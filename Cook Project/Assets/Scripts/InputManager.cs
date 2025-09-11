@@ -8,6 +8,8 @@ public class InputManager : MonoBehaviour
     private PlayerMotor motor;
     private PlayerLook camlook;
 
+    [SerializeField] private float interactDistance = 3f; //idk where to put so put this here for now
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -42,7 +44,7 @@ public class InputManager : MonoBehaviour
 
     private void OnInteract()
     {
-        if (!Physics.Raycast(camlook.cam.transform.position, camlook.cam.transform.forward, out RaycastHit hit, 2f))
+        if (!Physics.Raycast(camlook.cam.transform.position, camlook.cam.transform.forward, out RaycastHit hit, interactDistance))
             return;
 
         hit.collider.GetComponent<IInteractable>()?.Interact();
