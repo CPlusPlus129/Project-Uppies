@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class InputManager : MonoBehaviour
 {
     private PlayerInput playerInput;
     private PlayerInput.OnFootActions onFoot;
@@ -17,6 +17,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         camlook = GetComponent<PlayerLook>();
         //CallBack Context trigger (when the jump performed)
         onFoot.Jump.performed += onJump => motor.Jump();
+        onFoot.Interact.performed += onInteract => OnInteract();
     }
 
     // Update is called once per frame
@@ -37,5 +38,13 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void OnDisable(){
         onFoot.Disable();
+    }
+
+    private void OnInteract()
+    {
+        if (!Physics.Raycast(camlook.cam.transform.position, camlook.cam.transform.forward, out RaycastHit hit, 2f))
+            return;
+
+        hit.collider.GetComponent<IInteractable>()?.Interact();
     }
 }
