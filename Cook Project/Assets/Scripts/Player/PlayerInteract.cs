@@ -22,5 +22,14 @@ public class PlayerInteract : MonoBehaviour
             if (InventorySystem.Instance.AddItem(item))
                 item.gameObject.SetActive(false);
         }
+
+        if (hit.collider.TryGetComponent(out Customer customer))
+        {
+            var heldItem = InventorySystem.Instance.GetSelectedItem();
+            if (heldItem != null && customer.CanReceiveMeal(heldItem))
+            {
+                customer.ReceiveMeal(heldItem);
+            }
+        }
     }
 }

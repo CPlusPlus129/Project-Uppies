@@ -34,4 +34,9 @@ public class OrderManager : SimpleSingleton<OrderManager>
     {
         return pendingOrders.Exists(o => o.CustomerName == customerName);
     }
+
+    public Order GetPendingOrderForCustomer(string customerName)
+    {
+        return pendingOrders.Find(o => o.CustomerName == customerName);
+    }
 }

@@ -19,6 +19,9 @@ public class RecipeSelectionPanel : MonoBehaviour
             var item = Instantiate(recipeItemPrefab, recipeItemPrefab.transform.parent);
             return item;
         });
+        CookingSystem.Instance.currentSelectedRecipe
+            .Subscribe(_ => UpdateCookButton())
+            .AddTo(this);
         cookButton.OnClickAsObservable()
             .Subscribe(_ =>
             {
@@ -55,9 +58,13 @@ public class RecipeSelectionPanel : MonoBehaviour
     private void UpdateCookButton()
     {
         var currentRecipeName = CookingSystem.Instance.currentSelectedRecipe.Value;
+        if(string.IsNullOrEmpty(currentRecipeName))
+        {
+            cookButton.interactable = false;
+            return;
+        }
         var recipe = Database.Instance.recipeData.GetRecipeByName(currentRecipeName);
-        cookButton.interactable = !string.IsNullOrEmpty(currentRecipeName)
-            && CookingSystem.Instance.CheckPlayerHasIngredients(recipe);
+        cookButton.interactable = CookingSystem.Instance.CheckPlayerHasIngredients(recipe);
     }
 
     private void ClearAllItems()
