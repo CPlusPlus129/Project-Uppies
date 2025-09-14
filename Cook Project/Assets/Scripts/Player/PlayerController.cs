@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
         interactAction = InputSystem.actions.FindAction("Interact");
         //CallBack Context trigger (when the jump performed)
         jumpAction.performed += ctx => motor.Jump();
-        interactAction.performed += ctx => interact.Interact();
+        interactAction.performed += ctx => interact.Interact(camlook.cam);
 
         var scrollAction = InputSystem.actions.FindAction("Scroll");
         scrollAction.performed += ctx =>

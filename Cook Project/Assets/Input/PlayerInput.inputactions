@@ -64,7 +64,7 @@
                     "name": "Previous",
                     "type": "Button",
                     "id": "745cb5d4-1a8c-4847-9564-ea296c2e1dc9",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -82,7 +82,7 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "9ba341f4-5450-475b-b15f-3abf40dfa15b",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -331,17 +331,6 @@
                 },
                 {
                     "name": "",
-                    "id": "f0ed6759-95af-42c7-aacc-cb0e6b2ffeb4",
-                    "path": "<Keyboard>/2",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Next",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "abdd19af-c5b0-4602-9d7c-bc7444be7349",
                     "path": "<Gamepad>/dpad/right",
                     "interactions": "",
@@ -414,17 +403,6 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4c073880-cceb-4919-963d-77f52357f219",
-                    "path": "<Keyboard>/1",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Previous",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

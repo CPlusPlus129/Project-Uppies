@@ -1,4 +1,5 @@
 using R3;
+using System.Collections.Generic;
 
 public class InventorySystem : SimpleSingleton<InventorySystem>
 {
@@ -7,6 +8,7 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
     private ItemBase[] slots = new ItemBase[SlotCount];
     public ReactiveProperty<int> SelectedIndex { get; } = new ReactiveProperty<int>(0);
     public ItemBase GetSelectedItem() => slots[SelectedIndex.Value];
+    public IReadOnlyList<ItemBase> GetAllItems() => slots;
 
     public bool AddItem(ItemBase item)
     {
@@ -20,6 +22,19 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
             }
         }
         return false;
+    }
+
+    public void RemoveItem(string itemName)
+    {
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null && slots[i].ItemName == itemName)
+            {
+                slots[i] = null;
+                OnInventoryChanged.OnNext(slots);
+                return;
+            }
+        }
     }
 
     public void SelectSlot(int index)

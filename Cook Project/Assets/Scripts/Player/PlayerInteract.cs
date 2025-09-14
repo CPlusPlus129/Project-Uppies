@@ -5,12 +5,15 @@ public class PlayerInteract : MonoBehaviour
     public float interactDistance = 3f;
     public LayerMask interactLayer;
 
-    public void Interact()
+    public void Interact(Camera cam)
     {
-        Ray ray = new Ray(transform.position, transform.forward);
+        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+#if UNITY_EDITOR
+        Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red, 1f);
+#endif
         if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
             return;
-
+        Debug.Log($"ray cast hit {hit.collider.name}");
         if (hit.collider.TryGetComponent(out IInteractable interactable))
             interactable.Interact();
 
