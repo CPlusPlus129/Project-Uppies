@@ -149,6 +149,10 @@ GameObject:
   - component: {fileID: 2923998357952425869}
   - component: {fileID: 8591120124607443405}
   - component: {fileID: 6375442076544858703}
+  - component: {fileID: 4717512696201078045}
+  - component: {fileID: 642524756056240156}
+  - component: {fileID: 8858371310009257608}
+  - component: {fileID: 615881212244471086}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -253,3 +257,64 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4717512696201078045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e786ece36fa03a948903a431b6d7a191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  motor: {fileID: 642524756056240156}
+  camlook: {fileID: 8858371310009257608}
+  interact: {fileID: 615881212244471086}
+--- !u!114 &642524756056240156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf678d59141a6af4f908b93694076e8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMotor
+  speed: 5
+  jumpHeight: 1
+  gravity: -9.8
+--- !u!114 &8858371310009257608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2201a1d9a9d8c34980e7e740cf2886d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
+  cam: {fileID: 7827324936732029891}
+  xSensitivity: 30
+  ySensitivity: 30
+--- !u!114 &615881212244471086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e489aacbce85a54fb24a315044608cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInteract
+  interactDistance: 3
+  interactLayer:
+    serializedVersion: 2
+    m_Bits: 0
