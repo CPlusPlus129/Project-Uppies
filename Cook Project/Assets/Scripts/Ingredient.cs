@@ -1,9 +1,5 @@
-using UnityEngine;
-
-public class Ingredient : MonoBehaviour, IInteractable
+public class Ingredient : ItemBase, IInteractable
 {
-	public string Name;
-
     public void Interact()
     {
     }

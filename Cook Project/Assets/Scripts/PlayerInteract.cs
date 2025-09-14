@@ -12,5 +12,11 @@ public class PlayerInteract : MonoBehaviour
             return;
         var interactable = hit.collider.GetComponent<IInteractable>();
         interactable?.Interact();
+        var item = hit.collider.GetComponent<ItemBase>();
+        if (item != null)
+        {
+            if (InventorySystem.Instance.AddItem(item))
+                item.gameObject.SetActive(false);
+        }
     }
 }
