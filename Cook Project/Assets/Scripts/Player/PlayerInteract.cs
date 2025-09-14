@@ -13,7 +13,7 @@ public class PlayerInteract : MonoBehaviour
 #endif
         if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
             return;
-        Debug.Log($"ray cast hit {hit.collider.name}");
+
         if (hit.collider.TryGetComponent(out IInteractable interactable))
             interactable.Interact();
 

@@ -1,14 +1,17 @@
 using R3;
 using System.Collections.Generic;
+using static UnityEditor.Progress;
 
 public class InventorySystem : SimpleSingleton<InventorySystem>
 {
     public Subject<ItemBase[]> OnInventoryChanged = new Subject<ItemBase[]>();
     private const int SlotCount = 4;
     private ItemBase[] slots = new ItemBase[SlotCount];
+    private Dictionary<string, int> itemCache = new Dictionary<string, int>();
     public ReactiveProperty<int> SelectedIndex { get; } = new ReactiveProperty<int>(0);
     public ItemBase GetSelectedItem() => slots[SelectedIndex.Value];
     public IReadOnlyList<ItemBase> GetAllItems() => slots;
+    public IReadOnlyDictionary<string, int> GetItemCache() => itemCache;
 
     public bool AddItem(ItemBase item)
     {
@@ -17,6 +20,11 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
             if (slots[i] == null)
             {
                 slots[i] = item;
+                if (!itemCache.ContainsKey(item.ItemName))
+                    itemCache[item.ItemName] = 0;
+
+                itemCache[item.ItemName]++;
+
                 OnInventoryChanged.OnNext(slots);
                 return true;
             }
@@ -31,6 +39,12 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
             if (slots[i] != null && slots[i].ItemName == itemName)
             {
                 slots[i] = null;
+                if (itemCache.ContainsKey(itemName))
+                {
+                    itemCache[itemName]--;
+                    if (itemCache[itemName] <= 0)
+                        itemCache.Remove(itemName);
+                }
                 OnInventoryChanged.OnNext(slots);
                 return;
             }

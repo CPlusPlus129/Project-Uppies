@@ -14,5 +14,9 @@ public class Customer : MonoBehaviour, IInteractable
             OrderManager.Instance.PlaceOrder(order);
             Debug.Log($"Placed order for {customerName}: {order.MealName}");
         }
+        else
+        {
+            Debug.Log($"{customerName} already has a pending order.");
+        }
     }
 }

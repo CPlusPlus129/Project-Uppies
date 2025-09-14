@@ -17,22 +17,16 @@ public class RecipeItem : MonoBehaviour
         }).AddTo(this);
     }
 
-    private void OnEnable()
-    {
-        if (recipe == null)
-        {
-            btn.interactable = false;
-            return;
-        }
-
-        var canCook = CookingSystem.Instance.CheckPlayerHasIngredients(recipe);
-        btn.interactable = canCook;
-    }
-
     public void Setup(Recipe recipe)
     {
         this.recipe = recipe;
         mealName.text = recipe.mealName;
         ingredientText.text = string.Join(" + ", recipe.ingredients);
+    }
+
+    public void ResetUI()
+    {
+        recipe = null;
+        mealName.text = ingredientText.text = "";
     }
 }

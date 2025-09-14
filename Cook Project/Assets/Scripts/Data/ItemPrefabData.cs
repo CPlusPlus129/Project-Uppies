@@ -8,7 +8,7 @@ public class ItemPrefabData : ScriptableObject
     {
         foreach (var item in itemPrefabs)
         {
-            if (item.ItemName == itemName)
+            if (string.Equals(item.ItemName, itemName, System.StringComparison.InvariantCultureIgnoreCase))
             {
                 return item;
             }

@@ -546,7 +546,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42ff3179725905140998437b2375435b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingUI
-  selectionPanel: {fileID: 0}
+  selectionPanel: {fileID: 662581066}
 --- !u!114 &92227731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1085,6 +1085,7 @@ GameObject:
   - component: {fileID: 160022773}
   - component: {fileID: 160022772}
   - component: {fileID: 160022771}
+  - component: {fileID: 160022774}
   m_Layer: 0
   m_Name: RecipeItem
   m_TagString: Untagged
@@ -1195,6 +1196,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 160022769}
   m_CullTransparentMesh: 1
+--- !u!114 &160022774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 160022769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44627a1e5a744424aa5fdbe0d978d9bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RecipeItem
+  btn: {fileID: 160022771}
+  mealName: {fileID: 491211880}
+  ingredientText: {fileID: 64872476}
 --- !u!1 &194850479
 GameObject:
   m_ObjectHideFlags: 0
@@ -2911,6 +2927,7 @@ GameObject:
   - component: {fileID: 662581063}
   - component: {fileID: 662581065}
   - component: {fileID: 662581064}
+  - component: {fileID: 662581066}
   m_Layer: 0
   m_Name: SelectionPanel
   m_TagString: Untagged
@@ -2979,6 +2996,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 662581062}
   m_CullTransparentMesh: 1
+--- !u!114 &662581066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662581062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2022190ba3997b48874a0178ef1e77c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RecipeSelectionPanel
+  recipeItemPrefab: {fileID: 160022774}
+  cookButton: {fileID: 1698546890}
 --- !u!1 &755442095
 GameObject:
   m_ObjectHideFlags: 0

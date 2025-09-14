@@ -41,18 +41,11 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
 
     public bool CheckPlayerHasIngredients(Recipe recipe)
     {
+        var cache = InventorySystem.Instance.GetItemCache();
         foreach (var ingredient in recipe.ingredients)
         {
-            bool found = false;
-            foreach (var item in InventorySystem.Instance.GetAllItems())
-            {
-                if (item != null && item.ItemName == ingredient)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) return false;
+            if (!cache.TryGetValue(ingredient, out int itemCount) || itemCount <= 0)
+                return false;
         }
         return true;
     }
