@@ -1,6 +1,5 @@
 using R3;
 using System.Collections.Generic;
-using static UnityEditor.Progress;
 
 public class InventorySystem : SimpleSingleton<InventorySystem>
 {
