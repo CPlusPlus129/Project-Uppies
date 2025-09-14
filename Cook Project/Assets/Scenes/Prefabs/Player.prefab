@@ -281,7 +281,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8985326193973131990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf678d59141a6af4f908b93694076e8e, type: 3}
+  m_Script: {fileID: 11500000, guid: bdaec8f4340d6b84882c26d971c41465, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMotor
   speed: 5
@@ -296,12 +296,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 8985326193973131990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2201a1d9a9d8c34980e7e740cf2886d, type: 3}
+  m_Script: {fileID: 11500000, guid: 2e1eb77f81b72df46a7affea87fb5644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerLook
   cam: {fileID: 7827324936732029891}
-  xSensitivity: 30
-  ySensitivity: 30
+  xSensitivity: 50
+  ySensitivity: 50
 --- !u!114 &615881212244471086
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,10 +311,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8985326193973131990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e489aacbce85a54fb24a315044608cf, type: 3}
+  m_Script: {fileID: 11500000, guid: 334f7314f8610d8468322ceab75c449f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteract
   interactDistance: 3
   interactLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64

@@ -10,10 +10,11 @@ public class PlayerInteract : MonoBehaviour
         Ray ray = new Ray(transform.position, transform.forward);
         if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
             return;
-        var interactable = hit.collider.GetComponent<IInteractable>();
-        interactable?.Interact();
-        var item = hit.collider.GetComponent<ItemBase>();
-        if (item != null)
+
+        if (hit.collider.TryGetComponent(out IInteractable interactable))
+            interactable.Interact();
+
+        if (hit.collider.TryGetComponent(out ItemBase item))
         {
             if (InventorySystem.Instance.AddItem(item))
                 item.gameObject.SetActive(false);
