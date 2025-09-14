@@ -1,12 +1,16 @@
+using R3;
 using System.Collections.Generic;
 
-public class OrderSystem : SimpleSingleton<OrderSystem>
+public class OrderManager : SimpleSingleton<OrderManager>
 {
+    public Subject<Order> OnNewOrder = new Subject<Order>();
+    public Subject<Order> OnOrderServed = new Subject<Order>();
     private List<Order> pendingOrders = new List<Order>();
 
     public void PlaceOrder(Order order)
     {
         pendingOrders.Add(order);
+        OnNewOrder.OnNext(order);
     }
 
     public bool ServeOrder(Order servedOrder)
@@ -15,14 +19,15 @@ public class OrderSystem : SimpleSingleton<OrderSystem>
         if (match != null)
         {
             pendingOrders.Remove(match);
+            OnOrderServed.OnNext(match);
             return true;
         }
         return false;
     }
 
-    public List<Order> GetPendingOrders()
+    public IReadOnlyList<Order> GetPendingOrders()
     {
-        return new List<Order>(pendingOrders);
+        return pendingOrders;
     }
 
     public bool CustomerHasPendingOrder(string customerName)
