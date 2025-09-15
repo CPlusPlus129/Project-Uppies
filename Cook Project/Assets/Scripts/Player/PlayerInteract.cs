@@ -31,5 +31,19 @@ public class PlayerInteract : MonoBehaviour
                 customer.ReceiveMeal(heldItem);
             }
         }
+
+        if (hit.collider.TryGetComponent(out FoodSource foodSource))
+        {
+            var heldItem = InventorySystem.Instance.GetSelectedItem();
+            if (heldItem == null)
+            {
+                var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
+                var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
+                if (foodObj != null && InventorySystem.Instance.AddItem(foodObj))
+                {
+                    // Optionally, you can add some feedback here, like a sound or animation
+                }
+            }
+        }
     }
 }

@@ -8,8 +8,7 @@ public class Customer : MonoBehaviour, IInteractable
         WaitingForOrder,
         OrderPlaced, WaitingForMeal
     }
-    public CustomerState state =
-CustomerState.WaitingForOrder;
+    private CustomerState state = CustomerState.WaitingForOrder;
 
     public void Interact()
     {
@@ -26,10 +25,11 @@ CustomerState.WaitingForOrder;
 
     private void PlaceOrder()
     {
+        var randRecipe = Database.Instance.recipeData.GetRandomRecipe();
         var order = new Order
         {
             CustomerName = customerName,
-            MealName = "bloodburger"
+            MealName = randRecipe.mealName
         };
         OrderManager.Instance.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;

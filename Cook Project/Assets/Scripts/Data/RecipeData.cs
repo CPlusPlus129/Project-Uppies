@@ -17,6 +17,13 @@ public class RecipeData : ScriptableObject
         }
         return null;
     }
+
+    public Recipe GetRandomRecipe()
+    {
+        if (datas.Length == 0) return null;
+        int index = UnityEngine.Random.Range(0, datas.Length);
+        return datas[index];
+    }
 }
 
 [Serializable]

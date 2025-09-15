@@ -63,4 +63,13 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
         slots[SelectedIndex.Value] = null;
         OnInventoryChanged.OnNext(slots);
     }
+
+    public bool IsInventoryFull()
+    {
+        foreach (var slot in slots)
+        {
+            if (slot == null) return false;
+        }
+        return true;
+    }
 }
