@@ -1062,6 +1062,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Cooking",
+            "id": "6fab5559-7e64-41bd-8782-58e06fd2e552",
+            "actions": [
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "1bad1440-021d-4723-b48a-1ddea61efbde",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "476e69a2-5183-48cc-98ad-8c208a7d6a44",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
