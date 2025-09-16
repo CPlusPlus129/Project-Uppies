@@ -19,8 +19,6 @@ public class InputManager : MonoSingleton<InputManager>
             if (map.name is not "Player" or "UI")
                 map.Disable();
         }
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void PushActionMap(string mapName)
@@ -71,22 +69,5 @@ public class InputManager : MonoSingleton<InputManager>
         asset.FindActionMap(currentMap)?.Disable();
         asset.FindActionMap(nextMap)?.Enable();
         currentMap = nextMap;
-
-        SetCursorByMap();
-    }
-
-    private void SetCursorByMap()
-    {
-        Debug.Log("SetCursorbymap Current Map: " + currentMap);
-        if (currentMap == "Player")
-        {
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-        else
-        {
-            Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 }
