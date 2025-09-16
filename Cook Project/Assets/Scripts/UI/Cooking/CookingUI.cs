@@ -14,6 +14,8 @@ public class CookingUI : MonoBehaviour
     private void OnEnable()
     {
         InputManager.Instance.PushActionMap("Cooking");
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     private void OnDisable()
