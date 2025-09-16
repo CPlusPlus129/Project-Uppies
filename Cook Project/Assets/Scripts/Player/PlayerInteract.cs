@@ -32,18 +32,15 @@ public class PlayerInteract : MonoBehaviour
             }
         }
 
-        if (hit.collider.TryGetComponent(out FoodSource foodSource))
+        if (hit.collider.TryGetComponent(out FoodSource foodSource) && !InventorySystem.Instance.IsInventoryFull())
         {
-            var heldItem = InventorySystem.Instance.GetSelectedItem();
-            if (heldItem == null)
+            var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
+            var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
+            if (foodObj != null && InventorySystem.Instance.AddItem(foodObj))
             {
-                var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
-                var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
-                if (foodObj != null && InventorySystem.Instance.AddItem(foodObj))
-                {
-                    // Optionally, you can add some feedback here, like a sound or animation
-                }
+                // Optionally, you can add some feedback here, like a sound or animation
             }
         }
+
     }
 }

@@ -3,9 +3,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public PlayerMotor motor;
-    public PlayerLook camlook;
-    public PlayerInteract interact;
+    [SerializeField] private PlayerMotor motor;
+    [SerializeField] private PlayerLook camlook;
+    [SerializeField] private PlayerInteract interact;
+    private PlayerActionController actionController = new PlayerActionController();
     private InputAction lookAction;
     private InputAction moveAction;
     private InputAction jumpAction;
@@ -21,15 +22,12 @@ public class PlayerController : MonoBehaviour
         jumpAction.performed += ctx => motor.Jump();
         interactAction.performed += ctx => interact.Interact(camlook.cam);
 
+        var discardAction = InputSystem.actions.FindAction("Discard");
+        discardAction.performed += ctx => actionController.DropItem();
         var scrollAction = InputSystem.actions.FindAction("Scroll");
-        scrollAction.performed += ctx =>
-        {
-            var delta = ctx.ReadValue<Vector2>().y;
-            if (delta > 0)
-                InventorySystem.Instance.SelectSlot(InventorySystem.Instance.SelectedIndex.Value - 1);
-            else if (delta < 0)
-                InventorySystem.Instance.SelectSlot(InventorySystem.Instance.SelectedIndex.Value + 1);
-        };
+        scrollAction.performed += actionController.ScrollHotBar;
+        var hotbarAction = InputSystem.actions.FindAction("HotbarShortcut");
+        hotbarAction.performed += actionController.OnItemHotbarClicked;
     }
 
     void Update()
@@ -43,4 +41,6 @@ public class PlayerController : MonoBehaviour
         var lookValue = lookAction.ReadValue<Vector2>();
         camlook.ProcessLook(lookValue);
     }
+
+
 }
