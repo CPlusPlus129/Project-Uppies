@@ -71,10 +71,20 @@ public class InputManager : MonoSingleton<InputManager>
         asset.FindActionMap(currentMap)?.Disable();
         asset.FindActionMap(nextMap)?.Enable();
 
-        if (nextMap == "Player")
+        SetCursorByMap();
+    }
+
+    private void SetCursorByMap()
+    {
+        if (currentMap == "Player")
         {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+        }
+        else
+        {
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
         }
     }
 }
