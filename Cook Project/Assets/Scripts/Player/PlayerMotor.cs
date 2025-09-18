@@ -22,14 +22,15 @@ public class PlayerMotor : MonoBehaviour
     public void ProcessMove(Vector2 input)
     {
         Vector3 moveDirection = transform.right * input.x + transform.forward * input.y;
-        controller.Move(moveDirection * speed * Time.deltaTime);
 
         playerVelocity.y += gravity * Time.deltaTime;
         if (isGrounded && playerVelocity.y < 0)
         {
             playerVelocity.y = -2f;
         }
-        controller.Move(playerVelocity * Time.deltaTime);
+
+        Vector3 move = moveDirection * speed + playerVelocity;
+        controller.Move(move * Time.deltaTime);
     }
 
     public void Jump()

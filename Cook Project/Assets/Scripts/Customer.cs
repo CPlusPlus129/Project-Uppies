@@ -3,12 +3,18 @@ using UnityEngine;
 public class Customer : MonoBehaviour, IInteractable
 {
     public string customerName;
+    public TMPro.TextMeshPro nameText;
     public enum CustomerState
     {
         WaitingForOrder,
         OrderPlaced, WaitingForMeal
     }
     private CustomerState state = CustomerState.WaitingForOrder;
+
+    private void Awake()
+    {
+        nameText.text = customerName;
+    }
 
     public void Interact()
     {
