@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5768619778188527037}
   - component: {fileID: 693224393116347578}
   - component: {fileID: 572317475582377816}
+  - component: {fileID: 3603224939642634571}
   m_Layer: 0
   m_Name: SigilItem
   m_TagString: Untagged
@@ -96,3 +97,16 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &3603224939642634571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456485515446209448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78bc1e6e67963df40a4418e542f93e41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::sigilType
+  sigilKey: 0
