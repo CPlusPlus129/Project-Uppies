@@ -20,12 +20,14 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
             return;
         }
 
-        //Insert cooking minigame here
+        
+
 
         foreach (var ingredient in r.ingredients)
         {
             InventorySystem.Instance.RemoveItem(ingredient);
         }
+
 
         var mealPrefab = Database.Instance.itemPrefabData.GetItemByName(r.mealName);
         var mealItem = mealPrefab != null ? GameObject.Instantiate(mealPrefab) : null;
@@ -37,6 +39,11 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
         mealItem.gameObject.SetActive(false);
         InventorySystem.Instance.AddItem(mealItem);
         Debug.Log("Cooked: " + r.mealName);
+
+        // Enable minigame here (Canvas-Minigame)
+        UIRoot.Instance.GetUIComponent<CookingUI>().Close();
+        UIRoot.Instance.GetUIComponent<MinigameUI>().Open();
+
     }
 
     public bool CheckPlayerHasIngredients(Recipe recipe)
