@@ -3,7 +3,22 @@ guid: 3d710ae85d372b047a5e63737a4e25ef
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal 2
+    second: {fileID: 2100000, guid: fbe335814492ac34988b1e76fe81912b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metal opaque
+    second: {fileID: 2100000, guid: 26fe073d2cf0c31428a1cdface95d67f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: plastic fridge
+    second: {fileID: 2100000, guid: 40849d233461f7147ab92c20f1ae68ea, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -1,9 +1,29 @@
 fileFormatVersion: 2
-guid: d3b9e67ae152ee0489bb9ec8913497bb
+guid: 0b6b4367250a3fc408a973f2eba07efb
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: emission glass_
+    second: {fileID: 2100000, guid: 3e9a0e24c0b514047b0029091c3fb8de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: inner lamp part
+    second: {fileID: 2100000, guid: 26fe073d2cf0c31428a1cdface95d67f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: red lamp
+    second: {fileID: 2100000, guid: 40849d233461f7147ab92c20f1ae68ea, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: steel
+    second: {fileID: 2100000, guid: 48539275a1ac19146ba9b99f7c027023, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
