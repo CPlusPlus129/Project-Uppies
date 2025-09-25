@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 408ccb80b6a04bd4289d674cec265f4f, type: 3}
+  m_Name: ShiftData
+  m_EditorClassIdentifier: Assembly-CSharp::ShiftData
+  shiftDuration: 300
+  shifts:
+  - requiredOrdersCount: 1
+    specialQuest: 
+  - requiredOrdersCount: 3
+    specialQuest: 
+  - requiredOrdersCount: 5
+    specialQuest: StorageRoom1
+  - requiredOrdersCount: 5
+    specialQuest: StorageRoom2
+  - requiredOrdersCount: 7
+    specialQuest: StorageRoom3
+  - requiredOrdersCount: 10
+    specialQuest: Satan's Quest
