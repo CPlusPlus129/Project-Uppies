@@ -15,8 +15,18 @@ public class WorldPosFollowUI : MonoBehaviour
     {
         if (target != null)
         {
-            Vector3 screenPos = mainCamera.WorldToScreenPoint(target.position + offset);
-            rectTransform.position = screenPos;
+            Vector3 worldPos = target.position + offset;
+            Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
+
+            if (screenPos.z > 0)
+            {
+                rectTransform.position = screenPos;
+                rectTransform.gameObject.SetActive(true);
+            }
+            else
+            {
+                rectTransform.gameObject.SetActive(false);
+            }
         }
     }
 }
