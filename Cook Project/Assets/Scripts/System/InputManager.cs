@@ -19,6 +19,7 @@ public class InputManager : MonoSingleton<InputManager>
             if (map.name is not "Player" or "UI")
                 map.Disable();
         }
+        UpdateCursorState();
     }
 
     public void PushActionMap(string mapName)
@@ -69,5 +70,14 @@ public class InputManager : MonoSingleton<InputManager>
         asset.FindActionMap(currentMap)?.Disable();
         asset.FindActionMap(nextMap)?.Enable();
         currentMap = nextMap;
+        UpdateCursorState();
+    }
+
+    private void UpdateCursorState()
+    {
+        if (currentMap == "Player")
+            Cursor.lockState = CursorLockMode.Locked;
+        else
+            Cursor.lockState = CursorLockMode.None;
     }
 }
