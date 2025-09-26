@@ -30,4 +30,31 @@ class PlayerActionController
             InventorySystem.Instance.SelectSlot(index);
         }
     }
+
+    public void OnDebugKeyClicked(InputAction.CallbackContext ctx)
+    {
+        var control = ctx.control;
+        char last = control.path[^1];
+        if (last is >= '0' and <= '3')
+        {
+            int index = last - '0';
+            switch (index)
+            {
+                case 0:
+                    Debug.Log($"Debug Num0: Set shiftsystem remain time to 3 sec");
+                    ShiftSystem.Instance.shiftTimer.Value = 3f;
+                    break;
+                case 1:
+                    Debug.Log($"Debug Num1: Add 1 served order");
+                    ShiftSystem.Instance.completedOrderCount.Value += 1;
+                    break;
+                case 2:
+                    Debug.Log($"Debug Num2: Start next shift");
+                    ShiftSystem.Instance.StartNextShift();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }
