@@ -2685,6 +2685,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       insertIndex: -1
       addedObject: {fileID: 768672041}
+    - targetCorrespondingSourceObject: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1804186607}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
 --- !u!1001 &264049456
@@ -18081,6 +18084,88 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1167353056}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1804186606
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 416698675}
+    m_Modifications:
+    - target: {fileID: 156968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_Name
+      value: M79 Grenade Launcher
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.407
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.159
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.532
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: infiniteAmmo
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+--- !u!4 &1804186607 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+  m_PrefabInstance: {fileID: 1804186606}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1804631475
 GameObject:
   m_ObjectHideFlags: 0
