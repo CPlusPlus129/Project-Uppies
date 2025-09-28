@@ -66,6 +66,19 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         Debug.Log($"EndGame. success: {isSuccess}");
     }
 
+    public bool IsCurrentShiftQuestCompleted()
+    {
+        var s = GetCurrentShift();
+        if (s == null)
+            return false;
+
+        var quest = s.specialQuest;
+        if (string.IsNullOrEmpty(quest))
+            return true;
+
+        return completedQuest.Contains(quest);
+    }
+
     private void StartShift(int shift)
     {
         var s = Database.Instance.shiftData.GetShiftByNumber(shift);
@@ -97,22 +110,16 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
             return;
         }
         currentState.Value = ShiftState.AfterShift;
-        //TODO design ig
-        var s = Database.Instance.shiftData.GetShiftByNumber(shiftNumber.Value);
-        if (!string.IsNullOrEmpty(s.specialQuest))
-        {
-            RunSpecialQuest(s.specialQuest);
-        }
-    }
-
-    private void RunSpecialQuest(string questName)
-    {
-        //Run puzzle
     }
 
     private bool CheckShiftRequirementsMet()
     {
-        var s = Database.Instance.shiftData.GetShiftByNumber(shiftNumber.Value);
+        var s = GetCurrentShift();
         return completedOrderCount.Value >= s.requiredOrdersCount;
+    }
+
+    private ShiftData.Shift GetCurrentShift()
+    {
+        return Database.Instance.shiftData.GetShiftByNumber(shiftNumber.Value);
     }
 }
