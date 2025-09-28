@@ -4,7 +4,7 @@ public class SpawnPointList : MonoBehaviour
 {
     [HideInInspector] public SpawnPoint[] spawnPoints;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         if (spawnPoints == null || spawnPoints.Length == 0)
         {

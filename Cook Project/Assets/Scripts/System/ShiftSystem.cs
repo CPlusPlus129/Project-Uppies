@@ -17,6 +17,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
     public ReactiveProperty<float> shiftTimer = new ReactiveProperty<float>();
     public ReactiveProperty<string> specialQuest = new ReactiveProperty<string>();
     public ReactiveProperty<ShiftState> currentState = new ReactiveProperty<ShiftState>();
+    public Subject<Unit> OnGameStart = new Subject<Unit>();
     private bool hasRunTutorial = false;
     private List<string> completedQuest = new List<string>(); //might need a quest system?
     private CompositeDisposable updateDisposible = new CompositeDisposable();
@@ -29,6 +30,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         {
             completedOrderCount.Value++;
         }).AddTo(disposables);
+        OnGameStart.OnNext(Unit.Default);
         if (!hasRunTutorial)
         {
             //should do some dialogues first?

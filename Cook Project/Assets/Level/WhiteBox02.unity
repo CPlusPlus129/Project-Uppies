@@ -11458,10 +11458,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 438771327}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a0f1bdc0b040514d89fe96f839b00e2, type: 3}
+  m_Script: {fileID: 11500000, guid: c8ec5f33658db0542ac53b3324c62efc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SpawnPointList
+  m_EditorClassIdentifier: Assembly-CSharp::FridgeSpawnList
   spawnPoints: []
+  SpawnCount: 5
+  fridgePrefab: {fileID: 8948744908737421947, guid: b27a821ba7fa88a4e8c5b15f0e47a007, type: 3}
+  essentialIngredients:
+  - blood
+  - burger
+  - icecream
+  - milk
+  - ramen
+  - rat
+  - soul
 --- !u!1 &444911944
 GameObject:
   m_ObjectHideFlags: 0

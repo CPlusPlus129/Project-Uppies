@@ -5,6 +5,7 @@ public class SpawnPoint : MonoBehaviour
     public int id;
     [SerializeField] private MeshRenderer placeholderMesh;
     [SerializeField] private Color gizmosColor = Color.green;
+    public GameObject spawnedObject { get; private set; }
 
     private void Awake()
     {
@@ -14,8 +15,20 @@ public class SpawnPoint : MonoBehaviour
 
     public T Spawn<T>(T prefab) where T : Component
     {
-        T instance = Instantiate(prefab, transform.position, transform.rotation);
+        T instance = Instantiate(prefab, transform);
+        instance.transform.localPosition = Vector3.zero;
+        instance.transform.localRotation = Quaternion.identity;
+        spawnedObject = instance.gameObject;
         return instance;
+    }
+
+    public void Reset()
+    {
+        if (spawnedObject != null)
+        {
+            Destroy(spawnedObject);
+            spawnedObject = null;
+        }
     }
 
     private void OnDrawGizmos()
