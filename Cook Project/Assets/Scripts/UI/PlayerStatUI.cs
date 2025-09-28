@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using R3;
+using TMPro;
 
 public class PlayerStatUI : MonoBehaviour
 {
@@ -7,6 +8,8 @@ public class PlayerStatUI : MonoBehaviour
     private BarItem hpBar;
     [SerializeField]
     private BarItem staminaBar;
+    [SerializeField]
+    private TextMeshProUGUI moneyValueText;
 
     private void Start()
     {
@@ -28,6 +31,11 @@ public class PlayerStatUI : MonoBehaviour
         playerStatSystem.MaxStamina.Subscribe(maxStamina =>
         {
             staminaBar.UpdateValue(playerStatSystem.CurrentStamina.Value, maxStamina);
+        }).AddTo(this);
+        // Moneyの変更を監視してUIを更新
+        playerStatSystem.Money.Subscribe(money =>
+        {
+            moneyValueText.text = money.ToString();
         }).AddTo(this);
     }
 }

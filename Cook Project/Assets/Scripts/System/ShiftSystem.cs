@@ -87,6 +87,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         currentState.Value = ShiftState.InShift;
         shiftNumber.Value = shift;
         shiftTimer.Value = Database.Instance.shiftData.shiftDuration;
+        completedOrderCount.Value = 0;
         requiredOrderCount.Value = s.requiredOrdersCount;
         specialQuest.Value = s.specialQuest;
         Observable.EveryUpdate()
@@ -106,6 +107,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
     private void RunAfterShift()
     {
         updateDisposible.Clear();
+        OrderManager.Instance.ClearOrders();
         var passed = CheckShiftRequirementsMet();
         if (!passed)
         {

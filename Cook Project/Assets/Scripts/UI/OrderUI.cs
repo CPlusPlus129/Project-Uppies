@@ -14,6 +14,7 @@ public class OrderUI : MonoBehaviour
         orderListItemPrefab.gameObject.SetActive(false);
         OrderManager.Instance.OnNewOrder.Subscribe(OnNewOrder).AddTo(this);
         OrderManager.Instance.OnOrderServed.Subscribe(OnOrderServed).AddTo(this);
+        OrderManager.Instance.OnOrdersCleared.Subscribe(OnOrdersCleared).AddTo(this);
     }
 
     private void OnNewOrder(Order order)
@@ -32,5 +33,14 @@ public class OrderUI : MonoBehaviour
             itemList.Remove(item);
             Destroy(item.gameObject);
         }
+    }
+
+    private void OnOrdersCleared(Unit _)
+    {
+        foreach (var item in itemList)
+        {
+            Destroy(item.gameObject);
+        }
+        itemList.Clear();
     }
 }

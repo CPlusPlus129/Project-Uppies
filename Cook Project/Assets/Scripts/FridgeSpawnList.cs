@@ -15,14 +15,15 @@ public class FridgeSpawnList : SpawnPointList
     private void SpawnFridges()
     {
         Reset();
-        var arr = RandomHelper.PickWithoutReplacement(spawnPoints, SpawnCount);
+        var spArr = RandomHelper.PickWithoutReplacement(spawnPoints, SpawnCount);
+        var eArr = RandomHelper.PickWithoutReplacement(essentialIngredients, essentialIngredients.Length);
         var essentailIndex = 0;
-        foreach (var spawnPoint in arr)
+        foreach (var spawnPoint in spArr)
         {
             var f = spawnPoint.Spawn(fridgePrefab);
-            if (essentailIndex < essentialIngredients.Length)
+            if (essentailIndex < eArr.Length)
             {
-                f.SetItemName(essentialIngredients[essentailIndex]);
+                f.SetItemName(eArr[essentailIndex]);
                 essentailIndex++;
             }
             else
