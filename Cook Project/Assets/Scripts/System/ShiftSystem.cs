@@ -100,6 +100,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
                     RunAfterShift();
                 }
             }).AddTo(updateDisposible);
+        WorldBroadcastSystem.Instance.Broadcast("Get order from customers.", 60f);
     }
 
     private void RunAfterShift()

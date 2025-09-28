@@ -11462,7 +11462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FridgeSpawnList
   spawnPoints: []
-  SpawnCount: 5
+  SpawnCount: 7
   fridgePrefab: {fileID: 8948744908737421947, guid: b27a821ba7fa88a4e8c5b15f0e47a007, type: 3}
   essentialIngredients:
   - blood
@@ -54646,7 +54646,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3988715025732373326, guid: ad8553461f97bc446927c8a7071a42f1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: ad8553461f97bc446927c8a7071a42f1, type: 3}
 --- !u!1 &1982057039
 GameObject:
