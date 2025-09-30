@@ -1,6 +1,7 @@
 public enum PuzzleGameType
 {
-    NumberGuessing
+    NumberGuessing,
+    CardSwipe
 }
 
 public class PuzzleQuest : Quest

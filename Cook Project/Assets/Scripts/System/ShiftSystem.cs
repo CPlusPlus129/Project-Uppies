@@ -88,7 +88,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         //quest
         if (!string.IsNullOrEmpty(s.questId))
         {
-            var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.NumberGuessing, "door_temp");
+            var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.CardSwipe, "door_temp");
             QuestManager.Instance.AddQuest(quest);
         }
 

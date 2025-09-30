@@ -1171,6 +1171,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "CardSwipe",
+            "id": "04108714-4d2e-4329-9ea4-fa2b69e53890",
+            "actions": [
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "3d3caf3e-4432-446a-a1db-fe5854c41e6c",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "e43649d8-929f-4399-95e6-402c131ec93b",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

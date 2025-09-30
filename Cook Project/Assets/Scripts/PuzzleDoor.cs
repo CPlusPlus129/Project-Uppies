@@ -3,7 +3,6 @@ using UnityEngine;
 public class PuzzleDoor : MonoBehaviour, IInteractable
 {
     [SerializeField] private string doorId;
-    [SerializeField] private PuzzleGameType puzzleType = PuzzleGameType.NumberGuessing;
 
     public string DoorId => doorId;
 
@@ -30,13 +29,16 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
             return;
         }
 
-        switch (puzzleType)
+        switch (puzzleQuest.PuzzleType)
         {
             case PuzzleGameType.NumberGuessing:
                 OpenNumberGuessingGame();
                 break;
+            case PuzzleGameType.CardSwipe:
+                OpenCardSwipeGame();
+                break;
             default:
-                Debug.LogWarning($"Unsupported puzzle type: {puzzleType}");
+                Debug.LogWarning($"Unsupported puzzle type: {puzzleQuest.PuzzleType}");
                 break;
         }
     }
@@ -53,6 +55,21 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         else
         {
             Debug.LogError("NumberGuessingGameUI not found in UIRoot");
+        }
+    }
+
+    private void OpenCardSwipeGame()
+    {
+        PuzzleGameManager.Instance.StartCardSwipeGame(doorId);
+
+        var cardSwipeUI = UIRoot.Instance.GetUIComponent<CardSwipeGameUI>();
+        if (cardSwipeUI != null)
+        {
+            cardSwipeUI.Open();
+        }
+        else
+        {
+            Debug.LogError("CardSwipeGameUI not found in UIRoot");
         }
     }
 }

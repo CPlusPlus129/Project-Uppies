@@ -10,7 +10,6 @@ public class QuestManager : SimpleSingleton<QuestManager>
 
     private List<Quest> activeQuests = new List<Quest>();
     private List<Quest> completedQuests = new List<Quest>();
-    private int questIdCounter = 0;
 
     public void AddQuest(Quest quest)
     {
