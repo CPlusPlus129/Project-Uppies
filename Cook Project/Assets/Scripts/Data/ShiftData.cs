@@ -21,6 +21,9 @@ public class ShiftData : ScriptableObject
     public class Shift
     {
         public int requiredOrdersCount;
-        public string specialQuest;
+        //TODO quest datas
+        public string questId;
+        public string questName;
+        public string questDescription;
     }
 }

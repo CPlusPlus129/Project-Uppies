@@ -15,11 +15,9 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
     public ReactiveProperty<int> completedOrderCount = new ReactiveProperty<int>();
     public ReactiveProperty<int> requiredOrderCount = new ReactiveProperty<int>();
     public ReactiveProperty<float> shiftTimer = new ReactiveProperty<float>();
-    public ReactiveProperty<string> specialQuest = new ReactiveProperty<string>();
     public ReactiveProperty<ShiftState> currentState = new ReactiveProperty<ShiftState>();
     public Subject<Unit> OnGameStart = new Subject<Unit>();
     private bool hasRunTutorial = false;
-    private List<string> completedQuest = new List<string>(); //might need a quest system?
     private CompositeDisposable updateDisposible = new CompositeDisposable();
     private CompositeDisposable disposables = new CompositeDisposable();
 
@@ -45,17 +43,15 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
     {
         shiftNumber.Value = completedOrderCount.Value = requiredOrderCount.Value = 0;
         shiftTimer.Value = 0f;
-        specialQuest.Value = "";
         currentState.Value = ShiftState.AfterShift;
         hasRunTutorial = false;
-        completedQuest.Clear();
         updateDisposible.Clear();
         disposables.Clear();
     }
 
     public void StartNextShift()
     {
-        if(shiftNumber.Value + 1 >= Database.Instance.shiftData.shifts.Length)
+        if (shiftNumber.Value + 1 >= Database.Instance.shiftData.shifts.Length)
         {
             EndGame(true);
             return;
@@ -74,11 +70,11 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         if (s == null)
             return false;
 
-        var quest = s.specialQuest;
-        if (string.IsNullOrEmpty(quest))
+        var questId = s.questId;
+        if (string.IsNullOrEmpty(questId))
             return true;
 
-        return completedQuest.Contains(quest);
+        return QuestManager.Instance.IsQuestCompleted(questId);
     }
 
     private void StartShift(int shift)
@@ -89,7 +85,13 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         shiftTimer.Value = Database.Instance.shiftData.shiftDuration;
         completedOrderCount.Value = 0;
         requiredOrderCount.Value = s.requiredOrdersCount;
-        specialQuest.Value = s.specialQuest;
+        //quest
+        if (!string.IsNullOrEmpty(s.questId))
+        {
+            var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.NumberGuessing, "door_temp");
+            QuestManager.Instance.AddQuest(quest);
+        }
+
         Observable.EveryUpdate()
             .Where(_ => currentState.Value == ShiftState.InShift)
             .Subscribe(_ =>
