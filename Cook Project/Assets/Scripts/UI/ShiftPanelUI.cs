@@ -18,7 +18,9 @@ public class ShiftPanelUI : MonoBehaviour
         ShiftSystem.Instance.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
         ShiftSystem.Instance.requiredOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
         ShiftSystem.Instance.shiftTimer.Subscribe(UpdateShiftTimer).AddTo(this);
-        ShiftSystem.Instance.specialQuest.Subscribe(UpdateQuestText).AddTo(this);
+        QuestManager.Instance.OnQuestStarted.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        QuestManager.Instance.OnQuestCompleted.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        QuestManager.Instance.OnQuestFailed.Subscribe(_ => UpdateQuestText()).AddTo(this);
     }
 
     private void UpdateShiftNumber(int number)
@@ -50,8 +52,30 @@ public class ShiftPanelUI : MonoBehaviour
         orderText.text = $"Orders: {shiftSystem.completedOrderCount.Value}/{shiftSystem.requiredOrderCount.Value}";
     }
 
-    private void UpdateQuestText(string obj)
+    private void UpdateQuestText()
     {
-        questText.text = string.IsNullOrEmpty(obj) ? "Quest: None" : $"Quest: {obj}";
+        var activeQuests = QuestManager.Instance.GetActiveQuests();
+
+        if (activeQuests.Count == 0)
+        {
+            questText.text = "<size=36><b>Quest:</b></size> <color=#888888>None</color>";
+            return;
+        }
+
+        var questDisplay = "<size=36><b>Active Quests:</b></size>\n\n";
+
+        for (int i = 0; i < activeQuests.Count; i++)
+        {
+            var quest = activeQuests[i];
+            questDisplay += $"<size=30><b><color=#FFD700>{quest.Title}</color></b></size>\n";
+            questDisplay += $"<size=24><color=#CCCCCC>{quest.Description}</color></size>";
+
+            if (i < activeQuests.Count - 1)
+            {
+                questDisplay += "\n\n";
+            }
+        }
+
+        questText.text = questDisplay;
     }
 }

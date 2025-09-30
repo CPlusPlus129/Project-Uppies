@@ -20,14 +20,10 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
             return;
         }
 
-        
-
-
         foreach (var ingredient in r.ingredients)
         {
             InventorySystem.Instance.RemoveItem(ingredient);
         }
-
 
         var mealPrefab = Database.Instance.itemPrefabData.GetItemByName(r.mealName);
         var mealItem = mealPrefab != null ? GameObject.Instantiate(mealPrefab) : null;

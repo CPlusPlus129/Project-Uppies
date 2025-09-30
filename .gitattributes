@@ -1,2 +1,4 @@
 *.fbx filter=lfs diff=lfs merge=lfs -text
+docs/WebGLBuild/Build/*.data filter=lfs diff=lfs merge=lfs -text
+docs/WebGLBuild/Build/*.wasm filter=lfs diff=lfs merge=lfs -text
 *.fbx !text !filter !merge !diff
