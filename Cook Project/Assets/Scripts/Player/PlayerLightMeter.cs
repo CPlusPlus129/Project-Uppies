@@ -9,6 +9,7 @@ public class PlayerLightMeter : MonoBehaviour
     public Transform sampleMarker; // tiny quad/sphere on Layer: LightMeter
     public Transform sampleFrom;   // player transform (feet/head)
 
+    
     [Header("Sampling")]
     [Tooltip("How many times per second to update the meter.")]
     [Range(1, 60)] public int samplesPerSecond = 20;
