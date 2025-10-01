@@ -46,14 +46,14 @@ public class QuestManager : SimpleSingleton<QuestManager>
         return new PuzzleQuest(questId, title, description, puzzleType, doorId);
     }
 
-    public List<Quest> GetActiveQuests()
+    public IReadOnlyList<Quest> GetActiveQuests()
     {
-        return new List<Quest>(activeQuests);
+        return activeQuests;
     }
 
-    public List<Quest> GetCompletedQuests()
+    public IReadOnlyList<Quest> GetCompletedQuests()
     {
-        return new List<Quest>(completedQuests);
+        return completedQuests;
     }
 
     public Quest GetQuestById(string questId)
