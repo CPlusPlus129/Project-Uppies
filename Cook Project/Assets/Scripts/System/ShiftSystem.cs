@@ -91,6 +91,8 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
             var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.CardSwipe, "door_temp");
             QuestManager.Instance.AddQuest(quest);
         }
+        //shop
+        ShopSystem.Instance.RefreshShopItems();
 
         Observable.EveryUpdate()
             .Where(_ => currentState.Value == ShiftState.InShift)
