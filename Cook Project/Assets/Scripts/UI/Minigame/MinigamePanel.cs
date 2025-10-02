@@ -4,7 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
-
+using R3;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
@@ -14,10 +14,16 @@ public class MinigamePanel : MonoBehaviour
     // Hook this from other scripts, or swap for a UnityEvent<Key>
     public System.Action<Key> OnBeat;
 
+    // Event fired when the minigame pattern is successfully completed
+    public Subject<R3.Unit> OnMinigameCompleted = new Subject<R3.Unit>();
+
     // UI element for displaying the sigil pattern
     public UnityEngine.UI.LayoutGroup sigilDisplayArea;
 
     public Image currentSigilHighlighter;
+
+    [Header("Visual Feedback")]
+    [SerializeField] [UnityEngine.Range(0f, 1f)] private float completedSigilAlpha = 0.3f;
 
     // Holds all sigils in the scene
     private List<sigilType> sigilTypes;
@@ -33,12 +39,15 @@ public class MinigamePanel : MonoBehaviour
 
     private int currentSigilInd = 0;
 
+    // Holds references to instantiated sigil UI objects
+    private List<GameObject> instantiatedSigils = new List<GameObject>();
+
     // Setup key mappings and input action
     void OnEnable()
     {
         beatKey = new InputAction("BeatKey", InputActionType.Button);
 
-        // Bind WASD + Arrow keys, all OR’d into one action
+        // Bind WASD + Arrow keys, all OR'd into one action
         string[] paths = {
             "<Keyboard>/w","<Keyboard>/a","<Keyboard>/s","<Keyboard>/d",
             "<Keyboard>/upArrow","<Keyboard>/leftArrow","<Keyboard>/downArrow","<Keyboard>/rightArrow"
@@ -75,17 +84,25 @@ public class MinigamePanel : MonoBehaviour
         if (key == currentSigil.sigilKey)
         {
             Debug.Log("Correct!");
+            
+            // Dim the current sigil before moving to the next
+            DimSigil(currentSigilInd);
+            
             currentSigilInd++;
+            
             // Highlight next sigil
             if (currentSigilInd < currentSigilPattern.Count)
             {
-
                 var nextSigil = sigilDisplayArea.transform.GetChild(currentSigilInd);
                 currentSigilHighlighter.transform.position = nextSigil.position;
             }
             else
             {
                 Debug.Log("Pattern complete!");
+                
+                // Fire completion event BEFORE closing
+                OnMinigameCompleted.OnNext(R3.Unit.Default);
+                
                 // Reset for now
                 currentSigilInd = 0;
 
@@ -96,9 +113,12 @@ public class MinigamePanel : MonoBehaviour
         else
         {
             Debug.Log("Wrong key! Expected: " + currentSigil.sigilKey);
-            // Optionally, reset progress on wrong key
+            // Reset progress on wrong key
             currentSigilInd = 0;
             currentSigilHighlighter.transform.position = sigilDisplayArea.transform.GetChild(0).position;
+            
+            // Reset all sigils to full opacity
+            ResetAllSigilsAlpha();
         }
     }
 
@@ -139,14 +159,76 @@ public class MinigamePanel : MonoBehaviour
     // Display the sigil pattern in the UI
     private void DisplaySigils(List<sigilType> pattern)
     {
+        // Clear previous instantiated sigils list
+        instantiatedSigils.Clear();
+
         foreach (var sigil in pattern)
         {
             Debug.Log(sigil.sigilKey);
 
             var child = Instantiate(sigil.gameObject, sigilDisplayArea.transform);
-
             child.transform.localScale = Vector3.one;
 
+            // Store reference to instantiated sigil
+            instantiatedSigils.Add(child);
+        }
+    }
+
+    // Dim a specific sigil by index
+    private void DimSigil(int index)
+    {
+        if (index < 0 || index >= instantiatedSigils.Count)
+            return;
+
+        var sigilObject = instantiatedSigils[index];
+        if (sigilObject == null)
+            return;
+
+        // Get all Image components on the sigil and its children
+        var images = sigilObject.GetComponentsInChildren<Image>();
+        foreach (var image in images)
+        {
+            var color = image.color;
+            color.a = completedSigilAlpha;
+            image.color = color;
+        }
+
+        // Also check for raw images
+        var rawImages = sigilObject.GetComponentsInChildren<RawImage>();
+        foreach (var rawImage in rawImages)
+        {
+            var color = rawImage.color;
+            color.a = completedSigilAlpha;
+            rawImage.color = color;
+        }
+    }
+
+    // Reset all sigils to full opacity (called on wrong key press)
+    private void ResetAllSigilsAlpha()
+    {
+        for (int i = 0; i < instantiatedSigils.Count; i++)
+        {
+            var sigilObject = instantiatedSigils[i];
+            if (sigilObject == null)
+                continue;
+
+            // Get all Image components and reset their alpha
+            var images = sigilObject.GetComponentsInChildren<Image>();
+            foreach (var image in images)
+            {
+                var color = image.color;
+                color.a = 1f;
+                image.color = color;
+            }
+
+            // Also check for raw images
+            var rawImages = sigilObject.GetComponentsInChildren<RawImage>();
+            foreach (var rawImage in rawImages)
+            {
+                var color = rawImage.color;
+                color.a = 1f;
+                rawImage.color = color;
+            }
         }
     }
 
