@@ -67,6 +67,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SafeZone
   playerTag: Player
+  mobTag: Mob
+  enableHealing: 1
+  healingPerSecond: 5
+  healingDelay: 1
+  canOverheal: 0
+  damageMobs: 1
+  mobDamagePerSecond: 10
+  mobDamageDelay: 0.5
+  directMobDamage: 1
   showGizmo: 1
   gizmoColor: {r: 0, g: 1, b: 0, a: 0.3}
   gizmoWireColor: {r: 0, g: 1, b: 0, a: 0.8}
