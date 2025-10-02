@@ -13,7 +13,6 @@ public class CardSwipeGameUI : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private TextMeshProUGUI instructionText;
     [SerializeField] private TextMeshProUGUI feedbackText;
-    [SerializeField] private Button resetButton;
     [SerializeField] private Button closeButton;
 
     [Header("Card Positions")]
@@ -28,7 +27,6 @@ public class CardSwipeGameUI : MonoBehaviour
         var actions = InputSystem.actions;
         actions.FindActionMap("CardSwipe").FindAction("Esc").performed += ctx => Close();
 
-        resetButton.OnClickAsObservable().Subscribe(_ => ResetGame()).AddTo(this);
         closeButton.OnClickAsObservable().Subscribe(_ => Close()).AddTo(this);
 
         CalculateSwipeDistance();

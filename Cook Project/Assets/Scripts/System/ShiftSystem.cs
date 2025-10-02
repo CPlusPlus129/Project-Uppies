@@ -77,11 +77,11 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         return QuestManager.Instance.IsQuestCompleted(questId);
     }
 
-    private void StartShift(int shift)
+    private void StartShift(int num)
     {
-        var s = Database.Instance.shiftData.GetShiftByNumber(shift);
+        var s = Database.Instance.shiftData.GetShiftByNumber(num);
         currentState.Value = ShiftState.InShift;
-        shiftNumber.Value = shift;
+        shiftNumber.Value = num;
         shiftTimer.Value = Database.Instance.shiftData.shiftDuration;
         completedOrderCount.Value = 0;
         requiredOrderCount.Value = s.requiredOrdersCount;
@@ -91,6 +91,8 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
             var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.CardSwipe, "door_temp");
             QuestManager.Instance.AddQuest(quest);
         }
+        //shop
+        ShopSystem.Instance.RefreshShopItems();
 
         Observable.EveryUpdate()
             .Where(_ => currentState.Value == ShiftState.InShift)
