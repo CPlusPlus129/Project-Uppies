@@ -1037,6 +1037,7 @@ GameObject:
   - component: {fileID: 5292327897405335567}
   - component: {fileID: 4201371701000573977}
   - component: {fileID: 2408467629529423312}
+  - component: {fileID: 707456388411454258}
   m_Layer: 5
   m_Name: Bar-hp
   m_TagString: Untagged
@@ -1060,8 +1061,8 @@ RectTransform:
   - {fileID: 4352006325792561796}
   m_Father: {fileID: 6194077348675805686}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1098,12 +1099,41 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2657012672212138895}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3543325504c5e724dbe0e158b0b83896, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   barFill: {fileID: 670660708759964555}
+--- !u!114 &707456388411454258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2657012672212138895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52b120f324c009d42a1b4901c3c7be9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HPBarItem
+  barFill: {fileID: 670660708759964555}
+  barBackground: {fileID: 0}
+  hpText: {fileID: 0}
+  smoothTransition: 1
+  transitionSpeed: 5
+  useColorGradient: 1
+  highHealthColor: {r: 0, g: 1, b: 0, a: 1}
+  mediumHealthColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  lowHealthColor: {r: 1, g: 0, b: 0, a: 1}
+  lowHealthThreshold: 0.25
+  mediumHealthThreshold: 0.5
+  enableDamageFlash: 1
+  minDamageForFlash: 5
+  damageFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashDuration: 0.15
+  showHPText: 1
+  showPercentage: 0
 --- !u!1 &2664945861117054963
 GameObject:
   m_ObjectHideFlags: 0
