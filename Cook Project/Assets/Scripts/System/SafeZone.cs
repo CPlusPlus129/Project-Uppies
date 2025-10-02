@@ -1,8 +1,10 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
 /// Defines a 3D area where the player is protected from light damage and can heal over time.
-/// Uses a trigger collider to detect player entry/exit.
+/// Can also damage mobs that enter the zone.
+/// Uses a trigger collider to detect entry/exit.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class SafeZone : MonoBehaviour
@@ -10,6 +12,8 @@ public class SafeZone : MonoBehaviour
     [Header("Safe Zone Settings")]
     [Tooltip("Tag to identify the player (default: 'Player')")]
     [SerializeField] private string playerTag = "Player";
+    [Tooltip("Tag to identify mobs (default: 'Mob')")]
+    [SerializeField] private string mobTag = "Mob";
     
     [Header("Healing Settings")]
     [SerializeField] private bool enableHealing = true;
@@ -20,6 +24,15 @@ public class SafeZone : MonoBehaviour
     [Tooltip("Can heal above max HP (usually false)")]
     [SerializeField] private bool canOverheal = false;
     
+    [Header("Damage Settings (Mobs)")]
+    [SerializeField] private bool damageMobs = true;
+    [Tooltip("Damage per second to mobs in safe zone")]
+    [SerializeField] private float mobDamagePerSecond = 10f;
+    [Tooltip("Delay before damage starts after mob enters")]
+    [SerializeField] private float mobDamageDelay = 0.5f;
+    [Tooltip("If true, mobs are damaged by the safe zone directly. If false, safe zone does nothing to mobs.")]
+    [SerializeField] private bool directMobDamage = true;
+    
     [Header("Visual Settings")]
     [SerializeField] private bool showGizmo = true;
     [SerializeField] private Color gizmoColor = new Color(0f, 1f, 0f, 0.3f);
@@ -29,11 +42,22 @@ public class SafeZone : MonoBehaviour
     [SerializeField] private bool showDebugMessages = true;
     
     private Collider safeZoneCollider;
+    
+    // Player tracking
     private bool playerInZone = false;
     private PlayerLightDamage currentPlayerDamage;
     private float timeInZone = 0f;
     private float accumulatedHealing = 0f;
     private bool isHealing = false;
+    
+    // Mob tracking
+    private Dictionary<Mob, MobInZoneData> mobsInZone = new Dictionary<Mob, MobInZoneData>();
+    
+    private class MobInZoneData
+    {
+        public float timeInZone;
+        public float accumulatedDamage;
+    }
     
     private void Awake()
     {
@@ -70,6 +94,12 @@ public class SafeZone : MonoBehaviour
                 
                 ApplyHealing();
             }
+        }
+        
+        // Apply damage to mobs if enabled
+        if (damageMobs && directMobDamage)
+        {
+            UpdateMobDamage();
         }
     }
     
@@ -116,6 +146,56 @@ public class SafeZone : MonoBehaviour
         }
     }
     
+    private void UpdateMobDamage()
+    {
+        // Create list to avoid modification during iteration
+        List<Mob> mobsToRemove = new List<Mob>();
+        
+        foreach (var kvp in mobsInZone)
+        {
+            Mob mob = kvp.Key;
+            MobInZoneData data = kvp.Value;
+            
+            // Skip if mob is destroyed or dead
+            if (mob == null || !mob.IsAlive)
+            {
+                mobsToRemove.Add(mob);
+                continue;
+            }
+            
+            // Update time in zone
+            data.timeInZone += Time.deltaTime;
+            
+            // Apply damage after delay
+            if (data.timeInZone >= mobDamageDelay)
+            {
+                // Accumulate fractional damage
+                float damageThisFrame = mobDamagePerSecond * Time.deltaTime;
+                data.accumulatedDamage += damageThisFrame;
+                
+                // Apply damage when we have at least 1 full HP worth
+                if (data.accumulatedDamage >= 1f)
+                {
+                    int damageToApply = Mathf.FloorToInt(data.accumulatedDamage);
+                    data.accumulatedDamage -= damageToApply;
+                    
+                    mob.TakeDamage(damageToApply);
+                    
+                    if (showDebugMessages)
+                    {
+                        Debug.Log($"[SafeZone] Dealt {damageToApply} damage to {mob.name}. HP: {mob.CurrentHealth}/{mob.MaxHealth}");
+                    }
+                }
+            }
+        }
+        
+        // Remove dead/destroyed mobs
+        foreach (Mob mob in mobsToRemove)
+        {
+            mobsInZone.Remove(mob);
+        }
+    }
+    
     private void OnTriggerEnter(Collider other)
     {
         // Check if the player entered
@@ -142,6 +222,26 @@ public class SafeZone : MonoBehaviour
                 Debug.LogWarning("SafeZone: Player doesn't have PlayerLightDamage component!");
             }
         }
+        // Check if a mob entered
+        else if (other.CompareTag(mobTag))
+        {
+            Mob mob = other.GetComponent<Mob>();
+            if (mob != null && !mobsInZone.ContainsKey(mob))
+            {
+                MobInZoneData data = new MobInZoneData
+                {
+                    timeInZone = 0f,
+                    accumulatedDamage = 0f
+                };
+                
+                mobsInZone.Add(mob, data);
+                
+                if (showDebugMessages)
+                {
+                    Debug.Log($"Mob entered Safe Zone: {mob.name} in {gameObject.name}");
+                }
+            }
+        }
     }
     
     private void OnTriggerExit(Collider other)
@@ -163,6 +263,20 @@ public class SafeZone : MonoBehaviour
                 if (showDebugMessages)
                 {
                     Debug.Log($"Player exited Safe Zone: {gameObject.name}");
+                }
+            }
+        }
+        // Check if a mob exited
+        else if (other.CompareTag(mobTag))
+        {
+            Mob mob = other.GetComponent<Mob>();
+            if (mob != null && mobsInZone.ContainsKey(mob))
+            {
+                mobsInZone.Remove(mob);
+                
+                if (showDebugMessages)
+                {
+                    Debug.Log($"Mob exited Safe Zone: {mob.name} from {gameObject.name}");
                 }
             }
         }
@@ -192,6 +306,13 @@ public class SafeZone : MonoBehaviour
                 float pulse = Mathf.PingPong(Time.time * 2f, 0.3f) + 0.5f;
                 fillColor.a = pulse;
             }
+        }
+        
+        // Red tint if mobs are being damaged
+        if (Application.isPlaying && damageMobs && mobsInZone.Count > 0)
+        {
+            fillColor = Color.Lerp(fillColor, new Color(1f, 0f, 0f, 0.5f), 0.3f);
+            wireColor = Color.Lerp(wireColor, Color.red, 0.3f);
         }
         
         // Draw based on collider type
@@ -243,6 +364,10 @@ public class SafeZone : MonoBehaviour
         if (Application.isPlaying && isHealing)
         {
             statusText += " (HEALING)";
+        }
+        if (Application.isPlaying && damageMobs && mobsInZone.Count > 0)
+        {
+            statusText += $" (DAMAGING {mobsInZone.Count} MOBS)";
         }
         UnityEditor.Handles.Label(transform.position + Vector3.up * 2f, $"{statusText}\n{gameObject.name}");
         #endif

@@ -143,16 +143,17 @@ public class PlayerLightMeter2 : MonoBehaviour
         currentLightLevel = Mathf.Clamp01(1.0f - Mathf.Exp(-totalIntensity * 2f));
         currentLightColor = totalLight;
     }
-    
+
     private void DisplayDebugInfo()
     {
         string status = IsInDarkness ? "DARK" : IsInBrightLight ? "BRIGHT" : "MEDIUM";
-        
+
         // Show detailed debug info
         int lightCount = FindObjectsByType<Light>(FindObjectsSortMode.None).Length;
-        Debug.Log($"[{Time.frameCount}] Light Level: {currentLightLevel:F3} ({status}) | " +
-                  $"Color: RGBA({currentLightColor.r:F3}, {currentLightColor.g:F3}, {currentLightColor.b:F3}, {currentLightColor.a:F3}) | " +
-                  $"Lights in scene: {lightCount}");
+        
+        // Debug.Log($"[{Time.frameCount}] Light Level: {currentLightLevel:F3} ({status}) | " +
+        //           $"Color: RGBA({currentLightColor.r:F3}, {currentLightColor.g:F3}, {currentLightColor.b:F3}, {currentLightColor.a:F3}) | " +
+        //           $"Lights in scene: {lightCount}");
     }
     
     // Optional: Visualize detection area
