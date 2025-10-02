@@ -43,7 +43,10 @@ public class PlayerMotor : MonoBehaviour
         }
         else
         {
-            PlayerStatSystem.Instance.CurrentStamina.Value += PlayerStatSystem.Instance.StaminaRecoverySpeed.Value * Time.deltaTime;
+            PlayerStatSystem.Instance.CurrentStamina.Value = Mathf.Clamp(
+                PlayerStatSystem.Instance.CurrentStamina.Value + PlayerStatSystem.Instance.StaminaRecoverySpeed.Value * Time.deltaTime,
+                0,
+                PlayerStatSystem.Instance.MaxStamina.Value);
         }
 
         float currentSpeed = isSprinting ? sprintSpeed : speed;
