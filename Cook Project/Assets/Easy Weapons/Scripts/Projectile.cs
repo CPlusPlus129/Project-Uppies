@@ -63,7 +63,7 @@ public class Projectile : MonoBehaviour
 		// Destroy the projectile if the time is up
 		if (lifeTimer >= lifetime)
 		{
-			Explode(transform.position);
+			Explode(transform.position, Vector3.up); // Default to up when time expires
 		}
 
 		// Make the projectile move
@@ -122,8 +122,9 @@ public class Projectile : MonoBehaviour
 
 	void Hit(Collision col)
 	{
-		// Make the projectile explode
-		Explode(col.contacts[0].point);
+		// Make the projectile explode with surface normal
+		Vector3 surfaceNormal = col.contacts[0].normal;
+		Explode(col.contacts[0].point, surfaceNormal);
 
 		// Apply damage to the hit object if damageType is set to Direct
 		if (damageType == DamageType.Direct)
@@ -148,12 +149,20 @@ public class Projectile : MonoBehaviour
 		}
 	}
 
-	void Explode(Vector3 position)
+	void Explode(Vector3 position, Vector3 surfaceNormal = default)
 	{
-		// Instantiate the explosion
+		// Calculate rotation based on surface normal
+		Quaternion rotation = Quaternion.identity;
+		if (surfaceNormal != Vector3.zero)
+		{
+			// Rotate explosion to align with surface normal
+			rotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
+		}
+
+		// Instantiate the explosion with proper rotation
 		if (explosion != null)
 		{
-			Instantiate(explosion, position, Quaternion.identity);
+			Instantiate(explosion, position, rotation);
 		}
 
 		// Cluster bombs
