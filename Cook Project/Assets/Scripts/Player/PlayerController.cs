@@ -28,6 +28,9 @@ public class PlayerController : MonoBehaviour
         scrollAction.performed += actionController.ScrollHotBar;
         var hotbarAction = InputSystem.actions.FindAction("HotbarShortcut");
         hotbarAction.performed += actionController.OnItemHotbarClicked;
+        var sprintAction = InputSystem.actions.FindAction("Sprint");
+        sprintAction.performed += ctx => motor.TrySprint();
+        sprintAction.canceled += ctx => motor.StopSprint();
         //DEBUG
         var debugAction = InputSystem.actions.FindAction("DebugKeys");
         debugAction.performed += actionController.OnDebugKeyClicked;

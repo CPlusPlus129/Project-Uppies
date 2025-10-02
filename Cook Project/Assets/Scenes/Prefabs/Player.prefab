@@ -285,7 +285,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMotor
   speed: 5
+  sprintSpeed: 8
   jumpHeight: 1
+  sprintStaminaCost: 40
   gravity: -9.8
 --- !u!114 &8858371310009257608
 MonoBehaviour:
