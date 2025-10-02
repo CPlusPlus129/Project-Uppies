@@ -22,7 +22,7 @@ public class CardSwipeGame
     private void GenerateSpeedRange()
     {
         float baseSpeed = UnityEngine.Random.Range(600f, 1000f);
-        float tolerance = UnityEngine.Random.Range(50f, 100f);
+        float tolerance = 100;
 
         MinSpeed = baseSpeed - tolerance;
         MaxSpeed = baseSpeed + tolerance;
