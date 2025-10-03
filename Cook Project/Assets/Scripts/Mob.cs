@@ -37,6 +37,12 @@ public class Mob : MonoBehaviour
     [SerializeField] private float attackCooldown = 1.5f;
     private float lastAttackTime = -999f;
     
+    [Header("Light Source Damage")]
+    [Tooltip("Time in seconds to reduce from nearest light source when attacking")]
+    [SerializeField] private float lightLifetimeReduction = 2f;
+    [Tooltip("Maximum range to search for light sources to damage")]
+    [SerializeField] private float lightDamageRange = 15f;
+    
     [Header("Detection")]
     [SerializeField] private float playerDetectionRange = 30f;
     [SerializeField] private LayerMask obstacleLayer;
@@ -204,6 +210,123 @@ public class Mob : MonoBehaviour
             {
                 Debug.Log($"Mob attacked player for {damage} damage! Player HP: {newHP}/{playerHealth.MaxHP.Value}");
             }
+        }
+    }
+    
+    /// <summary>
+    /// Finds and damages the nearest light source (explosion with TimedObjectDestroyer)
+    /// </summary>
+    public void DamageNearestLightSource()
+    {
+        // Find all Light components in range, then check for TimedObjectDestroyer
+        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+        
+        Debug.Log($"[Mob] DamageNearestLightSource called. Found {allLights.Length} Light components in scene.");
+        
+        if (allLights.Length == 0)
+        {
+            Debug.Log("[Mob] No Light components found in scene");
+            return;
+        }
+        
+        // Find the nearest light that has TimedObjectDestroyer (on itself or parent)
+        TimedObjectDestroyer nearestLightSource = null;
+        float nearestDistance = float.MaxValue;
+        Light nearestLight = null;
+        
+        foreach (Light light in allLights)
+        {
+            if (!light.enabled) continue;
+            
+            float distance = Vector3.Distance(transform.position, light.transform.position);
+            
+            // Check for TimedObjectDestroyer on the same object first, then parents
+            TimedObjectDestroyer destroyer = light.GetComponent<TimedObjectDestroyer>();
+            if (destroyer == null)
+            {
+                destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
+            }
+            
+            if (destroyer != null)
+            {
+                string hierarchyInfo = destroyer.gameObject == light.gameObject ? "same object" : $"parent: '{destroyer.name}'";
+                Debug.Log($"[Mob] ✓ Found valid light '{light.name}' ({hierarchyInfo}) at distance {distance:F2}m (range: {lightDamageRange}m)");
+                
+                if (distance < nearestDistance && distance <= lightDamageRange)
+                {
+                    nearestDistance = distance;
+                    nearestLightSource = destroyer;
+                    nearestLight = light;
+                }
+            }
+            else
+            {
+                // Show full parent hierarchy for debugging
+                string hierarchy = GetHierarchyPath(light.transform);
+                Debug.Log($"[Mob] ✗ Light '{light.name}' has no TimedObjectDestroyer. Hierarchy: {hierarchy}");
+            }
+        }
+        
+        // Reduce lifetime of the nearest light source
+        if (nearestLightSource != null)
+        {
+            float oldLifetime = nearestLightSource.lifeTime;
+            nearestLightSource.lifeTime = Mathf.Max(0.1f, nearestLightSource.lifeTime - lightLifetimeReduction);
+            
+            Debug.LogWarning($"[Mob] DAMAGED light source '{nearestLightSource.name}' at {nearestDistance:F2}m distance. Lifetime: {oldLifetime:F2}s -> {nearestLightSource.lifeTime:F2}s");
+            
+            // If the light's lifetime is very low, give it a slight flicker effect
+            if (nearestLightSource.lifeTime < 1f && nearestLight != null)
+            {
+                StartCoroutine(FlickerLight(nearestLight));
+            }
+        }
+        else
+        {
+            Debug.Log($"[Mob] No valid light sources within range ({lightDamageRange}m). Checked {allLights.Length} lights.");
+        }
+    }
+    
+    /// <summary>
+    /// Helper method to get the full hierarchy path of a transform for debugging
+    /// </summary>
+    private string GetHierarchyPath(Transform transform)
+    {
+        string path = transform.name;
+        Transform current = transform.parent;
+        
+        while (current != null)
+        {
+            path = current.name + "/" + path;
+            current = current.parent;
+        }
+        
+        return path;
+    }
+    
+    /// <summary>
+    /// Creates a flicker effect on a light that's about to expire
+    /// </summary>
+    private System.Collections.IEnumerator FlickerLight(Light light)
+    {
+        if (light == null) yield break;
+        
+        float originalIntensity = light.intensity;
+        float flickerDuration = 0.3f;
+        float elapsed = 0f;
+        
+        while (elapsed < flickerDuration)
+        {
+            if (light == null) yield break;
+            
+            light.intensity = originalIntensity * Random.Range(0.5f, 1f);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        if (light != null)
+        {
+            light.intensity = originalIntensity;
         }
     }
     

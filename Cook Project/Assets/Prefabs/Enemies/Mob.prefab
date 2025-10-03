@@ -167,6 +167,8 @@ MonoBehaviour:
   autoDestroyParticles: 1
   attackDamage: 10
   attackCooldown: 1.5
+  lightLifetimeReduction: 2
+  lightDamageRange: 15
   playerDetectionRange: 30
   obstacleLayer:
     serializedVersion: 2
@@ -195,7 +197,7 @@ MonoBehaviour:
   damagePerSecond: 25
   damageDelay: 0.5
   updatesPerSecond: 3
-  showDebugInfo: 1
+  showDebugInfo: 0
   showDetailedLightInfo: 0
   showPerFrameUpdates: 0
   damageGizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

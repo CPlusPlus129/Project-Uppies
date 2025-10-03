@@ -318,6 +318,9 @@ public class MobLightDamage : MonoBehaviour
             // Apply to mob health
             mob.TakeDamage(damageToApply);
             
+            // Damage nearest light source when mob takes damage from light
+            mob.DamageNearestLightSource();
+            
             if (showDebugInfo)
             {
                 Debug.Log($"[MobLightDamage] Applied {damageToApply} damage! Mob HP: {mob.CurrentHealth}/{mob.MaxHealth} (accumulated: {accumulatedDamage:F2})");

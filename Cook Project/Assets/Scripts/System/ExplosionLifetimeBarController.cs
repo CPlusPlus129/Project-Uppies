@@ -52,7 +52,20 @@ public class ExplosionLifetimeBarController : MonoBehaviour
 
     void Update()
     {
-        currentLifetime -= Time.deltaTime;
+        // Get the TimedObjectDestroyer to use its actual elapsed time
+        TimedObjectDestroyer destroyer = GetComponent<TimedObjectDestroyer>();
+        
+        if (destroyer != null)
+        {
+            // Use the actual remaining lifetime from the destroyer
+            currentLifetime = destroyer.GetRemainingLifetime();
+            // DON'T update maxLifetime - it should stay as the original value for correct percentage
+        }
+        else
+        {
+            // Fallback to manual countdown if no destroyer found
+            currentLifetime -= Time.deltaTime;
+        }
         
         if (lifetimeBar != null)
         {
