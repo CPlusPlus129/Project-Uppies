@@ -100,7 +100,10 @@ public class MinigamePanel : MonoBehaviour
             {
                 Debug.Log("Pattern complete!");
                 
-                // Fire completion event BEFORE closing
+                // Notify the CookingSystem that the minigame is complete
+                CookingSystem.Instance.CompleteCooking();
+                
+                // Fire completion event for any other systems that might need it
                 OnMinigameCompleted.OnNext(R3.Unit.Default);
                 
                 // Reset for now

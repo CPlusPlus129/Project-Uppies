@@ -42,32 +42,17 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
         Debug.Log($"Started cooking: {r.mealName}. Complete the minigame to finish!");
 
         // Close cooking UI and open minigame
+        // The minigame will call CompleteCooking() when the player successfully completes the pattern
         UIRoot.Instance.GetUIComponent<CookingUI>().Close();
-        var minigameUI = UIRoot.Instance.GetUIComponent<MinigameUI>();
-        
-        // Subscribe to minigame completion event
-        var minigamePanel = minigameUI.minigamePanel;
-        if (minigamePanel != null)
-        {
-            // Use TakeUntilDestroy to automatically clean up subscription
-            minigamePanel.OnMinigameCompleted
-                .Take(1) // Only take the first completion event
-                .Subscribe(_ => CompleteCooking())
-                .AddTo(minigamePanel);
-        }
-        else
-        {
-            Debug.LogError("MinigamePanel not found! Cannot subscribe to completion event.");
-        }
-        
-        minigameUI.Open();
+        UIRoot.Instance.GetUIComponent<MinigameUI>().Open();
     }
 
     /// <summary>
     /// Called when the minigame is successfully completed.
     /// Adds the pending meal to the player's inventory.
+    /// This is called by the MinigamePanel when the player completes the pattern.
     /// </summary>
-    private void CompleteCooking()
+    public void CompleteCooking()
     {
         if (pendingMealItem == null)
         {
