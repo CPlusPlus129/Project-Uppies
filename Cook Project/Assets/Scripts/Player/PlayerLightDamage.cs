@@ -30,6 +30,10 @@ public class PlayerLightDamage : MonoBehaviour
     private float lastDamageTime = 0f;
     private float accumulatedDamage = 0f; // Fix: Accumulate fractional damage
     
+    // Respawn system
+    private Vector3 spawnPosition;
+    private CharacterController characterController;
+    
     // Public properties
     public bool IsInSafeZone => isInSafeZone;
     public bool IsTakingDamage => isTakingDamage;
@@ -63,6 +67,20 @@ public class PlayerLightDamage : MonoBehaviour
             {
                 Debug.Log($"PlayerLightDamage: Successfully found PlayerStatSystem. Current HP: {healthSystem.CurrentHP.Value}/{healthSystem.MaxHP.Value}");
             }
+        }
+        
+        // Store initial spawn position and get CharacterController
+        spawnPosition = transform.position;
+        characterController = GetComponent<CharacterController>();
+        
+        if (characterController == null)
+        {
+            Debug.LogWarning("PlayerLightDamage: No CharacterController found. Respawn may not work properly.", this);
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"PlayerLightDamage: Spawn position set to {spawnPosition}");
         }
     }
     
@@ -178,9 +196,51 @@ public class PlayerLightDamage : MonoBehaviour
     
     private void OnPlayerDeath()
     {
-        Debug.LogError("Player died from darkness exposure!");
-        // You can add death handling here (respawn, game over screen, etc.)
-        enabled = false; // Stop taking damage
+        Debug.LogWarning("Player died from darkness exposure! Respawning...");
+        RespawnPlayer();
+    }
+    
+    /// <summary>
+    /// Respawns the player at their initial spawn position with full health.
+    /// </summary>
+    private void RespawnPlayer()
+    {
+        var healthSystem = PlayerStatSystem.Instance;
+        if (healthSystem == null)
+        {
+            Debug.LogError("Cannot respawn: PlayerStatSystem.Instance is NULL!");
+            return;
+        }
+        
+        // Reset HP to maximum
+        healthSystem.CurrentHP.Value = healthSystem.MaxHP.Value;
+        
+        // Teleport player to spawn position
+        // CharacterController requires special handling for teleportation
+        if (characterController != null)
+        {
+            characterController.enabled = false;
+            transform.position = spawnPosition;
+            characterController.enabled = true;
+        }
+        else
+        {
+            // Fallback if no CharacterController
+            transform.position = spawnPosition;
+        }
+        
+        // Reset internal damage state
+        timeInDarkness = 0f;
+        isTakingDamage = false;
+        accumulatedDamage = 0f;
+        
+        // Re-enable the component if it was disabled
+        enabled = true;
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"Player respawned at {spawnPosition} with {healthSystem.CurrentHP.Value} HP");
+        }
     }
     
     /// <summary>
