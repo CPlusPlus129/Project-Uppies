@@ -34,6 +34,30 @@ public class MobSpawner : MonoBehaviour
     [SerializeField] private bool autoAssignPlayer = true;
     [SerializeField] private Transform playerTransform;
     
+    [Header("Visual Customization")]
+    [Tooltip("Randomize mob color on spawn")]
+    [SerializeField] private bool randomizeColor = true;
+    [Tooltip("Use a predefined color palette instead of fully random colors")]
+    [SerializeField] private bool useColorPalette = false;
+    [Tooltip("Color palette to choose from (only used if useColorPalette is true)")]
+    [SerializeField] private Color[] colorPalette = new Color[]
+    {
+        new Color(1f, 0.3f, 0.3f),    // Red
+        new Color(0.3f, 0.3f, 1f),    // Blue
+        new Color(0.3f, 1f, 0.3f),    // Green
+        new Color(1f, 1f, 0.3f),      // Yellow
+        new Color(1f, 0.3f, 1f),      // Magenta
+        new Color(0.3f, 1f, 1f),      // Cyan
+        new Color(1f, 0.6f, 0.2f),    // Orange
+        new Color(0.6f, 0.3f, 1f)     // Purple
+    };
+    [Tooltip("Brightness range for random colors (0-1)")]
+    [SerializeField] [Range(0f, 1f)] private float minBrightness = 0.4f;
+    [SerializeField] [Range(0f, 1f)] private float maxBrightness = 1f;
+    [Tooltip("Saturation range for random colors (0-1)")]
+    [SerializeField] [Range(0f, 1f)] private float minSaturation = 0.6f;
+    [SerializeField] [Range(0f, 1f)] private float maxSaturation = 1f;
+    
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = true;
     [SerializeField] private bool showGizmos = true;
@@ -184,6 +208,81 @@ public class MobSpawner : MonoBehaviour
                 }
             }
         }
+        
+        // Randomize color if enabled
+        if (randomizeColor)
+        {
+            RandomizeMobColor(mob);
+        }
+    }
+    
+    /// <summary>
+    /// Applies a random color to the mob's renderer(s).
+    /// </summary>
+    private void RandomizeMobColor(GameObject mob)
+    {
+        Color randomColor;
+        
+        if (useColorPalette && colorPalette != null && colorPalette.Length > 0)
+        {
+            // Pick a random color from the palette
+            randomColor = colorPalette[Random.Range(0, colorPalette.Length)];
+        }
+        else
+        {
+            // Generate a fully random color with brightness and saturation constraints
+            randomColor = GenerateRandomColor();
+        }
+        
+        // Apply the color to all renderers on the mob
+        Renderer[] renderers = mob.GetComponentsInChildren<Renderer>();
+        
+        if (renderers.Length == 0)
+        {
+            Debug.LogWarning($"MobSpawner: No renderers found on mob {mob.name}. Cannot apply color.", this);
+            return;
+        }
+        
+        foreach (Renderer renderer in renderers)
+        {
+            // Create a new material instance to avoid affecting other instances
+            Material[] materials = renderer.materials;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                materials[i] = new Material(materials[i]); // Clone the material
+                materials[i].color = randomColor;
+                
+                // If using Standard Shader, also set the emission color for variety
+                if (materials[i].HasProperty("_EmissionColor"))
+                {
+                    materials[i].SetColor("_EmissionColor", randomColor * 0.2f);
+                }
+            }
+            renderer.materials = materials;
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"MobSpawner: Applied color {randomColor} to mob {mob.name}");
+        }
+    }
+    
+    /// <summary>
+    /// Generates a random color with controlled brightness and saturation.
+    /// </summary>
+    private Color GenerateRandomColor()
+    {
+        // Generate random hue (0-1 for full color wheel)
+        float hue = Random.value;
+        
+        // Use the brightness and saturation ranges
+        float saturation = Random.Range(minSaturation, maxSaturation);
+        float brightness = Random.Range(minBrightness, maxBrightness);
+        
+        // Convert HSV to RGB
+        Color color = Color.HSVToRGB(hue, saturation, brightness);
+        
+        return color;
     }
     
     private void CleanupDestroyedMobs()

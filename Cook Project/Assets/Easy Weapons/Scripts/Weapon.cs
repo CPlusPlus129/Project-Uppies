@@ -325,9 +325,9 @@ public class Weapon : MonoBehaviour
 	{
 
 
-		InputAction fireAction = InputSystem.actions.FindAction("Interact");
-		InputAction cancelAction = InputSystem.actions.FindAction("Jump");
-		InputAction reloadAction = InputSystem.actions.FindAction("Jump");
+		InputAction fireAction = InputSystem.actions.FindAction("Attack");
+		InputAction cancelAction = InputSystem.actions.FindAction("Crouch");
+		InputAction reloadAction = InputSystem.actions.FindAction("Reload");
 
         // Fire if this is a raycast type weapon and the user presses the fire button
         if (type == WeaponType.Raycast)
