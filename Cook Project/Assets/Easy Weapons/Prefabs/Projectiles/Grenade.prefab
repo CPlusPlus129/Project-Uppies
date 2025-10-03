@@ -209,17 +209,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileType: 0
   damageType: 1
-  damage: 100
-  speed: 100
-  initialForce: 100000
   lifetime: 5
-  seekRate: 1
-  seekTag: Enemy
-  explosion: {fileID: 100002, guid: 2df66d02c8b8af84989ba846bb5dcac8, type: 3}
-  targetListUpdateRate: 1
-  clusterBomb: {fileID: 0}
-  clusterBombNum: 6
+  speed: 39
+  useInitialForce: 1
+  initialForce: 683
+  damage: 100
   weaponType: 0
+  explosionPrefab: {fileID: 100002, guid: 2df66d02c8b8af84989ba846bb5dcac8, type: 3}
+  explosionScale: 1
+  alignToSurface: 1
+  seekTag: Mob
+  seekRate: 10
+  targetUpdateInterval: 0.5
+  seekRange: 50
+  clusterBombPrefab: {fileID: 0}
+  clusterBombCount: 6
+  clusterSpreadRadius: 3
 --- !u!96 &9600000
 TrailRenderer:
   serializedVersion: 3

@@ -1,196 +1,427 @@
-﻿/// <summary>
+/// <summary>
 /// Projectile.cs
-/// Author: MutantGopher
-/// Attach this script to your projectile prefabs.  This includes rockets, missiles,
-/// mortars, grenade launchers, and a number of other weapons.  This script handles
-/// features like seeking missiles and the instantiation of explosions on impact.
+/// Modernized projectile system for Unity 6.2
+/// Supports standard projectiles, seeking missiles, and cluster bombs
+/// Features explosion spawning, damage application, and target tracking
 /// </summary>
 
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public enum ProjectileType
 {
-	Standard,
-	Seeker,
-	ClusterBomb
+    Standard,
+    Seeker,
+    ClusterBomb
 }
+
 public enum DamageType
 {
-	Direct,
-	Explosionawe
+    Direct,
+    Explosion
 }
 
+[RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
-	public ProjectileType projectileType = ProjectileType.Standard;		// The type of projectile - Standard is a straight forward moving projectile, Seeker type seeks GameObjects with a specified tag
-	public DamageType damageType = DamageType.Direct;					// The damage type - Direct applys damage directly from the projectile, Explosion lets an instantiated explosion handle damage
-	public float damage = 100.0f;										// The amount of damage to be applied (only for Direct damage type)
-	public float speed = 10.0f;											// The speed at which this projectile will move
-	public float initialForce = 1000.0f;								// The force to be applied to the projectile initially
-	public float lifetime = 30.0f;										// The maximum time (in seconds) before the projectile is destroyed
-	
-	public float seekRate = 1.0f;										// The rate at which the projectile will turn to seek enemies
-	public string seekTag = "Enemy";									// The projectile will seek gameobjects with this tag
-	public GameObject explosion;										// The explosion to be instantiated when this projectile hits something
-	public float targetListUpdateRate = 1.0f;							// The rate at which the projectile will update its list of all enemies to target
+    #region Projectile Type & Behavior
+    [Header("Projectile Configuration")]
+    [Tooltip("Type of projectile behavior")]
+    public ProjectileType projectileType = ProjectileType.Standard;
+    
+    [Tooltip("How damage is applied - Direct from projectile or from explosion")]
+    public DamageType damageType = DamageType.Direct;
+    
+    [Tooltip("Maximum lifetime in seconds before auto-destruction")]
+    [Range(1f, 120f)]
+    public float lifetime = 30f;
+    #endregion
 
-	public GameObject clusterBomb;										// The array of bombs to be instantiated on explode if this projectile is of clusterbomb type
-	public int clusterBombNum = 6;										// The number of cluster bombs to instantiate
+    #region Movement Settings
+    [Header("Movement")]
+    [Tooltip("Projectile movement speed (m/s)")]
+    [Range(1f, 200f)]
+    public float speed = 50f;
+    
+    [Tooltip("Use initial force impulse instead of constant velocity")]
+    public bool useInitialForce = false;
+    
+    [Tooltip("Initial force magnitude (only if Use Initial Force is enabled)")]
+    [Range(100f, 10000f)]
+    public float initialForce = 1000f;
+    #endregion
 
-	public int weaponType = 0;											// Bloody Mess support variable
+    #region Damage Settings
+    [Header("Damage (Direct Type Only)")]
+    [Tooltip("Damage amount for Direct damage type")]
+    [Range(1f, 1000f)]
+    public float damage = 100f;
+    
+    [Tooltip("Support for Bloody Mess system (if installed)")]
+    public int weaponType = 0;
+    #endregion
 
-	private float lifeTimer = 0.0f;										// The timer to keep track of how long this projectile has been in existence
-	private float targetListUpdateTimer = 0.0f;							// The timer to keep track of how long it's been since the enemy list was last updated
-	private GameObject[] enemyList;										// An array to hold possible targets
+    #region Explosion Settings
+    [Header("Explosion")]
+    [Tooltip("Explosion prefab to spawn on impact/destruction")]
+    public GameObject explosionPrefab;
+    
+    [Tooltip("Scale multiplier for spawned explosion")]
+    [Range(0.1f, 10f)]
+    public float explosionScale = 1f;
+    
+    [Tooltip("Align explosion with surface normal on impact")]
+    public bool alignToSurface = true;
+    #endregion
 
+    #region Seeker Settings
+    [Header("Seeker Missile (Seeker Type Only)")]
+    [Tooltip("Tag to search for targets")]
+    public string seekTag = "Enemy";
+    
+    [Tooltip("How aggressively the projectile turns toward target")]
+    [Range(0.1f, 20f)]
+    public float seekRate = 5f;
+    
+    [Tooltip("How often to update the target list (seconds)")]
+    [Range(0.1f, 5f)]
+    public float targetUpdateInterval = 0.5f;
+    
+    [Tooltip("Maximum range to detect targets (0 = unlimited)")]
+    [Range(0f, 200f)]
+    public float seekRange = 50f;
+    #endregion
 
-	void Start()
-	{
-		// Initialize the enemy list
-		UpdateEnemyList();
+    #region Cluster Bomb Settings
+    [Header("Cluster Bomb (ClusterBomb Type Only)")]
+    [Tooltip("Cluster bomb projectile prefab")]
+    public GameObject clusterBombPrefab;
+    
+    [Tooltip("Number of cluster bombs to spawn")]
+    [Range(1, 20)]
+    public int clusterBombCount = 6;
+    
+    [Tooltip("Spread radius for cluster bombs")]
+    [Range(0.5f, 10f)]
+    public float clusterSpreadRadius = 3f;
+    #endregion
 
-		// Add the initial force to rigidbody
-		GetComponent<Rigidbody>().AddRelativeForce(0, 0, initialForce);
-	}
+    #region Private Variables
+    private Rigidbody rb;
+    private float lifeTimer = 0f;
+    private float targetUpdateTimer = 0f;
+    private List<GameObject> cachedTargets = new List<GameObject>();
+    private bool hasExploded = false;
+    #endregion
 
-	// Update is called once per frame
-	void Update()
-	{
-		// Update the timer
-		lifeTimer += Time.deltaTime;
+    #region Unity Lifecycle
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        
+        // Validate settings
+        ValidateSettings();
+    }
 
-		// Destroy the projectile if the time is up
-		if (lifeTimer >= lifetime)
-		{
-			Explode(transform.position, Vector3.up); // Default to up when time expires
-		}
+    private void Start()
+    {
+        // Apply initial force if enabled
+        if (useInitialForce)
+        {
+            rb.AddRelativeForce(Vector3.forward * initialForce, ForceMode.Impulse);
+        }
+        
+        // Initialize target list for seekers
+        if (projectileType == ProjectileType.Seeker)
+        {
+            UpdateTargetList();
+        }
+    }
 
-		// Make the projectile move
-		if (initialForce == 0)		// Only if initial force is not being used to propel this projectile
-			GetComponent<Rigidbody>().linearVelocity = transform.forward * speed;
+    private void Update()
+    {
+        // Update lifetime
+        lifeTimer += Time.deltaTime;
+        
+        // Auto-destruct after lifetime expires
+        if (lifeTimer >= lifetime)
+        {
+            Explode(transform.position, Vector3.up);
+            return;
+        }
+        
+        // Handle constant velocity movement (if not using initial force)
+        if (!useInitialForce && rb != null)
+        {
+            rb.linearVelocity = transform.forward * speed;
+        }
+        
+        // Handle seeking behavior
+        if (projectileType == ProjectileType.Seeker)
+        {
+            UpdateSeeking();
+        }
+    }
 
-		// Make the projectile seek nearby targets if the projectile type is set to seeker
-		if (projectileType == ProjectileType.Seeker)
-		{
-			// Keep the timer updating
-			targetListUpdateTimer += Time.deltaTime;
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (hasExploded) return;
+        
+        HandleImpact(collision);
+    }
+    #endregion
 
-			// If the targetListUpdateTimer has reached the targetListUpdateRate, update the enemy list and restart the timer
-			if (targetListUpdateTimer >= targetListUpdateRate)
-			{
-				UpdateEnemyList();
-			}
+    #region Seeking Logic
+    private void UpdateSeeking()
+    {
+        targetUpdateTimer += Time.deltaTime;
+        
+        // Update target list periodically
+        if (targetUpdateTimer >= targetUpdateInterval)
+        {
+            UpdateTargetList();
+            targetUpdateTimer = 0f;
+        }
+        
+        // Find best target and rotate toward it
+        GameObject bestTarget = FindBestTarget();
+        if (bestTarget != null)
+        {
+            Vector3 targetDirection = (bestTarget.transform.position - transform.position).normalized;
+            Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, seekRate * Time.deltaTime);
+        }
+    }
 
-			if (enemyList != null)
-			{
-				// Choose a target to "seek" or rotate toward
-				float greatestDotSoFar = -1.0f;
-				Vector3 target = transform.forward * 1000;
-				foreach (GameObject enemy in enemyList)
-				{
-					if (enemy != null)
-					{
-						Vector3 direction = enemy.transform.position - transform.position;
-						float dot = Vector3.Dot(direction.normalized, transform.forward);
-						if (dot > greatestDotSoFar)
-						{
-							target = enemy.transform.position;
-							greatestDotSoFar = dot;
-						}
-					}
-				}
+    private void UpdateTargetList()
+    {
+        cachedTargets.Clear();
+        
+        GameObject[] potentialTargets = GameObject.FindGameObjectsWithTag(seekTag);
+        
+        foreach (GameObject target in potentialTargets)
+        {
+            if (target == null) continue;
+            
+            // Check range if specified
+            if (seekRange > 0f)
+            {
+                float distance = Vector3.Distance(transform.position, target.transform.position);
+                if (distance > seekRange) continue;
+            }
+            
+            cachedTargets.Add(target);
+        }
+    }
 
-				// Rotate the projectile to look at the target
-				Quaternion targetRotation = Quaternion.LookRotation(target - transform.position);
-				transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * seekRate);
-			}
-		}
-	}
+    private GameObject FindBestTarget()
+    {
+        if (cachedTargets.Count == 0) return null;
+        
+        GameObject bestTarget = null;
+        float bestDot = -1f;
+        
+        // Find target most aligned with current direction
+        foreach (GameObject target in cachedTargets)
+        {
+            if (target == null) continue;
+            
+            Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+            float dot = Vector3.Dot(directionToTarget, transform.forward);
+            
+            if (dot > bestDot)
+            {
+                bestDot = dot;
+                bestTarget = target;
+            }
+        }
+        
+        return bestTarget;
+    }
+    #endregion
 
-	void UpdateEnemyList()
-	{
-		//enemyList = GameObject.FindGameObjectsWithTag(seekTag);
-		targetListUpdateTimer = 0.0f;
-	}
+    #region Impact & Damage
+    private void HandleImpact(Collision collision)
+    {
+        Vector3 impactPoint = collision.contacts[0].point;
+        Vector3 surfaceNormal = collision.contacts[0].normal;
+        
+        // Apply direct damage if configured
+        if (damageType == DamageType.Direct)
+        {
+            ApplyDirectDamage(collision.collider.gameObject, impactPoint);
+        }
+        
+        // Explode at impact point
+        Explode(impactPoint, surfaceNormal);
+    }
 
-	void OnCollisionEnter(Collision col)
-	{
-		// If the projectile collides with something, call the Hit() function
-		Hit(col);
-	}
+    private void ApplyDirectDamage(GameObject target, Vector3 impactPoint)
+    {
+        // Try standard health system
+        target.SendMessageUpwards("ChangeHealth", -damage, SendMessageOptions.DontRequireReceiver);
+        
+        // Support for Bloody Mess system (if using limb-based damage)
+        if (target.layer == LayerMask.NameToLayer("Limb"))
+        {
+            Vector3 shotDirection = (target.transform.position - transform.position).normalized;
+            
+            // Bloody Mess integration would go here
+            // Commented out as it requires external package
+            /*
+            if (target.TryGetComponent<Limb>(out var limb))
+            {
+                GameObject parent = limb.parent;
+                if (parent.TryGetComponent<CharacterSetup>(out var character))
+                {
+                    character.ApplyDamage(damage, target, weaponType, shotDirection, Camera.main.transform.position);
+                }
+            }
+            */
+        }
+    }
+    #endregion
 
-	void Hit(Collision col)
-	{
-		// Make the projectile explode with surface normal
-		Vector3 surfaceNormal = col.contacts[0].normal;
-		Explode(col.contacts[0].point, surfaceNormal);
+    #region Explosion
+    private void Explode(Vector3 position, Vector3 surfaceNormal)
+    {
+        if (hasExploded) return;
+        hasExploded = true;
+        
+        // Spawn explosion effect
+        if (explosionPrefab != null)
+        {
+            // Calculate rotation to align explosion's UP with surface normal
+            Quaternion rotation = Quaternion.identity;
+            
+            if (alignToSurface && surfaceNormal != Vector3.zero)
+            {
+                // Rotate the explosion so its local up aligns with the surface normal
+                rotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
+            }
+            
+            GameObject explosion = Instantiate(explosionPrefab, position, rotation);
+            
+            // Apply scale
+            if (explosionScale != 1f)
+            {
+                explosion.transform.localScale = Vector3.one * explosionScale;
+            }
+        }
+        
+        // Handle cluster bombs
+        if (projectileType == ProjectileType.ClusterBomb && clusterBombPrefab != null)
+        {
+            SpawnClusterBombs(position);
+        }
+        
+        // Destroy projectile
+        Destroy(gameObject);
+    }
 
-		// Apply damage to the hit object if damageType is set to Direct
-		if (damageType == DamageType.Direct)
-		{
-			col.collider.gameObject.SendMessageUpwards("ChangeHealth", -damage, SendMessageOptions.DontRequireReceiver);
+    private void SpawnClusterBombs(Vector3 origin)
+    {
+        for (int i = 0; i < clusterBombCount; i++)
+        {
+            // Random spread pattern
+            Vector3 randomOffset = Random.insideUnitSphere * clusterSpreadRadius;
+            randomOffset.y = Mathf.Abs(randomOffset.y); // Keep above origin
+            
+            Vector3 spawnPosition = origin + randomOffset;
+            Quaternion randomRotation = Random.rotation;
+            
+            GameObject cluster = Instantiate(clusterBombPrefab, spawnPosition, randomRotation);
+            
+            // Add random force to cluster bombs
+            if (cluster.TryGetComponent<Rigidbody>(out var clusterRb))
+            {
+                Vector3 randomForce = Random.insideUnitSphere * 300f;
+                randomForce.y = Mathf.Abs(randomForce.y) * 0.5f; // Slight upward bias
+                clusterRb.AddForce(randomForce, ForceMode.Impulse);
+            }
+        }
+    }
+    #endregion
 
-			//call the ApplyDamage() function on the enenmy CharacterSetup script
-			if (col.collider.gameObject.layer == LayerMask.NameToLayer("Limb"))
-			{
-				Vector3 directionShot = col.collider.transform.position - transform.position;
+    #region Validation & Utilities
+    private void ValidateSettings()
+    {
+        // Ensure rigidbody is configured properly
+        if (rb != null)
+        {
+            rb.useGravity = useInitialForce; // Use gravity only with initial force
+            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        }
+        
+        // Validate seeker settings
+        if (projectileType == ProjectileType.Seeker && string.IsNullOrEmpty(seekTag))
+        {
+            Debug.LogWarning($"[Projectile] Seeker type requires a seek tag! GameObject: {gameObject.name}", this);
+        }
+        
+        // Validate cluster bomb settings
+        if (projectileType == ProjectileType.ClusterBomb && clusterBombPrefab == null)
+        {
+            Debug.LogWarning($"[Projectile] ClusterBomb type requires a cluster bomb prefab! GameObject: {gameObject.name}", this);
+        }
+    }
 
-				// Un-comment the following section for Bloody Mess support
-				/*
-				if (col.collider.gameObject.GetComponent<Limb>())
-				{
-					GameObject parent = col.collider.gameObject.GetComponent<Limb>().parent;
-					CharacterSetup character = parent.GetComponent<CharacterSetup>();
-					character.ApplyDamage(damage, col.collider.gameObject, weaponType, directionShot, Camera.main.transform.position);
-				}
-				*/
-			}
-		}
-	}
+    /// <summary>
+    /// Multiply the damage amount (useful for power-ups)
+    /// </summary>
+    public void MultiplyDamage(float multiplier)
+    {
+        damage *= multiplier;
+    }
 
-	void Explode(Vector3 position, Vector3 surfaceNormal = default)
-	{
-		// Calculate rotation based on surface normal
-		Quaternion rotation = Quaternion.identity;
-		if (surfaceNormal != Vector3.zero)
-		{
-			// Rotate explosion to align with surface normal
-			rotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
-		}
+    /// <summary>
+    /// Multiply the initial force (useful for power-ups)
+    /// </summary>
+    public void MultiplyInitialForce(float multiplier)
+    {
+        initialForce *= multiplier;
+    }
 
-		// Instantiate the explosion with proper rotation
-		if (explosion != null)
-		{
-			Instantiate(explosion, position, rotation);
-		}
+    /// <summary>
+    /// Multiply the speed (useful for power-ups)
+    /// </summary>
+    public void MultiplySpeed(float multiplier)
+    {
+        speed *= multiplier;
+    }
+    #endregion
 
-		// Cluster bombs
-		if (projectileType == ProjectileType.ClusterBomb)
-		{
-			if (clusterBomb != null)
-			{
-				for (int i = 0; i <= clusterBombNum; i++)
-				{
-					Instantiate(clusterBomb, transform.position, transform.rotation);
-				}
-			}
-		}
-
-		// Destroy this projectile
-		Destroy(gameObject);
-	}
-
-	// Modify the damage that this projectile can cause
-	public void MultiplyDamage(float amount)
-	{
-		damage *= amount;
-	}
-
-	// Modify the inital force
-	public void MultiplyInitialForce(float amount)
-	{
-		initialForce *= amount;
-	}
+    #region Debug Visualization
+    private void OnDrawGizmosSelected()
+    {
+        if (!Application.isPlaying) return;
+        
+        // Draw seek range for seeker missiles
+        if (projectileType == ProjectileType.Seeker && seekRange > 0f)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, seekRange);
+        }
+        
+        // Draw lines to cached targets
+        if (projectileType == ProjectileType.Seeker && cachedTargets != null)
+        {
+            Gizmos.color = Color.red;
+            foreach (GameObject target in cachedTargets)
+            {
+                if (target != null)
+                {
+                    Gizmos.DrawLine(transform.position, target.transform.position);
+                }
+            }
+        }
+        
+        // Draw cluster bomb spawn radius
+        if (projectileType == ProjectileType.ClusterBomb)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(transform.position, clusterSpreadRadius);
+        }
+    }
+    #endregion
 }
-

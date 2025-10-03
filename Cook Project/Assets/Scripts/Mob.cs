@@ -220,12 +220,9 @@ public class Mob : MonoBehaviour
     {
         // Find all Light components in range, then check for TimedObjectDestroyer
         Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-        
-        Debug.Log($"[Mob] DamageNearestLightSource called. Found {allLights.Length} Light components in scene.");
-        
+                
         if (allLights.Length == 0)
         {
-            Debug.Log("[Mob] No Light components found in scene");
             return;
         }
         
@@ -250,7 +247,6 @@ public class Mob : MonoBehaviour
             if (destroyer != null)
             {
                 string hierarchyInfo = destroyer.gameObject == light.gameObject ? "same object" : $"parent: '{destroyer.name}'";
-                Debug.Log($"[Mob] ✓ Found valid light '{light.name}' ({hierarchyInfo}) at distance {distance:F2}m (range: {lightDamageRange}m)");
                 
                 if (distance < nearestDistance && distance <= lightDamageRange)
                 {
@@ -258,12 +254,6 @@ public class Mob : MonoBehaviour
                     nearestLightSource = destroyer;
                     nearestLight = light;
                 }
-            }
-            else
-            {
-                // Show full parent hierarchy for debugging
-                string hierarchy = GetHierarchyPath(light.transform);
-                Debug.Log($"[Mob] ✗ Light '{light.name}' has no TimedObjectDestroyer. Hierarchy: {hierarchy}");
             }
         }
         
@@ -273,17 +263,12 @@ public class Mob : MonoBehaviour
             float oldLifetime = nearestLightSource.lifeTime;
             nearestLightSource.lifeTime = Mathf.Max(0.1f, nearestLightSource.lifeTime - lightLifetimeReduction);
             
-            Debug.LogWarning($"[Mob] DAMAGED light source '{nearestLightSource.name}' at {nearestDistance:F2}m distance. Lifetime: {oldLifetime:F2}s -> {nearestLightSource.lifeTime:F2}s");
             
             // If the light's lifetime is very low, give it a slight flicker effect
             if (nearestLightSource.lifeTime < 1f && nearestLight != null)
             {
                 StartCoroutine(FlickerLight(nearestLight));
             }
-        }
-        else
-        {
-            Debug.Log($"[Mob] No valid light sources within range ({lightDamageRange}m). Checked {allLights.Length} lights.");
         }
     }
     
