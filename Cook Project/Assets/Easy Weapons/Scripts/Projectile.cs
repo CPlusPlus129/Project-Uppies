@@ -47,8 +47,8 @@ public class Projectile : MonoBehaviour
     public bool useInitialForce = false;
     
     [Tooltip("Initial force magnitude (only if Use Initial Force is enabled)")]
-    [Range(100f, 10000f)]
-    public float initialForce = 1000f;
+    [Range(1, 1000)]
+    public float initialForce = 1f;
     #endregion
 
     #region Damage Settings

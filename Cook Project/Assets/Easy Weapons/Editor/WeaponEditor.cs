@@ -1,443 +1,332 @@
-﻿/// <summary>
-/// WeaponEditor.cs
-/// Author: MutantGopher
-/// This script creates a custom inspector for the weapon system in Weapon.cs.
+/// <summary>
+/// WeaponEditor.cs - Modernized for Unity 6.2
+/// Custom inspector for the Weapon system
 /// </summary>
 
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 
 [CustomEditor(typeof(Weapon))]
 public class WeaponEditor : Editor
 {
-	private bool showPluginSupport = false;
-	private bool showGeneral = false;
-	private bool showAmmo = false;
-	private bool showROF = false;
-	private bool showPower = false;
-	private bool showAccuracy = false;
-	private bool showWarmup = false;
-	private bool showRecoil = false;
-	private bool showEffects = false;
-	private bool showBulletHoles = false;
-	private bool showCrosshairs = false;
-	private bool showAudio = false;
-
-	public override void OnInspectorGUI()
-	{
-		// Get a reference to the weapon script
-		Weapon weapon = (Weapon)target;
-
-		// Weapon type
-		weapon.type = (WeaponType)EditorGUILayout.EnumPopup("Weapon Type", weapon.type);
-
-		// External tools support
-		showPluginSupport = EditorGUILayout.Foldout(showPluginSupport, "3rd Party Plugin Support");
-		if (showPluginSupport)
-		{
-			// Shooter AI support
-			weapon.shooterAIEnabled = EditorGUILayout.Toggle(new GUIContent("Shooter AI", "Support for Shooter AI by Gateway Games"), weapon.shooterAIEnabled);
-
-			// Bloody Mess support
-			weapon.bloodyMessEnabled = EditorGUILayout.Toggle (new GUIContent("Bloody Mess"), weapon.bloodyMessEnabled);
-			if (weapon.bloodyMessEnabled)
-			{
-				weapon.weaponType = EditorGUILayout.IntField("Weapon Type", weapon.weaponType);
-			}
-		}
-
-		// General
-		showGeneral = EditorGUILayout.Foldout(showGeneral, "General");
-		if (showGeneral)
-		{
-			weapon.playerWeapon = EditorGUILayout.Toggle("Player's Weapon", weapon.playerWeapon);
-			if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Projectile)
-				weapon.auto = (Auto)EditorGUILayout.EnumPopup("Auto Type", weapon.auto);
-			weapon.weaponModel = (GameObject)EditorGUILayout.ObjectField("Weapon Model", weapon.weaponModel, typeof(GameObject), true);
-			if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Beam)
-				weapon.raycastStartSpot = (Transform)EditorGUILayout.ObjectField("Raycasting Point", weapon.raycastStartSpot, typeof(Transform), true);
-
-			// Projectile
-			if (weapon.type == WeaponType.Projectile)
-			{
-				weapon.projectile = (GameObject)EditorGUILayout.ObjectField("Projectile", weapon.projectile, typeof(GameObject), false);
-				weapon.projectileSpawnSpot = (Transform)EditorGUILayout.ObjectField("Projectile Spawn Point", weapon.projectileSpawnSpot, typeof(Transform), true);
-			}
-
-			// Beam
-			if (weapon.type == WeaponType.Beam)
-			{
-				weapon.reflect = EditorGUILayout.Toggle("Reflect", weapon.reflect);
-				weapon.reflectionMaterial = (Material)EditorGUILayout.ObjectField("Reflection Material", weapon.reflectionMaterial, typeof(Material), false);
-				weapon.maxReflections = EditorGUILayout.IntField("Max Reflections", weapon.maxReflections);
-				weapon.beamTypeName = EditorGUILayout.TextField("Beam Effect Name", weapon.beamTypeName);
-				weapon.maxBeamHeat = EditorGUILayout.FloatField("Max Heat", weapon.maxBeamHeat);
-				weapon.infiniteBeam = EditorGUILayout.Toggle("Infinite", weapon.infiniteBeam);
-				weapon.beamMaterial = (Material)EditorGUILayout.ObjectField("Material", weapon.beamMaterial, typeof(Material), false);
-				weapon.beamColor = EditorGUILayout.ColorField("Color", weapon.beamColor);
-				weapon.startBeamWidth = EditorGUILayout.FloatField("Start Width", weapon.startBeamWidth);
-				weapon.endBeamWidth = EditorGUILayout.FloatField("End Width", weapon.endBeamWidth);
-			}
-
-			if (weapon.type == WeaponType.Beam)
-				weapon.showCurrentAmmo = EditorGUILayout.Toggle("Show Current Heat", weapon.showCurrentAmmo);
-
-		}
-
-
-
-		// Power
-		if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Beam)
-		{
-			showPower = EditorGUILayout.Foldout(showPower, "Power");
-			if (showPower)
-			{
-				if (weapon.type == WeaponType.Raycast)
-					weapon.power = EditorGUILayout.FloatField("Power", weapon.power);
-				else
-					weapon.beamPower = EditorGUILayout.FloatField("Power", weapon.beamPower);
-
-				weapon.forceMultiplier = EditorGUILayout.FloatField("Force Multiplier", weapon.forceMultiplier);
-				weapon.range = EditorGUILayout.FloatField("Range", weapon.range);
-			}
-		}
-
-
-		// ROF
-		if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Projectile)
-		{
-			showROF = EditorGUILayout.Foldout(showROF, "Rate Of Fire");
-			if (showROF)
-			{
-				weapon.rateOfFire = EditorGUILayout.FloatField("Rate Of Fire", weapon.rateOfFire);
-				weapon.delayBeforeFire = EditorGUILayout.FloatField("Delay Before Fire", weapon.delayBeforeFire);
-				// Burst
-				weapon.burstRate = EditorGUILayout.IntField("Burst Rate", weapon.burstRate);
-				weapon.burstPause = EditorGUILayout.FloatField("Burst Pause", weapon.burstPause);
-			}
-		}
-
-
-		// Ammo
-		if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Projectile)
-		{
-			showAmmo = EditorGUILayout.Foldout(showAmmo, "Ammunition");
-			if (showAmmo)
-			{
-				weapon.infiniteAmmo = EditorGUILayout.Toggle("Infinite Ammo", weapon.infiniteAmmo);
-
-				if (!weapon.infiniteAmmo)
-				{
-					weapon.ammoCapacity = EditorGUILayout.IntField("Ammo Capacity", weapon.ammoCapacity);
-					weapon.reloadTime = EditorGUILayout.FloatField("Reload Time", weapon.reloadTime);
-					weapon.showCurrentAmmo = EditorGUILayout.Toggle("Show Current Ammo", weapon.showCurrentAmmo);
-					weapon.reloadAutomatically = EditorGUILayout.Toggle("Reload Automatically", weapon.reloadAutomatically);
-				}
-				weapon.shotPerRound = EditorGUILayout.IntField("Shots Per Round", weapon.shotPerRound);
-			}
-		}
-
-
-
-		// Accuracy
-		if (weapon.type == WeaponType.Raycast)
-		{
-			showAccuracy = EditorGUILayout.Foldout(showAccuracy, "Accuracy");
-			if (showAccuracy)
-			{
-				weapon.accuracy = EditorGUILayout.FloatField("Accuracy", weapon.accuracy);
-				weapon.accuracyDropPerShot = EditorGUILayout.FloatField("Accuracy Drop Per Shot", weapon.accuracyDropPerShot);
-				weapon.accuracyRecoverRate = EditorGUILayout.FloatField("Accuracy Recover Rate", weapon.accuracyRecoverRate);
-			}
-		}
-
-
-		// Warmup
-		if ((weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Projectile) && weapon.auto == Auto.Semi)
-		{
-			showWarmup = EditorGUILayout.Foldout(showWarmup, "Warmup");
-			if (showWarmup)
-			{
-				weapon.warmup = EditorGUILayout.Toggle("Warmup", weapon.warmup);
-
-				if (weapon.warmup)
-				{
-					weapon.maxWarmup = EditorGUILayout.FloatField("Max Warmup", weapon.maxWarmup);
-					
-					if (weapon.type == WeaponType.Projectile)
-					{
-						weapon.multiplyForce = EditorGUILayout.Toggle("Multiply Force", weapon.multiplyForce);
-						if (weapon.multiplyForce)
-							weapon.initialForceMultiplier = EditorGUILayout.FloatField("Initial Force Multiplier", weapon.initialForceMultiplier);
-
-						weapon.multiplyPower = EditorGUILayout.Toggle("Multiply Power", weapon.multiplyPower);
-						if (weapon.multiplyPower)
-							weapon.powerMultiplier = EditorGUILayout.FloatField("Power Multiplier", weapon.powerMultiplier);
-					}
-					else	// If this is a raycast weapon
-					{
-						weapon.powerMultiplier = EditorGUILayout.FloatField("Power Multiplier", weapon.powerMultiplier);
-					}
-					weapon.allowCancel = EditorGUILayout.Toggle("Allow Cancel", weapon.allowCancel);
-				}
-			}
-		}
-
-
-		// Recoil
-		if (weapon.type == WeaponType.Raycast || weapon.type == WeaponType.Projectile)
-		{
-			showRecoil = EditorGUILayout.Foldout(showRecoil, "Recoil");
-			if (showRecoil)
-			{
-				weapon.recoil = EditorGUILayout.Toggle("Recoil", weapon.recoil);
-
-				if (weapon.recoil)
-				{
-					weapon.recoilKickBackMin = EditorGUILayout.FloatField("Recoil Move Min", weapon.recoilKickBackMin);
-					weapon.recoilKickBackMax = EditorGUILayout.FloatField("Recoil Move Max", weapon.recoilKickBackMax);
-					weapon.recoilRotationMin = EditorGUILayout.FloatField("Recoil Rotation Min", weapon.recoilRotationMin);
-					weapon.recoilRotationMax = EditorGUILayout.FloatField("Recoil Rotation Max", weapon.recoilRotationMax);
-					weapon.recoilRecoveryRate = EditorGUILayout.FloatField("Recoil Recovery Rate", weapon.recoilRecoveryRate);
-				}
-			}
-		}
-
-
-		// Shells
-		showEffects = EditorGUILayout.Foldout(showEffects, "Effects");
-		if (showEffects)
-		{
-			weapon.spitShells = EditorGUILayout.Toggle("Spit Shells", weapon.spitShells);
-			if (weapon.spitShells)
-			{
-				weapon.shell = (GameObject)EditorGUILayout.ObjectField("Shell", weapon.shell, typeof(GameObject), false);
-				weapon.shellSpitForce = EditorGUILayout.FloatField("Shell Spit Force", weapon.shellSpitForce);
-				weapon.shellForceRandom = EditorGUILayout.FloatField("Force Variant", weapon.shellForceRandom);
-				weapon.shellSpitTorqueX = EditorGUILayout.FloatField("X Torque", weapon.shellSpitTorqueX);
-				weapon.shellSpitTorqueY = EditorGUILayout.FloatField("Y Torque", weapon.shellSpitTorqueY);
-				weapon.shellTorqueRandom = EditorGUILayout.FloatField("Torque Variant", weapon.shellTorqueRandom);
-				weapon.shellSpitPosition = (Transform)EditorGUILayout.ObjectField("Shell Spit Point", weapon.shellSpitPosition, typeof(Transform), true);
-			}
-
-			// Muzzle FX
-			EditorGUILayout.Separator();
-			weapon.makeMuzzleEffects = EditorGUILayout.Toggle("Muzzle Effects", weapon.makeMuzzleEffects);
-			if (weapon.makeMuzzleEffects)
-			{
-				weapon.muzzleEffectsPosition = (Transform)EditorGUILayout.ObjectField("Muzzle FX Spawn Point", weapon.muzzleEffectsPosition, typeof(Transform), true);
-
-				if (GUILayout.Button("Add"))
-				{
-					List<GameObject> temp = new List<GameObject>(weapon.muzzleEffects);
-					temp.Add(null);
-					weapon.muzzleEffects = temp.ToArray();
-				}
-				EditorGUI.indentLevel++;
-				for (int i = 0; i < weapon.muzzleEffects.Length; i++)
-				{
-					EditorGUILayout.BeginHorizontal();
-					weapon.muzzleEffects[i] = (GameObject)EditorGUILayout.ObjectField("Muzzle FX Prefabs", weapon.muzzleEffects[i], typeof(GameObject), false);
-					if (GUILayout.Button("Remove"))
-					{
-						List<GameObject> temp = new List<GameObject>(weapon.muzzleEffects);
-						temp.Remove(temp[i]);
-						weapon.muzzleEffects = temp.ToArray();
-					}
-					EditorGUILayout.EndHorizontal();
-				}
-				EditorGUI.indentLevel--;
-			}
-
-			// Hit FX
-			if (weapon.type != WeaponType.Projectile)
-			{
-				EditorGUILayout.Separator();
-				weapon.makeHitEffects = EditorGUILayout.Toggle("Hit Effects", weapon.makeHitEffects);
-				if (weapon.makeHitEffects)
-				{
-					if (GUILayout.Button("Add"))
-					{
-						List<GameObject> temp = new List<GameObject>(weapon.hitEffects);
-						temp.Add(null);
-						weapon.hitEffects = temp.ToArray();
-					}
-					EditorGUI.indentLevel++;
-					for (int i = 0; i < weapon.hitEffects.Length; i++)
-					{
-						EditorGUILayout.BeginHorizontal();
-						weapon.hitEffects[i] = (GameObject)EditorGUILayout.ObjectField("Hit FX Prefabs", weapon.hitEffects[i], typeof(GameObject), false);
-						if (GUILayout.Button("Remove"))
-						{
-							List<GameObject> temp = new List<GameObject>(weapon.hitEffects);
-							temp.Remove(temp[i]);
-							weapon.hitEffects = temp.ToArray();
-						}
-						EditorGUILayout.EndHorizontal();
-					}
-					EditorGUI.indentLevel--;
-				}
-			}
-		}
-
-
-		// Bullet Holes
-		if (weapon.type == WeaponType.Raycast)
-		{
-			showBulletHoles = EditorGUILayout.Foldout(showBulletHoles, "Bullet Holes");
-			if (showBulletHoles)
-			{
-
-				weapon.makeBulletHoles = EditorGUILayout.Toggle("Bullet Holes", weapon.makeBulletHoles);
-
-				if (weapon.makeBulletHoles)
-				{
-					weapon.bhSystem = (BulletHoleSystem)EditorGUILayout.EnumPopup("Determined By", weapon.bhSystem);
-
-					if (GUILayout.Button("Add"))
-					{
-						weapon.bulletHoleGroups.Add(new SmartBulletHoleGroup());
-						weapon.bulletHolePoolNames.Add("Default");
-					}
-
-					EditorGUILayout.BeginVertical();
-
-					for (int i = 0; i < weapon.bulletHolePoolNames.Count; i++)
-					{
-						EditorGUILayout.BeginHorizontal();
-
-						// The tag, material, or physic material by which the bullet hole is determined
-						if (weapon.bhSystem == BulletHoleSystem.Tag)
-						{
-							weapon.bulletHoleGroups[i].tag = EditorGUILayout.TextField(weapon.bulletHoleGroups[i].tag);
-						}
-						else if (weapon.bhSystem == BulletHoleSystem.Material)
-						{
-							weapon.bulletHoleGroups[i].material = (Material)EditorGUILayout.ObjectField(weapon.bulletHoleGroups[i].material, typeof(Material), false);
-						}
-						else if (weapon.bhSystem == BulletHoleSystem.Physic_Material)
-						{
-							weapon.bulletHoleGroups[i].physicMaterial = (PhysicsMaterial)EditorGUILayout.ObjectField(weapon.bulletHoleGroups[i].physicMaterial, typeof(PhysicsMaterial), false);
-						}
-
-						// The bullet hole to be instantiated for this type
-						weapon.bulletHolePoolNames[i] = EditorGUILayout.TextField(weapon.bulletHolePoolNames[i]);
-
-						if (GUILayout.Button("Remove"))
-						{
-							weapon.bulletHoleGroups.Remove(weapon.bulletHoleGroups[i]);
-							weapon.bulletHolePoolNames.Remove(weapon.bulletHolePoolNames[i]);
-						}
-
-						EditorGUILayout.EndHorizontal();
-					}
-
-					// The default bullet holes to be instantiated when other specifications (above) are not met
-					EditorGUILayout.Separator();
-					EditorGUILayout.LabelField("Default Bullet Holes");
-
-					if (GUILayout.Button("Add"))
-					{
-						weapon.defaultBulletHoles.Add(null);
-						weapon.defaultBulletHolePoolNames.Add("Default");
-					}
-
-					for (int i = 0; i < weapon.defaultBulletHolePoolNames.Count; i++)
-					{
-						EditorGUILayout.BeginHorizontal();
-
-						weapon.defaultBulletHolePoolNames[i] = EditorGUILayout.TextField(weapon.defaultBulletHolePoolNames[i]);
-
-						if (GUILayout.Button("Remove"))
-						{
-							weapon.defaultBulletHoles.Remove(weapon.defaultBulletHoles[i]);
-							weapon.defaultBulletHolePoolNames.Remove(weapon.defaultBulletHolePoolNames[i]);
-							
-						}
-
-						EditorGUILayout.EndHorizontal();
-					}
-
-
-					// The exceptions to the bullet hole rules defined in the default bullet holes
-					EditorGUILayout.Separator();
-					EditorGUILayout.LabelField("Exceptions");
-
-					if (GUILayout.Button("Add"))
-					{
-						weapon.bulletHoleExceptions.Add(new SmartBulletHoleGroup());
-					}
-
-					for (int i = 0; i < weapon.bulletHoleExceptions.Count; i++)
-					{
-						EditorGUILayout.BeginHorizontal();
-
-						// The tag, material, or physic material by which the bullet hole is determined
-						if (weapon.bhSystem == BulletHoleSystem.Tag)
-						{
-							weapon.bulletHoleExceptions[i].tag = EditorGUILayout.TextField(weapon.bulletHoleExceptions[i].tag);
-						}
-						else if (weapon.bhSystem == BulletHoleSystem.Material)
-						{
-							weapon.bulletHoleExceptions[i].material = (Material)EditorGUILayout.ObjectField(weapon.bulletHoleExceptions[i].material, typeof(Material), false);
-						}
-						else if (weapon.bhSystem == BulletHoleSystem.Physic_Material)
-						{
-							weapon.bulletHoleExceptions[i].physicMaterial = (PhysicsMaterial)EditorGUILayout.ObjectField(weapon.bulletHoleExceptions[i].physicMaterial, typeof(PhysicsMaterial), false);
-						}
-
-
-						if (GUILayout.Button("Remove"))
-						{
-							weapon.bulletHoleExceptions.Remove(weapon.bulletHoleExceptions[i]);
-						}
-
-						EditorGUILayout.EndHorizontal();
-					}
-
-
-					EditorGUILayout.EndVertical();
-
-					if (weapon.bulletHoleGroups.Count > 0)
-					{
-						EditorGUILayout.HelpBox("Assign bullet hole prefabs corresponding with tags, materials, or physic materials.  If you assign multiple bullet holes to the same parameter, one of them will be chosen at random.  The default bullet hole will be used when something is hit that doesn't match any of the other parameters.  The exceptions define parameters for which no bullet holes will be instantiated.", MessageType.None);
-					}
-				}
-
-			}
-		}
-
-
-		// Crosshairs
-		showCrosshairs = EditorGUILayout.Foldout(showCrosshairs, "Crosshairs");
-		if (showCrosshairs)
-		{
-			weapon.showCrosshair = EditorGUILayout.Toggle("Show Crosshairs", weapon.showCrosshair);
-			if (weapon.showCrosshair)
-			{
-				weapon.crosshairTexture = (Texture2D)EditorGUILayout.ObjectField("Crosshair Texture", weapon.crosshairTexture, typeof(Texture2D), false);
-				weapon.crosshairLength = EditorGUILayout.IntField("Crosshair Length", weapon.crosshairLength);
-				weapon.crosshairWidth = EditorGUILayout.IntField("Crosshair Width", weapon.crosshairWidth);
-				weapon.startingCrosshairSize = EditorGUILayout.FloatField("Start Crosshair Size", weapon.startingCrosshairSize);
-			}
-		}
-		
-
-		// Audio
-		showAudio = EditorGUILayout.Foldout(showAudio, "Audio");
-		if (showAudio)
-		{
-			weapon.fireSound = (AudioClip)EditorGUILayout.ObjectField("Fire", weapon.fireSound, typeof(AudioClip), false);
-			weapon.reloadSound = (AudioClip)EditorGUILayout.ObjectField("Reload", weapon.reloadSound, typeof(AudioClip), false);
-			weapon.dryFireSound = (AudioClip)EditorGUILayout.ObjectField("Out of Ammo", weapon.dryFireSound, typeof(AudioClip), false);
-		}
-
-
-		// This makes the editor gui re-draw the inspector if values have changed
-		if (GUI.changed)
-			EditorUtility.SetDirty(target);
-	}
+    private bool showReferences = true;
+    private bool showFireRate = true;
+    private bool showAmmo = true;
+    private bool showDamage = true;
+    private bool showProjectile = false;
+    private bool showBeam = false;
+    private bool showAccuracy = true;
+    private bool showWarmup = false;
+    private bool showRecoil = true;
+    private bool showEffects = true;
+    private bool showBulletHoles = true;
+    private bool showAudio = true;
+
+    public override void OnInspectorGUI()
+    {
+        Weapon weapon = (Weapon)target;
+        
+        EditorGUILayout.Space();
+        
+        // Weapon Type & Mode
+        EditorGUILayout.LabelField("Weapon Configuration", EditorStyles.boldLabel);
+        weapon.weaponType = (WeaponType)EditorGUILayout.EnumPopup("Weapon Type", weapon.weaponType);
+        weapon.fireMode = (FireMode)EditorGUILayout.EnumPopup("Fire Mode", weapon.fireMode);
+        weapon.isPlayerWeapon = EditorGUILayout.Toggle("Player Weapon", weapon.isPlayerWeapon);
+        
+        EditorGUILayout.Space();
+        
+        // References
+        showReferences = EditorGUILayout.Foldout(showReferences, "References", true);
+        if (showReferences)
+        {
+            EditorGUI.indentLevel++;
+            weapon.weaponModel = (GameObject)EditorGUILayout.ObjectField("Weapon Model", weapon.weaponModel, typeof(GameObject), true);
+            
+            if (weapon.weaponType == WeaponType.Raycast || weapon.weaponType == WeaponType.Beam)
+                weapon.raycastOrigin = (Transform)EditorGUILayout.ObjectField("Raycast Origin", weapon.raycastOrigin, typeof(Transform), true);
+            
+            if (weapon.weaponType == WeaponType.Projectile)
+                weapon.projectileSpawnPoint = (Transform)EditorGUILayout.ObjectField("Projectile Spawn Point", weapon.projectileSpawnPoint, typeof(Transform), true);
+            
+            weapon.muzzleEffectPoint = (Transform)EditorGUILayout.ObjectField("Muzzle Effect Point", weapon.muzzleEffectPoint, typeof(Transform), true);
+            weapon.shellEjectPoint = (Transform)EditorGUILayout.ObjectField("Shell Eject Point", weapon.shellEjectPoint, typeof(Transform), true);
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUILayout.Space();
+        
+        // Fire Rate
+        showFireRate = EditorGUILayout.Foldout(showFireRate, "Fire Rate & Timing", true);
+        if (showFireRate)
+        {
+            EditorGUI.indentLevel++;
+            weapon.roundsPerSecond = EditorGUILayout.Slider("Rounds Per Second", weapon.roundsPerSecond, 0.1f, 30f);
+            weapon.fireDelay = EditorGUILayout.Slider("Fire Delay", weapon.fireDelay, 0f, 2f);
+            
+            if (weapon.fireMode == FireMode.Burst)
+            {
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Burst Settings", EditorStyles.miniBoldLabel);
+                weapon.burstCount = EditorGUILayout.IntSlider("Burst Count", weapon.burstCount, 2, 10);
+                weapon.burstPause = EditorGUILayout.Slider("Burst Pause", weapon.burstPause, 0f, 2f);
+            }
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUILayout.Space();
+        
+        // Ammo
+        if (weapon.weaponType != WeaponType.Beam)
+        {
+            showAmmo = EditorGUILayout.Foldout(showAmmo, "Ammunition", true);
+            if (showAmmo)
+            {
+                EditorGUI.indentLevel++;
+                weapon.infiniteAmmo = EditorGUILayout.Toggle("Infinite Ammo", weapon.infiniteAmmo);
+                
+                if (!weapon.infiniteAmmo)
+                {
+                    weapon.magazineCapacity = EditorGUILayout.IntSlider("Magazine Capacity", weapon.magazineCapacity, 1, 999);
+                    weapon.reloadTime = EditorGUILayout.Slider("Reload Time", weapon.reloadTime, 0.1f, 10f);
+                    weapon.autoReload = EditorGUILayout.Toggle("Auto Reload", weapon.autoReload);
+                }
+                
+                weapon.pelletsPerShot = EditorGUILayout.IntSlider("Pellets Per Shot", weapon.pelletsPerShot, 1, 20);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Damage & Power
+        showDamage = EditorGUILayout.Foldout(showDamage, "Damage & Power", true);
+        if (showDamage)
+        {
+            EditorGUI.indentLevel++;
+            
+            if (weapon.weaponType == WeaponType.Raycast)
+            {
+                weapon.damage = EditorGUILayout.Slider("Damage", weapon.damage, 1f, 1000f);
+            }
+            else if (weapon.weaponType == WeaponType.Beam)
+            {
+                weapon.beamDamagePerSecond = EditorGUILayout.Slider("Damage Per Second", weapon.beamDamagePerSecond, 0.1f, 100f);
+            }
+            
+            if (weapon.weaponType != WeaponType.Projectile)
+            {
+                weapon.range = EditorGUILayout.Slider("Range", weapon.range, 1f, 1000f);
+                weapon.impactForce = EditorGUILayout.Slider("Impact Force", weapon.impactForce, 1f, 100f);
+            }
+            
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUILayout.Space();
+        
+        // Projectile Settings
+        if (weapon.weaponType == WeaponType.Projectile)
+        {
+            showProjectile = EditorGUILayout.Foldout(showProjectile, "Projectile Settings", true);
+            if (showProjectile)
+            {
+                EditorGUI.indentLevel++;
+                weapon.projectilePrefab = (GameObject)EditorGUILayout.ObjectField("Projectile Prefab", weapon.projectilePrefab, typeof(GameObject), false);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Beam Settings
+        if (weapon.weaponType == WeaponType.Beam)
+        {
+            showBeam = EditorGUILayout.Foldout(showBeam, "Beam Settings", true);
+            if (showBeam)
+            {
+                EditorGUI.indentLevel++;
+                weapon.maxBeamDuration = EditorGUILayout.Slider("Max Duration", weapon.maxBeamDuration, 0.1f, 10f);
+                weapon.infiniteBeam = EditorGUILayout.Toggle("Infinite Beam", weapon.infiniteBeam);
+                weapon.beamReflects = EditorGUILayout.Toggle("Reflects", weapon.beamReflects);
+                
+                if (weapon.beamReflects)
+                {
+                    weapon.reflectiveMaterial = (Material)EditorGUILayout.ObjectField("Reflective Material", weapon.reflectiveMaterial, typeof(Material), false);
+                    weapon.maxReflections = EditorGUILayout.IntSlider("Max Reflections", weapon.maxReflections, 1, 10);
+                }
+                
+                EditorGUILayout.Space();
+                EditorGUILayout.LabelField("Beam Visuals", EditorStyles.miniBoldLabel);
+                weapon.beamMaterial = (Material)EditorGUILayout.ObjectField("Material", weapon.beamMaterial, typeof(Material), false);
+                weapon.beamColor = EditorGUILayout.ColorField("Color", weapon.beamColor);
+                weapon.beamStartWidth = EditorGUILayout.Slider("Start Width", weapon.beamStartWidth, 0.01f, 2f);
+                weapon.beamEndWidth = EditorGUILayout.Slider("End Width", weapon.beamEndWidth, 0.01f, 2f);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Accuracy
+        if (weapon.weaponType == WeaponType.Raycast)
+        {
+            showAccuracy = EditorGUILayout.Foldout(showAccuracy, "Accuracy", true);
+            if (showAccuracy)
+            {
+                EditorGUI.indentLevel++;
+                weapon.baseAccuracy = EditorGUILayout.Slider("Base Accuracy", weapon.baseAccuracy, 0f, 100f);
+                weapon.accuracyDecayPerShot = EditorGUILayout.Slider("Decay Per Shot", weapon.accuracyDecayPerShot, 0f, 10f);
+                weapon.accuracyRecoveryRate = EditorGUILayout.Slider("Recovery Rate", weapon.accuracyRecoveryRate, 0.1f, 100f);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Warmup
+        if (weapon.fireMode == FireMode.SemiAuto && weapon.weaponType != WeaponType.Beam)
+        {
+            showWarmup = EditorGUILayout.Foldout(showWarmup, "Warmup / Charge System", true);
+            if (showWarmup)
+            {
+                EditorGUI.indentLevel++;
+                weapon.enableWarmup = EditorGUILayout.Toggle("Enable Warmup", weapon.enableWarmup);
+                
+                if (weapon.enableWarmup)
+                {
+                    weapon.maxWarmupTime = EditorGUILayout.Slider("Max Warmup Time", weapon.maxWarmupTime, 0.1f, 10f);
+                    weapon.warmupAffectsDamage = EditorGUILayout.Toggle("Affects Damage", weapon.warmupAffectsDamage);
+                    
+                    if (weapon.warmupAffectsDamage)
+                        weapon.warmupDamageMultiplier = EditorGUILayout.Slider("Damage Multiplier", weapon.warmupDamageMultiplier, 1f, 10f);
+                    
+                    weapon.warmupAffectsForce = EditorGUILayout.Toggle("Affects Force", weapon.warmupAffectsForce);
+                    
+                    if (weapon.warmupAffectsForce)
+                        weapon.warmupForceMultiplier = EditorGUILayout.Slider("Force Multiplier", weapon.warmupForceMultiplier, 1f, 10f);
+                    
+                    weapon.allowWarmupCancel = EditorGUILayout.Toggle("Allow Cancel", weapon.allowWarmupCancel);
+                }
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Recoil
+        if (weapon.weaponType != WeaponType.Beam)
+        {
+            showRecoil = EditorGUILayout.Foldout(showRecoil, "Recoil", true);
+            if (showRecoil)
+            {
+                EditorGUI.indentLevel++;
+                weapon.enableRecoil = EditorGUILayout.Toggle("Enable Recoil", weapon.enableRecoil);
+                
+                if (weapon.enableRecoil)
+                {
+                    weapon.recoilKickMin = EditorGUILayout.Slider("Kick Min", weapon.recoilKickMin, 0f, 1f);
+                    weapon.recoilKickMax = EditorGUILayout.Slider("Kick Max", weapon.recoilKickMax, 0f, 1f);
+                    weapon.recoilRotationMin = EditorGUILayout.Slider("Rotation Min", weapon.recoilRotationMin, 0f, 5f);
+                    weapon.recoilRotationMax = EditorGUILayout.Slider("Rotation Max", weapon.recoilRotationMax, 0f, 5f);
+                    weapon.recoilRecoverySpeed = EditorGUILayout.Slider("Recovery Speed", weapon.recoilRecoverySpeed, 1f, 100f);
+                }
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Visual Effects
+        showEffects = EditorGUILayout.Foldout(showEffects, "Visual Effects", true);
+        if (showEffects)
+        {
+            EditorGUI.indentLevel++;
+            
+            // Muzzle Flash
+            weapon.enableMuzzleFlash = EditorGUILayout.Toggle("Muzzle Flash", weapon.enableMuzzleFlash);
+            if (weapon.enableMuzzleFlash)
+            {
+                EditorGUI.indentLevel++;
+                SerializedProperty muzzleArray = serializedObject.FindProperty("muzzleFlashPrefabs");
+                EditorGUILayout.PropertyField(muzzleArray, true);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+            
+            // Impact Effects
+            weapon.enableImpactEffects = EditorGUILayout.Toggle("Impact Effects", weapon.enableImpactEffects);
+            if (weapon.enableImpactEffects)
+            {
+                EditorGUI.indentLevel++;
+                SerializedProperty impactArray = serializedObject.FindProperty("impactEffectPrefabs");
+                EditorGUILayout.PropertyField(impactArray, true);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+            
+            // Shell Ejection
+            weapon.ejectShells = EditorGUILayout.Toggle("Eject Shells", weapon.ejectShells);
+            if (weapon.ejectShells)
+            {
+                EditorGUI.indentLevel++;
+                weapon.shellPrefab = (GameObject)EditorGUILayout.ObjectField("Shell Prefab", weapon.shellPrefab, typeof(GameObject), false);
+                weapon.shellEjectionForce = EditorGUILayout.Slider("Ejection Force", weapon.shellEjectionForce, 1f, 50f);
+                weapon.shellForceVariance = EditorGUILayout.Slider("Force Variance", weapon.shellForceVariance, 0f, 10f);
+                weapon.shellTorque = EditorGUILayout.Vector3Field("Torque", weapon.shellTorque);
+                weapon.shellTorqueVariance = EditorGUILayout.Slider("Torque Variance", weapon.shellTorqueVariance, 0f, 50f);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUILayout.Space();
+        
+        // Bullet Holes
+        if (weapon.weaponType == WeaponType.Raycast)
+        {
+            showBulletHoles = EditorGUILayout.Foldout(showBulletHoles, "Bullet Holes", true);
+            if (showBulletHoles)
+            {
+                EditorGUI.indentLevel++;
+                weapon.enableBulletHoles = EditorGUILayout.Toggle("Enable Bullet Holes", weapon.enableBulletHoles);
+                
+                if (weapon.enableBulletHoles)
+                {
+                    weapon.bulletHoleDetection = (BulletHoleDetection)EditorGUILayout.EnumPopup("Detection Method", weapon.bulletHoleDetection);
+                    
+                    SerializedProperty mappings = serializedObject.FindProperty("bulletHoleMappings");
+                    EditorGUILayout.PropertyField(mappings, true);
+                    
+                    SerializedProperty defaults = serializedObject.FindProperty("defaultBulletHoles");
+                    EditorGUILayout.PropertyField(defaults, true);
+                    
+                    SerializedProperty exclusions = serializedObject.FindProperty("bulletHoleExclusions");
+                    EditorGUILayout.PropertyField(exclusions, true);
+                }
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorGUILayout.Space();
+        }
+        
+        // Audio
+        showAudio = EditorGUILayout.Foldout(showAudio, "Audio", true);
+        if (showAudio)
+        {
+            EditorGUI.indentLevel++;
+            weapon.fireSound = (AudioClip)EditorGUILayout.ObjectField("Fire Sound", weapon.fireSound, typeof(AudioClip), false);
+            weapon.reloadSound = (AudioClip)EditorGUILayout.ObjectField("Reload Sound", weapon.reloadSound, typeof(AudioClip), false);
+            weapon.dryFireSound = (AudioClip)EditorGUILayout.ObjectField("Dry Fire Sound", weapon.dryFireSound, typeof(AudioClip), false);
+            EditorGUI.indentLevel--;
+        }
+        
+        serializedObject.ApplyModifiedProperties();
+        
+        if (GUI.changed)
+            EditorUtility.SetDirty(target);
+    }
 }
-

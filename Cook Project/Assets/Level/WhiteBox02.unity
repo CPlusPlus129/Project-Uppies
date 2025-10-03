@@ -8349,6 +8349,34 @@ PrefabInstance:
       propertyPath: interactDistance
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: range
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: fireMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: weaponType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: enableRecoil
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: projectilePrefab
+      value: 
+      objectReference: {fileID: 100008, guid: a4b44abdbd241fa4faf6f507cff9873c, type: 3}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: muzzleEffectPoint
+      value: 
+      objectReference: {fileID: 607422781}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: projectileSpawnPoint
+      value: 
+      objectReference: {fileID: 607422781}
     - target: {fileID: 8858371310009257608, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: cam
       value: 
@@ -21330,6 +21358,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 939f27c57ef13654eafcf37ff873a454, type: 3}
+--- !u!4 &607422781 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 695477875813288012, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+  m_PrefabInstance: {fileID: 261736250}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &611753697
 GameObject:
   m_ObjectHideFlags: 0
