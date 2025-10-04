@@ -38,16 +38,13 @@ public class NumberGuessingGameUI : MonoBehaviour
     {
         var puzzleManager = PuzzleGameManager.Instance;
 
-        puzzleManager.CurrentNumberGame.Subscribe(game =>
+        puzzleManager.OnGameStarted.Where(x => x is NumberGuessingGame).Subscribe(game =>
         {
-            if (game != null)
-            {
-                UpdateHint();
-                ClearFeedback();
-                ResetDigits();
-            }
+            currentGame = game as NumberGuessingGame;
+            UpdateHint();
+            ClearFeedback();
+            ResetDigits();
         }).AddTo(this);
-
 
         puzzleManager.IsGameActive.Subscribe(isActive =>
         {
@@ -125,7 +122,7 @@ public class NumberGuessingGameUI : MonoBehaviour
             guess += currentDigits[i].ToString();
         }
 
-        bool isCorrect = PuzzleGameManager.Instance.CurrentNumberGame.Value.GuessNumber(guess);
+        bool isCorrect = currentGame.GuessNumber(guess);
 
         if (!isCorrect)
         {
@@ -135,7 +132,7 @@ public class NumberGuessingGameUI : MonoBehaviour
 
     private void UpdateHint()
     {
-        string hint = PuzzleGameManager.Instance.CurrentNumberGame.Value.GetHint();
+        string hint = currentGame.GetHint();
         if (hintText != null)
         {
             hintText.text = hint;

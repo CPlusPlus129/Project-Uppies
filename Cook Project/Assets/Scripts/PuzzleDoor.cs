@@ -3,42 +3,42 @@ using UnityEngine;
 
 public class PuzzleDoor : MonoBehaviour, IInteractable
 {
-    [SerializeField] private string doorId;
+    [SerializeField] private string questTargetId;
     [SerializeField] private Animator anim;
-
+    private string questId;
     private bool doorOpen;
-    public string DoorId => doorId;
 
     private void Awake()
     {
-        if (string.IsNullOrEmpty(doorId))
+        if (string.IsNullOrEmpty(questTargetId))
         {
-            doorId = $"door_{GetInstanceID()}";
+            questTargetId = $"door_{GetInstanceID()}";
         }
     }
 
     public void Interact()
     {
-        if (!QuestManager.Instance.HasActiveQuestForDoor(doorId))
+        if (!QuestManager.Instance.HasActiveQuestForTarget(questTargetId))
         {
-            Debug.Log($"No active quest for door {doorId}");
+            Debug.Log($"No active quest for door {questTargetId}");
             return;
         }
 
-        var puzzleQuest = QuestManager.Instance.GetPuzzleQuestByDoorId(doorId);
+        var puzzleQuest = QuestManager.Instance.GetPuzzleQuestByTargetId(questTargetId);
         if (puzzleQuest == null || puzzleQuest.IsSolved)
         {
-            Debug.Log($"Door {doorId} puzzle already solved");
+            Debug.Log($"Door {questTargetId} puzzle already solved");
             return;
         }
 
+        questId = puzzleQuest.Id;
         switch (puzzleQuest.PuzzleType)
         {
             case PuzzleGameType.NumberGuessing:
-                OpenNumberGuessingGame();
+                OpenNumberGuessingGame(puzzleQuest);
                 break;
             case PuzzleGameType.CardSwipe:
-                OpenCardSwipeGame();
+                OpenCardSwipeGame(puzzleQuest);
                 break;
             default:
                 Debug.LogWarning($"Unsupported puzzle type: {puzzleQuest.PuzzleType}");
@@ -46,39 +46,21 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         }
     }
 
-    private void OpenNumberGuessingGame()
+    private void OpenNumberGuessingGame(PuzzleQuest quest)
     {
-        PuzzleGameManager.Instance.StartNumberGuessingGame(doorId);
-
-        var numberGuessingUI = UIRoot.Instance.GetUIComponent<NumberGuessingGameUI>();
-        if (numberGuessingUI != null)
-        {
-            numberGuessingUI.Open();
-        }
-        else
-        {
-            Debug.LogError("NumberGuessingGameUI not found in UIRoot");
-        }
+        UIRoot.Instance.GetUIComponent<NumberGuessingGameUI>()?.Open();
+        PuzzleGameManager.Instance.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
     }
 
-    private void OpenCardSwipeGame()
+    private void OpenCardSwipeGame(PuzzleQuest quest)
     {
-        PuzzleGameManager.Instance.StartCardSwipeGame(doorId);
+        UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
+        PuzzleGameManager.Instance.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
         PuzzleGameManager.Instance.OnGameCompleted
-            .Where(x => x == doorId)
+            .Where(x => x == questId)
             .Take(1)
             .Subscribe(_ => PlayDoorAnimation())
             .AddTo(this);
-
-        var cardSwipeUI = UIRoot.Instance.GetUIComponent<CardSwipeGameUI>();
-        if (cardSwipeUI != null)
-        {
-            cardSwipeUI.Open();
-        }
-        else
-        {
-            Debug.LogError("CardSwipeGameUI not found in UIRoot");
-        }
     }
 
 

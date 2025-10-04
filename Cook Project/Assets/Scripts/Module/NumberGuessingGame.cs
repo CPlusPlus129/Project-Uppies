@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 
-public class NumberGuessingGame
+public class NumberGuessingGame : IPuzzle
 {
+    public PuzzleGameType puzzleType => PuzzleGameType.NumberGuessing;
     private string answer;
     private string hint;
 
@@ -57,7 +58,7 @@ public class NumberGuessingGame
 
         if (isCorrect)
         {
-            PuzzleGameManager.Instance.CompleteNumberGuessingGame();
+            PuzzleGameManager.Instance.CompletePuzzleGame(PuzzleGameType.NumberGuessing);
         }
 
         return isCorrect;
