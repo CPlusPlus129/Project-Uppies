@@ -71695,6 +71695,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDoor
   doorId: door_temp
+  door: {fileID: 0}
 --- !u!4 &1861315328
 Transform:
   m_ObjectHideFlags: 0
@@ -76796,7 +76797,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 197610, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_Name
-      value: SM_Prop_Bolt_01
+      value: StorageDoorButton_1
       objectReference: {fileID: 0}
     - target: {fileID: 197610, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_Layer
@@ -76883,6 +76884,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDoor
   doorId: door_temp
+  door: {fileID: 1950957509}
 --- !u!4 &1993410242 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}

@@ -1,9 +1,12 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PuzzleDoor : MonoBehaviour, IInteractable
 {
     [SerializeField] private string doorId;
 
+    [SerializeField] private GameObject door;
+    private bool doorOpen;
     public string DoorId => doorId;
 
     private void Awake()
@@ -71,5 +74,12 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         {
             Debug.LogError("CardSwipeGameUI not found in UIRoot");
         }
+    }
+
+    
+    private void PlayDoorAnimation()
+    {
+        doorOpen =! doorOpen;
+        door.GetComponent<Animator>().SetBool("IsOpen",doorOpen);
     }
 }
