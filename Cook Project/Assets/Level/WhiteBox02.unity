@@ -10302,8 +10302,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: fireSound
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: weaponType
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: reloadSound
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 695477875802284162, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: enableRecoil
@@ -10321,6 +10329,18 @@ PrefabInstance:
       propertyPath: projectileSpawnPoint
       value: 
       objectReference: {fileID: 607422781}
+    - target: {fileID: 695477875805359234, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: m_Volume
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875805359234, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 695477875810994082, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e085479f7e17a7e4685167bbbe7a514a, type: 2}
     - target: {fileID: 4825173545663693834, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_Antialiasing
       value: 2
@@ -10348,6 +10368,10 @@ PrefabInstance:
     - target: {fileID: 8985326193973131990, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 9120623846359802501, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
