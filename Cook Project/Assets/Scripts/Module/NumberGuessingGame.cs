@@ -1,8 +1,9 @@
 using System;
 using UnityEngine;
 
-public class NumberGuessingGame
+public class NumberGuessingGame : IPuzzle
 {
+    public PuzzleGameType puzzleType => PuzzleGameType.NumberGuessing;
     private string answer;
     private string hint;
 
@@ -45,14 +46,21 @@ public class NumberGuessingGame
     {
         return hint;
     }
-
-    public bool Guess(string userAnswer)
-    {
-        return answer == userAnswer.PadLeft(4, '0');
-    }
-
+    
     public string GetAnswer()
     {
         return answer;
+    }
+
+    public bool GuessNumber(string guess)
+    {
+        bool isCorrect = answer == guess.PadLeft(4, '0');
+
+        if (isCorrect)
+        {
+            PuzzleGameManager.Instance.CompletePuzzleGame(PuzzleGameType.NumberGuessing);
+        }
+
+        return isCorrect;
     }
 }
