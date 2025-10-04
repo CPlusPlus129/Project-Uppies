@@ -195,6 +195,7 @@ GameObject:
   - component: {fileID: 10800000}
   - component: {fileID: 4809642987506162343}
   - component: {fileID: 6894076233850201701}
+  - component: {fileID: 4977340992560708891}
   m_Layer: 0
   m_Name: Explosion Light
   m_TagString: Untagged
@@ -228,17 +229,17 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 0.8438134, b: 0.19117647, a: 0.7058824}
-  m_Intensity: 20
-  m_Range: 5
+  m_Intensity: 8
+  m_Range: 6
   m_SpotAngle: 124.21053
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0.1
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
@@ -294,7 +295,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
-  m_UsePipelineSettings: 1
+  m_UsePipelineSettings: 0
   m_AdditionalLightsShadowResolutionTier: 0
   m_CustomShadowLayers: 0
   m_LightCookieSize: {x: 1, y: 1}
@@ -335,6 +336,23 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   raycastDistance: 50
+--- !u!114 &4977340992560708891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 692d5684a3b74ac4b9fb011304dfa896, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DynamicShadowLight
+  lightComponent: {fileID: 0}
+  priority: 5
+  shadowStrength: 1
+  shadowBias: 0.05
+  shadowNormalBias: 0.4
 --- !u!1 &498551599811890383
 GameObject:
   m_ObjectHideFlags: 0
@@ -346,7 +364,7 @@ GameObject:
   - component: {fileID: 1318014750378126357}
   - component: {fileID: 8216638037725031865}
   - component: {fileID: 4046401744088994855}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Fill
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -419,7 +437,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5140492203298875325}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Fill Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -558,7 +576,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6779264715614667927}
   - component: {fileID: 6123375043188927177}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LifetimeBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -648,7 +666,7 @@ GameObject:
   - component: {fileID: 949737055971853660}
   - component: {fileID: 4943548888538228041}
   - component: {fileID: 6624106536428122952}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
