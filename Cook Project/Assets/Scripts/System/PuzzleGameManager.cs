@@ -8,8 +8,8 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
     public ReactiveProperty<bool> IsGameActive = new ReactiveProperty<bool>(false);
     public ReactiveProperty<PuzzleGameType> CurrentGameType = new ReactiveProperty<PuzzleGameType>();
 
-    public Subject<Unit> OnGameCompleted = new Subject<Unit>();
-    public Subject<Unit> OnGameClosed = new Subject<Unit>();
+    public Subject<string> OnGameCompleted = new Subject<string>();
+    public Subject<string> OnGameClosed = new Subject<string>();
 
     public void StartNumberGuessingGame(string doorId)
     {
@@ -68,16 +68,17 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
         QuestManager.Instance.SolvePuzzleForDoor(doorId);
 
         EndGame();
-        OnGameCompleted.OnNext(Unit.Default);
+        OnGameCompleted.OnNext(doorId);
     }
 
     public void EndGame()
     {
+        var doorId = CurrentDoorId.Value;
         CurrentNumberGame.Value = null;
         CurrentCardGame.Value = null;
         CurrentDoorId.Value = "";
         CurrentGameType.Value = PuzzleGameType.NumberGuessing;
         IsGameActive.Value = false;
-        OnGameClosed.OnNext(Unit.Default);
+        OnGameClosed.OnNext(doorId);
     }
 }
