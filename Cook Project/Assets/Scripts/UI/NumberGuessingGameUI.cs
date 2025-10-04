@@ -20,6 +20,7 @@ public class NumberGuessingGameUI : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private TextMeshProUGUI feedbackText;
 
+    private NumberGuessingGame currentGame;
     private int[] currentDigits = new int[4];
 
     private void Awake()
@@ -37,20 +38,12 @@ public class NumberGuessingGameUI : MonoBehaviour
     {
         var puzzleManager = PuzzleGameManager.Instance;
 
-        puzzleManager.CurrentNumberGame.Subscribe(game =>
+        puzzleManager.OnGameStarted.Where(x => x is NumberGuessingGame).Subscribe(game =>
         {
-            if (game != null)
-            {
-                UpdateHint();
-                ClearFeedback();
-                ResetDigits();
-            }
-        }).AddTo(this);
-
-        puzzleManager.OnGameCompleted.Subscribe(_ =>
-        {
-            ShowFeedback("Correct! Puzzle solved!", Color.green);
-            Invoke(nameof(Close), 2f);
+            currentGame = game as NumberGuessingGame;
+            UpdateHint();
+            ClearFeedback();
+            ResetDigits();
         }).AddTo(this);
 
         puzzleManager.IsGameActive.Subscribe(isActive =>
@@ -129,7 +122,7 @@ public class NumberGuessingGameUI : MonoBehaviour
             guess += currentDigits[i].ToString();
         }
 
-        bool isCorrect = PuzzleGameManager.Instance.GuessNumber(guess);
+        bool isCorrect = currentGame.GuessNumber(guess);
 
         if (!isCorrect)
         {
@@ -139,7 +132,7 @@ public class NumberGuessingGameUI : MonoBehaviour
 
     private void UpdateHint()
     {
-        string hint = PuzzleGameManager.Instance.GetCurrentHint();
+        string hint = currentGame.GetHint();
         if (hintText != null)
         {
             hintText.text = hint;

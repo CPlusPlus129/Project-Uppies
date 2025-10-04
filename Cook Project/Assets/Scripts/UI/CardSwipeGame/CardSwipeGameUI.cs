@@ -31,6 +31,15 @@ public class CardSwipeGameUI : MonoBehaviour
 
         CalculateSwipeDistance();
         SetupCardEvents();
+
+        PuzzleGameManager.Instance.OnGameStarted
+            .Where(x => x is CardSwipeGame)
+            .Subscribe(game =>
+            {
+                currentGame = game as CardSwipeGame;
+                InitializeGame();
+            })
+            .AddTo(this);
     }
 
     private void CalculateSwipeDistance()
@@ -47,7 +56,6 @@ public class CardSwipeGameUI : MonoBehaviour
     private void OnEnable()
     {
         InputManager.Instance.PushActionMap("CardSwipe");
-        InitializeGame();
     }
 
     private void OnDisable()
@@ -62,13 +70,11 @@ public class CardSwipeGameUI : MonoBehaviour
 
     public void Close()
     {
-        PuzzleGameManager.Instance.EndGame();
         gameObject.SetActive(false);
     }
 
     private void InitializeGame()
     {
-        currentGame = new CardSwipeGame();
         draggableCard.Initialize(
             startPosition.anchoredPosition,
             endPosition.anchoredPosition,
@@ -113,16 +119,16 @@ public class CardSwipeGameUI : MonoBehaviour
         cardReader.PlaySuccessAnimation();
         draggableCard.SetCardEnabled(false);
 
-        PuzzleGameManager.Instance.CompleteCardSwipeGame();
+        PuzzleGameManager.Instance.CompletePuzzleGame(PuzzleGameType.CardSwipe);
     }
 
     private void OnSwipeFail(string message)
     {
         feedbackText.text = $"{message} (Attempt {currentGame.AttemptCount})";
         cardReader.PlayFailAnimation();
-
-        draggableCard.MoveToResetPosition(1.5f);
-        Observable.Timer(System.TimeSpan.FromSeconds(1.5f))
+        var animationDuration = 1.5f;
+        draggableCard.MoveToResetPosition(animationDuration);
+        Observable.Timer(System.TimeSpan.FromSeconds(animationDuration))
             .Subscribe(_ =>
             {
                 cardReader.SetStatus(CardReaderStatus.Ready);

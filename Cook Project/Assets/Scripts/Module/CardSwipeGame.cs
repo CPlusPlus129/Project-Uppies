@@ -6,8 +6,9 @@ public enum SwipeResult
     Incomplete
 }
 
-public class CardSwipeGame
+public class CardSwipeGame : IPuzzle
 {
+    public PuzzleGameType puzzleType => PuzzleGameType.CardSwipe;
     public float MinSpeed { get; private set; }
     public float MaxSpeed { get; private set; }
     public bool IsCompleted { get; private set; }

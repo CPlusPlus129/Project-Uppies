@@ -2,60 +2,32 @@ using R3;
 
 public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
 {
-    public ReactiveProperty<NumberGuessingGame> CurrentNumberGame = new ReactiveProperty<NumberGuessingGame>();
-    public ReactiveProperty<CardSwipeGame> CurrentCardGame = new ReactiveProperty<CardSwipeGame>();
-    public ReactiveProperty<string> CurrentDoorId = new ReactiveProperty<string>();
+    public ReactiveProperty<IPuzzle> CurrentPuzzleGame = new ReactiveProperty<IPuzzle>();
+    public ReactiveProperty<PuzzleQuest> CurrentPuzzleQuest = new ReactiveProperty<PuzzleQuest>();
     public ReactiveProperty<bool> IsGameActive = new ReactiveProperty<bool>(false);
-    public ReactiveProperty<PuzzleGameType> CurrentGameType = new ReactiveProperty<PuzzleGameType>();
 
-    public Subject<Unit> OnGameCompleted = new Subject<Unit>();
-    public Subject<Unit> OnGameClosed = new Subject<Unit>();
+    public Subject<IPuzzle> OnGameStarted = new Subject<IPuzzle>();
+    public Subject<string> OnGameCompleted = new Subject<string>();
+    public Subject<string> OnGameClosed = new Subject<string>();
 
-    public void StartNumberGuessingGame(string doorId)
+    public void StartPuzzleGame(PuzzleGameType puzzleType, PuzzleQuest quest)
     {
         if (IsGameActive.Value) return;
 
-        var game = new NumberGuessingGame();
-        CurrentNumberGame.Value = game;
-        CurrentDoorId.Value = doorId;
-        CurrentGameType.Value = PuzzleGameType.NumberGuessing;
-        IsGameActive.Value = true;
-    }
-
-    public void StartCardSwipeGame(string doorId)
-    {
-        if (IsGameActive.Value) return;
-
-        var game = new CardSwipeGame();
-        CurrentCardGame.Value = game;
-        CurrentDoorId.Value = doorId;
-        CurrentGameType.Value = PuzzleGameType.CardSwipe;
-        IsGameActive.Value = true;
-    }
-
-    public bool GuessNumber(string guess)
-    {
-        if (!IsGameActive.Value || CurrentNumberGame.Value == null)
-            return false;
-
-        bool isCorrect = CurrentNumberGame.Value.Guess(guess);
-
-        if (isCorrect)
+        CurrentPuzzleGame.Value = puzzleType switch
         {
-            CompleteGame();
-        }
-
-        return isCorrect;
+            PuzzleGameType.NumberGuessing => new NumberGuessingGame(),
+            PuzzleGameType.CardSwipe => new CardSwipeGame(),
+            _ => null
+        };
+        CurrentPuzzleQuest.Value = quest;
+        IsGameActive.Value = true;
+        OnGameStarted.OnNext(CurrentPuzzleGame.Value);
     }
 
-    public string GetCurrentHint()
+    public void CompletePuzzleGame(PuzzleGameType puzzleType)
     {
-        return CurrentNumberGame.Value?.GetHint() ?? "";
-    }
-
-    public void CompleteCardSwipeGame()
-    {
-        if (!IsGameActive.Value || CurrentGameType.Value != PuzzleGameType.CardSwipe) return;
+        if (!IsGameActive.Value || CurrentPuzzleGame.Value.puzzleType != puzzleType) return;
 
         CompleteGame();
     }
@@ -64,20 +36,20 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
     {
         if (!IsGameActive.Value) return;
 
-        string doorId = CurrentDoorId.Value;
-        QuestManager.Instance.SolvePuzzleForDoor(doorId);
+        CurrentPuzzleQuest.Value.SolvePuzzle();
+        var questId = CurrentPuzzleQuest.Value.Id;
+        QuestManager.Instance.CompleteQuest(CurrentPuzzleQuest.Value.Id);
 
         EndGame();
-        OnGameCompleted.OnNext(Unit.Default);
+        OnGameCompleted.OnNext(questId);
     }
 
     public void EndGame()
     {
-        CurrentNumberGame.Value = null;
-        CurrentCardGame.Value = null;
-        CurrentDoorId.Value = "";
-        CurrentGameType.Value = PuzzleGameType.NumberGuessing;
+        var questId = CurrentPuzzleQuest.Value.Id;
+        CurrentPuzzleGame.Value = null;
+        CurrentPuzzleQuest.Value = null;
         IsGameActive.Value = false;
-        OnGameClosed.OnNext(Unit.Default);
+        OnGameClosed.OnNext(questId);
     }
 }

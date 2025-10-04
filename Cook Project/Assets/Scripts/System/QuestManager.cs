@@ -67,26 +67,14 @@ public class QuestManager : SimpleSingleton<QuestManager>
         return GetQuestById(questId)?.Status == QuestStatus.Completed;
     }
 
-    public PuzzleQuest GetPuzzleQuestByDoorId(string doorId)
+    public PuzzleQuest GetPuzzleQuestByTargetId(string targetId)
     {
-        return activeQuests.OfType<PuzzleQuest>().FirstOrDefault(q => q.DoorId == doorId);
+        return activeQuests.OfType<PuzzleQuest>().FirstOrDefault(q => q.QuestTargetId == targetId);
     }
 
-    public bool HasActiveQuestForDoor(string doorId)
+    public bool HasActiveQuestForTarget(string targetId)
     {
-        return GetPuzzleQuestByDoorId(doorId) != null;
-    }
-
-    public void SolvePuzzleForDoor(string doorId)
-    {
-        var puzzleQuest = GetPuzzleQuestByDoorId(doorId);
-        if (puzzleQuest != null)
-        {
-            puzzleQuest.SolvePuzzle();
-            activeQuests.Remove(puzzleQuest);
-            completedQuests.Add(puzzleQuest);
-            OnQuestCompleted.OnNext(puzzleQuest);
-        }
+        return GetPuzzleQuestByTargetId(targetId) != null;
     }
 
     public void ClearAllQuests()
