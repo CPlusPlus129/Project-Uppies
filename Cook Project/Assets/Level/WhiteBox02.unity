@@ -760,7 +760,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 12853654}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Door1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17208,6 +17208,10 @@ PrefabInstance:
     - target: {fileID: 115464, guid: fbfaefed9c8de504992ea1e44db04aaf, type: 3}
       propertyPath: m_Name
       value: SM_Env_DoorDouble_Flat_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 115464, guid: fbfaefed9c8de504992ea1e44db04aaf, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 488452, guid: fbfaefed9c8de504992ea1e44db04aaf, type: 3}
       propertyPath: m_LocalPosition.x
@@ -51609,7 +51613,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1368341606}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Door2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63597,6 +63601,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Env_DoorDouble_Flat_02
       objectReference: {fileID: 0}
+    - target: {fileID: 125676, guid: 99ccc99de12ffe040be3b530f06e7eed, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 411578, guid: 99ccc99de12ffe040be3b530f06e7eed, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.9978244
@@ -71695,7 +71703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDoor
   doorId: door_temp
-  door: {fileID: 0}
+  anim: {fileID: 0}
 --- !u!4 &1861315328
 Transform:
   m_ObjectHideFlags: 0
@@ -74930,7 +74938,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1950957511}
   - component: {fileID: 1950957510}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: StorageDoor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -76884,7 +76892,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDoor
   doorId: door_temp
-  door: {fileID: 1950957509}
+  anim: {fileID: 1950957510}
 --- !u!4 &1993410242 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}

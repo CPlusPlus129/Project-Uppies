@@ -45,14 +45,21 @@ public class NumberGuessingGame
     {
         return hint;
     }
-
-    public bool Guess(string userAnswer)
-    {
-        return answer == userAnswer.PadLeft(4, '0');
-    }
-
+    
     public string GetAnswer()
     {
         return answer;
+    }
+
+    public bool GuessNumber(string guess)
+    {
+        bool isCorrect = answer == guess.PadLeft(4, '0');
+
+        if (isCorrect)
+        {
+            PuzzleGameManager.Instance.CompleteNumberGuessingGame();
+        }
+
+        return isCorrect;
     }
 }

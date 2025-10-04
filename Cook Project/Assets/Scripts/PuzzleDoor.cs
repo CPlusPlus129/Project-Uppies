@@ -1,11 +1,11 @@
-using Unity.VisualScripting;
+using R3;
 using UnityEngine;
 
 public class PuzzleDoor : MonoBehaviour, IInteractable
 {
     [SerializeField] private string doorId;
+    [SerializeField] private Animator anim;
 
-    [SerializeField] private GameObject door;
     private bool doorOpen;
     public string DoorId => doorId;
 
@@ -64,6 +64,11 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     private void OpenCardSwipeGame()
     {
         PuzzleGameManager.Instance.StartCardSwipeGame(doorId);
+        PuzzleGameManager.Instance.OnGameCompleted
+            .Where(x => x == doorId)
+            .Take(1)
+            .Subscribe(_ => PlayDoorAnimation())
+            .AddTo(this);
 
         var cardSwipeUI = UIRoot.Instance.GetUIComponent<CardSwipeGameUI>();
         if (cardSwipeUI != null)
@@ -76,10 +81,10 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         }
     }
 
-    
+
     private void PlayDoorAnimation()
     {
-        doorOpen =! doorOpen;
-        door.GetComponent<Animator>().SetBool("IsOpen",doorOpen);
+        doorOpen = !doorOpen;
+        anim.SetBool("IsOpen", doorOpen);
     }
 }

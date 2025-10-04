@@ -31,26 +31,13 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
         CurrentDoorId.Value = doorId;
         CurrentGameType.Value = PuzzleGameType.CardSwipe;
         IsGameActive.Value = true;
-    }
+    } 
 
-    public bool GuessNumber(string guess)
+    public void CompleteNumberGuessingGame()
     {
-        if (!IsGameActive.Value || CurrentNumberGame.Value == null)
-            return false;
+        if (!IsGameActive.Value || CurrentGameType.Value != PuzzleGameType.NumberGuessing) return;
 
-        bool isCorrect = CurrentNumberGame.Value.Guess(guess);
-
-        if (isCorrect)
-        {
-            CompleteGame();
-        }
-
-        return isCorrect;
-    }
-
-    public string GetCurrentHint()
-    {
-        return CurrentNumberGame.Value?.GetHint() ?? "";
+        CompleteGame();
     }
 
     public void CompleteCardSwipeGame()
