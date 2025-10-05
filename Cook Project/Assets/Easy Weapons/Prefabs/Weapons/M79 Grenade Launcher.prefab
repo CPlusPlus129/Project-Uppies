@@ -316,8 +316,8 @@ MonoBehaviour:
   bulletHoleMappings: []
   defaultBulletHoles: []
   bulletHoleExclusions: []
-  fireSound: {fileID: 8300000, guid: e5c3dd3dda2747c498244d938aff0d00, type: 3}
-  reloadSound: {fileID: 8300000, guid: a236ed6ed1165ca44908f0cfe8c7ed65, type: 3}
+  fireSound: {fileID: 0}
+  reloadSound: {fileID: 0}
   dryFireSound: {fileID: 0}
 --- !u!82 &8256968
 AudioSource:
@@ -326,13 +326,13 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 156968}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0
   m_Pitch: 1
   Loop: 0
   Mute: 0

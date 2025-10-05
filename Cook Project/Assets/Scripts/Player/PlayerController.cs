@@ -14,6 +14,9 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("Set audiolistener volume to 0.1");
+        AudioListener.volume = 0.1f;
+
         lookAction = InputSystem.actions.FindAction("Look");
         moveAction = InputSystem.actions.FindAction("Move");
         jumpAction = InputSystem.actions.FindAction("Jump");
