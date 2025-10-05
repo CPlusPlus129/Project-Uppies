@@ -1,10 +1,15 @@
 using R3;
+using UnityEngine;
 
 public class FridgeSpawnList : SpawnPointList
 {
+    [Header("Spawn Settings")]
     public int SpawnCount = 7;
     public FoodSource fridgePrefab;
     public string[] essentialIngredients;
+    
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
 
     protected override void Awake()
     {
@@ -15,23 +20,42 @@ public class FridgeSpawnList : SpawnPointList
     private void SpawnFridges()
     {
         Reset();
+        
         var spArr = RandomHelper.PickWithoutReplacement(spawnPoints, SpawnCount);
         var eArr = RandomHelper.PickWithoutReplacement(essentialIngredients, essentialIngredients.Length);
-        var essentailIndex = 0;
+        var essentialIndex = 0;
+        
+        if (enableDebugLogs) Debug.Log($"Spawning {SpawnCount} fridges");
+        
         foreach (var spawnPoint in spArr)
         {
             var f = spawnPoint.Spawn(fridgePrefab);
-            if (essentailIndex < eArr.Length)
+            
+            if (essentialIndex < eArr.Length)
             {
-                f.SetItemName(eArr[essentailIndex]);
-                essentailIndex++;
+                f.SetItemName(eArr[essentialIndex]);
+                if (enableDebugLogs) Debug.Log($"Spawned fridge with ingredient: {eArr[essentialIndex]}");
+                essentialIndex++;
             }
             else
             {
-                // Pick a random ingredient from essential. This is subject to change later.
                 var randomIngredient = RandomHelper.PickOne(essentialIngredients);
                 f.SetItemName(randomIngredient);
+                if (enableDebugLogs) Debug.Log($"Spawned fridge with random ingredient: {randomIngredient}");
             }
+        }
+        
+        StartCoroutine(RefreshGlowStatesDelayed());
+    }
+    
+    private System.Collections.IEnumerator RefreshGlowStatesDelayed()
+    {
+        yield return null;
+        
+        if (FridgeGlowManager.Instance != null)
+        {
+            FridgeGlowManager.Instance.RefreshGlowStates();
+            if (enableDebugLogs) Debug.Log("Refreshed glow states after spawning");
         }
     }
 
@@ -42,5 +66,4 @@ public class FridgeSpawnList : SpawnPointList
             spawnPoint.Reset();
         }
     }
-
 }
