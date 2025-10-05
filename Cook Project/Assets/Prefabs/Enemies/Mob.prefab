@@ -167,7 +167,7 @@ MonoBehaviour:
   autoDestroyParticles: 1
   attackDamage: 10
   attackCooldown: 1.5
-  lightLifetimeReduction: 2
+  lightLifetimeReduction: 1
   lightDamageRange: 15
   playerDetectionRange: 30
   obstacleLayer:
@@ -190,10 +190,10 @@ MonoBehaviour:
   mob: {fileID: 472364103881071553}
   detectionRadius: 5
   includeAmbientLight: 0
-  lightSensitivity: 4
+  lightSensitivity: 5
   ambientStrength: 0.1
   useRealisticFalloff: 1
-  damageThreshold: 0.15
+  damageThreshold: 0.1
   damagePerSecond: 25
   damageDelay: 0.1
   updatesPerSecond: 3
