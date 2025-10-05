@@ -88,7 +88,7 @@ public class LightRadiusIndicator : MonoBehaviour
         lineRenderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
         
         // Create unlit material
-        Material lineMaterial = new Material(Shader.Find("Unlit/Color"));
+        Material lineMaterial = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
         lineMaterial.color = circleColor;
         lineRenderer.material = lineMaterial;
         lineRenderer.startColor = circleColor;
