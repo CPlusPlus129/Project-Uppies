@@ -1230,6 +1230,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Shop",
+            "id": "96cb8c8a-9fd1-4d60-8c60-044d97c3c788",
+            "actions": [
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "400abe41-e342-4894-8662-cdd699e05e3f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1e28d0e7-1294-4ca3-ad88-91a0732e37df",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
