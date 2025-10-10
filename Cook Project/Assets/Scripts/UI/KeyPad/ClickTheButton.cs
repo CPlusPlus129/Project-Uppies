@@ -13,7 +13,7 @@ public class ClickTheButton : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        buttonName =gameObject.name;
+        buttonName = gameObject.name;
         splitID = buttonName.IndexOf("-");
         buttonNumber = buttonName.Substring(0, splitID);
 
