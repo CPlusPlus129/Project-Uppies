@@ -62,6 +62,10 @@ public class MinigamePanel : MonoBehaviour
         };
 
         beatKey.Enable();
+
+        // Generate a new sigil pattern & display
+        currentSigilPattern = GenerateNewSigilPattern(3, 5);
+        DisplaySigils(currentSigilPattern);
     }
 
     // Clean up
@@ -93,8 +97,7 @@ public class MinigamePanel : MonoBehaviour
             // Highlight next sigil
             if (currentSigilInd < currentSigilPattern.Count)
             {
-                var nextSigil = sigilDisplayArea.transform.GetChild(currentSigilInd);
-                currentSigilHighlighter.transform.position = nextSigil.position;
+                currentSigilHighlighter.transform.position = instantiatedSigils[currentSigilInd].transform.position;
             }
             else
             {
@@ -118,7 +121,10 @@ public class MinigamePanel : MonoBehaviour
             Debug.Log("Wrong key! Expected: " + currentSigil.sigilKey);
             // Reset progress on wrong key
             currentSigilInd = 0;
-            currentSigilHighlighter.transform.position = sigilDisplayArea.transform.GetChild(0).position;
+            if (instantiatedSigils.Count > 0)
+            {
+                currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
+            }
             
             // Reset all sigils to full opacity
             ResetAllSigilsAlpha();
@@ -132,10 +138,6 @@ public class MinigamePanel : MonoBehaviour
         sigilTypes = FindObjectsByType<sigilType>(FindObjectsSortMode.None).ToList();
         // Start capturing input for minigame
         Debug.Log(sigilTypes.Count());
-
-        currentSigilPattern = GenerateNewSigilPattern(3, 5);
-
-        DisplaySigils(currentSigilPattern);
     }
 
     // Gets a random sigil based on sigilTypes list
@@ -162,9 +164,19 @@ public class MinigamePanel : MonoBehaviour
     // Display the sigil pattern in the UI
     private void DisplaySigils(List<sigilType> pattern)
     {
+        // Destroy all previously instantiated sigil GameObjects
+        foreach (var sigil in instantiatedSigils)
+        {
+            if (sigil != null)
+            {
+                Destroy(sigil);
+            }
+        }
+
         // Clear previous instantiated sigils list
         instantiatedSigils.Clear();
 
+        // Display new sigils
         foreach (var sigil in pattern)
         {
             Debug.Log(sigil.sigilKey);
@@ -174,6 +186,13 @@ public class MinigamePanel : MonoBehaviour
 
             // Store reference to instantiated sigil
             instantiatedSigils.Add(child);
+        }
+
+        // Reset sigil index and highlighter position to the first sigil
+        currentSigilInd = 0;
+        if (instantiatedSigils.Count > 0)
+        {
+            currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
         }
     }
 
