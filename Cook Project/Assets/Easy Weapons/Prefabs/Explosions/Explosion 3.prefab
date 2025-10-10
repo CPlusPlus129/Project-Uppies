@@ -34,7 +34,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 400004}
-  - {fileID: 964136773113761380}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &11400000
@@ -196,6 +195,7 @@ GameObject:
   - component: {fileID: 4809642987506162343}
   - component: {fileID: 6894076233850201701}
   - component: {fileID: 4977340992560708891}
+  - component: {fileID: 7182362939788789047}
   m_Layer: 0
   m_Name: Explosion Light
   m_TagString: Untagged
@@ -215,7 +215,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 964136773113761380}
   m_Father: {fileID: 400002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!108 &10800000
@@ -230,7 +231,7 @@ Light:
   m_Type: 2
   m_Color: {r: 1, g: 0.8438134, b: 0.19117647, a: 0.7058824}
   m_Intensity: 10
-  m_Range: 6
+  m_Range: 9
   m_SpotAngle: 124.21053
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
@@ -319,7 +320,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100004}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9e7f2c4ab70c244399431e801e1cae7, type: 3}
   m_Name: 
@@ -353,6 +354,33 @@ MonoBehaviour:
   shadowStrength: 1
   shadowBias: 0.05
   shadowNormalBias: 0.4
+--- !u!114 &7182362939788789047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3773a98a266eaee49a84d070cd825ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightRadiusIndicatorSphereSmooth
+  showIndicator: 1
+  sphereColor: {r: 1, g: 0.9, b: 0.5, a: 0.14901961}
+  subdivisions: 2
+  rimPower: 3
+  rimIntensity: 0.5
+  blendMode: 2
+  depthFade: 1
+  centerFalloff: 0.6
+  blobThreshold: 0.7
+  maxBrightness: 0.1
+  pulseEffect: 1
+  pulseSpeed: 2
+  pulseAmount: 0.1
+  matchLightColor: 1
+  lightColorInfluence: 0.5
 --- !u!1 &498551599811890383
 GameObject:
   m_ObjectHideFlags: 0
@@ -496,11 +524,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6779264715614667927}
-  m_Father: {fileID: 400002}
+  m_Father: {fileID: 400004}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 726.25, y: 405}
+  m_AnchoredPosition: {x: 726.25, y: 404}
   m_SizeDelta: {x: 1446.5, y: 814}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6055285110176391459
