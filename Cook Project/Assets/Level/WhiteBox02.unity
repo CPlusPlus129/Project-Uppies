@@ -1014,7 +1014,7 @@ GameObject:
   - component: {fileID: 20611140}
   - component: {fileID: 20611139}
   - component: {fileID: 20611138}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Two_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4211,7 +4211,7 @@ GameObject:
   - component: {fileID: 110675218}
   - component: {fileID: 110675217}
   - component: {fileID: 110675216}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Eight_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6800,7 +6800,7 @@ GameObject:
   - component: {fileID: 160084368}
   - component: {fileID: 160084367}
   - component: {fileID: 160084366}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Three_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8589,7 +8589,7 @@ GameObject:
   - component: {fileID: 213945651}
   - component: {fileID: 213945650}
   - component: {fileID: 213945649}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Zero_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -22269,7 +22269,7 @@ GameObject:
   - component: {fileID: 522378853}
   - component: {fileID: 522378852}
   - component: {fileID: 522378851}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: One_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -34816,7 +34816,7 @@ GameObject:
   - component: {fileID: 821500387}
   - component: {fileID: 821500389}
   - component: {fileID: 821500388}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Char_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35340,7 +35340,7 @@ GameObject:
   - component: {fileID: 841836282}
   - component: {fileID: 841836281}
   - component: {fileID: 841836280}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Five_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41029,7 +41029,7 @@ GameObject:
   - component: {fileID: 991473429}
   - component: {fileID: 991473431}
   - component: {fileID: 991473430}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Background_Img
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46743,7 +46743,7 @@ GameObject:
   - component: {fileID: 1125648577}
   - component: {fileID: 1125648579}
   - component: {fileID: 1125648578}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63310,7 +63310,7 @@ GameObject:
   - component: {fileID: 1506590555}
   - component: {fileID: 1506590557}
   - component: {fileID: 1506590556}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Char_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67013,7 +67013,8 @@ GameObject:
   - component: {fileID: 1603212562}
   - component: {fileID: 1603212561}
   - component: {fileID: 1603212560}
-  m_Layer: 5
+  - component: {fileID: 1603212563}
+  m_Layer: 0
   m_Name: Canvas-StorageRoom1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67103,6 +67104,19 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+--- !u!114 &1603212563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1603212558}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc95f5aed2b73c4cac1436225b0c389, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KeyPadGameUI
+  DigitalDisplay: {fileID: 0}
 --- !u!1001 &1604740143
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67229,7 +67243,7 @@ GameObject:
   - component: {fileID: 1608194561}
   - component: {fileID: 1608194560}
   - component: {fileID: 1608194559}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Nine_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74841,7 +74855,7 @@ GameObject:
   - component: {fileID: 1739566475}
   - component: {fileID: 1739566474}
   - component: {fileID: 1739566473}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Seven_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75083,7 +75097,7 @@ GameObject:
   - component: {fileID: 1740513309}
   - component: {fileID: 1740513311}
   - component: {fileID: 1740513310}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Char_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75160,7 +75174,7 @@ GameObject:
   - component: {fileID: 1740686034}
   - component: {fileID: 1740686033}
   - component: {fileID: 1740686032}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Six_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -81726,7 +81740,7 @@ GameObject:
   - component: {fileID: 1861728242}
   - component: {fileID: 1861728241}
   - component: {fileID: 1861728240}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Four_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -82785,7 +82799,7 @@ GameObject:
   - component: {fileID: 1871100483}
   - component: {fileID: 1871100485}
   - component: {fileID: 1871100484}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Char_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
