@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ServiceLocator : SimpleSingleton<ServiceLocator>
@@ -34,17 +35,12 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         Register<IAssetLoader>(() => new AssetLoader());
         Register<ITableManager>(() => new TableManager());
         Register<ISceneManagementService>(() => new SceneManagementService());
-        Register<IShiftSystem>(() => new ShiftSystem());
-        //Register<IAudioService>(() => UnityEngine.Object.FindFirstObjectByType<AudioService>());
-        //Register<IInventoryManager>(() => new InventoryManager());
-        //Register<IEndGameService>(() => new EndGameService(
-        //    Get<ISceneManagementService>()));
-        //Register<IGameLogicService>(() => new GameLogicService(
-        //    Get<IInventoryManager>(),
-        //    Get<ITableManager>(),
-        //    ConfigLocator.Instance.gameManagerConfig));
         Register<IQuestService>(() => new QuestManager(
             Get<ITableManager>()));
+        Register<IShiftSystem>(() => new ShiftSystem(
+            Get<IQuestService>()));
+        Register<IPuzzleGameManager>(() => new PuzzleGameManager(
+            Get<IQuestService>()));
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         var debugManagerGO = new UnityEngine.GameObject("DebugManager");

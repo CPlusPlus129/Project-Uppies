@@ -20,6 +20,7 @@ public class NumberGuessingGameUI : MonoBehaviour
     [SerializeField] private Button closeButton;
     [SerializeField] private TextMeshProUGUI feedbackText;
 
+    private IPuzzleGameManager puzzleGameManager;
     private NumberGuessingGame currentGame;
     private int[] currentDigits = new int[4];
 
@@ -34,11 +35,11 @@ public class NumberGuessingGameUI : MonoBehaviour
         SetupDigitButtons();
     }
 
-    private void Start()
+    private async void Start()
     {
-        var puzzleManager = PuzzleGameManager.Instance;
+        puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
 
-        puzzleManager.OnGameStarted.Where(x => x is NumberGuessingGame).Subscribe(game =>
+        puzzleGameManager.OnGameStarted.Where(x => x is NumberGuessingGame).Subscribe(game =>
         {
             currentGame = game as NumberGuessingGame;
             UpdateHint();
@@ -46,7 +47,7 @@ public class NumberGuessingGameUI : MonoBehaviour
             ResetDigits();
         }).AddTo(this);
 
-        puzzleManager.IsGameActive.Subscribe(isActive =>
+        puzzleGameManager.IsGameActive.Subscribe(isActive =>
         {
             if (!isActive)
             {
@@ -110,7 +111,7 @@ public class NumberGuessingGameUI : MonoBehaviour
 
     public void Close()
     {
-        PuzzleGameManager.Instance.EndGame();
+        puzzleGameManager.EndGame();
         gameObject.SetActive(false);
     }
 

@@ -6,6 +6,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
 {
     [SerializeField] private string questTargetId;
     [SerializeField] private Animator anim;
+    private IPuzzleGameManager puzzleGameManager;
     private IQuestService questService;
     private string questId;
     private bool doorOpen;
@@ -16,6 +17,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         {
             questTargetId = $"door_{GetInstanceID()}";
         }
+        puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
     }
 
@@ -45,14 +47,14 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     private void OpenNumberGuessingGame(Quest quest)
     {
         UIRoot.Instance.GetUIComponent<NumberGuessingGameUI>()?.Open();
-        PuzzleGameManager.Instance.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
+        puzzleGameManager.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
     }
 
     private void OpenCardSwipeGame(Quest quest)
     {
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
-        PuzzleGameManager.Instance.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
-        PuzzleGameManager.Instance.OnGameCompleted
+        puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
+        puzzleGameManager.OnGameCompleted
             .Where(x => x == questId)
             .Take(1)
             .Subscribe(_ => PlayDoorAnimation())

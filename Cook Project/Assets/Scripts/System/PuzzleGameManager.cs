@@ -1,14 +1,26 @@
+using Cysharp.Threading.Tasks;
 using R3;
 
-public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
+public class PuzzleGameManager : IPuzzleGameManager
 {
     public ReactiveProperty<IPuzzle> CurrentPuzzleGame = new ReactiveProperty<IPuzzle>();
     public ReactiveProperty<Quest> CurrentPuzzleQuest = new ReactiveProperty<Quest>();
-    public ReactiveProperty<bool> IsGameActive = new ReactiveProperty<bool>(false);
+    public ReactiveProperty<bool> IsGameActive { get;  } = new ReactiveProperty<bool>(false);
 
-    public Subject<IPuzzle> OnGameStarted = new Subject<IPuzzle>();
-    public Subject<string> OnGameCompleted = new Subject<string>();
+    public Subject<IPuzzle> OnGameStarted { get;  } = new Subject<IPuzzle>();
+    public Subject<string> OnGameCompleted { get; } = new Subject<string>();
     public Subject<string> OnGameClosed = new Subject<string>();
+    private readonly IQuestService questService;
+
+    public PuzzleGameManager(IQuestService questService)
+    {
+        this.questService = questService;
+    }
+
+    public async UniTask Init()
+    {
+         await UniTask.CompletedTask;
+    }
 
     public void StartPuzzleGame(PuzzleGameType puzzleType, Quest quest)
     {
@@ -16,8 +28,8 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
 
         CurrentPuzzleGame.Value = puzzleType switch
         {
-            PuzzleGameType.NumberGuessing => new NumberGuessingGame(),
-            PuzzleGameType.CardSwipe => new CardSwipeGame(),
+            PuzzleGameType.NumberGuessing => new NumberGuessingGame(this),
+            PuzzleGameType.CardSwipe => new CardSwipeGame(this),
             _ => null
         };
         CurrentPuzzleQuest.Value = quest;
@@ -38,8 +50,7 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
 
         CurrentPuzzleQuest.Value.CompleteQuest();
         var questId = CurrentPuzzleQuest.Value.Id;
-        var questManager = ServiceLocator.Instance.GetService<QuestManager>(); //TODO
-        questManager.CompleteQuest(CurrentPuzzleQuest.Value.Id);
+        questService.CompleteQuest(CurrentPuzzleQuest.Value.Id);
 
         EndGame();
         OnGameCompleted.OnNext(questId);

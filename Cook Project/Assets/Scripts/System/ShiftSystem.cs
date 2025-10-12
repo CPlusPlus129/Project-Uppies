@@ -23,9 +23,14 @@ public class ShiftSystem : IShiftSystem
     private CompositeDisposable updateDisposible = new CompositeDisposable();
     private CompositeDisposable disposables = new CompositeDisposable();
 
+    public ShiftSystem(IQuestService questService)
+    {
+        this.questService = questService;
+    }
+
     public async UniTask Init()
     {
-        questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
+        await UniTask.CompletedTask;
     }
 
     public void StartGame()

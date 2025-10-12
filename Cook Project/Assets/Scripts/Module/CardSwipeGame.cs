@@ -8,14 +8,16 @@ public enum SwipeResult
 
 public class CardSwipeGame : IPuzzle
 {
+    readonly IPuzzleGameManager puzzleGameManager;
     public PuzzleGameType puzzleType => PuzzleGameType.CardSwipe;
     public float MinSpeed { get; private set; }
     public float MaxSpeed { get; private set; }
     public bool IsCompleted { get; private set; }
     public int AttemptCount { get; private set; }
 
-    public CardSwipeGame()
+    public CardSwipeGame(IPuzzleGameManager puzzleGameManager)
     {
+        this.puzzleGameManager = puzzleGameManager;
         GenerateSpeedRange();
         Reset();
     }

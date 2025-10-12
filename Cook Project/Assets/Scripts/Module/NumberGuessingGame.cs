@@ -1,14 +1,13 @@
-using System;
-using UnityEngine;
-
 public class NumberGuessingGame : IPuzzle
 {
+    readonly IPuzzleGameManager puzzleGameManager;
     public PuzzleGameType puzzleType => PuzzleGameType.NumberGuessing;
     private string answer;
     private string hint;
 
-    public NumberGuessingGame()
+    public NumberGuessingGame(IPuzzleGameManager puzzleGameManager)
     {
+        this.puzzleGameManager = puzzleGameManager;
         GenerateAnswerAndHint();
     }
 
@@ -58,7 +57,7 @@ public class NumberGuessingGame : IPuzzle
 
         if (isCorrect)
         {
-            PuzzleGameManager.Instance.CompletePuzzleGame(PuzzleGameType.NumberGuessing);
+            puzzleGameManager.CompletePuzzleGame(PuzzleGameType.NumberGuessing);
         }
 
         return isCorrect;

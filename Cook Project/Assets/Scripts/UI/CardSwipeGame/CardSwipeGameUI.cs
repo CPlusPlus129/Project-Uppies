@@ -19,11 +19,22 @@ public class CardSwipeGameUI : MonoBehaviour
     [SerializeField] private RectTransform startPosition;
     [SerializeField] private RectTransform endPosition;
 
+    IPuzzleGameManager puzzleGameManager;
     private CardSwipeGame currentGame;
     private float swipeDistance;
 
-    private void Awake()
+    private async void Awake()
     {
+        puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
+        puzzleGameManager.OnGameStarted
+            .Where(x => x is CardSwipeGame)
+            .Subscribe(game =>
+            {
+                currentGame = game as CardSwipeGame;
+                InitializeGame();
+            })
+            .AddTo(this);
+
         var actions = InputSystem.actions;
         actions.FindActionMap("CardSwipe").FindAction("Esc").performed += ctx => Close();
 
@@ -32,14 +43,6 @@ public class CardSwipeGameUI : MonoBehaviour
         CalculateSwipeDistance();
         SetupCardEvents();
 
-        PuzzleGameManager.Instance.OnGameStarted
-            .Where(x => x is CardSwipeGame)
-            .Subscribe(game =>
-            {
-                currentGame = game as CardSwipeGame;
-                InitializeGame();
-            })
-            .AddTo(this);
     }
 
     private void CalculateSwipeDistance()
@@ -119,7 +122,7 @@ public class CardSwipeGameUI : MonoBehaviour
         cardReader.PlaySuccessAnimation();
         draggableCard.SetCardEnabled(false);
 
-        PuzzleGameManager.Instance.CompletePuzzleGame(PuzzleGameType.CardSwipe);
+        puzzleGameManager.CompletePuzzleGame(PuzzleGameType.CardSwipe);
     }
 
     private void OnSwipeFail(string message)

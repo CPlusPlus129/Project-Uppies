@@ -10,6 +10,7 @@ public class StartGameTrigger : MonoBehaviour
 
     private async UniTask StartGame()
     {
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
 #if UNITY_WEBGL && !UNITY_EDITOR
         await UniTask.Delay(2000); //wait for webgl to load
 #endif
