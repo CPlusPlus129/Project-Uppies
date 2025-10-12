@@ -558,8 +558,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1261218216107503928}
   - component: {fileID: 57695638131130069}
-  - component: {fileID: 1984858830880137199}
-  - component: {fileID: 4651269587646098521}
+  - component: {fileID: 4303017369259318574}
   m_Layer: 5
   m_Name: Bar-light
   m_TagString: Untagged
@@ -614,20 +613,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &1984858830880137199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 995515604388284749}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3543325504c5e724dbe0e158b0b83896, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  barFill: {fileID: 3921380680387691698}
---- !u!114 &4651269587646098521
+--- !u!114 &4303017369259318574
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -636,7 +622,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 995515604388284749}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7404c091946fb74db27e7ab9d1045fe, type: 3}
+  m_Script: {fileID: 11500000, guid: 09c8eb93617d04b4ba6cd0f8d37188bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightBarItem
   barFill: {fileID: 3921380680387691698}
@@ -645,9 +631,9 @@ MonoBehaviour:
   smoothTransition: 1
   transitionSpeed: 5
   useColorGradient: 1
-  highLightColor: {r: 0.015686274, g: 1, b: 0.96156764, a: 1}
-  mediumLightColor: {r: 0, g: 0.4587262, b: 0.59568727, a: 1}
-  lowLightColor: {r: 0, g: 0.0025068577, b: 0.3584904, a: 1}
+  highLightColor: {r: 1, g: 0.92, b: 0.016, a: 1}
+  mediumLightColor: {r: 1, g: 0.64, b: 0, a: 1}
+  lowLightColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
   lowLightThreshold: 0.25
   mediumLightThreshold: 0.5
   enableLowLightFlash: 1
@@ -1354,7 +1340,6 @@ GameObject:
   m_Component:
   - component: {fileID: 5292327897405335567}
   - component: {fileID: 4201371701000573977}
-  - component: {fileID: 2408467629529423312}
   - component: {fileID: 707456388411454258}
   m_Layer: 5
   m_Name: Bar-hp
@@ -1379,8 +1364,8 @@ RectTransform:
   - {fileID: 4352006325792561796}
   m_Father: {fileID: 6194077348675805686}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1410,19 +1395,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &2408467629529423312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2657012672212138895}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3543325504c5e724dbe0e158b0b83896, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  barFill: {fileID: 670660708759964555}
 --- !u!114 &707456388411454258
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2010,9 +1982,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e66210c0eab46a642abc967556e97f75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hpBar: {fileID: 2408467629529423312}
+  hpBar: {fileID: 707456388411454258}
   staminaBar: {fileID: 1477567675488843602}
-  lightBar: {fileID: 0}
+  lightBar: {fileID: 4303017369259318574}
   moneyValueText: {fileID: 2028958491547743357}
 --- !u!1 &3829008726674981674
 GameObject:
@@ -3272,6 +3244,7 @@ GameObject:
   - component: {fileID: 2666005791878520086}
   - component: {fileID: 2387107254206871420}
   - component: {fileID: 9077632757999625146}
+  - component: {fileID: 5843373774983648159}
   m_Layer: 5
   m_Name: Canvas-HUD
   m_TagString: Untagged
@@ -3366,6 +3339,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &5843373774983648159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6931262126446937387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958272e327403ca41ad9b7508646859b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HUD
 --- !u!1 &6971170426530724002
 GameObject:
   m_ObjectHideFlags: 0

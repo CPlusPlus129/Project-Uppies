@@ -2,16 +2,23 @@ using UnityEngine;
 
 public class RestaurantDoor : MonoBehaviour, IInteractable
 {
+    private IShiftSystem shiftSystem;
+
+    private async void Awake()
+    {
+        shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>(); 
+    }
+
     public void Interact()
     {
-        if(ShiftSystem.Instance.currentState.Value != ShiftSystem.ShiftState.AfterShift)
+        if(shiftSystem.currentState.Value != ShiftSystem.ShiftState.AfterShift)
         {
             WorldBroadcastSystem.Instance.Broadcast("You can only start next shift when your shift is off.");
             return;
         }
 
-        if (ShiftSystem.Instance.IsCurrentShiftQuestCompleted())
-            ShiftSystem.Instance.StartNextShift();
+        if (shiftSystem.IsCurrentShiftQuestCompleted())
+            shiftSystem.StartNextShift();
         else
             WorldBroadcastSystem.Instance.Broadcast("You haven't completed the shift requirements yet!");
     }

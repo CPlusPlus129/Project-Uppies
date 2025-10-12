@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-public class ShiftSystem : SimpleSingleton<ShiftSystem>
+public class ShiftSystem : IShiftSystem
 {
     public enum ShiftState
     {
@@ -11,15 +12,21 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         AfterShift,
         GaveOver
     }
-    public ReactiveProperty<int> shiftNumber = new ReactiveProperty<int>();
-    public ReactiveProperty<int> completedOrderCount = new ReactiveProperty<int>();
-    public ReactiveProperty<int> requiredOrderCount = new ReactiveProperty<int>();
-    public ReactiveProperty<float> shiftTimer = new ReactiveProperty<float>();
-    public ReactiveProperty<ShiftState> currentState = new ReactiveProperty<ShiftState>();
-    public Subject<Unit> OnGameStart = new Subject<Unit>();
+    public ReactiveProperty<int> shiftNumber { get; } = new ReactiveProperty<int>();
+    public ReactiveProperty<int> completedOrderCount { get; } = new ReactiveProperty<int>();
+    public ReactiveProperty<int> requiredOrderCount { get; } = new ReactiveProperty<int>();
+    public ReactiveProperty<float> shiftTimer { get; } = new ReactiveProperty<float>();
+    public ReactiveProperty<ShiftState> currentState { get; } = new ReactiveProperty<ShiftState>();
+    public Subject<Unit> OnGameStart { get; } = new Subject<Unit>();
+    private IQuestService questService;
     private bool hasRunTutorial = false;
     private CompositeDisposable updateDisposible = new CompositeDisposable();
     private CompositeDisposable disposables = new CompositeDisposable();
+
+    public async UniTask Init()
+    {
+        questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
+    }
 
     public void StartGame()
     {
@@ -74,7 +81,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         if (string.IsNullOrEmpty(questId))
             return true;
 
-        return QuestManager.Instance.IsQuestCompleted(questId);
+        return questService.GetQuestStatus(questId) == QuestStatus.Completed;
     }
 
     private void StartShift(int num)
@@ -88,8 +95,7 @@ public class ShiftSystem : SimpleSingleton<ShiftSystem>
         //quest
         if (!string.IsNullOrEmpty(s.questId))
         {
-            var quest = QuestManager.Instance.CreatePuzzleQuest(s.questId, s.questName, s.questDescription, PuzzleGameType.CardSwipe, "door_temp");
-            QuestManager.Instance.AddQuest(quest);
+            questService.StartQuest(s.questId);
         }
         //shop
         ShopSystem.Instance.RefreshShopItems();

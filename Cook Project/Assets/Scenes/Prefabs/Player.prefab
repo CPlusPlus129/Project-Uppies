@@ -156,7 +156,7 @@ GameObject:
   - component: {fileID: 615881212244471086}
   - component: {fileID: 95115153265476298}
   - component: {fileID: 6402948963258906421}
-  - component: {fileID: 182026414456375723}
+  - component: {fileID: 9051912068616898175}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -362,7 +362,7 @@ MonoBehaviour:
   showWarningMessages: 1
   damageGizmoColor: {r: 1, g: 0, b: 0, a: 1}
   showDebugInfo: 0
---- !u!114 &182026414456375723
+--- !u!114 &9051912068616898175
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -371,13 +371,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 8985326193973131990}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07c60f62fb595b14ebfe3a374fe93d9d, type: 3}
+  m_Script: {fileID: 11500000, guid: 595b89b90f3580a408af8c0261655f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightRecoverySystem
   enablePassiveRecovery: 1
   recoveryDelay: 0
-  rechargeSpeed: 2
-  safeZoneRecoveryMultiplier: 5
+  rechargeSpeed: 5
+  safeZoneRecoveryMultiplier: 3
   showDebugInfo: 0
 --- !u!1001 &695477875812888906
 PrefabInstance:

@@ -3,14 +3,14 @@ using R3;
 public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
 {
     public ReactiveProperty<IPuzzle> CurrentPuzzleGame = new ReactiveProperty<IPuzzle>();
-    public ReactiveProperty<PuzzleQuest> CurrentPuzzleQuest = new ReactiveProperty<PuzzleQuest>();
+    public ReactiveProperty<Quest> CurrentPuzzleQuest = new ReactiveProperty<Quest>();
     public ReactiveProperty<bool> IsGameActive = new ReactiveProperty<bool>(false);
 
     public Subject<IPuzzle> OnGameStarted = new Subject<IPuzzle>();
     public Subject<string> OnGameCompleted = new Subject<string>();
     public Subject<string> OnGameClosed = new Subject<string>();
 
-    public void StartPuzzleGame(PuzzleGameType puzzleType, PuzzleQuest quest)
+    public void StartPuzzleGame(PuzzleGameType puzzleType, Quest quest)
     {
         if (IsGameActive.Value) return;
 
@@ -36,9 +36,10 @@ public class PuzzleGameManager : SimpleSingleton<PuzzleGameManager>
     {
         if (!IsGameActive.Value) return;
 
-        CurrentPuzzleQuest.Value.SolvePuzzle();
+        CurrentPuzzleQuest.Value.CompleteQuest();
         var questId = CurrentPuzzleQuest.Value.Id;
-        QuestManager.Instance.CompleteQuest(CurrentPuzzleQuest.Value.Id);
+        var questManager = ServiceLocator.Instance.GetService<QuestManager>(); //TODO
+        questManager.CompleteQuest(CurrentPuzzleQuest.Value.Id);
 
         EndGame();
         OnGameCompleted.OnNext(questId);

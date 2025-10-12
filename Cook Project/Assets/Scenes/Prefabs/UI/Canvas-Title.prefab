@@ -605,6 +605,7 @@ GameObject:
   - component: {fileID: 6452042361052854443}
   - component: {fileID: 3911116139053170594}
   - component: {fileID: 7140045688736413884}
+  - component: {fileID: 4448391085030821302}
   m_Layer: 0
   m_Name: Canvas-Title
   m_TagString: Untagged
@@ -696,6 +697,21 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &4448391085030821302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6593363494122081210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3571ed5f8bb261b4f8a8ce26ab85cb9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TitleUI
+  startSceneName: WhiteBox02
+  startButton: {fileID: 2659692085560538391}
+  exitButton: {fileID: 3477406279806247891}
 --- !u!1 &7431675902762567856
 GameObject:
   m_ObjectHideFlags: 0

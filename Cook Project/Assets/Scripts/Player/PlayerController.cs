@@ -34,9 +34,6 @@ public class PlayerController : MonoBehaviour
         var sprintAction = InputSystem.actions.FindAction("Sprint");
         sprintAction.performed += ctx => motor.TrySprint();
         sprintAction.canceled += ctx => motor.StopSprint();
-        //DEBUG
-        var debugAction = InputSystem.actions.FindAction("DebugKeys");
-        debugAction.performed += actionController.OnDebugKeyClicked;
     }
 
     void Update()

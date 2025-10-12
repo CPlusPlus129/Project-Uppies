@@ -11,16 +11,31 @@ public class ShiftPanelUI : MonoBehaviour
     public TextMeshProUGUI orderText;
     public TextMeshProUGUI questText;
 
-    private void Awake()
+    private IShiftSystem shiftSystem;
+    private IQuestService questService;
+
+    private async void Awake()
     {
-        ShiftSystem.Instance.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
-        ShiftSystem.Instance.currentState.Subscribe(UpdateShiftState).AddTo(this);
-        ShiftSystem.Instance.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        ShiftSystem.Instance.requiredOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        ShiftSystem.Instance.shiftTimer.Subscribe(UpdateShiftTimer).AddTo(this);
-        QuestManager.Instance.OnQuestStarted.Subscribe(_ => UpdateQuestText()).AddTo(this);
-        QuestManager.Instance.OnQuestCompleted.Subscribe(_ => UpdateQuestText()).AddTo(this);
-        QuestManager.Instance.OnQuestFailed.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
+        shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
+        shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
+        shiftSystem.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
+        shiftSystem.requiredOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
+        shiftSystem.shiftTimer.Subscribe(UpdateShiftTimer).AddTo(this);
+        questService.OnQuestStarted.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        questService.OnQuestCompleted.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        questService.OnQuestFailed.Subscribe(_ => UpdateQuestText()).AddTo(this);
+        UpdateAll();
+    }
+
+    private void UpdateAll()
+    {
+        UpdateShiftNumber(shiftSystem.shiftNumber.Value);
+        UpdateShiftState(shiftSystem.currentState.Value);
+        UpdateOrderText();
+        UpdateShiftTimer(shiftSystem.shiftTimer.Value);
+        UpdateQuestText();
     }
 
     private void UpdateShiftNumber(int number)
@@ -48,13 +63,12 @@ public class ShiftPanelUI : MonoBehaviour
 
     private void UpdateOrderText()
     {
-        var shiftSystem = ShiftSystem.Instance;
         orderText.text = $"Orders: {shiftSystem.completedOrderCount.Value}/{shiftSystem.requiredOrderCount.Value}";
     }
 
     private void UpdateQuestText()
     {
-        var activeQuests = QuestManager.Instance.GetActiveQuests();
+        var activeQuests = questService.ongoingQuestList;
 
         if (activeQuests.Count == 0)
         {

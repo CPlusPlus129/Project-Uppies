@@ -13,21 +13,27 @@ public enum QuestStatus
     Failed
 }
 
-public abstract class Quest
+public class Quest
 {
     public string Id { get; protected set; }
     public string Title { get; protected set; }
     public string Description { get; protected set; }
+    public string TargetId { get; protected set; }
+    public PuzzleGameType PuzzleType { get; protected set; }
     public QuestType Type { get; protected set; }
+
+    public bool IsSolved { get; private set; }
     public QuestStatus Status { get; protected set; }
     public DateTime CreatedTime { get; protected set; }
 
-    protected Quest(string id, string title, string description, QuestType type)
+    public Quest(string id, string title, string description, string targetId, QuestType type, PuzzleGameType puzzleType)
     {
         Id = id;
         Title = title;
         Description = description;
         Type = type;
+        TargetId = targetId;
+        PuzzleType = puzzleType;
         Status = QuestStatus.NotStarted;
         CreatedTime = DateTime.Now;
     }
@@ -47,5 +53,8 @@ public abstract class Quest
         Status = QuestStatus.Failed;
     }
 
-    public abstract bool CanComplete();
+    public bool CanComplete()
+    {
+        return IsSolved;
+    }
 }

@@ -11,10 +11,11 @@ public class FridgeSpawnList : SpawnPointList
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
-    protected override void Awake()
+    protected override async void Awake()
     {
         base.Awake();
-        ShiftSystem.Instance.OnGameStart.Subscribe(_ => SpawnFridges()).AddTo(this);
+        var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        shiftSystem.OnGameStart.Subscribe(_ => SpawnFridges()).AddTo(this);
     }
 
     private void SpawnFridges()
