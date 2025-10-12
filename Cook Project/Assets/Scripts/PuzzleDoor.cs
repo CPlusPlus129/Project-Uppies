@@ -55,7 +55,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
         puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
         puzzleGameManager.OnGameCompleted
-            .Where(x => x == questId)
+            .Where(x => x == quest.Id)
             .Take(1)
             .Subscribe(_ => PlayDoorAnimation())
             .AddTo(this);

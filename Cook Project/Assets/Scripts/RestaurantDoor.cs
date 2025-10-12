@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class RestaurantDoor : MonoBehaviour, IInteractable
@@ -6,6 +7,7 @@ public class RestaurantDoor : MonoBehaviour, IInteractable
 
     private async void Awake()
     {
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>(); 
     }
 

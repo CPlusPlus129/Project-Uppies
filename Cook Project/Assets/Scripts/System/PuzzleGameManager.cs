@@ -7,7 +7,7 @@ public class PuzzleGameManager : IPuzzleGameManager
     public ReactiveProperty<Quest> CurrentPuzzleQuest = new ReactiveProperty<Quest>();
     public ReactiveProperty<bool> IsGameActive { get;  } = new ReactiveProperty<bool>(false);
 
-    public Subject<IPuzzle> OnGameStarted { get;  } = new Subject<IPuzzle>();
+    public ReplaySubject<IPuzzle> OnGameStarted { get;  } = new ReplaySubject<IPuzzle>(1);
     public Subject<string> OnGameCompleted { get; } = new Subject<string>();
     public Subject<string> OnGameClosed = new Subject<string>();
     private readonly IQuestService questService;
