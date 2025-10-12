@@ -1,0 +1,40 @@
+Command,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Text
+*story_test1
+,,,,,,,"Well, you're probably wondering how I get here."
+,,,,,,,"It all started from a tiktok challenge, one that demands you to survive in the woods for 24 hours or something."
+,,,,,,,"Now that I think about it, I prabably picked the worst one to try out of the entire list of them."
+,,,,,,,And now I'm lost.
+,,,,,,,Like really lost.
+,,,,,,,"No signal. No paths. Just trees, fog, and the creeping realization that I had no idea how long I’d been out there. I stopped counting days after the third time the sun forgot to rise on schedule."
+,,,,,,,"Right when everything fades dark, when all hopes are lost..."
+,,,,,,,I see a beam of light.
+,elder,,,,,,"Oh, welcome! A new face, eh? Or is old Gamlo forgetting faces again..."
+,,,,,,,"If a character is not specified with a layer, it will not persist to next dialogue (elder disappears)"
+,elder,,,,,,"Coming directly out from the woods, young mans have gotten fancier lately, haven't ya? Anyways, welcome to the Mato village."
+EndScenario
+
+*story_test2
+,elder,,charL
+,farmerwoman,,charM
+,butcher,,charR,,,,"To show multiple characters, assign characters to layer charL, charM, charR. Which means left, middle and right."
+,butcher,,charL,,,,"A layer can only contain one cahracter at a time, so butcher will override elder"
+CharacterOff,farmerwoman
+,,,,,,,"Use CharacterOff command to remove character on screen, specify name of character will only remove the specified character."
+CharacterOff
+,,,,,,,"If there is no name specified for CharacterOff, every character will be removed from screen."
+EndScenario
+
+*story_test3
+,,,,,,,Sample dialogue for testing
+,satan,,,,,,Are you a good guy <char=ido>?
+,,,,,,,<char=ido> wakes up.
+Selection,*story_test3_route1,,,,,,Go Route 1
+Selection,*story_test3_end,,,,,,Nah I'm good
+
+*story_test3_route1
+,,,,,,,"Hi, I'm route 1"
+Jump,*story_test3_end
+
+*story_test3_end
+,,,,,,,End of story test 3.
+EndScenario
