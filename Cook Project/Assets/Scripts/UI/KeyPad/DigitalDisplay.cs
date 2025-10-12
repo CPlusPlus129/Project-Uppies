@@ -11,6 +11,9 @@ public class DigitalDisplay : MonoBehaviour
     [SerializeField]
     private Image[] characters;
 
+    [SerializeField]
+    private GameObject secretWall;
+
     private string codeSequence;
 
     public event Action OnSolved;
@@ -78,11 +81,11 @@ public class DigitalDisplay : MonoBehaviour
         }
         switch (digitEntered)
         {
-            case "Star":
+            case "Reset":
                 ResetDisplay();
                 break;
 
-            case "Hash":
+            case "Enter":
                 if(codeSequence.Length > 0)
                 {
                     CheckResult();
@@ -128,6 +131,7 @@ public class DigitalDisplay : MonoBehaviour
         {
             Debug.Log("correct");
             OnSolved?.Invoke();
+            secretWall.GetComponent<Animator>().SetBool("IsWallOpen", true);
         }
         else
         {

@@ -37,7 +37,6 @@ public class KeyPadGameUI : MonoBehaviour
     }
     private void HandleSolved()
     {
-        // 成功后自动关
         Close();
     }
 
