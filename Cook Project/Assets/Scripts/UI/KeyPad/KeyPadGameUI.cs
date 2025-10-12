@@ -21,13 +21,13 @@ public class KeyPadGameUI : MonoBehaviour
     private void OnEnable()
     {
         Debug.Log("KeyPadGame Active");
-        InputManager.Instance.PushActionMap("KeyPadGame");
+        InputManager.Instance.PushActionMap("KeyPad");
         if (DigitalDisplay != null) DigitalDisplay.OnSolved += HandleSolved;
     }
 
     private void OnDisable()
     {
-        InputManager.Instance.PopActionMap("KeyPadGame");
+        InputManager.Instance.PopActionMap("KeyPad");
     }
 
     public void OpenPuzzle(System.Action onClosed)
