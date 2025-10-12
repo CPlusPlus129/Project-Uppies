@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +12,9 @@ public class DigitalDisplay : MonoBehaviour
     private Image[] characters;
 
     private string codeSequence;
+
+    public event Action OnSolved;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -123,6 +127,7 @@ public class DigitalDisplay : MonoBehaviour
         if (codeSequence == "8416")
         {
             Debug.Log("correct");
+            OnSolved?.Invoke();
         }
         else
         {
@@ -138,7 +143,7 @@ public class DigitalDisplay : MonoBehaviour
             characters[i].sprite = digits[10];
         }
 
-        codeSequence = "";
+        codeSequence = string.Empty;
     }
 
     private void OnDestroy()
