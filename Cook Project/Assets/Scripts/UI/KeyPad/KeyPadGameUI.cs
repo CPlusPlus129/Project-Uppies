@@ -8,7 +8,7 @@ public class KeyPadGameUI : MonoBehaviour
     public DigitalDisplay DigitalDisplay;
 
     private System.Action onCloseCallback;
-
+    private System.Action onSuccessCallback;
 
 
     private void Awake()
@@ -30,13 +30,15 @@ public class KeyPadGameUI : MonoBehaviour
         InputManager.Instance.PopActionMap("KeyPad");
     }
 
-    public void OpenPuzzle(System.Action onClosed)
+    public void OpenPuzzle(System.Action onSuccess, System.Action onClosed)
     {
+        onSuccessCallback = onSuccess;
         onCloseCallback = onClosed;
         gameObject.SetActive(true);
     }
     private void HandleSolved()
     {
+        onSuccessCallback?.Invoke();
         Close();
     }
 

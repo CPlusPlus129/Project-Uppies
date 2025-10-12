@@ -4,6 +4,8 @@ public class KeyPadGameTrigger : MonoBehaviour, IInteractable
 {
     [SerializeField]
     private KeyPadGameUI keyPadUI;
+    [SerializeField]
+    private SecretWall wall;
 
     private bool isActive;
 
@@ -13,6 +15,16 @@ public class KeyPadGameTrigger : MonoBehaviour, IInteractable
         if (keyPadUI == null) { Debug.LogWarning("KeyPadGameUI is not assigned."); return; }
 
         isActive = true;
-        keyPadUI.OpenPuzzle(() => { isActive = false; });
+        keyPadUI.OpenPuzzle(OnSuccess, OnCloseUI);
+    }
+
+    private void OnSuccess()
+    {
+        wall.SetOpen(true);
+    }
+
+    private void OnCloseUI()
+    {
+        isActive = false;
     }
 }

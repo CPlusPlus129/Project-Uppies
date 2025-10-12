@@ -1,5 +1,4 @@
 using System;
-using DG.Tweening.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +9,6 @@ public class DigitalDisplay : MonoBehaviour
 
     [SerializeField]
     private Image[] characters;
-
-    [SerializeField]
-    private GameObject secretWall;
 
     private string codeSequence;
 
@@ -36,7 +32,8 @@ public class DigitalDisplay : MonoBehaviour
     {
         if (codeSequence.Length < 4)
         {
-            switch (digitEntered) {
+            switch (digitEntered)
+            {
                 case "Zero":
                     codeSequence += "0";
                     DisplayCodeSequence(0);
@@ -86,7 +83,7 @@ public class DigitalDisplay : MonoBehaviour
                 break;
 
             case "Enter":
-                if(codeSequence.Length > 0)
+                if (codeSequence.Length > 0)
                 {
                     CheckResult();
                 }
@@ -131,7 +128,6 @@ public class DigitalDisplay : MonoBehaviour
         {
             Debug.Log("correct");
             OnSolved?.Invoke();
-            secretWall.GetComponent<Animator>().SetBool("IsWallOpen", true);
         }
         else
         {
