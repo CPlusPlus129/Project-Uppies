@@ -59,6 +59,11 @@ public class BuildPipeline
         };
         var report = UnityEditor.BuildPipeline.BuildPlayer(buildPlayerOptions);
 
+        PrintBuildReport(report);
+    }
+
+    private static void PrintBuildReport(UnityEditor.Build.Reporting.BuildReport report)
+    {
         var summary = report.summary;
         var sb = new System.Text.StringBuilder();
         foreach (var step in report.steps)

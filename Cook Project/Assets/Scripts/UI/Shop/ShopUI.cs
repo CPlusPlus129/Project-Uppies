@@ -1,7 +1,8 @@
-using UnityEngine;
-using UnityEngine.UI;
 using R3;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ShopUI : MonoBehaviour
 {
@@ -15,17 +16,18 @@ public class ShopUI : MonoBehaviour
         itemPrefab.gameObject.SetActive(false);
         closeButton.OnClickAsObservable().Subscribe(_ => Close()).AddTo(this);
         ShopSystem.Instance.OnShopItemsUpdated.Subscribe(_ => RefreshShopItems()).AddTo(this);
+        InputSystem.actions.FindActionMap("Shop").FindAction("Esc").performed += ctx => Close();
     }
 
     public void OnEnable()
     {
         RefreshShopItems();
-        InputManager.Instance.PushActionMap("UI");
+        InputManager.Instance.PushActionMap("Shop");
     }
 
     public void OnDisable()
     {
-        InputManager.Instance.PopActionMap("UI");
+        InputManager.Instance.PopActionMap("Shop");
     }
 
     public void Open()

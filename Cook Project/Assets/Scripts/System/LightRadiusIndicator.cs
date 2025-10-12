@@ -9,6 +9,7 @@ public class LightRadiusIndicator : MonoBehaviour
 {
     [Header("Circle Settings")]
     [SerializeField] private bool showIndicator = true;
+    [SerializeField] private Material circleMaterial;
     [SerializeField] private Color circleColor = new Color(1f, 0.9f, 0.5f, 0.8f);
     [SerializeField] private float lineWidth = 0.3f;
     [SerializeField] private int segments = 64;
@@ -88,7 +89,7 @@ public class LightRadiusIndicator : MonoBehaviour
         lineRenderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
         
         // Create unlit material
-        Material lineMaterial = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        Material lineMaterial = circleMaterial ?? new Material(Shader.Find("Universal Render Pipeline/Unlit"));
         lineMaterial.color = circleColor;
         lineRenderer.material = lineMaterial;
         lineRenderer.startColor = circleColor;
