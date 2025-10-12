@@ -195,7 +195,7 @@ GameObject:
   - component: {fileID: 4809642987506162343}
   - component: {fileID: 6894076233850201701}
   - component: {fileID: 4977340992560708891}
-  - component: {fileID: 7182362939788789047}
+  - component: {fileID: 1506427986334882649}
   m_Layer: 0
   m_Name: Explosion Light
   m_TagString: Untagged
@@ -355,28 +355,28 @@ MonoBehaviour:
   shadowStrength: 1
   shadowBias: 0.05
   shadowNormalBias: 0.4
---- !u!114 &7182362939788789047
+--- !u!114 &1506427986334882649
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100004}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3773a98a266eaee49a84d070cd825ee6, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d54823f4283f0f4b86d6f496aa07ca8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightRadiusIndicatorSphereSmooth
   showIndicator: 1
-  sphereColor: {r: 1, g: 0.9, b: 0.5, a: 0.14901961}
+  sphereColor: {r: 1, g: 0.9, b: 0.5, a: 0.3}
   subdivisions: 2
   rimPower: 3
-  rimIntensity: 0.5
+  rimIntensity: 1
   blendMode: 2
   depthFade: 1
-  centerFalloff: 0.6
-  blobThreshold: 0.7
-  maxBrightness: 0.3
+  centerFalloff: 0.8
+  blobThreshold: 0.5
+  maxBrightness: 1
   pulseEffect: 1
   pulseSpeed: 2
   pulseAmount: 0.1
