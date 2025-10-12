@@ -14,6 +14,12 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
             applicationIsQuitting = false;
             DontDestroyOnLoad(gameObject);
         }
+        else if (_instance != this)
+        {
+            // Destroy duplicate instance
+            Debug.Log($"[MonoSingleton] Duplicate {typeof(T)} instance found. Destroying the new one.");
+            Destroy(gameObject);
+        }
     }
 
     public static T Instance
@@ -78,6 +84,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
     /// </summary>
     public virtual void OnDestroy()
     {
-        applicationIsQuitting = true;
+        if (_instance == this)
+            applicationIsQuitting = true;
     }
 }
