@@ -47292,15 +47292,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.7243605
+      value: 7.873
       objectReference: {fileID: 0}
     - target: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -5.44521
+      value: -5.447
       objectReference: {fileID: 0}
     - target: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -14.523163
+      value: -14.523
       objectReference: {fileID: 0}
     - target: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       propertyPath: m_LocalRotation.w
@@ -47341,6 +47341,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 197610, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1737454366}
+    - targetCorrespondingSourceObject: {fileID: 197610, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1737454372}
   m_SourcePrefab: {fileID: 100100000, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
 --- !u!1001 &1142638833
 PrefabInstance:
@@ -64827,7 +64830,7 @@ GameObject:
   - component: {fileID: 1538549215}
   - component: {fileID: 1538549216}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: KeyPadDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67116,7 +67119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bc95f5aed2b73c4cac1436225b0c389, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyPadGameUI
-  DigitalDisplay: {fileID: 0}
+  DigitalDisplay: {fileID: 1538549216}
 --- !u!1001 &1604740143
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74487,6 +74490,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 439526, guid: 312a0e66578f8924ba3e7105a3033bda, type: 3}
   m_PrefabInstance: {fileID: 1141527242}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1737454372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737454362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5230183d2783b194c86066adfee31298, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KeyPadGameTrigger
+  keyPadUI: {fileID: 1603212563}
 --- !u!1 &1738804859
 GameObject:
   m_ObjectHideFlags: 0

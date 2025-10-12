@@ -14,7 +14,7 @@ public class ClickTheButton : MonoBehaviour
     void Start()
     {
         buttonName = gameObject.name;
-        splitID = buttonName.IndexOf("-");
+        splitID = buttonName.IndexOf("_");
         buttonNumber = buttonName.Substring(0, splitID);
 
         gameObject.GetComponent<Button>().onClick.AddListener(ButtonClicked);
