@@ -43,6 +43,15 @@ public class SafeZone : MonoBehaviour
     
     private Collider safeZoneCollider;
     
+    // Static tracking for ALL safe zones
+    private static int playerInSafeZoneCount = 0;
+    
+    /// <summary>
+    /// Returns true if the player is currently in ANY safe zone.
+    /// Can be checked by other systems like LightRecoverySystem.
+    /// </summary>
+    public static bool IsPlayerInAnySafeZone => playerInSafeZoneCount > 0;
+    
     // Player tracking
     private bool playerInZone = false;
     private PlayerLightDamage currentPlayerDamage;
@@ -206,6 +215,9 @@ public class SafeZone : MonoBehaviour
             isHealing = false;
             accumulatedHealing = 0f;
             
+            // Increment static counter
+            playerInSafeZoneCount++;
+            
             // Notify the player's light damage script
             currentPlayerDamage = other.GetComponent<PlayerLightDamage>();
             if (currentPlayerDamage != null)
@@ -214,7 +226,7 @@ public class SafeZone : MonoBehaviour
                 
                 if (showDebugMessages)
                 {
-                    Debug.Log($"Player entered Safe Zone: {gameObject.name}");
+                    Debug.Log($"Player entered Safe Zone: {gameObject.name} (Total safe zones: {playerInSafeZoneCount})");
                 }
             }
             else
@@ -254,6 +266,9 @@ public class SafeZone : MonoBehaviour
             isHealing = false;
             accumulatedHealing = 0f;
             
+            // Decrement static counter
+            playerInSafeZoneCount = Mathf.Max(0, playerInSafeZoneCount - 1);
+            
             // Notify the player's light damage script
             if (currentPlayerDamage != null)
             {
@@ -262,7 +277,7 @@ public class SafeZone : MonoBehaviour
                 
                 if (showDebugMessages)
                 {
-                    Debug.Log($"Player exited Safe Zone: {gameObject.name}");
+                    Debug.Log($"Player exited Safe Zone: {gameObject.name} (Total safe zones: {playerInSafeZoneCount})");
                 }
             }
         }
