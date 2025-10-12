@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 15003, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: Web_FastBuild
+  m_Name: Web
   m_EditorClassIdentifier: UnityEditor.dll::UnityEditor.Build.Profile.BuildProfile
   m_AssetVersion: 1
   m_BuildTarget: 20
@@ -34,13 +34,13 @@ MonoBehaviour:
     - line: '|   targetDevice: 2'
     - line: '|   useOnDemandResources: 0'
     - line: '|   accelerometerFrequency: 60'
-    - line: '|   companyName: UnPaidStartup'
-    - line: '|   productName: ProjectGaslight'
+    - line: '|   companyName: DefaultCompany'
+    - line: '|   productName: Cook Project'
     - line: '|   defaultCursor: {instanceID: 0}'
     - line: '|   cursorHotspot: {x: 0, y: 0}'
     - line: '|   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b:
         0.1254902, a: 1}'
-    - line: '|   m_ShowUnitySplashScreen: 0'
+    - line: '|   m_ShowUnitySplashScreen: 1'
     - line: '|   m_ShowUnitySplashLogo: 1'
     - line: '|   m_SplashScreenOverlayOpacity: 1'
     - line: '|   m_SplashScreenAnimation: 1'
@@ -67,8 +67,8 @@ MonoBehaviour:
     - line: '|   m_HolographicTrackingLossScreen: {instanceID: 0}'
     - line: '|   defaultScreenWidth: 1024'
     - line: '|   defaultScreenHeight: 768'
-    - line: '|   defaultScreenWidthWeb: 1920'
-    - line: '|   defaultScreenHeightWeb: 1080'
+    - line: '|   defaultScreenWidthWeb: 960'
+    - line: '|   defaultScreenHeightWeb: 600'
     - line: '|   m_StereoRenderingPath: 0'
     - line: '|   m_ActiveColorSpace: 1'
     - line: '|   unsupportedMSAAFallback: 0'
@@ -105,7 +105,7 @@ MonoBehaviour:
     - line: '|   androidApplicationEntry: 2'
     - line: '|   defaultIsNativeResolution: 1'
     - line: '|   macRetinaSupport: 1'
-    - line: '|   runInBackground: 1'
+    - line: '|   runInBackground: 0'
     - line: '|   muteOtherAudioSources: 0'
     - line: '|   Prepare IOS For Recording: 0'
     - line: '|   Force IOS Speakers When Recording: 0'
@@ -566,8 +566,7 @@ MonoBehaviour:
     - line: '|   openGLRequireES31: 0'
     - line: '|   openGLRequireES31AEP: 0'
     - line: '|   openGLRequireES32: 0'
-    - line: '|   m_TemplateCustomTags:'
-    - line: '|     PRODUCT_DESCRIPTION: Projecy Gaslight'
+    - line: '|   m_TemplateCustomTags: {}'
     - line: '|   mobileMTRendering:'
     - line: '|     Android: 1'
     - line: '|     iPhone: 1'
@@ -834,7 +833,7 @@ MonoBehaviour:
     - line: '|   webGLDebugSymbols: 0'
     - line: '|   webGLEmscriptenArgs: '
     - line: '|   webGLModulesDirectory: '
-    - line: '|   webGLTemplate: APPLICATION:PWA'
+    - line: '|   webGLTemplate: APPLICATION:Default'
     - line: '|   webGLAnalyzeBuildSize: 0'
     - line: '|   webGLUseEmbeddedResources: 0'
     - line: '|   webGLCompressionFormat: 2'
@@ -854,7 +853,25 @@ MonoBehaviour:
     - line: '|   webGLCloseOnQuit: 0'
     - line: '|   webWasm2023: 0'
     - line: '|   webEnableSubmoduleStrippingCompatibility: 0'
-    - line: '|   scriptingDefineSymbols: {}'
+    - line: '|   scriptingDefineSymbols:'
+    - line: '|     Android: DOTWEEN'
+    - line: '|     EmbeddedLinux: DOTWEEN'
+    - line: '|     GameCoreScarlett: DOTWEEN'
+    - line: '|     GameCoreXboxOne: DOTWEEN'
+    - line: '|     Kepler: DOTWEEN'
+    - line: '|     LinuxHeadlessSimulation: DOTWEEN'
+    - line: '|     Nintendo Switch: DOTWEEN'
+    - line: '|     PS4: DOTWEEN'
+    - line: '|     PS5: DOTWEEN'
+    - line: '|     QNX: DOTWEEN'
+    - line: '|     ReservedCFE: DOTWEEN'
+    - line: '|     Standalone: DOTWEEN'
+    - line: '|     VisionOS: DOTWEEN'
+    - line: '|     WebGL: DOTWEEN'
+    - line: '|     Windows Store Apps: DOTWEEN'
+    - line: '|     XboxOne: DOTWEEN'
+    - line: '|     iPhone: DOTWEEN'
+    - line: '|     tvOS: DOTWEEN'
     - line: '|   additionalCompilerArguments: {}'
     - line: '|   platformArchitecture: {}'
     - line: '|   scriptingBackend:'
@@ -989,7 +1006,7 @@ MonoBehaviour:
         m_InstallInBuildFolder: 0
         m_InsightsSettingsContainer:
           m_BuildProfileEngineDiagnosticsState: 2
-        m_CodeOptimization: 4
+        m_CodeOptimization: 0
         m_WebGLClientBrowserPath: 
         m_WebGLClientBrowserType: 0
         m_WebGLTextureSubtarget: 0

@@ -86,10 +86,20 @@ public class Weapon : MonoBehaviour
     [Tooltip("Number of shots per burst")]
     [Range(2, 10)]
     public int burstCount = 3;
-    
+
     [Tooltip("Pause between bursts")]
     [Range(0f, 2f)]
     public float burstPause = 0.2f;
+    #endregion
+    
+    #region Light System
+    [Header("Light Cost")]
+    [Tooltip("Light cost per shot (0 = no cost)")]
+    [Range(0f, 100f)]
+    public float lightCostPerShot = 20f;
+
+    [Tooltip("Allow firing with insufficient light")]
+    public bool allowFireWithoutLight = false;
     #endregion
 
     #region Ammo System
@@ -584,9 +594,25 @@ public class Weapon : MonoBehaviour
             return;
         }
         
+        // Check light cost
+        if (lightCostPerShot > 0f && !allowFireWithoutLight)
+        {
+            if (!LightRecoverySystem.HasEnoughLight(lightCostPerShot))
+            {
+                PlayDryFire();
+                return;
+            }
+        }
+        
         if (!infiniteAmmo)
         {
             currentAmmo--;
+        }
+        
+        // Drain light cost
+        if (lightCostPerShot > 0f)
+        {
+            LightRecoverySystem.DrainLight(lightCostPerShot);
         }
         
         float warmupMultiplier = enableWarmup ? (warmupCharge / maxWarmupTime) : 1f;
@@ -636,9 +662,25 @@ public class Weapon : MonoBehaviour
             return;
         }
         
+        // Check light cost
+        if (lightCostPerShot > 0f && !allowFireWithoutLight)
+        {
+            if (!LightRecoverySystem.HasEnoughLight(lightCostPerShot))
+            {
+                PlayDryFire();
+                return;
+            }
+        }
+        
         if (!infiniteAmmo)
         {
             currentAmmo--;
+        }
+        
+        // Drain light cost
+        if (lightCostPerShot > 0f)
+        {
+            LightRecoverySystem.DrainLight(lightCostPerShot);
         }
         
         float warmupMultiplier = enableWarmup ? (warmupCharge / maxWarmupTime) : 1f;
@@ -676,6 +718,18 @@ public class Weapon : MonoBehaviour
     {
         isBeaming = true;
         SendMessageUpwards("OnWeaponBeamFire", SendMessageOptions.DontRequireReceiver);
+        
+        // Drain light cost for beam weapons (per frame)
+        if (lightCostPerShot > 0f)
+        {
+            float beamLightCost = lightCostPerShot * Time.deltaTime;
+            if (!allowFireWithoutLight && !LightRecoverySystem.HasEnoughLight(beamLightCost))
+            {
+                StopBeam();
+                return;
+            }
+            LightRecoverySystem.DrainLight(beamLightCost);
+        }
         
         if (!infiniteBeam)
         {
