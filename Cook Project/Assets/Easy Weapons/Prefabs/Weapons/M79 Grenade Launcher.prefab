@@ -214,8 +214,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 456968}
-  - component: {fileID: 11456968}
   - component: {fileID: 8256968}
+  - component: {fileID: 6196081138801454883}
   m_Layer: 0
   m_Name: M79 Grenade Launcher
   m_TagString: Untagged
@@ -242,83 +242,6 @@ Transform:
   - {fileID: 456966}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &11456968
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 156968}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cfdbd9104e186642943082e0cd11378, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponType: 1
-  fireMode: 0
-  isPlayerWeapon: 1
-  weaponModel: {fileID: 156966}
-  raycastOrigin: {fileID: 0}
-  projectileSpawnPoint: {fileID: 456966}
-  muzzleEffectPoint: {fileID: 456966}
-  shellEjectPoint: {fileID: 0}
-  roundsPerSecond: 10
-  fireDelay: 0
-  burstCount: 3
-  burstPause: 0
-  infiniteAmmo: 0
-  magazineCapacity: 30
-  pelletsPerShot: 1
-  reloadTime: 2
-  autoReload: 1
-  damage: 50
-  impactForce: 10
-  beamDamagePerSecond: 20
-  range: 1000
-  projectilePrefab: {fileID: 100008, guid: a4b44abdbd241fa4faf6f507cff9873c, type: 3}
-  maxBeamDuration: 3
-  infiniteBeam: 0
-  beamReflects: 1
-  reflectiveMaterial: {fileID: 0}
-  maxReflections: 5
-  beamMaterial: {fileID: 0}
-  beamColor: {r: 1, g: 0, b: 0, a: 1}
-  beamStartWidth: 0.1
-  beamEndWidth: 0.2
-  baseAccuracy: 90
-  accuracyDecayPerShot: 1
-  accuracyRecoveryRate: 5
-  enableWarmup: 0
-  maxWarmupTime: 2
-  warmupAffectsDamage: 0
-  warmupAffectsForce: 1
-  warmupDamageMultiplier: 2
-  warmupForceMultiplier: 3
-  allowWarmupCancel: 0
-  enableRecoil: 0
-  recoilKickMin: 0.05
-  recoilKickMax: 0.15
-  recoilRotationMin: 3
-  recoilRotationMax: 4
-  recoilRecoverySpeed: 10
-  enableMuzzleFlash: 1
-  muzzleFlashPrefabs: []
-  enableImpactEffects: 1
-  impactEffectPrefabs: []
-  ejectShells: 0
-  shellPrefab: {fileID: 0}
-  shellEjectionForce: 10
-  shellForceVariance: 2
-  shellTorque: {x: 100, y: 100, z: 0}
-  shellTorqueVariance: 20
-  enableBulletHoles: 1
-  bulletHoleDetection: 0
-  bulletHoleMappings: []
-  defaultBulletHoles: []
-  bulletHoleExclusions: []
-  fireSound: {fileID: 0}
-  reloadSound: {fileID: 0}
-  dryFireSound: {fileID: 0}
 --- !u!82 &8256968
 AudioSource:
   m_ObjectHideFlags: 0
@@ -416,3 +339,82 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6196081138801454883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 156968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cfdbd9104e186642943082e0cd11378, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponType: 1
+  fireMode: 0
+  isPlayerWeapon: 1
+  weaponModel: {fileID: 156966}
+  raycastOrigin: {fileID: 0}
+  projectileSpawnPoint: {fileID: 456966}
+  muzzleEffectPoint: {fileID: 456966}
+  shellEjectPoint: {fileID: 0}
+  roundsPerSecond: 1
+  fireDelay: 0
+  burstCount: 3
+  burstPause: 0
+  lightCostPerShot: 20
+  allowFireWithoutLight: 0
+  infiniteAmmo: 1
+  magazineCapacity: 30
+  pelletsPerShot: 1
+  reloadTime: 2
+  autoReload: 1
+  damage: 50
+  impactForce: 10
+  beamDamagePerSecond: 20
+  range: 1000
+  projectilePrefab: {fileID: 100008, guid: a4b44abdbd241fa4faf6f507cff9873c, type: 3}
+  maxBeamDuration: 3
+  infiniteBeam: 0
+  beamReflects: 1
+  reflectiveMaterial: {fileID: 0}
+  maxReflections: 5
+  beamMaterial: {fileID: 0}
+  beamColor: {r: 1, g: 0, b: 0, a: 1}
+  beamStartWidth: 0.1
+  beamEndWidth: 0.2
+  baseAccuracy: 90
+  accuracyDecayPerShot: 1
+  accuracyRecoveryRate: 5
+  enableWarmup: 0
+  maxWarmupTime: 2
+  warmupAffectsDamage: 0
+  warmupAffectsForce: 1
+  warmupDamageMultiplier: 2
+  warmupForceMultiplier: 3
+  allowWarmupCancel: 0
+  enableRecoil: 0
+  recoilKickMin: 0.05
+  recoilKickMax: 0.15
+  recoilRotationMin: 3
+  recoilRotationMax: 4
+  recoilRecoverySpeed: 10
+  enableMuzzleFlash: 1
+  muzzleFlashPrefabs: []
+  enableImpactEffects: 1
+  impactEffectPrefabs: []
+  ejectShells: 0
+  shellPrefab: {fileID: 0}
+  shellEjectionForce: 10
+  shellForceVariance: 2
+  shellTorque: {x: 100, y: 100, z: 0}
+  shellTorqueVariance: 20
+  enableBulletHoles: 1
+  bulletHoleDetection: 0
+  bulletHoleMappings: []
+  defaultBulletHoles: []
+  bulletHoleExclusions: []
+  fireSound: {fileID: 0}
+  reloadSound: {fileID: 0}
+  dryFireSound: {fileID: 0}

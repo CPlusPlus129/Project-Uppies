@@ -11,6 +11,7 @@ public class WeaponEditor : Editor
 {
     private bool showReferences = true;
     private bool showFireRate = true;
+    private bool showLightCost = true;
     private bool showAmmo = true;
     private bool showDamage = true;
     private bool showProjectile = false;
@@ -71,6 +72,21 @@ public class WeaponEditor : Editor
                 weapon.burstCount = EditorGUILayout.IntSlider("Burst Count", weapon.burstCount, 2, 10);
                 weapon.burstPause = EditorGUILayout.Slider("Burst Pause", weapon.burstPause, 0f, 2f);
             }
+            EditorGUI.indentLevel--;
+        }
+        
+        EditorGUILayout.Space();
+        
+        // Light Cost
+        showLightCost = EditorGUILayout.Foldout(showLightCost, "Light Cost", true);
+        if (showLightCost)
+        {
+            EditorGUI.indentLevel++;
+            weapon.lightCostPerShot = EditorGUILayout.Slider("Light Cost Per Shot", weapon.lightCostPerShot, 0f, 100f);
+            weapon.allowFireWithoutLight = EditorGUILayout.Toggle("Allow Fire Without Light", weapon.allowFireWithoutLight);
+            
+            EditorGUILayout.Space();
+            EditorGUILayout.HelpBox("Light cost is consumed when the weapon fires. Set to 0 for no light cost.", MessageType.Info);
             EditorGUI.indentLevel--;
         }
         

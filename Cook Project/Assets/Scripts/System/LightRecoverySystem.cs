@@ -13,6 +13,10 @@ public class LightRecoverySystem : MonoBehaviour
 
     [SerializeField] [Range(0f, 100f)] private float rechargeSpeed = 5f;
     
+    [Header("Safe Zone Settings")]
+    [Tooltip("Multiplier for light recovery rate when in a safe zone (e.g., 3.0 = 3x faster recovery)")]
+    [SerializeField] [Range(1f, 10f)] private float safeZoneRecoveryMultiplier = 3f;
+    
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = false;
     
@@ -49,7 +53,17 @@ public class LightRecoverySystem : MonoBehaviour
         
         float currentLight = playerStatSystem.CurrentLight.Value;
         float maxLight = playerStatSystem.MaxLight.Value;
-        float recoverySpeed = rechargeSpeed;
+        
+        // Check if player is in a safe zone and apply multiplier
+        bool inSafeZone = SafeZone.IsPlayerInAnySafeZone;
+        float safeZoneBoost = inSafeZone ? safeZoneRecoveryMultiplier : 1f;
+        
+        // Check if player is near any enhanced light sources
+        float lightSourceBoost = EnhancedLightSource.GetActiveLightBoostMultiplier();
+        
+        // Apply the highest boost (safe zones and light sources don't stack, we use the better one)
+        float finalMultiplier = Mathf.Max(safeZoneBoost, lightSourceBoost);
+        float recoverySpeed = rechargeSpeed * finalMultiplier;
         
         // Check if we're at max light already
         if (currentLight >= maxLight)
@@ -77,7 +91,13 @@ public class LightRecoverySystem : MonoBehaviour
             
             if (showDebugInfo)
             {
-                Debug.Log($"Light Recovery: {currentLight:F2} -> {newLight:F2} (Rate: {recoverySpeed}/s)");
+                string boostStatus = "";
+                if (SafeZone.IsPlayerInAnySafeZone)
+                    boostStatus = " [SAFE ZONE BOOST]";
+                else if (EnhancedLightSource.IsPlayerNearAnyLightSource())
+                    boostStatus = $" [LIGHT SOURCE BOOST {lightSourceBoost:F1}x]";
+                
+                Debug.Log($"Light Recovery: {currentLight:F2} -> {newLight:F2} (Rate: {recoverySpeed}/s){boostStatus}");
             }
         }
     }

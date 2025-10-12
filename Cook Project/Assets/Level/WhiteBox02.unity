@@ -10380,10 +10380,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2140928474}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8985326193973131990, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2079492266}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
 --- !u!1001 &262813647
 PrefabInstance:
@@ -37174,6 +37171,7 @@ GameObject:
   - component: {fileID: 939882763}
   - component: {fileID: 939882762}
   - component: {fileID: 939882761}
+  - component: {fileID: 939882764}
   m_Layer: 0
   m_Name: Point light 12 (24)
   m_TagString: Untagged
@@ -37292,7 +37290,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 2
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -37307,6 +37305,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &939882764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 939882759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13f2030d47e438246a34461864c04ef0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnhancedLightSource
+  recoveryMultiplier: 2.5
+  effectiveRange: 5
+  autoCreateCollider: 1
+  autoCreateLightBulb: 1
+  lightBulbSize: 2
+  lightColor: {r: 0.63318694, g: 0.95687324, b: 0.9400536, a: 1}
+  enableEmission: 1
+  emissionColor: {r: 0.8, g: 0.8030674, b: 1, a: 1}
+  emissionIntensity: 2
+  meshRenderer: {fileID: 0}
+  lightComponent: {fileID: 0}
+  playerTag: Player
+  allowStacking: 1
+  priority: 0
+  showDebugMessages: 0
+  showGizmo: 1
+  gizmoColor: {r: 1, g: 1, b: 0.5, a: 0.3}
 --- !u!1 &942937061
 GameObject:
   m_ObjectHideFlags: 0
@@ -88212,27 +88239,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 462572, guid: 3bf01e09059dad54b985779213d8dca8, type: 3}
   m_PrefabInstance: {fileID: 439436643}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2079492256 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8985326193973131990, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
-  m_PrefabInstance: {fileID: 261736250}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2079492266
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2079492256}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07c60f62fb595b14ebfe3a374fe93d9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LightRecoverySystem
-  enablePassiveRecovery: 1
-  recoveryDelay: 0
-  rechargeSpeed: 1
-  showDebugInfo: 0
 --- !u!1 &2082333238
 GameObject:
   m_ObjectHideFlags: 0
