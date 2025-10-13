@@ -8,7 +8,7 @@ public interface IShiftSystem : IGameService
     ReactiveProperty<int> requiredOrderCount { get; }
     ReactiveProperty<float> shiftTimer { get; }
     ReactiveProperty<ShiftState> currentState { get; }
-    Subject<Unit> OnGameStart { get; }
+    ReplaySubject<Unit> OnGameStart { get; }
     void StartGame();
     void StartNextShift();
     bool IsCurrentShiftQuestCompleted();

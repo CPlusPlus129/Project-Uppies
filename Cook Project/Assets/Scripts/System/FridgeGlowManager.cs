@@ -8,7 +8,7 @@ public class FridgeGlowManager : IFridgeGlowManager
 {
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
-    
+
     private readonly IOrderManager orderManager;
     private Dictionary<Order, List<FoodSource>> glowingFridgesPerOrder = new Dictionary<Order, List<FoodSource>>();
     private CompositeDisposable disposables = new CompositeDisposable();
@@ -23,7 +23,7 @@ public class FridgeGlowManager : IFridgeGlowManager
         InitializeSubscriptions();
         await UniTask.CompletedTask;
     }
-    
+
     private void InitializeSubscriptions()
     {
         if (orderManager != null)
@@ -35,11 +35,11 @@ public class FridgeGlowManager : IFridgeGlowManager
             orderManager.OnOrderServed
                 .Subscribe(order => HandleOrderServed(order))
                 .AddTo(disposables);
-                
+
             orderManager.OnOrdersCleared
                 .Subscribe(_ => HandleOrdersCleared())
                 .AddTo(disposables);
-                
+
             if (enableDebugLogs) Debug.Log("FridgeGlowManager: Subscribed to OrderManager events");
         }
         else
@@ -47,7 +47,7 @@ public class FridgeGlowManager : IFridgeGlowManager
             Debug.LogError("FridgeGlowManager: OrderManager is null!");
         }
     }
-    
+
     private void HandleNewOrder(Order order)
     {
         if (order == null)
@@ -55,57 +55,60 @@ public class FridgeGlowManager : IFridgeGlowManager
             if (enableDebugLogs) Debug.LogWarning("FridgeGlowManager: Received null order");
             return;
         }
-        
+
         if (enableDebugLogs) Debug.Log($"New Order: {order.MealName}");
-        
+
         if (Database.Instance == null || Database.Instance.recipeData == null)
         {
             Debug.LogError("FridgeGlowManager: Database or RecipeData is not available");
             return;
         }
-        
+
         Recipe recipe = Database.Instance.recipeData.GetRecipeByName(order.MealName);
         if (recipe == null || recipe.ingredients == null || recipe.ingredients.Length == 0)
         {
             if (enableDebugLogs) Debug.LogWarning($"No recipe found for {order.MealName}");
             return;
         }
-        
+
         if (enableDebugLogs) Debug.Log($"Ingredients needed: {string.Join(", ", recipe.ingredients)}");
-        
+
         FoodSource[] allFridges = GameObject.FindObjectsByType<FoodSource>(FindObjectsSortMode.None);
         if (allFridges == null || allFridges.Length == 0)
         {
             if (enableDebugLogs) Debug.LogWarning("No fridges found in scene");
             return;
         }
-        
+
         HashSet<string> uniqueIngredients = new HashSet<string>(recipe.ingredients, System.StringComparer.InvariantCultureIgnoreCase);
         List<FoodSource> fridgesToGlow = new List<FoodSource>();
-        
+
         foreach (string ingredient in uniqueIngredients)
         {
-            FoodSource fridge = allFridges.FirstOrDefault(f => f.ContainsIngredient(ingredient));
-            if (fridge != null && !fridgesToGlow.Contains(fridge))
-            {
-                fridgesToGlow.Add(fridge);
-                if (enableDebugLogs) Debug.Log($"Matched '{ingredient}' → {fridge.ItemName}");
-            }
-            else if (fridge == null && enableDebugLogs)
+            var containingIngredientFridges = allFridges.Where(f => f.ContainsIngredient(ingredient));
+            if (containingIngredientFridges.Count() == 0 && enableDebugLogs)
             {
                 Debug.LogWarning($"No fridge found for ingredient: {ingredient}");
             }
+            foreach (var fridge in containingIngredientFridges)
+            {
+                if (!fridgesToGlow.Contains(fridge))
+                {
+                    fridgesToGlow.Add(fridge);
+                    if (enableDebugLogs) Debug.Log($"Matched '{ingredient}' → {fridge.ItemName}");
+                }
+            }
         }
-        
+
         if (fridgesToGlow.Count > 0)
         {
             glowingFridgesPerOrder[order] = fridgesToGlow;
-            
+
             foreach (var fridge in fridgesToGlow)
             {
                 fridge.StartGlowing();
             }
-            
+
             if (enableDebugLogs) Debug.Log($"Started glowing {fridgesToGlow.Count} fridges for {order.MealName}");
         }
         else if (enableDebugLogs)
@@ -113,11 +116,11 @@ public class FridgeGlowManager : IFridgeGlowManager
             Debug.LogError($"No fridges found with ingredients for {order.MealName}");
         }
     }
-    
+
     private void HandleOrderServed(Order order)
     {
         Order matchingOrder = glowingFridgesPerOrder.Keys.FirstOrDefault(o => o.Equals(order));
-        
+
         if (matchingOrder != null && glowingFridgesPerOrder.TryGetValue(matchingOrder, out List<FoodSource> fridges))
         {
             foreach (var fridge in fridges)
@@ -127,13 +130,13 @@ public class FridgeGlowManager : IFridgeGlowManager
                     fridge.StopGlowing();
                 }
             }
-            
+
             glowingFridgesPerOrder.Remove(matchingOrder);
-            
+
             if (enableDebugLogs) Debug.Log($"Stopped glowing fridges for order: {order.MealName}");
         }
     }
-    
+
     private void HandleOrdersCleared()
     {
         foreach (var kvp in glowingFridgesPerOrder)
@@ -143,11 +146,11 @@ public class FridgeGlowManager : IFridgeGlowManager
                 if (fridge != null) fridge.StopGlowing();
             }
         }
-        
+
         glowingFridgesPerOrder.Clear();
         if (enableDebugLogs) Debug.Log("Cleared all glowing fridges");
     }
-    
+
     private bool IsFridgeNeededForOtherOrders(FoodSource fridge, Order excludeOrder)
     {
         foreach (var kvp in glowingFridgesPerOrder)
@@ -159,7 +162,7 @@ public class FridgeGlowManager : IFridgeGlowManager
         }
         return false;
     }
-    
+
     public void RefreshGlowStates()
     {
         foreach (var kvp in glowingFridgesPerOrder)
@@ -170,12 +173,12 @@ public class FridgeGlowManager : IFridgeGlowManager
             }
         }
         glowingFridgesPerOrder.Clear();
-        
+
         var pendingOrders = orderManager.pendingOrders;
         foreach (var order in pendingOrders)
         {
             HandleNewOrder(order);
         }
     }
-    
+
 }

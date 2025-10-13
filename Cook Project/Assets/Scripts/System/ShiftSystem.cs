@@ -17,7 +17,7 @@ public class ShiftSystem : IShiftSystem
     public ReactiveProperty<int> requiredOrderCount { get; } = new ReactiveProperty<int>();
     public ReactiveProperty<float> shiftTimer { get; } = new ReactiveProperty<float>();
     public ReactiveProperty<ShiftState> currentState { get; } = new ReactiveProperty<ShiftState>();
-    public Subject<Unit> OnGameStart { get; } = new Subject<Unit>();
+    public ReplaySubject<Unit> OnGameStart { get; } = new ReplaySubject<Unit>(1);
     private readonly IQuestService questService;
     private readonly IOrderManager orderManager;
     private bool hasRunTutorial = false;

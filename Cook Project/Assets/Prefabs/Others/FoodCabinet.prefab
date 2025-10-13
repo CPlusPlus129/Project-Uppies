@@ -317,6 +317,7 @@ GameObject:
   - component: {fileID: 5353601945475235384}
   - component: {fileID: 8948744908737421947}
   - component: {fileID: 7654696861010887868}
+  - component: {fileID: -1011726877848763724}
   m_Layer: 6
   m_Name: FoodCabinet
   m_TagString: Untagged
@@ -377,6 +378,26 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 0.3}
   m_Center: {x: 0, y: 1.1, z: 0}
+--- !u!114 &-1011726877848763724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4872169377035788883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8491a78c66a7f964fbdee41a8a96da11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FridgeGlowController
+  glowColor: {r: 0.5, g: 1, b: 0.5, a: 1}
+  glowIntensity: 3
+  pulseSpeed: 3
+  glowScale: 1.1
+  fresnelPower: 3
+  pulseIntensityVariation: 0.5
+  glowMaterial: {fileID: 0}
+  enableDebugLogs: 0
 --- !u!1 &7004332891898472192
 GameObject:
   m_ObjectHideFlags: 0
