@@ -154,7 +154,8 @@ public class EnhancedLightSource : MonoBehaviour
                 Debug.Log($"[EnhancedLightSource] Auto-detected Light component on {gameObject.name}");
             }
         }
-        
+
+#if UNITY_EDITOR
         // Check if Light is baked and warn user
         if (lightComponent != null && lightComponent.lightmapBakeType == LightmapBakeType.Baked && !hasWarnedAboutBakedLight)
         {
@@ -164,7 +165,8 @@ public class EnhancedLightSource : MonoBehaviour
                            $"Consider using 'Mixed' or 'Realtime' mode if you need runtime light updates.", this);
             hasWarnedAboutBakedLight = true;
         }
-        
+#endif
+
         // Setup or create collider
         SetupCollider();
         
@@ -468,7 +470,8 @@ public class EnhancedLightSource : MonoBehaviour
                 }
             }
         }
-        
+
+#if UNITY_EDITOR
         // Update Unity Light component if present and not baked
         if (lightComponent != null)
         {
@@ -488,7 +491,8 @@ public class EnhancedLightSource : MonoBehaviour
                 Debug.Log($"[EnhancedLightSource] Skipped Light component update on {gameObject.name} (Baked mode)");
             }
         }
-        
+#endif
+
         if (!updated && showDebugMessages)
         {
             Debug.LogWarning($"[EnhancedLightSource] No properties were updated on {gameObject.name}. Check material setup.");
