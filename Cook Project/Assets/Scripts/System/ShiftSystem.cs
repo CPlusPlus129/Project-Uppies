@@ -18,14 +18,16 @@ public class ShiftSystem : IShiftSystem
     public ReactiveProperty<float> shiftTimer { get; } = new ReactiveProperty<float>();
     public ReactiveProperty<ShiftState> currentState { get; } = new ReactiveProperty<ShiftState>();
     public Subject<Unit> OnGameStart { get; } = new Subject<Unit>();
-    private IQuestService questService;
+    private readonly IQuestService questService;
+    private readonly IOrderManager orderManager;
     private bool hasRunTutorial = false;
     private CompositeDisposable updateDisposible = new CompositeDisposable();
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public ShiftSystem(IQuestService questService)
+    public ShiftSystem(IQuestService questService, IOrderManager orderManager)
     {
         this.questService = questService;
+        this.orderManager = orderManager;
     }
 
     public async UniTask Init()
@@ -36,7 +38,7 @@ public class ShiftSystem : IShiftSystem
     public void StartGame()
     {
         ResetGame();
-        OrderManager.Instance.OnOrderServed.Subscribe(_ =>
+        orderManager.OnOrderServed.Subscribe(_ =>
         {
             completedOrderCount.Value++;
         }).AddTo(disposables);
@@ -122,7 +124,7 @@ public class ShiftSystem : IShiftSystem
     private void RunAfterShift()
     {
         updateDisposible.Clear();
-        OrderManager.Instance.ClearOrders();
+        orderManager.ClearOrders();
         var passed = CheckShiftRequirementsMet();
         if (!passed)
         {

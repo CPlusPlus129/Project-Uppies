@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class Customer : MonoBehaviour, IInteractable
@@ -10,10 +11,13 @@ public class Customer : MonoBehaviour, IInteractable
         OrderPlaced, WaitingForMeal
     }
     private CustomerState state = CustomerState.WaitingForOrder;
+    private IOrderManager orderManager;
 
-    private void Awake()
+    private async void Awake()
     {
         nameText.text = customerName;
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
     }
 
     public void Interact()
@@ -37,7 +41,7 @@ public class Customer : MonoBehaviour, IInteractable
             CustomerName = customerName,
             MealName = randRecipe.mealName
         };
-        OrderManager.Instance.PlaceOrder(order);
+        orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;
         Debug.Log($"{customerName} placed order: {order.MealName}");
         WorldBroadcastSystem.Instance.Broadcast($"Check recipes in the pot. Find ingredients on the map to cook them.", 60f);
@@ -47,14 +51,14 @@ public class Customer : MonoBehaviour, IInteractable
     {
         if (state != CustomerState.WaitingForMeal) return false;
         if (item is not Meal meal) return false;
-        var pendingOrder = OrderManager.Instance.GetPendingOrderForCustomer(customerName);
+        var pendingOrder = orderManager.GetPendingOrderForCustomer(customerName);
         return pendingOrder != null && pendingOrder.MealName.Equals(meal.ItemName, System.StringComparison.InvariantCultureIgnoreCase);
     }
 
     public void ReceiveMeal(ItemBase meal)
     {
         var order = new Order { CustomerName = customerName, MealName = meal.ItemName };
-        if (OrderManager.Instance.ServeOrder(order))
+        if (orderManager.ServeOrder(order))
         {
             InventorySystem.Instance.RemoveSelectedItem();
             state = CustomerState.WaitingForOrder;

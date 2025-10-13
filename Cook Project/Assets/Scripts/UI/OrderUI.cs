@@ -7,14 +7,16 @@ public class OrderUI : MonoBehaviour
 {
     public Transform listRoot;
     public OrderListItem orderListItemPrefab;
+    private IOrderManager orderManager;
     private List<OrderListItem> itemList = new List<OrderListItem>();
 
-    private void Awake()
+    private async void Awake()
     {
         orderListItemPrefab.gameObject.SetActive(false);
-        OrderManager.Instance.OnNewOrder.Subscribe(OnNewOrder).AddTo(this);
-        OrderManager.Instance.OnOrderServed.Subscribe(OnOrderServed).AddTo(this);
-        OrderManager.Instance.OnOrdersCleared.Subscribe(OnOrdersCleared).AddTo(this);
+        orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
+        orderManager.OnNewOrder.Subscribe(OnNewOrder).AddTo(this);
+        orderManager.OnOrderServed.Subscribe(OnOrderServed).AddTo(this);
+        orderManager.OnOrdersCleared.Subscribe(OnOrdersCleared).AddTo(this);
     }
 
     private void OnNewOrder(Order order)

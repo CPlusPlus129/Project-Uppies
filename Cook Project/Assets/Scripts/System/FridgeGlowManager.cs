@@ -2,36 +2,38 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using R3;
+using Cysharp.Threading.Tasks;
 
 public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
 {
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
     
+    private IOrderManager orderManager;
     private Dictionary<Order, List<FoodSource>> glowingFridgesPerOrder = new Dictionary<Order, List<FoodSource>>();
     private CompositeDisposable disposables = new CompositeDisposable();
     
     protected override void Awake()
     {
         base.Awake();
-        StartCoroutine(InitializeSubscriptions());
+        InitializeSubscriptions().Forget();
     }
     
-    private System.Collections.IEnumerator InitializeSubscriptions()
+    private async UniTask InitializeSubscriptions()
     {
-        yield return null;
-        
-        if (OrderManager.Instance != null)
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
+        if (orderManager != null)
         {
-            OrderManager.Instance.OnNewOrder
+            orderManager.OnNewOrder
                 .Subscribe(order => HandleNewOrder(order))
                 .AddTo(disposables);
-                
-            OrderManager.Instance.OnOrderServed
+
+            orderManager.OnOrderServed
                 .Subscribe(order => HandleOrderServed(order))
                 .AddTo(disposables);
                 
-            OrderManager.Instance.OnOrdersCleared
+            orderManager.OnOrdersCleared
                 .Subscribe(_ => HandleOrdersCleared())
                 .AddTo(disposables);
                 
@@ -166,7 +168,7 @@ public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
         }
         glowingFridgesPerOrder.Clear();
         
-        var pendingOrders = OrderManager.Instance.GetPendingOrders();
+        var pendingOrders = orderManager.pendingOrders;
         foreach (var order in pendingOrders)
         {
             HandleNewOrder(order);

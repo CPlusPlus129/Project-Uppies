@@ -34,13 +34,15 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         //Service that needs other service dependencies please add it AFTER their dependencies are registered.
         Register<IAssetLoader>(() => new AssetLoader());
         Register<ITableManager>(() => new TableManager());
+        Register<IOrderManager>(() => new OrderManager());
         Register<ISceneManagementService>(() => new SceneManagementService());
         Register<IQuestService>(() => new QuestManager(
             Get<ITableManager>()));
-        Register<IShiftSystem>(() => new ShiftSystem(
-            Get<IQuestService>()));
         Register<IPuzzleGameManager>(() => new PuzzleGameManager(
             Get<IQuestService>()));
+        Register<IShiftSystem>(() => new ShiftSystem(
+            Get<IQuestService>(),
+            Get<IOrderManager>()));
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         var debugManagerGO = new UnityEngine.GameObject("DebugManager");

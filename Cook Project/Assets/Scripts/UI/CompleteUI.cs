@@ -4,11 +4,13 @@ using UnityEngine;
 public class CompleteUI : MonoBehaviour //This purpose is too specific, will need to rename or refactor in the future
 {
     public WorldPosFollowUI followPrefab;
+    private IOrderManager orderManager;
 
-    private void Awake()
+    private async void Awake()
     {
         followPrefab.gameObject.SetActive(false);
-        OrderManager.Instance.OnOrderServed.Subscribe(order =>
+        orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
+        orderManager.OnOrderServed.Subscribe(order =>
         {
             // need to get customer transform from order somehow, this is inefficient
             var allCustomerArr = Object.FindObjectsByType<Customer>(FindObjectsSortMode.None);
@@ -23,7 +25,7 @@ public class CompleteUI : MonoBehaviour //This purpose is too specific, will nee
                     break;
                 }
             }
-        });
+        }).AddTo(this);
     }
 
     public void Open()
