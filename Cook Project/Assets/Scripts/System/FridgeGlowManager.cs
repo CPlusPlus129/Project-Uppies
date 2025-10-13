@@ -4,25 +4,28 @@ using System.Linq;
 using R3;
 using Cysharp.Threading.Tasks;
 
-public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
+public class FridgeGlowManager : IFridgeGlowManager
 {
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
     
-    private IOrderManager orderManager;
+    private readonly IOrderManager orderManager;
     private Dictionary<Order, List<FoodSource>> glowingFridgesPerOrder = new Dictionary<Order, List<FoodSource>>();
     private CompositeDisposable disposables = new CompositeDisposable();
-    
-    protected override void Awake()
+
+    public FridgeGlowManager(IOrderManager orderManager)
     {
-        base.Awake();
-        InitializeSubscriptions().Forget();
+        this.orderManager = orderManager;
+    }
+
+    public async UniTask Init()
+    {
+        InitializeSubscriptions();
+        await UniTask.CompletedTask;
     }
     
-    private async UniTask InitializeSubscriptions()
+    private void InitializeSubscriptions()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
-        orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         if (orderManager != null)
         {
             orderManager.OnNewOrder
@@ -41,7 +44,7 @@ public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
         }
         else
         {
-            Debug.LogError("FridgeGlowManager: OrderManager.Instance is null!");
+            Debug.LogError("FridgeGlowManager: OrderManager is null!");
         }
     }
     
@@ -70,7 +73,7 @@ public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
         
         if (enableDebugLogs) Debug.Log($"Ingredients needed: {string.Join(", ", recipe.ingredients)}");
         
-        FoodSource[] allFridges = FindObjectsByType<FoodSource>(FindObjectsSortMode.None);
+        FoodSource[] allFridges = GameObject.FindObjectsByType<FoodSource>(FindObjectsSortMode.None);
         if (allFridges == null || allFridges.Length == 0)
         {
             if (enableDebugLogs) Debug.LogWarning("No fridges found in scene");
@@ -175,8 +178,4 @@ public class FridgeGlowManager : MonoSingleton<FridgeGlowManager>
         }
     }
     
-    override public void OnDestroy()
-    {
-        disposables?.Dispose();
-    }
 }

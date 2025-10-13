@@ -25,7 +25,7 @@ public class CardSwipeGame : IPuzzle
     private void GenerateSpeedRange()
     {
         float baseSpeed = UnityEngine.Random.Range(600f, 1000f);
-        float tolerance = 100;
+        float tolerance = 125;
 
         MinSpeed = baseSpeed - tolerance;
         MaxSpeed = baseSpeed + tolerance;

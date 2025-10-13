@@ -1,6 +1,7 @@
+using R3;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using R3;
 
 public class CardReader : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CardReader : MonoBehaviour
     [SerializeField] private Color readyColor = Color.yellow;
     [SerializeField] private Color successColor = Color.green;
     [SerializeField] private Color failColor = Color.red;
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     private void Awake()
     {
@@ -37,10 +39,10 @@ public class CardReader : MonoBehaviour
     {
         SetStatus(CardReaderStatus.Success);
         statusLight.transform.localScale = Vector3.one * 1.2f;
-
+        disposables.Clear();
         Observable.Timer(System.TimeSpan.FromSeconds(0.1f))
             .Subscribe(_ => statusLight.transform.localScale = Vector3.one)
-            .AddTo(this);
+            .AddTo(disposables);
     }
 
     public void PlayFailAnimation()
@@ -49,14 +51,14 @@ public class CardReader : MonoBehaviour
 
         var originalPos = statusLight.transform.localPosition;
         statusLight.transform.localPosition = originalPos + Vector3.right * 5f;
-
+        disposables.Clear();
         Observable.Timer(System.TimeSpan.FromSeconds(0.1f))
             .Subscribe(_ => statusLight.transform.localPosition = originalPos - Vector3.right * 5f)
-            .AddTo(this);
+            .AddTo(disposables);
 
         Observable.Timer(System.TimeSpan.FromSeconds(0.2f))
             .Subscribe(_ => statusLight.transform.localPosition = originalPos)
-            .AddTo(this);
+            .AddTo(disposables);
     }
 }
 

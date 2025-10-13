@@ -5,11 +5,10 @@ public class PuzzleGameManager : IPuzzleGameManager
 {
     public ReactiveProperty<IPuzzle> CurrentPuzzleGame = new ReactiveProperty<IPuzzle>();
     public ReactiveProperty<Quest> CurrentPuzzleQuest = new ReactiveProperty<Quest>();
-    public ReactiveProperty<bool> IsGameActive { get;  } = new ReactiveProperty<bool>(false);
+    public ReactiveProperty<bool> IsGameActive { get; } = new ReactiveProperty<bool>(false);
 
-    public ReplaySubject<IPuzzle> OnGameStarted { get;  } = new ReplaySubject<IPuzzle>(1);
-    public Subject<string> OnGameCompleted { get; } = new Subject<string>();
-    public Subject<string> OnGameClosed = new Subject<string>();
+    public ReplaySubject<IPuzzle> OnGameStarted { get; } = new ReplaySubject<IPuzzle>(1);
+    public Subject<IPuzzle> OnGameCompleted { get; } = new Subject<IPuzzle>();
     private readonly IQuestService questService;
 
     public PuzzleGameManager(IQuestService questService)
@@ -19,12 +18,12 @@ public class PuzzleGameManager : IPuzzleGameManager
 
     public async UniTask Init()
     {
-         await UniTask.CompletedTask;
+        await UniTask.CompletedTask;
     }
 
-    public void StartPuzzleGame(PuzzleGameType puzzleType, Quest quest)
+    public IPuzzle StartPuzzleGame(PuzzleGameType puzzleType, Quest quest = null)
     {
-        if (IsGameActive.Value) return;
+        if (IsGameActive.Value) return null;
 
         CurrentPuzzleGame.Value = puzzleType switch
         {
@@ -35,6 +34,7 @@ public class PuzzleGameManager : IPuzzleGameManager
         CurrentPuzzleQuest.Value = quest;
         IsGameActive.Value = true;
         OnGameStarted.OnNext(CurrentPuzzleGame.Value);
+        return CurrentPuzzleGame.Value;
     }
 
     public void CompletePuzzleGame(PuzzleGameType puzzleType)
@@ -48,20 +48,22 @@ public class PuzzleGameManager : IPuzzleGameManager
     {
         if (!IsGameActive.Value) return;
 
-        CurrentPuzzleQuest.Value.IsSolved = true;
-        var questId = CurrentPuzzleQuest.Value.Id;
-        questService.CompleteQuest(CurrentPuzzleQuest.Value.Id);
+        if (CurrentPuzzleQuest.Value != null)
+        {
+            CurrentPuzzleQuest.Value.IsSolved = true;
+            var questId = CurrentPuzzleQuest.Value.Id;
+            questService.CompleteQuest(CurrentPuzzleQuest.Value.Id);
+        }
 
+        var game = CurrentPuzzleGame.Value;
         EndGame();
-        OnGameCompleted.OnNext(questId);
+        OnGameCompleted.OnNext(game);
     }
 
     public void EndGame()
     {
-        var questId = CurrentPuzzleQuest.Value.Id;
         CurrentPuzzleGame.Value = null;
         CurrentPuzzleQuest.Value = null;
         IsGameActive.Value = false;
-        OnGameClosed.OnNext(questId);
     }
 }

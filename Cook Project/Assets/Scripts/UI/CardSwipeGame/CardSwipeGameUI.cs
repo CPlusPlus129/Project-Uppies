@@ -27,7 +27,7 @@ public class CardSwipeGameUI : MonoBehaviour
     {
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
         puzzleGameManager.OnGameStarted
-            .Where(x => x is CardSwipeGame)
+            .Where(x => x.puzzleType == PuzzleGameType.CardSwipe)
             .Subscribe(game =>
             {
                 currentGame = game as CardSwipeGame;

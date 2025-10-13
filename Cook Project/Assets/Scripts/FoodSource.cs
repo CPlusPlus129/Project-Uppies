@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class FoodSource : MonoBehaviour, IInteractable
@@ -6,8 +7,9 @@ public class FoodSource : MonoBehaviour, IInteractable
     public TMPro.TMP_Text ItemNameText;
     
     private FridgeGlowController glowController;
+    private IFridgeGlowManager glowManager;
 
-    private void Awake()
+    private async void Awake()
     {
         if (ItemNameText != null && !string.IsNullOrEmpty(ItemName))
         {
@@ -19,6 +21,9 @@ public class FoodSource : MonoBehaviour, IInteractable
         {
             glowController = gameObject.AddComponent<FridgeGlowController>();
         }
+
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        glowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
     }
 
     public void SetItemName(string name)
@@ -29,9 +34,9 @@ public class FoodSource : MonoBehaviour, IInteractable
             ItemNameText.text = ItemName;
         }
         
-        if (FridgeGlowManager.Instance != null)
+        if (glowManager != null)
         {
-            FridgeGlowManager.Instance.RefreshGlowStates();
+            glowManager.RefreshGlowStates();
         }
     }
 

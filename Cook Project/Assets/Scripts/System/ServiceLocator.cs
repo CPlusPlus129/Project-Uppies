@@ -31,7 +31,7 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
 
     private void RegisterAllServices()
     {
-        //Service that needs other service dependencies please add it AFTER their dependencies are registered.
+        //Service that requires other service dependencies please add it AFTER their dependencies are registered.
         Register<IAssetLoader>(() => new AssetLoader());
         Register<ITableManager>(() => new TableManager());
         Register<IOrderManager>(() => new OrderManager());
@@ -40,6 +40,8 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
             Get<ITableManager>()));
         Register<IPuzzleGameManager>(() => new PuzzleGameManager(
             Get<IQuestService>()));
+        Register<IFridgeGlowManager>(() => new FridgeGlowManager(
+            Get<IOrderManager>()));
         Register<IShiftSystem>(() => new ShiftSystem(
             Get<IQuestService>(),
             Get<IOrderManager>()));

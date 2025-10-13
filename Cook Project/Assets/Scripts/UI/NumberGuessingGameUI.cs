@@ -39,7 +39,7 @@ public class NumberGuessingGameUI : MonoBehaviour
     {
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
 
-        puzzleGameManager.OnGameStarted.Where(x => x is NumberGuessingGame).Subscribe(game =>
+        puzzleGameManager.OnGameStarted.Where(x => x.puzzleType == PuzzleGameType.NumberGuessing).Subscribe(game =>
         {
             currentGame = game as NumberGuessingGame;
             UpdateHint();

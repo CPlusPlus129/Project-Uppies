@@ -8,7 +8,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     [SerializeField] private Animator anim;
     private IPuzzleGameManager puzzleGameManager;
     private IQuestService questService;
-    private string questId;
+    private IPuzzle gameInstance;
     private bool doorOpen;
 
     private async void Awake()
@@ -47,15 +47,15 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     private void OpenNumberGuessingGame(Quest quest)
     {
         UIRoot.Instance.GetUIComponent<NumberGuessingGameUI>()?.Open();
-        puzzleGameManager.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
+        gameInstance = puzzleGameManager.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
     }
 
     private void OpenCardSwipeGame(Quest quest)
     {
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
-        puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
+        gameInstance = puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
         puzzleGameManager.OnGameCompleted
-            .Where(x => x == quest.Id)
+            .Where(x => x == gameInstance)
             .Take(1)
             .Subscribe(_ => PlayDoorAnimation())
             .AddTo(this);

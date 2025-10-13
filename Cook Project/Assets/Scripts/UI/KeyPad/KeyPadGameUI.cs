@@ -28,6 +28,7 @@ public class KeyPadGameUI : MonoBehaviour
     private void OnDisable()
     {
         InputManager.Instance.PopActionMap("KeyPad");
+        if (DigitalDisplay != null) DigitalDisplay.OnSolved -= HandleSolved;
     }
 
     public void OpenPuzzle(System.Action onSuccess, System.Action onClosed)
