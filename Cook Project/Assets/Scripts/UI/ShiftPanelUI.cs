@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using R3;
 using System;
+using Cysharp.Threading.Tasks;
 
 public class ShiftPanelUI : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class ShiftPanelUI : MonoBehaviour
 
     private async void Awake()
     {
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
         shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);

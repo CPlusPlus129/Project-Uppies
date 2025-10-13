@@ -3,8 +3,6 @@ using UnityEngine;
 public class KeyPadGameTrigger : MonoBehaviour, IInteractable
 {
     [SerializeField]
-    private KeyPadGameUI keyPadUI;
-    [SerializeField]
     private SecretWall wall;
 
     private bool isActive;
@@ -12,6 +10,7 @@ public class KeyPadGameTrigger : MonoBehaviour, IInteractable
     public void Interact()
     {
         if (isActive) return;
+        var keyPadUI = UIRoot.Instance.GetUIComponent<KeyPadGameUI>();
         if (keyPadUI == null) { Debug.LogWarning("KeyPadGameUI is not assigned."); return; }
 
         isActive = true;

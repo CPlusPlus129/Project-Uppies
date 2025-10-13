@@ -79,6 +79,11 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         }
     }
 
+    /// <summary>
+    /// WARNING: DO NOT USE THIS IN Init()!!!
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public async UniTask<T> GetAsync<T>() where T : IGameService
     {
         var serviceType = typeof(T);

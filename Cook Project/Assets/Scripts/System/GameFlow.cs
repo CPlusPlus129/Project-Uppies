@@ -6,8 +6,10 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     protected override void Awake()
     {
-        if (isInitialized) return;
         base.Awake();
+        if (Instance != this)
+            return;
+        if (isInitialized) return;
         StartGame().Forget();
     }
 
