@@ -1,4 +1,4 @@
-const cacheName = "UnPaidStartup-ProjectGaslight-0.1.0";
+const cacheName = "DefaultCompany-Cook Project-0.1.1";
 const contentToCache = [
     "Build/docs.loader.js",
     "Build/docs.framework.js",
