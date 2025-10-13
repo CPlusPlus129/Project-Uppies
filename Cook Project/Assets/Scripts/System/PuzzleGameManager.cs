@@ -48,7 +48,7 @@ public class PuzzleGameManager : IPuzzleGameManager
     {
         if (!IsGameActive.Value) return;
 
-        CurrentPuzzleQuest.Value.CompleteQuest();
+        CurrentPuzzleQuest.Value.IsSolved = true;
         var questId = CurrentPuzzleQuest.Value.Id;
         questService.CompleteQuest(CurrentPuzzleQuest.Value.Id);
 

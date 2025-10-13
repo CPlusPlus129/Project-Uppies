@@ -22,7 +22,7 @@ public class Quest
     public PuzzleGameType PuzzleType { get; protected set; }
     public QuestType Type { get; protected set; }
 
-    public bool IsSolved { get; private set; }
+    public bool IsSolved { get; set; }
     public QuestStatus Status { get; protected set; }
     public DateTime CreatedTime { get; protected set; }
 
