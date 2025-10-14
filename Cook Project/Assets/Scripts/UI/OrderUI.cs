@@ -2,6 +2,7 @@ using UnityEngine;
 using R3;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 
 public class OrderUI : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class OrderUI : MonoBehaviour
     private async void Awake()
     {
         orderListItemPrefab.gameObject.SetActive(false);
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         orderManager.OnNewOrder.Subscribe(OnNewOrder).AddTo(this);
         orderManager.OnOrderServed.Subscribe(OnOrderServed).AddTo(this);

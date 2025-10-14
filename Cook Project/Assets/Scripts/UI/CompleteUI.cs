@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ public class CompleteUI : MonoBehaviour //This purpose is too specific, will nee
     private async void Awake()
     {
         followPrefab.gameObject.SetActive(false);
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         orderManager.OnOrderServed.Subscribe(order =>
         {
