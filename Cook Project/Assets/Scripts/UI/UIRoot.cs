@@ -20,4 +20,13 @@ public class UIRoot : MonoSingleton<UIRoot>
             child.gameObject.SetActive(false);
         }
     }
+
+    public void SetVisible(bool isVisible)
+    {
+        var canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup != null)
+        {
+            canvasGroup.alpha = isVisible ? 1 : 0;
+        }
+    }
 }

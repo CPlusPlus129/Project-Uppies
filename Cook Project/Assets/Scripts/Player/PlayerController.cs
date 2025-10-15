@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log("Set audiolistener volume to 0.1");
         AudioListener.volume = 0.1f;
+        //UIRoot.Instance.SetVisible(false);
 
         lookAction = InputSystem.actions.FindAction("Look");
         moveAction = InputSystem.actions.FindAction("Move");
