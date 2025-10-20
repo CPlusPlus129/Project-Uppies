@@ -1,0 +1,278 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb562a77968c3446ac17dc27173a98c, type: 3}
+  m_Name: ScenarioBook
+  m_EditorClassIdentifier: Assembly-CSharp::ScenarioBook
+  scenarioData:
+    keys:
+    - ExampleDialogue
+    values:
+    - rows:
+      - strings:
+        - Command
+        - Arg1
+        - Arg2
+        - Arg3
+        - Arg4
+        - Arg5
+        - Arg6
+        - Text
+      - strings:
+        - '*story_test1'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Well, you're probably wondering how I get here.
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - It all started from a tiktok challenge, one that demands you to survive
+          in the woods for 24 hours or something.
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Now that I think about it, I prabably picked the worst one to try out of
+          the entire list of them.
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - And now I'm lost.
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Like really lost.
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - "No signal. No paths. Just trees, fog, and the creeping realization that
+          I had no idea how long I\u2019d been out there. I stopped counting days
+          after the third time the sun forgot to rise on schedule."
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Right when everything fades dark, when all hopes are lost...
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - I see a beam of light.
+      - strings:
+        - 
+        - elder
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Oh, welcome! A new face, eh? Or is old Gamlo forgetting faces again...
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - If a character is not specified with a layer, it will not persist to next
+          dialogue (elder disappears)
+      - strings:
+        - 
+        - elder
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Coming directly out from the woods, young mans have gotten fancier lately,
+          haven't ya? Anyways, welcome to the Mato village.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*story_test2'
+      - strings:
+        - 
+        - elder
+        - 
+        - charL
+      - strings:
+        - 
+        - farmerwoman
+        - 
+        - charM
+      - strings:
+        - 
+        - butcher
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - To show multiple characters, assign characters to layer charL, charM, charR.
+          Which means left, middle and right.
+      - strings:
+        - 
+        - butcher
+        - 
+        - charL
+        - 
+        - 
+        - 
+        - A layer can only contain one cahracter at a time, so butcher will override
+          elder
+      - strings:
+        - CharacterOff
+        - farmerwoman
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Use CharacterOff command to remove character on screen, specify name of
+          character will only remove the specified character.
+      - strings:
+        - CharacterOff
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - If there is no name specified for CharacterOff, every character will be
+          removed from screen.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*story_test3'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Sample dialogue for testing
+      - strings:
+        - 
+        - satan
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Are you a good guy <char=ido>?
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - <char=ido> wakes up.
+      - strings:
+        - Selection
+        - '*story_test3_route1'
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Go Route 1
+      - strings:
+        - Selection
+        - '*story_test3_end'
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Nah I'm good
+      - strings:
+        - 
+      - strings:
+        - '*story_test3_route1'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Hi, I'm route 1
+      - strings:
+        - Jump
+        - '*story_test3_end'
+      - strings:
+        - 
+      - strings:
+        - '*story_test3_end'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - End of story test 3.
+      - strings:
+        - EndScenario

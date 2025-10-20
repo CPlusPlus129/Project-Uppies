@@ -8,13 +8,21 @@ public class DebugManager : MonoBehaviour, IDebugService
 {
     private const string DEBUG_MODE_KEY = "ProjectGaslight_DebugMode";
     private IShiftSystem shiftSystem;
+    private IDialogueService dialogueService;
+
     public bool IsDebugModeEnabled { get; private set; }
+
+    private async void Awake()
+    {
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
+    }
 
     public async UniTask Init()
     {
         LoadDebugModeState();
 
-        shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         var debugAction = InputSystem.actions.FindAction("DebugKeys");
         debugAction.performed += OnDebugKeyClicked;
         DontDestroyOnLoad(gameObject);
@@ -23,6 +31,8 @@ public class DebugManager : MonoBehaviour, IDebugService
         {
             Debug.Log("[DebugManager] Debug mode enabled. Press F12 to toggle debug mode.");
         }
+
+        await UniTask.CompletedTask;
     }
 
     public void ToggleDebugMode()
@@ -49,8 +59,8 @@ public class DebugManager : MonoBehaviour, IDebugService
                     shiftSystem.completedOrderCount.Value += 1;
                     break;
                 case 2:
-                    Debug.Log($"Debug Num2: Start next shift");
-                    shiftSystem.StartNextShift();
+                    Debug.Log($"Debug Num2: StartDialogue story_test1");
+                    dialogueService.StartDialogue("story_test1");
                     break;
                 case 3:
                     Debug.Log($"Debug Num0: Set shiftsystem remain time to 3 sec");

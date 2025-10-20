@@ -36,6 +36,7 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         Register<ITableManager>(() => new TableManager());
         Register<IOrderManager>(() => new OrderManager());
         Register<ISceneManagementService>(() => new SceneManagementService());
+        Register<IDialogueService>(() => GameFlow.Instance.transform.GetComponentInChildren<DialogueEngine_Gaslight>());
         Register<IQuestService>(() => new QuestManager(
             Get<ITableManager>()));
         Register<IPuzzleGameManager>(() => new PuzzleGameManager(
