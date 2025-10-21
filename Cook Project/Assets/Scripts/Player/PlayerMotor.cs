@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerMotor : MonoBehaviour
 {
@@ -54,7 +55,7 @@ public class PlayerMotor : MonoBehaviour
         controller.Move(move * Time.deltaTime);
     }
 
-    public void Jump()
+    public void Jump(InputAction.CallbackContext ctx)
     {
         if (isGrounded)
         {
@@ -62,7 +63,7 @@ public class PlayerMotor : MonoBehaviour
         }
     }
 
-    public void TrySprint()
+    public void TrySprint(InputAction.CallbackContext ctx)
     {
         if (isGrounded && PlayerStatSystem.Instance.CurrentStamina.Value > 0)
         {
@@ -74,7 +75,7 @@ public class PlayerMotor : MonoBehaviour
         }
     }
 
-    public void StopSprint()
+    public void StopSprint(InputAction.CallbackContext ctx)
     {
         isSprinting = false;
     }

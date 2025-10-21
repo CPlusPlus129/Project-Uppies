@@ -14,7 +14,7 @@ class PlayerActionController
             inventorySystem.SelectSlot(inventorySystem.SelectedIndex.Value + 1);
     }
 
-    public void DropItem()
+    public void DropItem(InputAction.CallbackContext ctx)
     {
         var selectedItem = inventorySystem.GetSelectedItem();
         if (selectedItem == null) return;

@@ -4,7 +4,7 @@ using R3;
 using System;
 using Cysharp.Threading.Tasks;
 
-public class ShiftPanelUI : MonoBehaviour
+public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 {
     public TextMeshProUGUI shiftNumberText;
     public TextMeshProUGUI shiftOnOffText;
@@ -15,7 +15,7 @@ public class ShiftPanelUI : MonoBehaviour
     private IShiftSystem shiftSystem;
     private IQuestService questService;
 
-    private async void Awake()
+    public async UniTask Init()
     {
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();

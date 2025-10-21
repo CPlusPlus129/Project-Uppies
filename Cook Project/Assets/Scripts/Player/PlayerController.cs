@@ -20,28 +20,17 @@ public class PlayerController : MonoBehaviour
         AudioListener.volume = 0.1f;
         //UIRoot.Instance.SetVisible(false);        
 
-        lookAction = InputSystem.actions.FindAction("Look");
-        moveAction = InputSystem.actions.FindAction("Move");
-        jumpAction = InputSystem.actions.FindAction("Jump");
-        interactAction = InputSystem.actions.FindAction("Interact");
-        //CallBack Context trigger (when the jump performed)
-        jumpAction.performed += ctx => motor.Jump();
-        interactAction.performed += ctx => interact.Interact(camlook.cam);
-
-        var discardAction = InputSystem.actions.FindAction("Discard");
-        discardAction.performed += ctx => actionController.DropItem();
-        var scrollAction = InputSystem.actions.FindAction("Scroll");
-        scrollAction.performed += actionController.ScrollHotBar;
-        var hotbarAction = InputSystem.actions.FindAction("HotbarShortcut");
-        hotbarAction.performed += actionController.OnItemHotbarClicked;
-        var sprintAction = InputSystem.actions.FindAction("Sprint");
-        sprintAction.performed += ctx => motor.TrySprint();
-        sprintAction.canceled += ctx => motor.StopSprint();
+        SubscribeEvents();
 
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         actionController.inventorySystem = inventorySystem;
         interact.inventorySystem = inventorySystem;
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeEvents();
     }
 
     void Update()
@@ -56,5 +45,44 @@ public class PlayerController : MonoBehaviour
         camlook.ProcessLook(lookValue);
     }
 
+    private void SubscribeEvents()
+    {
+        lookAction = InputSystem.actions.FindAction("Look");
+        moveAction = InputSystem.actions.FindAction("Move");
+        jumpAction = InputSystem.actions.FindAction("Jump");
+        interactAction = InputSystem.actions.FindAction("Interact");
+        jumpAction.performed += motor.Jump;
+        interactAction.performed += OnInteractKey;
 
+        var discardAction = InputSystem.actions.FindAction("Discard");
+        discardAction.performed += actionController.DropItem;
+        var scrollAction = InputSystem.actions.FindAction("Scroll");
+        scrollAction.performed += actionController.ScrollHotBar;
+        var hotbarAction = InputSystem.actions.FindAction("HotbarShortcut");
+        hotbarAction.performed += actionController.OnItemHotbarClicked;
+        var sprintAction = InputSystem.actions.FindAction("Sprint");
+        sprintAction.performed += motor.TrySprint;
+        sprintAction.canceled += motor.StopSprint;
+    }
+
+    private void UnsubscribeEvents()
+    {
+        jumpAction.performed -= motor.Jump;
+        interactAction.performed -= OnInteractKey;
+
+        var discardAction = InputSystem.actions.FindAction("Discard");
+        discardAction.performed -= actionController.DropItem;
+        var scrollAction = InputSystem.actions.FindAction("Scroll");
+        scrollAction.performed -= actionController.ScrollHotBar;
+        var hotbarAction = InputSystem.actions.FindAction("HotbarShortcut");
+        hotbarAction.performed -= actionController.OnItemHotbarClicked;
+        var sprintAction = InputSystem.actions.FindAction("Sprint");
+        sprintAction.performed -= motor.TrySprint;
+        sprintAction.canceled -= motor.StopSprint;
+    }
+
+    private void OnInteractKey(InputAction.CallbackContext ctx)
+    {
+        interact.Interact(camlook.cam);
+    }
 }
