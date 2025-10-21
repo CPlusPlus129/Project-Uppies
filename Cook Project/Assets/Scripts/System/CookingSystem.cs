@@ -4,7 +4,7 @@ using UnityEngine;
 public class CookingSystem : SimpleSingleton<CookingSystem>
 {
     public ReactiveProperty<string> currentSelectedRecipe = new ReactiveProperty<string>("");
-    
+
     // Store the pending meal item until minigame completion
     private ItemBase pendingMealItem = null;
 
@@ -38,7 +38,7 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
             return;
         }
         pendingMealItem.gameObject.SetActive(false);
-        
+
         Debug.Log($"Started cooking: {r.mealName}. Complete the minigame to finish!");
 
         // Close cooking UI and open minigame
@@ -78,10 +78,9 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
 
     public bool CheckPlayerHasIngredients(Recipe recipe)
     {
-        var cache = InventorySystem.Instance.GetItemCache();
         foreach (var ingredient in recipe.ingredients)
         {
-            if (!cache.TryGetValue(ingredient, out int itemCount) || itemCount <= 0)
+            if (!InventorySystem.Instance.HasItem(ingredient))
                 return false;
         }
         return true;
