@@ -3,21 +3,23 @@ using UnityEngine.InputSystem;
 
 class PlayerActionController
 {
+    public IInventorySystem inventorySystem { get; set; }
+
     public void ScrollHotBar(InputAction.CallbackContext ctx)
     {
         var delta = ctx.ReadValue<Vector2>().y;
         if (delta > 0)
-            InventorySystem.Instance.SelectSlot(InventorySystem.Instance.SelectedIndex.Value - 1);
+            inventorySystem.SelectSlot(inventorySystem.SelectedIndex.Value - 1);
         else if (delta < 0)
-            InventorySystem.Instance.SelectSlot(InventorySystem.Instance.SelectedIndex.Value + 1);
+            inventorySystem.SelectSlot(inventorySystem.SelectedIndex.Value + 1);
     }
 
     public void DropItem()
     {
-        var selectedItem = InventorySystem.Instance.GetSelectedItem();
+        var selectedItem = inventorySystem.GetSelectedItem();
         if (selectedItem == null) return;
         // just discard it for now
-        InventorySystem.Instance.RemoveSelectedItem();
+        inventorySystem.RemoveSelectedItem();
     }
 
     public void OnItemHotbarClicked(InputAction.CallbackContext ctx)
@@ -27,7 +29,7 @@ class PlayerActionController
         if (last is >= '1' and <= '4')
         {
             int index = last - '1';
-            InventorySystem.Instance.SelectSlot(index);
+            inventorySystem.SelectSlot(index);
         }
     }
 

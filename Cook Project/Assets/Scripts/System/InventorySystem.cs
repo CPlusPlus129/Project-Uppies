@@ -1,23 +1,30 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
 
-public class InventorySystem : SimpleSingleton<InventorySystem>
+public class InventorySystem : IInventorySystem
 {
-    public Subject<ItemBase[]> OnInventoryChanged = new Subject<ItemBase[]>();
+    public Subject<IReadOnlyList<ItemBase>> OnInventoryChanged { get; } = new Subject<IReadOnlyList<ItemBase>>();
     public ReactiveProperty<int> SelectedIndex { get; } = new ReactiveProperty<int>(0);
-    private const int SlotCount = 4;
-    private ItemBase[] slots = new ItemBase[SlotCount];
+    public ReactiveProperty<int> SlotCount { get; } = new ReactiveProperty<int>(4);
+    private List<ItemBase> slots = new List<ItemBase>();
     private Dictionary<string, int> itemCache = new Dictionary<string, int>();
     public ItemBase GetSelectedItem() => slots[SelectedIndex.Value];
     public IReadOnlyList<ItemBase> GetAllItems() => slots;
 
+    public async UniTask Init()
+    {
+        InitSlots();
+        await UniTask.CompletedTask;
+    }
+
     public bool AddItem(ItemBase item)
     {
-        for (int i = 0; i < slots.Length; i++)
+        for (int i = 0; i < slots.Count; i++)
         {
             if (slots[i] == null)
             {
-                slots[i] = item;                
+                slots[i] = item;
                 UpdateItemCache(item.ItemName, CollectionChangeType.Add);
                 OnInventoryChanged.OnNext(slots);
                 return true;
@@ -28,7 +35,7 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
 
     public void RemoveItem(string itemName)
     {
-        for (int i = 0; i < slots.Length; i++)
+        for (int i = 0; i < slots.Count; i++)
         {
             if (slots[i] != null && slots[i].ItemName == itemName)
             {
@@ -42,9 +49,9 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
 
     public void SelectSlot(int index)
     {
-        if (index == -1) index = SlotCount - 1;
-        else if (index == SlotCount) index = 0;
-        if (index >= 0 && index < SlotCount)
+        if (index == -1) index = SlotCount.Value - 1;
+        else if (index == SlotCount.Value) index = 0;
+        if (index >= 0 && index < SlotCount.Value)
             SelectedIndex.Value = index;
     }
 
@@ -99,6 +106,14 @@ public class InventorySystem : SimpleSingleton<InventorySystem>
         }
     }
 
+    private void InitSlots()
+    {
+        slots.Clear();
+        for (int i = 0; i < SlotCount.Value; i++)
+        {
+            slots.Add(null);
+        }
+    }
 
     enum CollectionChangeType
     {

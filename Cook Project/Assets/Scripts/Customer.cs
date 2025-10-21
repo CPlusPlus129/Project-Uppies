@@ -12,12 +12,14 @@ public class Customer : MonoBehaviour, IInteractable
     }
     private CustomerState state = CustomerState.WaitingForOrder;
     private IOrderManager orderManager;
+    private IInventorySystem inventorySystem;
 
     private async void Awake()
     {
         nameText.text = customerName;
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
+        inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
     }
 
     public void Interact()
@@ -60,7 +62,7 @@ public class Customer : MonoBehaviour, IInteractable
         var order = new Order { CustomerName = customerName, MealName = meal.ItemName };
         if (orderManager.ServeOrder(order))
         {
-            InventorySystem.Instance.RemoveSelectedItem();
+            inventorySystem.RemoveSelectedItem();
             state = CustomerState.WaitingForOrder;
             Debug.Log($"{customerName} received meal: {meal.ItemName}");
         }

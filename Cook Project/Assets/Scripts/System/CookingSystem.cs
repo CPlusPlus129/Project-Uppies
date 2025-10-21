@@ -1,12 +1,23 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-public class CookingSystem : SimpleSingleton<CookingSystem>
+public class CookingSystem : ICookingSystem
 {
-    public ReactiveProperty<string> currentSelectedRecipe = new ReactiveProperty<string>("");
-
+    public ReactiveProperty<string> currentSelectedRecipe { get; } = new ReactiveProperty<string>("");
+    private readonly IInventorySystem inventorySystem;
     // Store the pending meal item until minigame completion
     private ItemBase pendingMealItem = null;
+
+    public CookingSystem(IInventorySystem inventorySystem)
+    {
+        this.inventorySystem = inventorySystem;
+    }
+
+    public async UniTask Init()
+    {
+        await UniTask.CompletedTask;
+    }
 
     public void Cook()
     {
@@ -26,7 +37,7 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
         // Remove ingredients from inventory
         foreach (var ingredient in r.ingredients)
         {
-            InventorySystem.Instance.RemoveItem(ingredient);
+            inventorySystem.RemoveItem(ingredient);
         }
 
         // Create the meal item but DON'T add it to inventory yet
@@ -61,7 +72,7 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
         }
 
         // Add the meal to inventory
-        if (InventorySystem.Instance.AddItem(pendingMealItem))
+        if (inventorySystem.AddItem(pendingMealItem))
         {
             Debug.Log($"Cooking completed! Added {pendingMealItem.ItemName} to inventory.");
         }
@@ -80,7 +91,7 @@ public class CookingSystem : SimpleSingleton<CookingSystem>
     {
         foreach (var ingredient in recipe.ingredients)
         {
-            if (!InventorySystem.Instance.HasItem(ingredient))
+            if (!inventorySystem.HasItem(ingredient))
                 return false;
         }
         return true;

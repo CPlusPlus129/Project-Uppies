@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Collections.Generic;
@@ -8,21 +9,23 @@ public class InventoryBarUI : MonoBehaviour
 {
     [SerializeField] private GameObject selectedIndicator;
     [SerializeField] private InventorySlotUI slotPrefab;
+    private IInventorySystem inventorySystem;
     private List<InventorySlotUI> slots = new List<InventorySlotUI>();
 
-    private void Awake()
+    private async void Awake()
     {
         slotPrefab.gameObject.SetActive(false);
-        InventorySystem.Instance.OnInventoryChanged.Subscribe(UpdateInventory).AddTo(this);
-        InventorySystem.Instance.SelectedIndex.Subscribe(OnSelectedIndexChanged).AddTo(this);
-        ClearItems();
-        UpdateInventory(InventorySystem.Instance.GetAllItems().ToArray());
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        inventorySystem.OnInventoryChanged.Subscribe(UpdateInventory).AddTo(this);
+        inventorySystem.SelectedIndex.Subscribe(OnSelectedIndexChanged).AddTo(this);
+        UpdateInventory(inventorySystem.GetAllItems());
         OnSelectedIndexChanged(0);
     }
 
-    private void UpdateInventory(ItemBase[] items)
+    private void UpdateInventory(IReadOnlyList<ItemBase>items )
     {
-        for (int i = 0; i < items.Length; i++)
+        for (int i = 0; i < items.Count; i++)
         {
             var item = items[i];
             if (i < slots.Count)
@@ -37,9 +40,9 @@ public class InventoryBarUI : MonoBehaviour
                 newSlot.SetItem(item?.ItemName);
             }
         }
-        if(slots.Count > items.Length)
+        if(slots.Count > items.Count)
         {
-            for (int i = slots.Count - 1; i >= items.Length; i--)
+            for (int i = slots.Count - 1; i >= items.Count; i--)
             {
                 var slot = slots[i];
                 slots.RemoveAt(i);
@@ -48,7 +51,7 @@ public class InventoryBarUI : MonoBehaviour
         }
     }
 
-    private void ClearItems()
+    private void ClearSlotItems()
     {
         foreach (var slot in slots)
         {

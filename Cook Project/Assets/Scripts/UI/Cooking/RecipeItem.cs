@@ -7,13 +7,14 @@ public class RecipeItem : MonoBehaviour
     public Button btn;
     public TMPro.TextMeshProUGUI mealName;
     public TMPro.TextMeshProUGUI ingredientText; // use text just for demo
+    public ICookingSystem cookingSystem { get; set; }
     public Recipe recipe { get; set; }
 
     private void Awake()
     {
         btn.OnClickAsObservable().Subscribe(_ =>
         {
-            CookingSystem.Instance.currentSelectedRecipe.Value = recipe.mealName;
+            cookingSystem.currentSelectedRecipe.Value = recipe.mealName;
         }).AddTo(this);
     }
 

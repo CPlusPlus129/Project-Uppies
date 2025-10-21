@@ -36,6 +36,7 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         Register<ITableManager>(() => new TableManager());
         Register<IOrderManager>(() => new OrderManager());
         Register<ISceneManagementService>(() => new SceneManagementService());
+        Register<IInventorySystem>(() => new InventorySystem());
         Register<IDialogueService>(() => GameFlow.Instance.transform.GetComponentInChildren<DialogueEngine_Gaslight>());
         Register<IQuestService>(() => new QuestManager(
             Get<ITableManager>()));
@@ -43,6 +44,8 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
             Get<IQuestService>()));
         Register<IFridgeGlowManager>(() => new FridgeGlowManager(
             Get<IOrderManager>()));
+        Register<ICookingSystem>(() => new CookingSystem(
+            Get<IInventorySystem>()));
         Register<IShiftSystem>(() => new ShiftSystem(
             Get<IQuestService>(),
             Get<IOrderManager>()));

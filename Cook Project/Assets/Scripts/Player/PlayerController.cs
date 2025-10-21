@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,12 +12,13 @@ public class PlayerController : MonoBehaviour
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction interactAction;
+    private IInventorySystem inventorySystem;
 
-    private void Awake()
+    private async void Awake()
     {
         Debug.Log("Set audiolistener volume to 0.1");
         AudioListener.volume = 0.1f;
-        //UIRoot.Instance.SetVisible(false);
+        //UIRoot.Instance.SetVisible(false);        
 
         lookAction = InputSystem.actions.FindAction("Look");
         moveAction = InputSystem.actions.FindAction("Move");
@@ -35,6 +37,11 @@ public class PlayerController : MonoBehaviour
         var sprintAction = InputSystem.actions.FindAction("Sprint");
         sprintAction.performed += ctx => motor.TrySprint();
         sprintAction.canceled += ctx => motor.StopSprint();
+
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        actionController.inventorySystem = inventorySystem;
+        interact.inventorySystem = inventorySystem;
     }
 
     void Update()

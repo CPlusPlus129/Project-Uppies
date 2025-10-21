@@ -1,31 +1,35 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.UI;
 
-public class RecipeSelectionPanel : MonoBehaviour
+public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
 {
     public RecipeItem recipeItemPrefab;
     public Button cookButton;
+    private ICookingSystem cookingSystem;
     private ObjectPool<RecipeItem> recipeItemPool;
     private List<RecipeItem> recipeItemList = new List<RecipeItem>();
     
-    private void Awake()
+    public void Init()
     {
         recipeItemPrefab.gameObject.SetActive(false);
         recipeItemPool = new ObjectPool<RecipeItem>(() =>
         {
             var item = Instantiate(recipeItemPrefab, recipeItemPrefab.transform.parent);
+            item.cookingSystem = cookingSystem;
             return item;
         });
-        CookingSystem.Instance.currentSelectedRecipe
+        cookingSystem = ServiceLocator.Instance.GetService<ICookingSystem>();
+        cookingSystem.currentSelectedRecipe
             .Subscribe(_ => UpdateCookButton())
             .AddTo(this);
         cookButton.OnClickAsObservable()
             .Subscribe(_ =>
             {
-                CookingSystem.Instance.Cook();
+                cookingSystem.Cook();
                 UpdateUI();
             }).AddTo(this);
     }
@@ -49,7 +53,7 @@ public class RecipeSelectionPanel : MonoBehaviour
             var item = recipeItemPool.Get();
             item.gameObject.SetActive(true);
             item.Setup(recipe);
-            var canCook = CookingSystem.Instance.CheckPlayerHasIngredients(recipe);
+            var canCook = cookingSystem.CheckPlayerHasIngredients(recipe);
             item.btn.interactable = canCook;
             recipeItemList.Add(item);
         }        
@@ -57,14 +61,14 @@ public class RecipeSelectionPanel : MonoBehaviour
 
     private void UpdateCookButton()
     {
-        var currentRecipeName = CookingSystem.Instance.currentSelectedRecipe.Value;
+        var currentRecipeName = cookingSystem.currentSelectedRecipe.Value;
         if(string.IsNullOrEmpty(currentRecipeName))
         {
             cookButton.interactable = false;
             return;
         }
         var recipe = Database.Instance.recipeData.GetRecipeByName(currentRecipeName);
-        cookButton.interactable = CookingSystem.Instance.CheckPlayerHasIngredients(recipe);
+        cookButton.interactable = cookingSystem.CheckPlayerHasIngredients(recipe);
     }
 
     private void ClearAllItems()
@@ -77,4 +81,6 @@ public class RecipeSelectionPanel : MonoBehaviour
         }
         recipeItemList.Clear();
     }
+
+    
 }

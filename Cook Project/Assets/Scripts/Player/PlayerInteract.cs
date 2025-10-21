@@ -4,6 +4,7 @@ public class PlayerInteract : MonoBehaviour
 {
     public float interactDistance = 3f;
     public LayerMask interactLayer;
+    public IInventorySystem inventorySystem { get; set; }
 
     public void Interact(Camera cam)
     {
@@ -19,24 +20,24 @@ public class PlayerInteract : MonoBehaviour
 
         if (hit.collider.TryGetComponent(out ItemBase item))
         {
-            if (InventorySystem.Instance.AddItem(item))
+            if (inventorySystem.AddItem(item))
                 item.gameObject.SetActive(false);
         }
 
         if (hit.collider.TryGetComponent(out Customer customer))
         {
-            var heldItem = InventorySystem.Instance.GetSelectedItem();
+            var heldItem = inventorySystem.GetSelectedItem();
             if (heldItem != null && customer.CanReceiveMeal(heldItem))
             {
                 customer.ReceiveMeal(heldItem);
             }
         }
 
-        if (hit.collider.TryGetComponent(out FoodSource foodSource) && !InventorySystem.Instance.IsInventoryFull())
+        if (hit.collider.TryGetComponent(out FoodSource foodSource) && !    inventorySystem.IsInventoryFull())
         {
             var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
             var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
-            if (foodObj != null && InventorySystem.Instance.AddItem(foodObj))
+            if (foodObj != null && inventorySystem.AddItem(foodObj))
             {
                 // Optionally, you can add some feedback here, like a sound or animation
             }

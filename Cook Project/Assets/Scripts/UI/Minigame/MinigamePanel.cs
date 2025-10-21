@@ -1,15 +1,12 @@
-using System;
+using R3;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
-using Unity.VisualScripting;
 using UnityEngine;
-using R3;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 
-public class MinigamePanel : MonoBehaviour
+public class MinigamePanel : MonoBehaviour, IUIInitializable
 {
     // Hook this from other scripts, or swap for a UnityEvent<Key>
     public System.Action<Key> OnBeat;
@@ -23,7 +20,7 @@ public class MinigamePanel : MonoBehaviour
     public Image currentSigilHighlighter;
 
     [Header("Visual Feedback")]
-    [SerializeField] [UnityEngine.Range(0f, 1f)] private float completedSigilAlpha = 0.3f;
+    [SerializeField][UnityEngine.Range(0f, 1f)] private float completedSigilAlpha = 0.3f;
 
     // Holds all sigils in the scene
     private List<sigilType> sigilTypes;
@@ -41,6 +38,8 @@ public class MinigamePanel : MonoBehaviour
 
     // Holds references to instantiated sigil UI objects
     private List<GameObject> instantiatedSigils = new List<GameObject>();
+
+    private ICookingSystem cookingSystem;
 
     // Setup key mappings and input action
     void OnEnable()
@@ -88,12 +87,12 @@ public class MinigamePanel : MonoBehaviour
         if (key == currentSigil.sigilKey)
         {
             Debug.Log("Correct!");
-            
+
             // Dim the current sigil before moving to the next
             DimSigil(currentSigilInd);
-            
+
             currentSigilInd++;
-            
+
             // Highlight next sigil
             if (currentSigilInd < currentSigilPattern.Count)
             {
@@ -102,13 +101,13 @@ public class MinigamePanel : MonoBehaviour
             else
             {
                 Debug.Log("Pattern complete!");
-                
+
                 // Notify the CookingSystem that the minigame is complete
-                CookingSystem.Instance.CompleteCooking();
-                
+                cookingSystem.CompleteCooking();
+
                 // Fire completion event for any other systems that might need it
                 OnMinigameCompleted.OnNext(R3.Unit.Default);
-                
+
                 // Reset for now
                 currentSigilInd = 0;
 
@@ -125,7 +124,7 @@ public class MinigamePanel : MonoBehaviour
             {
                 currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
             }
-            
+
             // Reset all sigils to full opacity
             ResetAllSigilsAlpha();
         }
@@ -133,15 +132,16 @@ public class MinigamePanel : MonoBehaviour
 
 
     // Reads all available sigils and makes a random pattern for the player
-    private void Awake()
+    public void Init()
     {
-        sigilTypes = FindObjectsByType<sigilType>(FindObjectsSortMode.None).ToList();
+        sigilTypes = GetComponentsInChildren<sigilType>(true).ToList();
         // Start capturing input for minigame
-        Debug.Log(sigilTypes.Count());
+        Debug.Log(sigilTypes.Count);
+        cookingSystem = ServiceLocator.Instance.GetService<ICookingSystem>();
     }
 
     // Gets a random sigil based on sigilTypes list
-    private sigilType GetRandomSigil(bool preventRepeats=true)
+    private sigilType GetRandomSigil(bool preventRepeats = true)
     {
         int index = UnityEngine.Random.Range(0, sigilTypes.Count);
 
