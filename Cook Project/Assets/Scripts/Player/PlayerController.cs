@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,12 +8,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerMotor motor;
     [SerializeField] private PlayerLook camlook;
     [SerializeField] private PlayerInteract interact;
+    [SerializeField] private Weapon lightGun;
     private PlayerActionController actionController = new PlayerActionController();
     private InputAction lookAction;
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction interactAction;
     private IInventorySystem inventorySystem;
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     private async void Awake()
     {
@@ -63,6 +66,11 @@ public class PlayerController : MonoBehaviour
         var sprintAction = InputSystem.actions.FindAction("Sprint");
         sprintAction.performed += motor.TrySprint;
         sprintAction.canceled += motor.StopSprint;
+
+        PlayerStatSystem.Instance.CanUseWeapon.Subscribe(can =>
+        {
+            lightGun.gameObject.SetActive(can);
+        }).AddTo(disposables);
     }
 
     private void UnsubscribeEvents()
@@ -79,6 +87,8 @@ public class PlayerController : MonoBehaviour
         var sprintAction = InputSystem.actions.FindAction("Sprint");
         sprintAction.performed -= motor.TrySprint;
         sprintAction.canceled -= motor.StopSprint;
+
+        disposables.Clear();
     }
 
     private void OnInteractKey(InputAction.CallbackContext ctx)

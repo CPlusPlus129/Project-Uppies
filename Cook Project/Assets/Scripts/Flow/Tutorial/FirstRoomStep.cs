@@ -7,16 +7,18 @@ class FirstRoomStep : ITutorialStep
     private readonly IOrderManager orderManager;
     private readonly Customer customer;
     private readonly SimpleDoor door;
-    private const string dialogueName = "story_test1";
-    private const string orderName = "SoulShake";
+    private readonly string dialogueName;
+    private readonly string orderName;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door)
+    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, string dialogueName, string orderName)
     {
         this.dialogueService = dialogueService;
         this.orderManager = orderManager;
         this.customer = customer;
         this.door = door;
+        this.dialogueName = dialogueName;
+        this.orderName = orderName;
     }
 
     public async UniTask ExecuteAsync()

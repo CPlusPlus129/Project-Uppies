@@ -58,7 +58,7 @@ public class Customer : MonoBehaviour, IInteractable
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;
         Debug.Log($"{customerName} placed order: {order.MealName}");
-        WorldBroadcastSystem.Instance.Broadcast($"Check recipes in the pot. Find ingredients on the map to cook them.", 60f);
+        //WorldBroadcastSystem.Instance.Broadcast($"Check recipes in the pot. Find ingredients on the map to cook them.", 60f);
     }
 
     public bool CanReceiveMeal(ItemBase item)
