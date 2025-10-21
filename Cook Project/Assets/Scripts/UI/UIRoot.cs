@@ -1,15 +1,13 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class UIRoot : MonoSingleton<UIRoot>
 {
-    protected override async void Awake()
+    protected override void Awake()
     {
         base.Awake();
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
-        InitChildren();
+        InitChildren().Forget();
     }
 
     public T GetUIComponent<T>() where T : Component
@@ -39,12 +37,15 @@ public class UIRoot : MonoSingleton<UIRoot>
         }
     }
 
-    private void InitChildren()
+    private async UniTaskVoid InitChildren()
     {
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         var uiList = GetComponentsInChildren<IUIInitializable>(true);
+        var taskList = new List<UniTask>();
         foreach (var item in uiList)
         {
-            item.Init();
+            taskList.Add(item.Init());
         }
+        await UniTask.WhenAll(taskList);
     }
 }

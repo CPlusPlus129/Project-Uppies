@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
+
 public interface IUIInitializable
 {
-    void Init();
+    UniTask Init();
 }

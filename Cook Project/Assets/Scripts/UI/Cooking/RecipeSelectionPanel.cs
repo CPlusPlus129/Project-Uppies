@@ -13,7 +13,7 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
     private ObjectPool<RecipeItem> recipeItemPool;
     private List<RecipeItem> recipeItemList = new List<RecipeItem>();
     
-    public void Init()
+    public async UniTask Init()
     {
         recipeItemPrefab.gameObject.SetActive(false);
         recipeItemPool = new ObjectPool<RecipeItem>(() =>
@@ -22,7 +22,7 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
             item.cookingSystem = cookingSystem;
             return item;
         });
-        cookingSystem = ServiceLocator.Instance.GetService<ICookingSystem>();
+        cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
         cookingSystem.currentSelectedRecipe
             .Subscribe(_ => UpdateCookButton())
             .AddTo(this);

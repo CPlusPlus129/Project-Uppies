@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,12 +133,12 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
 
 
     // Reads all available sigils and makes a random pattern for the player
-    public void Init()
+    public async UniTask Init()
     {
         sigilTypes = GetComponentsInChildren<sigilType>(true).ToList();
         // Start capturing input for minigame
         Debug.Log(sigilTypes.Count);
-        cookingSystem = ServiceLocator.Instance.GetService<ICookingSystem>();
+        cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
     }
 
     // Gets a random sigil based on sigilTypes list
