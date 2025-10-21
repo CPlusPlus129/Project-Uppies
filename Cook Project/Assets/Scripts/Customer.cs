@@ -5,6 +5,7 @@ public class Customer : MonoBehaviour, IInteractable
 {
     public string customerName;
     public TMPro.TextMeshPro nameText;
+
     public enum CustomerState
     {
         WaitingForOrder,
@@ -13,6 +14,7 @@ public class Customer : MonoBehaviour, IInteractable
     private CustomerState state = CustomerState.WaitingForOrder;
     private IOrderManager orderManager;
     private IInventorySystem inventorySystem;
+    public string specifiedNextOrderName { get; set; }
 
     private async void Awake()
     {
@@ -37,11 +39,21 @@ public class Customer : MonoBehaviour, IInteractable
 
     private void PlaceOrder()
     {
-        var randRecipe = Database.Instance.recipeData.GetRandomRecipe();
+        string mealName = null;
+        if (!string.IsNullOrEmpty(specifiedNextOrderName))
+        {
+            mealName = specifiedNextOrderName;
+            specifiedNextOrderName = null;
+        }
+        else
+        {
+            var randRecipe = Database.Instance.recipeData.GetRandomRecipe();
+            mealName = randRecipe.mealName;
+        }
         var order = new Order
         {
             CustomerName = customerName,
-            MealName = randRecipe.mealName
+            MealName = mealName
         };
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;

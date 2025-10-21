@@ -44,8 +44,11 @@ namespace DialogueModule
 
         private void UnbindSelf()
         {
-            engine.adapter.onStartScenario -= OnStartScenario;
-            engine.adapter.onEndScenario -= OnEndScenario;
+            if (engine?.adapter != null)
+            {
+                engine.adapter.onStartScenario -= OnStartScenario;
+                engine.adapter.onEndScenario -= OnEndScenario;
+            }
         }
 
         private void CacheBindables()
@@ -73,7 +76,7 @@ namespace DialogueModule
 
         private void Bind()
         {
-            foreach (var bindables in _bindables) 
+            foreach (var bindables in _bindables)
             {
                 bindables?.BindToScenario(engine.adapter);
             }
@@ -99,7 +102,7 @@ namespace DialogueModule
 
         private void SetEngine()
         {
-            if(engine == null)
+            if (engine == null)
             {
                 engine = FindFirstObjectByType<DialogueEngine>();
             }

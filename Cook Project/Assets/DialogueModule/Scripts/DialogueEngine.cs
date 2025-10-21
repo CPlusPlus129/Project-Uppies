@@ -17,7 +17,7 @@ namespace DialogueModule
         internal bool uiHasInit { get; set; } = false;
         private bool _isInited = false;
 
-        private void Awake()
+        protected void Awake()
         {
             Init();
         }

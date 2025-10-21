@@ -33,6 +33,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateAll()
     {
+        gameObject.SetActive(shiftSystem.currentState.Value != ShiftSystem.ShiftState.None);
         UpdateShiftNumber(shiftSystem.shiftNumber.Value);
         UpdateShiftState(shiftSystem.currentState.Value);
         UpdateOrderText();
