@@ -12,7 +12,9 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<float> MaxLight { get; private set; } = new ReactiveProperty<float>(100f);
     public ReactiveProperty<float> LightRecoverySpeed { get; private set; } = new ReactiveProperty<float>(5f);
 
-    public ReactiveProperty<int> Money { get; private set; } = new ReactiveProperty<int>(200);
+    public ReactiveProperty<int> Money { get; private set; } = new ReactiveProperty<int>(0);
 
     public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
+
+    public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
 }
