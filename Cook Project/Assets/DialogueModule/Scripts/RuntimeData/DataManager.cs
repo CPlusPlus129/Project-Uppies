@@ -22,8 +22,10 @@ namespace DialogueModule
         private void InitScenarios()
         {
             scenarioDataDict.Clear();
-            foreach (var grid in scenarioBook.ScenarioData.Values)
+            foreach (var kvp in scenarioBook.ScenarioData.ToDictionary())
             {
+                var grid = kvp.Value;
+                grid.Name = kvp.Key;
                 var scenarioData = new ScenarioData(grid);
                 scenarioDataDict[grid.Name] = scenarioData;
             }

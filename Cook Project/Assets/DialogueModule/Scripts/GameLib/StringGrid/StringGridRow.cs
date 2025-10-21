@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEngine.Rendering.GPUSort;
 
 namespace DialogueModule
 {
@@ -11,22 +10,26 @@ namespace DialogueModule
         [SerializeField]
         private string[] strings;
 
-        public bool IsEmpty { get; private set; }
-        public bool IsCommentOut { get; private set; }
+        private bool? _IsEmpty = null;
+        private bool? _IsCommentOut = null;
+        public bool IsEmpty => IsEmptyGetter();
+        public bool IsCommentOut => IsCommentOutGetter();
         public int Length => strings?.Length ?? 0;
 
         public StringGridRow(List<string> cells)
         {
             strings = cells.ToArray();
-            IsEmpty = CheckIsEmpty();
-            IsCommentOut = CheckIsCommentOut();
+            //initialize isEmpty and isCommentOut
+            IsEmptyGetter();
+            IsCommentOutGetter();
         }
 
         public void Init(string csvText)
         {
             strings = csvText.Split(new char[] { ',' });
-            IsEmpty = CheckIsEmpty();
-            IsCommentOut = CheckIsCommentOut();
+            //initialize isEmpty and isCommentOut
+            IsEmptyGetter();
+            IsCommentOutGetter();
         }
 
         public string GetCell(int index)
@@ -34,6 +37,18 @@ namespace DialogueModule
             if (index < 0 || index >= strings.Length)
                 return string.Empty;
             return strings[index];
+        }
+
+        bool IsEmptyGetter()
+        {
+            _IsEmpty ??= CheckIsEmpty();
+            return _IsEmpty.Value;
+        }
+
+        bool IsCommentOutGetter()
+        {
+            _IsCommentOut ??= CheckIsCommentOut();
+            return _IsCommentOut.Value;
         }
 
         bool CheckIsEmpty()
