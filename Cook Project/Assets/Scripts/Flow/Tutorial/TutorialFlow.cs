@@ -7,6 +7,7 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private Customer customer;
     [SerializeField] private SimpleDoor[] doors;
     [SerializeField] private FoodSource[] foods;
+    [SerializeField] private GameObject backToFirstRoomArrow;
 
     [Header("Settings")]
     [SerializeField] private string startDialogueName = "story_test1";
@@ -29,6 +30,7 @@ public class TutorialFlow : MonoBehaviour
         {
             door.Close();
         }
+        backToFirstRoomArrow.SetActive(false);
         PlayerStatSystem.Instance.CanUseWeapon.Value = false;
         var recipe = Database.Instance.recipeData.GetRecipeByName(orderName);
         if (recipe == null || recipe.ingredients.Length != 3)
@@ -49,7 +51,7 @@ public class TutorialFlow : MonoBehaviour
             new SecondRoomStep(inventorySystem, foods[0], doors[1]),
             new ThirdRoomStep(inventorySystem, foods[1], doors[2]),
             new FourthRoomStep(inventorySystem, foods[2], doors[3]),
-            new CookingStep(inventorySystem, orderName),
+            new CookingStep(inventorySystem, backToFirstRoomArrow, orderName),
             new ServeMealStep(orderManager, orderName)
         };
 

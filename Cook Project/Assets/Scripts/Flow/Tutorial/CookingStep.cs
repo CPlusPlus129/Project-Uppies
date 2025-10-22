@@ -1,20 +1,24 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using UnityEngine;
 
 class CookingStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
+    private readonly GameObject backArrow;
     private readonly string orderName;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public CookingStep(IInventorySystem inventorySystem, string orderName)
+    public CookingStep(IInventorySystem inventorySystem, GameObject backArrow, string orderName)
     {
         this.inventorySystem = inventorySystem;
+        this.backArrow = backArrow;
         this.orderName = orderName;
     }
 
     public async UniTask ExecuteAsync()
     {
+        backArrow?.SetActive(true);
         await WaitUntilPlayerCookedMeal();
     }
 
