@@ -175,7 +175,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 210, y: 0}
+  m_SizeDelta: {x: 167.19, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5131294435825914841
 CanvasRenderer:
@@ -597,7 +597,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 210, y: 0}
+  m_SizeDelta: {x: 167.19, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6418625406815026622
 CanvasRenderer:
@@ -1182,7 +1182,7 @@ MonoBehaviour:
   m_Spacing: 10
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
@@ -2290,6 +2290,7 @@ GameObject:
   - component: {fileID: 7749671554880168815}
   - component: {fileID: 4977818632580144215}
   - component: {fileID: 7836335857184785990}
+  - component: {fileID: 4011951131905297128}
   m_Layer: 5
   m_Name: ListItem
   m_TagString: Untagged
@@ -2316,7 +2317,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 210, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6682831390138893695
 CanvasRenderer:
@@ -2396,6 +2397,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrderListItem
   customerName: {fileID: 3441364828597133573}
   mealName: {fileID: 6694448951835952147}
+--- !u!114 &4011951131905297128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5206583371223475507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 167.19
+  m_PreferredHeight: 250.7865
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &5331114422438167392
 GameObject:
   m_ObjectHideFlags: 0
