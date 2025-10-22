@@ -916,6 +916,95 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400616, guid: 3095eed88e39bec4bb5a519dac88fed9, type: 3}
   m_PrefabInstance: {fileID: 30087041}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &36879161
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 45024394}
+    m_Modifications:
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.3074067
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.1464198
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.044669
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.166
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611712987, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_Name
+      value: TutorialDoor 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8717519531611712987, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+--- !u!114 &36879162 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5634653137855877482, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+  m_PrefabInstance: {fileID: 36879161}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37ba41c4dabbb0b4cbb8f1749784e383, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleDoor
+--- !u!4 &36879163 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8717519531611359109, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
+  m_PrefabInstance: {fileID: 36879161}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &38006337 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 149828, guid: 3095eed88e39bec4bb5a519dac88fed9, type: 3}
@@ -1113,6 +1202,38 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f5bef9e1bbbbe9f4a89a3c958ad516c7, type: 3}
+--- !u!1 &45024393
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 45024394}
+  m_Layer: 0
+  m_Name: Root4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &45024394
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45024393}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 88.51, y: -0.121659994, z: -0.7192402}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 36879163}
+  m_Father: {fileID: 213811718}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1001 &49176686
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3712,6 +3833,7 @@ Transform:
   - {fileID: 1931524694}
   - {fileID: 946344098}
   - {fileID: 1844234906}
+  - {fileID: 45024394}
   m_Father: {fileID: 1538568223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &214402650 stripped
@@ -9388,7 +9510,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 421208, guid: ded14b4d6268d2643ae9d947489d4667, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.7927604
+      value: 0.96
       objectReference: {fileID: 0}
     - target: {fileID: 421208, guid: ded14b4d6268d2643ae9d947489d4667, type: 3}
       propertyPath: m_LocalRotation.w
@@ -13080,7 +13202,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightgunInteractable
   rend: {fileID: 813333262}
-  emissionBaseColor: {r: 0.7169812, g: 0.7169811, b: 0.19277322, a: 1}
+  emissionBaseColor: {r: 0.9339623, g: 0.9339623, b: 0.7004717, a: 1}
   intensity: 0.25
   speed: 2
 --- !u!1001 &817769262
@@ -14474,12 +14596,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialFlow
   customer: {fileID: 2038321867}
-  firstDoor: {fileID: 1852623747}
-  secondDoor: {fileID: 26898892}
-  thirdDoor: {fileID: 467840752}
-  food1: {fileID: 574163291}
-  food2: {fileID: 1925468222}
-  food3: {fileID: 1249627}
+  doors:
+  - {fileID: 1852623747}
+  - {fileID: 26898892}
+  - {fileID: 467840752}
+  - {fileID: 36879162}
+  foods:
+  - {fileID: 574163291}
+  - {fileID: 1925468222}
+  - {fileID: 1249627}
   startDialogueName: story_test1
   orderName: SoulShake
 --- !u!4 &919226522
@@ -19568,7 +19693,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8717519531611712987, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
       propertyPath: m_Name
-      value: TutorialDoor
+      value: TutorialDoor 1
       objectReference: {fileID: 0}
     - target: {fileID: 8717519531611712987, guid: bb3b4474592e1424baa1d9c02c401135, type: 3}
       propertyPath: m_IsActive

@@ -9,7 +9,7 @@ class FirstRoomStep : ITutorialStep
     private readonly SimpleDoor door;
     private readonly string dialogueName;
     private readonly string orderName;
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private CompositeDisposable disposables = new CompositeDisposable();
 
     public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, string dialogueName, string orderName)
     {
@@ -39,7 +39,7 @@ class FirstRoomStep : ITutorialStep
             .Where(order => order.CustomerName == customer.customerName && order.MealName == orderName)
             .Take(1)
             .Subscribe(_ => tcs.TrySetResult())
-            .AddTo(compositeDisposable);
+            .AddTo(disposables);
 
         await tcs.Task;
     }

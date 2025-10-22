@@ -5,18 +5,39 @@ class FourthRoomStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
     private readonly FoodSource foodSource;
+    private readonly SimpleDoor door;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource)
+    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door)
     {
         this.inventorySystem = inventorySystem;
         this.foodSource = foodSource;
+        this.door = door;
     }
 
     public async UniTask ExecuteAsync()
     {
+        await WaitUntilPlayerGetsGun();
+        door.Open();
         await WaitUntilPlayerGetsFoodFromSource();
         //TODO arrow
+    }
+
+    private async UniTask WaitUntilPlayerGetsGun()
+    {
+        if (PlayerStatSystem.Instance.CanUseWeapon.Value)
+            return;
+        var tcs = new UniTaskCompletionSource();
+        PlayerStatSystem.Instance.CanUseWeapon
+            .Subscribe(can =>
+            {
+                if (can)
+                {
+                    tcs.TrySetResult();
+                    disposables.Clear();
+                }
+            }).AddTo(disposables);
+        await tcs.Task;
     }
 
     private async UniTask WaitUntilPlayerGetsFoodFromSource()
