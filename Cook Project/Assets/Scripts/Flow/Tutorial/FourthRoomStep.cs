@@ -33,8 +33,8 @@ class FourthRoomStep : ITutorialStep
             {
                 if (can)
                 {
-                    tcs.TrySetResult();
                     disposables.Clear();
+                    tcs.TrySetResult();
                 }
             }).AddTo(disposables);
         await tcs.Task;
@@ -48,10 +48,10 @@ class FourthRoomStep : ITutorialStep
             {
                 foreach (var item in list)
                 {
-                    if (item != null && item.ItemName == foodSource.ItemName)
+                    if (item != null && item.EqualsItemName(foodSource.ItemName))
                     {
-                        tcs.TrySetResult();
                         disposables.Clear();
+                        tcs.TrySetResult();
                     }
                 }
             }).AddTo(disposables);

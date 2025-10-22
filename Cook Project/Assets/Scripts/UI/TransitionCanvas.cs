@@ -44,7 +44,6 @@ public class TransitionCanvas : MonoBehaviour, IUIInitializable
 
     public async UniTask FadeOut(float duration = -1f, EaseType? easeType = null)
     {
-        Debug.Log("Fade out");
         if (duration < 0) duration = fadeDuration;
         EaseType ease = easeType ?? fadeOutEase;
 
@@ -54,7 +53,6 @@ public class TransitionCanvas : MonoBehaviour, IUIInitializable
 
     public async UniTask FadeIn(float duration = -1f, EaseType? easeType = null)
     {
-        Debug.Log("Fade in");
         if (duration < 0) duration = fadeDuration;
         EaseType ease = easeType ?? fadeInEase;
 

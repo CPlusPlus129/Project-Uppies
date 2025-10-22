@@ -137,7 +137,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
     {
         sigilTypes = GetComponentsInChildren<sigilType>(true).ToList();
         // Start capturing input for minigame
-        Debug.Log(sigilTypes.Count);
+        //Debug.Log(sigilTypes.Count);
         cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
     }
 

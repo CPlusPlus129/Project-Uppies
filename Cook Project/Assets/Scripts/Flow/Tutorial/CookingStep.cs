@@ -26,10 +26,10 @@ class CookingStep : ITutorialStep
             {
                 foreach (var item in list)
                 {
-                    if (item != null && item.ItemName == orderName)
+                    if (item != null && item.EqualsItemName(orderName))
                     {
-                        tcs.TrySetResult();
                         disposables.Clear();
+                        tcs.TrySetResult();
                     }
                 }
             }).AddTo(disposables);
