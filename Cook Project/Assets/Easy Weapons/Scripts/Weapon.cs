@@ -94,9 +94,9 @@ public class Weapon : MonoBehaviour
     
     #region Light System
     [Header("Light Cost")]
-    [Tooltip("Light cost per shot (0 = no cost)")]
-    [Range(0f, 100f)]
-    public float lightCostPerShot = 20f;
+    //[Tooltip("Light cost per shot (0 = no cost)")]
+    //[Range(0f, 100f)]
+    //public float lightCostPerShot = 20f;
 
     [Tooltip("Allow firing with insufficient light")]
     public bool allowFireWithoutLight = false;
@@ -593,8 +593,9 @@ public class Weapon : MonoBehaviour
             PlayDryFire();
             return;
         }
-        
+
         // Check light cost
+        var lightCostPerShot = PlayerStatSystem.Instance.LightCostPerShot.Value;
         if (lightCostPerShot > 0f && !allowFireWithoutLight)
         {
             if (!LightRecoverySystem.HasEnoughLight(lightCostPerShot))
@@ -661,8 +662,9 @@ public class Weapon : MonoBehaviour
             PlayDryFire();
             return;
         }
-        
+
         // Check light cost
+        var lightCostPerShot = PlayerStatSystem.Instance.LightCostPerShot.Value;
         if (lightCostPerShot > 0f && !allowFireWithoutLight)
         {
             if (!LightRecoverySystem.HasEnoughLight(lightCostPerShot))
@@ -718,8 +720,9 @@ public class Weapon : MonoBehaviour
     {
         isBeaming = true;
         SendMessageUpwards("OnWeaponBeamFire", SendMessageOptions.DontRequireReceiver);
-        
+
         // Drain light cost for beam weapons (per frame)
+        var lightCostPerShot = PlayerStatSystem.Instance.LightCostPerShot.Value;
         if (lightCostPerShot > 0f)
         {
             float beamLightCost = lightCostPerShot * Time.deltaTime;

@@ -82,7 +82,7 @@ public class WeaponEditor : Editor
         if (showLightCost)
         {
             EditorGUI.indentLevel++;
-            weapon.lightCostPerShot = EditorGUILayout.Slider("Light Cost Per Shot", weapon.lightCostPerShot, 0f, 100f);
+            //weapon.lightCostPerShot = EditorGUILayout.Slider("Light Cost Per Shot", weapon.lightCostPerShot, 0f, 100f);
             weapon.allowFireWithoutLight = EditorGUILayout.Toggle("Allow Fire Without Light", weapon.allowFireWithoutLight);
             
             EditorGUILayout.Space();

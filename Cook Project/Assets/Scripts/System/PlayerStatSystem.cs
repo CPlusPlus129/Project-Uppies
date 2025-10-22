@@ -11,6 +11,7 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<float> CurrentLight { get; private set; } = new ReactiveProperty<float>(100f);
     public ReactiveProperty<float> MaxLight { get; private set; } = new ReactiveProperty<float>(100f);
     public ReactiveProperty<float> LightRecoverySpeed { get; private set; } = new ReactiveProperty<float>(5f);
+    public ReactiveProperty<float> LightCostPerShot { get; private set; } = new ReactiveProperty<float>(40f);
 
     public ReactiveProperty<int> Money { get; private set; } = new ReactiveProperty<int>(0);
 
