@@ -5,7 +5,7 @@ using R3;
 
 public class TitleUI : MonoBehaviour
 {
-    public string startSceneName = "WhiteBox02";
+    public string startSceneName = "Tutorial";
     [Header("UI References")]
     public Button startButton;
     public Button exitButton;

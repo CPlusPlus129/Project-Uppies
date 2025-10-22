@@ -7,6 +7,8 @@ public class UIRoot : MonoSingleton<UIRoot>
     protected override void Awake()
     {
         base.Awake();
+        if (Instance != this)
+            return;
         InitChildren().Forget();
     }
 

@@ -1,21 +1,18 @@
 using Cysharp.Threading.Tasks;
 using R3;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
-public class InventoryBarUI : MonoBehaviour
+public class InventoryBarUI : MonoBehaviour, IUIInitializable
 {
     [SerializeField] private GameObject selectedIndicator;
     [SerializeField] private InventorySlotUI slotPrefab;
     private IInventorySystem inventorySystem;
     private List<InventorySlotUI> slots = new List<InventorySlotUI>();
 
-    private async void Awake()
+    public async UniTask Init()
     {
         slotPrefab.gameObject.SetActive(false);
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         inventorySystem.OnInventoryChanged.Subscribe(UpdateInventory).AddTo(this);
         inventorySystem.SelectedIndex.Subscribe(OnSelectedIndexChanged).AddTo(this);

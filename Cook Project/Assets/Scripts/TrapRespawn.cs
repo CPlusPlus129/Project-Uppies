@@ -4,7 +4,7 @@ public class TrapRespawn : MonoBehaviour
 {
 
     [SerializeField] private Transform respawnPoint;
-    [SerializeField] private float upOffset = 0.25f;
+    //[SerializeField] private float upOffset = 0.25f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private void OnTriggerEnter(Collider other)
     {
