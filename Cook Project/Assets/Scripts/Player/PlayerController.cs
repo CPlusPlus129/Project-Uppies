@@ -19,8 +19,6 @@ public class PlayerController : MonoBehaviour
 
     private async void Awake()
     {
-        Debug.Log("Set audiolistener volume to 0.1");
-        AudioListener.volume = 0.1f;
         //UIRoot.Instance.SetVisible(false);        
 
         SubscribeEvents();
