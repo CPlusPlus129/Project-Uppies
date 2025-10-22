@@ -5,7 +5,6 @@ class FourthRoomStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
     private readonly FoodSource foodSource;
-    private readonly SimpleDoor door;
     private CompositeDisposable disposables = new CompositeDisposable();
 
     public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource)

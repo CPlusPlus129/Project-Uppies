@@ -49,6 +49,7 @@ public class TutorialFlow : MonoBehaviour
             new FirstRoomStep(dialogueService, orderManager, customer, firstDoor, startDialogueName, orderName),
             new SecondRoomStep(inventorySystem, food1, secondDoor),
             new ThirdRoomStep(inventorySystem, food2, thirdDoor),
+            new FourthRoomStep(inventorySystem, food3),
         };
 
         foreach (var step in steps)
