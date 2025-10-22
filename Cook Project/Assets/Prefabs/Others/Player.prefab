@@ -552,6 +552,18 @@ PrefabInstance:
       propertyPath: infiniteAmmo
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6196081138801454883, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: lightCostPerShot
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 6196081138801454883, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: muzzleEffectPoint
+      value: 
+      objectReference: {fileID: 695477875813288014}
+    - target: {fileID: 6196081138801454883, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+      propertyPath: projectileSpawnPoint
+      value: 
+      objectReference: {fileID: 695477875813288014}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -560,6 +572,11 @@ PrefabInstance:
 --- !u!4 &695477875813288002 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 456968, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
+  m_PrefabInstance: {fileID: 695477875812888906}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &695477875813288014 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 456964, guid: 0c71c2e2c11e70244bccb576cda20dd1, type: 3}
   m_PrefabInstance: {fileID: 695477875812888906}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &6654688053589335657 stripped
