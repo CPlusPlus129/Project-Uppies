@@ -20,6 +20,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
+        shiftSystem.OnGameStart.Subscribe(_ => UpdateActiveState());
         shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
         shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
         shiftSystem.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
@@ -33,12 +34,17 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateAll()
     {
-        gameObject.SetActive(shiftSystem.currentState.Value != ShiftSystem.ShiftState.None);
+        UpdateActiveState();
         UpdateShiftNumber(shiftSystem.shiftNumber.Value);
         UpdateShiftState(shiftSystem.currentState.Value);
         UpdateOrderText();
         UpdateShiftTimer(shiftSystem.shiftTimer.Value);
         UpdateQuestText();
+    }
+
+    private void UpdateActiveState()
+    {
+        gameObject.SetActive(shiftSystem.currentState.Value != ShiftSystem.ShiftState.None);
     }
 
     private void UpdateShiftNumber(int number)
