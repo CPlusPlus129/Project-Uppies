@@ -12,7 +12,7 @@ public enum SceneTransitionType
 public class SceneManagementService : ISceneManagementService
 {
     public ReactiveProperty<string> CurrentSceneName { get; private set; } = new ReactiveProperty<string>();
-
+    private string[] sceneList = new[] { "Title", "TutorialLevel", "WhiteBox02" };
     private string pendingSpawnPointId;
 
     public async UniTask Init()
@@ -21,7 +21,6 @@ public class SceneManagementService : ISceneManagementService
 
         // Listen for scene loaded events
         SceneManager.sceneLoaded += OnSceneLoaded;
-
         await UniTask.CompletedTask;
     }
 
@@ -67,6 +66,19 @@ public class SceneManagementService : ISceneManagementService
             await UniTask.Delay(100); // Brief delay for scene setup
             await HideTransitionEffect();
         }
+    }
+
+    public string GetNextSceneName()
+    {
+        for (int i = 0; i < sceneList.Length; i++)
+        {
+            var sceneName = sceneList[i];
+            if (sceneName == CurrentSceneName.Value)
+            {
+                return i + 1 >= sceneList.Length ? null : sceneList[i + 1];
+            }
+        }
+        return null;
     }
 
 

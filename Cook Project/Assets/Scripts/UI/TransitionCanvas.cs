@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TransitionCanvas : MonoBehaviour
+public class TransitionCanvas : MonoBehaviour, IUIInitializable
 {
     [Header("Fade Settings")]
     [SerializeField] private Image fadeImage;
@@ -10,9 +10,10 @@ public class TransitionCanvas : MonoBehaviour
     [SerializeField] private EaseType fadeInEase = EaseType.OutQuad;
     [SerializeField] private EaseType fadeOutEase = EaseType.InQuad;
 
-    private void Awake()
+    public async UniTask Init()
     {
         SetupCanvas();
+        await UniTask.CompletedTask;
     }
 
     private void SetupCanvas()
@@ -43,6 +44,7 @@ public class TransitionCanvas : MonoBehaviour
 
     public async UniTask FadeOut(float duration = -1f, EaseType? easeType = null)
     {
+        Debug.Log("Fade out");
         if (duration < 0) duration = fadeDuration;
         EaseType ease = easeType ?? fadeOutEase;
 
@@ -52,6 +54,7 @@ public class TransitionCanvas : MonoBehaviour
 
     public async UniTask FadeIn(float duration = -1f, EaseType? easeType = null)
     {
+        Debug.Log("Fade in");
         if (duration < 0) duration = fadeDuration;
         EaseType ease = easeType ?? fadeInEase;
 

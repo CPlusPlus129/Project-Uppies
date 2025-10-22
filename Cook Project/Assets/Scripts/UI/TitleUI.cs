@@ -3,16 +3,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using R3;
 
-public class TitleUI : MonoBehaviour
+public class TitleUI : MonoBehaviour, IUIInitializable
 {
-    public string startSceneName = "Tutorial";
     [Header("UI References")]
     public Button startButton;
     public Button exitButton;
 
     private ISceneManagementService sceneManagementService;
 
-    private async void Start()
+    public async UniTask Init()
     {
         sceneManagementService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
 
@@ -44,8 +43,11 @@ public class TitleUI : MonoBehaviour
     {
         if (sceneManagementService != null)
         {
-            await sceneManagementService.LoadSceneAsync(startSceneName, null, SceneTransitionType.Fade);
-
+            var nextSceneName = sceneManagementService.GetNextSceneName();
+            if (!string.IsNullOrEmpty(nextSceneName))
+                await sceneManagementService.LoadSceneAsync(nextSceneName, null, SceneTransitionType.Fade);
+            else
+                Debug.LogError("[TitleUI] title scene is the last scene, cannot determine next scene name");
         }
         else
         {

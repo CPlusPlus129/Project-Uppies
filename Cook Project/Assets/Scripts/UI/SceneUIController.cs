@@ -15,7 +15,8 @@ public class SceneUIController : MonoBehaviour
     private void SetupUIForScene(string sceneName)
     {
         UIRoot root = UIRoot.Instance;
-        root.CloseAll();
+        var transitionUI = root.GetUIComponent<TransitionCanvas>();
+        root.CloseAll(transitionUI.transform);
         switch (sceneName)
         {
             case "Title":

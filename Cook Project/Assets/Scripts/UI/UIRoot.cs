@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UIRoot : MonoSingleton<UIRoot>
@@ -22,10 +23,12 @@ public class UIRoot : MonoSingleton<UIRoot>
         return GetComponentsInChildren<T>(true);
     }
 
-    public void CloseAll()
+    public void CloseAll(params Transform[] excludingTransforms)
     {
         foreach (Transform child in transform)
         {
+            if (excludingTransforms.Contains(child))
+                continue;
             child.gameObject.SetActive(false);
         }
     }

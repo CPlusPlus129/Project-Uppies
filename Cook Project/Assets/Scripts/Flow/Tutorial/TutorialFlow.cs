@@ -12,7 +12,6 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private string startDialogueName = "story_test1";
     [SerializeField] private string endDialogueName = "story_test2";
     [SerializeField] private string orderName = "SoulShake";
-    [SerializeField] private string nextSceneName = "WhiteBox02";
 
     private void Start()
     {
@@ -56,12 +55,15 @@ public class TutorialFlow : MonoBehaviour
 
         foreach (var step in steps)
         {
+            Debug.Log($"Tutorial Step {step}");
             await step.ExecuteAsync();
         }
 
         await dialogueService.StartDialogueAsync(endDialogueName);
         Debug.Log("Tutorial Finished!");
         var sceneManagementService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
+        // for current game, this is sufficient
+        var nextSceneName = sceneManagementService.GetNextSceneName();
         await sceneManagementService.LoadSceneAsync(nextSceneName, null, SceneTransitionType.Fade);
     }
 
