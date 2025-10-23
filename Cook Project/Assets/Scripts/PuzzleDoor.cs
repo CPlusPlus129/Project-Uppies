@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Linq;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         {
             questTargetId = $"door_{GetInstanceID()}";
         }
+        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
     }

@@ -120,11 +120,12 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         return true;
     }
 
+    // NOT RECOMMENDED
     // get service synchronously (can only be used after services are initialized)
-    public TInterface GetService<TInterface>() where TInterface : IGameService
-    {
-        return services.TryGetValue(typeof(TInterface), out var service) ? (TInterface)service : default;
-    }
+    //public TInterface GetService<TInterface>() where TInterface : IGameService
+    //{
+    //    return services.TryGetValue(typeof(TInterface), out var service) ? (TInterface)service : default;
+    //}
 
     public void Shutdown()
     {
