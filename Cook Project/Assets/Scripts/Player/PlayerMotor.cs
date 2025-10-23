@@ -13,18 +13,9 @@ public class PlayerMotor : MonoBehaviour
     private bool isSprinting;
     public float gravity = -9.8f;
 
-    // Running sound variables
-    public AudioSource runAudio;
-    public float moveThreshold = 0.1f;
-
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        if (runAudio != null)
-        {
-            runAudio.loop = true;
-            runAudio.playOnAwake = false;
-        }
     }
 
     void Update()
@@ -35,16 +26,6 @@ public class PlayerMotor : MonoBehaviour
     public void ProcessMove(Vector2 input)
     {
         Vector3 moveDirection = transform.right * input.x + transform.forward * input.y;
-
-        // Run sound logic
-        bool isMoving = input.magnitude > moveThreshold;
-        if (runAudio != null)
-        {
-            if (isMoving && isGrounded && !runAudio.isPlaying)
-                runAudio.Play();
-            else if ((!isMoving || !isGrounded) && runAudio.isPlaying)
-                runAudio.Stop();
-        }
 
         playerVelocity.y += gravity * Time.deltaTime;
         if (isGrounded && playerVelocity.y < 0)
@@ -99,3 +80,4 @@ public class PlayerMotor : MonoBehaviour
         isSprinting = false;
     }
 }
+
