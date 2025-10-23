@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67a0b7577a12f2f42bf8dc73927b0ecf, type: 3}
   m_Name: SettingsBook
-  m_EditorClassIdentifier: Assembly-CSharp::SettingsBook
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.SettingsBook
   keys:
   - Character
   - Layer
@@ -49,12 +49,19 @@ MonoBehaviour:
         - 
         - Res:/Images/farmerwoman.png
       - strings:
-        - satan
+        - Satan
         - Satan
         - 
         - 
         - 
         - Res:/Images/satan.png
+      - strings:
+        - Player
+        - Player
+        - 
+        - 
+        - 
+        - Res:/Images/butcher.png
       - strings:
         - ido
         - Ido

@@ -33,6 +33,10 @@ public class SafeZone : MonoBehaviour
     [Tooltip("If true, mobs are damaged by the safe zone directly. If false, safe zone does nothing to mobs.")]
     [SerializeField] private bool directMobDamage = true;
     
+    [Header("Speed Modifier")]
+    [Tooltip("Multiplier for player speed while in safe zone (1.0 = normal, 0.8 = 80% speed, 1.2 = 120% speed)")]
+    [SerializeField] private float playerSpeedModifier = 1.0f;
+    
     [Header("Visual Settings")]
     [SerializeField] private bool showGizmo = true;
     [SerializeField] private Color gizmoColor = new Color(0f, 1f, 0f, 0.3f);
@@ -45,12 +49,22 @@ public class SafeZone : MonoBehaviour
     
     // Static tracking for ALL safe zones
     private static int playerInSafeZoneCount = 0;
+    private static SafeZone currentActiveSafeZone = null;
     
     /// <summary>
     /// Returns true if the player is currently in ANY safe zone.
     /// Can be checked by other systems like LightRecoverySystem.
     /// </summary>
     public static bool IsPlayerInAnySafeZone => playerInSafeZoneCount > 0;
+    
+    /// <summary>
+    /// Gets the current player speed modifier from the active safe zone.
+    /// Returns 1.0 (no modification) if player is not in any safe zone.
+    /// </summary>
+    public static float GetCurrentSpeedModifier()
+    {
+        return currentActiveSafeZone != null ? currentActiveSafeZone.playerSpeedModifier : 1.0f;
+    }
     
     // Player tracking
     private bool playerInZone = false;
@@ -215,8 +229,9 @@ public class SafeZone : MonoBehaviour
             isHealing = false;
             accumulatedHealing = 0f;
             
-            // Increment static counter
+            // Increment static counter and set active safe zone
             playerInSafeZoneCount++;
+            currentActiveSafeZone = this;
             
             // Notify the player's light damage script
             currentPlayerDamage = other.GetComponent<PlayerLightDamage>();
@@ -266,8 +281,12 @@ public class SafeZone : MonoBehaviour
             isHealing = false;
             accumulatedHealing = 0f;
             
-            // Decrement static counter
+            // Decrement static counter and clear active safe zone
             playerInSafeZoneCount = Mathf.Max(0, playerInSafeZoneCount - 1);
+            if (playerInSafeZoneCount == 0)
+            {
+                currentActiveSafeZone = null;
+            }
             
             // Notify the player's light damage script
             if (currentPlayerDamage != null)

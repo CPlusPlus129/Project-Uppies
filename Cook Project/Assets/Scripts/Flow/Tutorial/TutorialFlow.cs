@@ -10,10 +10,12 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private GameObject backToFirstRoomArrow;
 
     [Header("Settings")]
-    [SerializeField] private string startDialogueName = "story_test1";
-    [SerializeField] private string endDialogueName = "story_test2";
+    
     [SerializeField] private string orderName = "SoulShake";
-
+    [SerializeField] private string nextSceneName = "WhiteBox02";
+    
+    private string startDialogueName = "GameStart";
+    private string endDialogueName = "TutorialStart";
     private void Start()
     {
         StartTutorial().Forget();

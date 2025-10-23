@@ -51,6 +51,8 @@ public class PlayerMotor : MonoBehaviour
         }
 
         float currentSpeed = isSprinting ? sprintSpeed : speed;
+        // Apply speed modifier from SafeZone if player is in one
+        currentSpeed *= SafeZone.GetCurrentSpeedModifier();
         Vector3 move = moveDirection * currentSpeed + playerVelocity;
         controller.Move(move * Time.deltaTime);
     }
