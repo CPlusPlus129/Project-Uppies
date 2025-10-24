@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 using R3;
+using UnityEngine;
 
 class FirstRoomStep : ITutorialStep
 {
@@ -23,11 +25,12 @@ class FirstRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        UnityEngine.Debug.Log("Waiting for player to take order...");
+        await WaitUntilPlayerGetsOrder();
+        UnityEngine.Debug.Log("Taking order...");
         await dialogueService.StartDialogueAsync(dialogueName);
 
         customer.specifiedNextOrderName = orderName;
-
-        await WaitUntilPlayerGetsOrder();
 
         door.Open();
     }
