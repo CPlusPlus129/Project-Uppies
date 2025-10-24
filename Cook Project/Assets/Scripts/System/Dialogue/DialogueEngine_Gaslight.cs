@@ -21,6 +21,7 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
 
         StartDialogue(label);
         await tcs.Task;
+        await UniTask.NextFrame();
     }
 
     async UniTask IGameService.Init()
