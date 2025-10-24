@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TutorialFlow : MonoBehaviour
 {
+    [SerializeField] private TriggerZone zeroRoomTriggerZone;
     [SerializeField] private Customer customer;
     [SerializeField] private SimpleDoor[] doors;
     [SerializeField] private FoodSource[] foods;
@@ -15,6 +16,8 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private string nextSceneName = "WhiteBox02";
     
     private string startDialogueName = "GameStart";
+    private string zeroRoomSecondDialogueName = "ZeroRoomReachArea";
+    private string firstRoomDialogueName = "FirstRoomIntro";
     private string endDialogueName = "TutorialStart";
     private void Start()
     {
@@ -49,7 +52,8 @@ public class TutorialFlow : MonoBehaviour
         var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         var steps = new List<ITutorialStep>
         {
-            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], startDialogueName, orderName),
+            new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName),
+            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], firstRoomDialogueName, orderName),
             new SecondRoomStep(inventorySystem, foods[0], doors[1]),
             new ThirdRoomStep(inventorySystem, foods[1], doors[2]),
             new FourthRoomStep(inventorySystem, foods[2], doors[3]),
