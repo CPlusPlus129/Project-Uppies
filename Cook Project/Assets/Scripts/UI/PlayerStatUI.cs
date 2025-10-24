@@ -19,7 +19,6 @@ public class PlayerStatUI : MonoBehaviour
 
         // hp and light bar register their own events
 
-        // Staminaの変更を監視してUIを更新
         playerStatSystem.CurrentStamina.Subscribe(stamina =>
         {
             staminaBar.UpdateValue(stamina, playerStatSystem.MaxStamina.Value);
@@ -29,7 +28,6 @@ public class PlayerStatUI : MonoBehaviour
             staminaBar.UpdateValue(playerStatSystem.CurrentStamina.Value, maxStamina);
         }).AddTo(this);
 
-        // Moneyの変更を監視してUIを更新
         playerStatSystem.Money.Subscribe(money =>
         {
             moneyValueText.text = money.ToString();

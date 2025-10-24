@@ -13,7 +13,6 @@ public class TutorialFlow : MonoBehaviour
     [Header("Settings")]
     
     [SerializeField] private string orderName = "SoulShake";
-    [SerializeField] private string nextSceneName = "WhiteBox02";
     
     private string startDialogueName = "GameStart";
     private string zeroRoomSecondDialogueName = "ZeroRoomReachArea";
