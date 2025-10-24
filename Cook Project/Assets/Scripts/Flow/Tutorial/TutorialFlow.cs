@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class TutorialFlow : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private SimpleDoor[] doors;
     [SerializeField] private FoodSource[] foods;
     [SerializeField] private GameObject backToFirstRoomArrow;
+
+    [SerializeField] private GameObject satanLight;
 
     [Header("Settings")]
     
@@ -51,7 +54,7 @@ public class TutorialFlow : MonoBehaviour
         var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         var steps = new List<ITutorialStep>
         {
-            new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName),
+            new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName, satanLight),
             new FirstRoomStep(dialogueService, orderManager, customer, doors[0], firstRoomDialogueName, orderName),
             new SecondRoomStep(inventorySystem, foods[0], doors[1]),
             new ThirdRoomStep(inventorySystem, foods[1], doors[2]),

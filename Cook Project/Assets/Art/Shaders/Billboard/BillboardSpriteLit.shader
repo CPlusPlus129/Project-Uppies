@@ -293,6 +293,9 @@ Shader "Billboard/Sprite Lit"
                 // Use Unity's built-in Blinn-Phong lighting (perfect for sprites)
                 half4 color = UniversalFragmentBlinnPhong(inputData, surfaceData);
 
+                // Apply fog
+                color.rgb = MixFog(color.rgb, inputData.fogCoord);
+
                 // Final output
                 color.a = albedoAlpha.a;
                 return color;
