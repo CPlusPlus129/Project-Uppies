@@ -24,6 +24,17 @@ namespace NvJ.Rendering
         [SerializeField] private bool castShadows = true;
         [SerializeField, Range(0f, 1f)] private float alphaCutoff = 0.5f;
         
+        [Header("Lighting")]
+        [Tooltip("Billboard Normal: Normal faces camera (good for camera-aligned lights)\nWorld Up: Normal points up (best for overhead lights)\nSpherical: Blended normal for rounded appearance")]
+        [SerializeField] private LightingMode lightingMode = LightingMode.WorldUp;
+        
+        public enum LightingMode
+        {
+            BillboardNormal = 0,
+            WorldUp = 1,
+            Spherical = 2
+        }
+        
         [Header("Sorting")]
         [SerializeField] private int sortingOrder = 0;
         [SerializeField] private string sortingLayerName = "Default";
@@ -40,9 +51,23 @@ namespace NvJ.Rendering
 
         private void OnValidate()
         {
+            // Update in both edit mode and play mode
             if (Application.isPlaying)
             {
                 UpdateBillboard();
+            }
+            else
+            {
+                // In edit mode, use delayed call to avoid issues
+                #if UNITY_EDITOR
+                UnityEditor.EditorApplication.delayCall += () =>
+                {
+                    if (this != null)
+                    {
+                        UpdateBillboard();
+                    }
+                };
+                #endif
             }
         }
 
@@ -106,13 +131,22 @@ namespace NvJ.Rendering
             // Triangles
             mesh.triangles = new int[] { 0, 2, 1, 2, 3, 1 };
 
-            // Normals
+            // Normals (pointing back in object space, will be transformed by billboard shader)
             mesh.normals = new Vector3[]
             {
                 Vector3.back,
                 Vector3.back,
                 Vector3.back,
                 Vector3.back
+            };
+
+            // Tangents (for normal mapping support)
+            mesh.tangents = new Vector4[]
+            {
+                new Vector4(1, 0, 0, 1),  // Right direction
+                new Vector4(1, 0, 0, 1),
+                new Vector4(1, 0, 0, 1),
+                new Vector4(1, 0, 0, 1)
             };
 
             mesh.RecalculateBounds();
@@ -168,18 +202,42 @@ namespace NvJ.Rendering
                 return;
             }
 
-            // Create material
-            billboardMaterial = new Material(shader);
-            billboardMaterial.name = $"Billboard Material ({gameObject.name})";
+            // Destroy old material if it exists and doesn't match the shader
+            if (billboardMaterial != null && billboardMaterial.shader != shader)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(billboardMaterial);
+                }
+                else
+                {
+                    DestroyImmediate(billboardMaterial);
+                }
+                billboardMaterial = null;
+            }
+
+            // Create new material if needed
+            if (billboardMaterial == null)
+            {
+                billboardMaterial = new Material(shader);
+                billboardMaterial.name = $"Billboard Material ({gameObject.name})";
+            }
 
             UpdateMaterial();
 
-            meshRenderer.sharedMaterial = billboardMaterial;
+            if (meshRenderer != null)
+            {
+                meshRenderer.sharedMaterial = billboardMaterial;
+            }
         }
 
         private void UpdateMaterial()
         {
-            if (billboardMaterial == null) return;
+            if (billboardMaterial == null)
+            {
+                Debug.LogWarning($"BillboardSprite on {gameObject.name}: Cannot update material - material is null. Call CreateMaterial first.");
+                return;
+            }
 
             // Set properties
             if (sprite != null)
@@ -189,6 +247,17 @@ namespace NvJ.Rendering
 
             billboardMaterial.SetColor("_BaseColor", tint);
             billboardMaterial.SetFloat("_BillboardType", (float)billboardMode);
+            
+            // Check if shader has the lighting mode property before setting it
+            if (billboardMaterial.HasProperty("_LightingMode"))
+            {
+                billboardMaterial.SetFloat("_LightingMode", (float)lightingMode);
+            }
+            else if (useLighting)
+            {
+                Debug.LogWarning($"BillboardSprite on {gameObject.name}: Material doesn't have _LightingMode property. Shader may need to be updated.");
+            }
+            
             billboardMaterial.SetFloat("_Cutoff", alphaCutoff);
         }
 
@@ -210,7 +279,23 @@ namespace NvJ.Rendering
 
         private void UpdateBillboard()
         {
-            if (billboardMaterial != null)
+            // Ensure we have the necessary components
+            if (meshRenderer == null)
+            {
+                meshRenderer = GetComponent<MeshRenderer>();
+            }
+            
+            if (meshFilter == null)
+            {
+                meshFilter = GetComponent<MeshFilter>();
+            }
+            
+            // If material doesn't exist or wrong shader, recreate it
+            if (billboardMaterial == null || meshRenderer.sharedMaterial != billboardMaterial)
+            {
+                CreateMaterial();
+            }
+            else if (billboardMaterial != null)
             {
                 UpdateMaterial();
             }
@@ -265,6 +350,15 @@ namespace NvJ.Rendering
             }
         }
 
+        public void SetLightingMode(LightingMode mode)
+        {
+            lightingMode = mode;
+            if (billboardMaterial != null)
+            {
+                billboardMaterial.SetFloat("_LightingMode", (float)mode);
+            }
+        }
+
         /// <summary>
         /// Gets the current sprite being displayed
         /// </summary>
@@ -279,6 +373,32 @@ namespace NvJ.Rendering
         public void Refresh()
         {
             UpdateBillboard();
+        }
+        
+        /// <summary>
+        /// Forces a complete recreation of the billboard (mesh, material, and renderer)
+        /// Use this if the billboard is not responding to lighting changes
+        /// </summary>
+        public void ForceRecreate()
+        {
+            // Destroy existing material
+            if (billboardMaterial != null)
+            {
+                if (Application.isPlaying)
+                {
+                    Destroy(billboardMaterial);
+                }
+                else
+                {
+                    DestroyImmediate(billboardMaterial);
+                }
+                billboardMaterial = null;
+            }
+            
+            // Recreate everything
+            SetupBillboard();
+            
+            Debug.Log($"BillboardSprite on {gameObject.name}: Forced recreation complete.");
         }
     }
 }

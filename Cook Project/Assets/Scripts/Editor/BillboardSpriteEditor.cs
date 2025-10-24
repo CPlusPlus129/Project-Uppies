@@ -24,6 +24,22 @@ namespace NvJ.Rendering.Editor
                 billboard.Refresh();
                 EditorUtility.SetDirty(billboard);
             }
+            
+            // Force Recreate button (for troubleshooting lighting issues)
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Force Recreate (Fix Lighting Issues)", GUILayout.Height(25), GUILayout.Width(250)))
+            {
+                if (EditorUtility.DisplayDialog("Force Recreate Billboard",
+                    "This will destroy and recreate the billboard material and mesh. Use this if lighting is not working correctly.\n\nContinue?",
+                    "Yes", "Cancel"))
+                {
+                    billboard.ForceRecreate();
+                    EditorUtility.SetDirty(billboard);
+                }
+            }
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
 
             // Warning if no sprite assigned
             if (billboard.GetSprite() == null)
