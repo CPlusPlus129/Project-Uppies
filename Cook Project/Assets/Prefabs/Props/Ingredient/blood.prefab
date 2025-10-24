@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 805826147275403463}
   - component: {fileID: 1138879054300767443}
   - component: {fileID: 4331627513954554698}
+  - component: {fileID: 5410901594852781583}
   m_Layer: 6
   m_Name: blood
   m_TagString: Untagged
@@ -42,7 +43,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3958719202997239552}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!23 &805826147275403463
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -68,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 83f0ee6b4629d0c47a3844307245c506, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -125,3 +126,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ingredient
   ItemName: blood
+--- !u!114 &5410901594852781583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3958719202997239552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf6a5cbf4fd00f45ab9ce8ee2bc6c54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NvJ.Rendering.BillboardSprite
+  sprite: {fileID: 21300000, guid: 35d99e78b5c3e9349aad357498a4438c, type: 3}
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  size: {x: 1, y: 1}
+  billboardMode: 1
+  useLighting: 1
+  castShadows: 1
+  alphaCutoff: 0.5
+  sortingOrder: 0
+  sortingLayerName: Default
