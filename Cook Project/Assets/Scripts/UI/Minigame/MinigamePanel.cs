@@ -193,7 +193,10 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         currentSigilInd = 0;
         if (instantiatedSigils.Count > 0)
         {
-            currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
+            UniTask.DelayFrame(1).ContinueWith(() => // Wait a frame to ensure layout is updated
+            {
+                currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
+            }).Forget();
         }
     }
 
