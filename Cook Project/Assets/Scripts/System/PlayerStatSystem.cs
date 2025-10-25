@@ -2,8 +2,25 @@ using R3;
 
 public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
 {
+    public PlayerStatSystem()
+    {
+        CurrentHP
+            .Pairwise()
+            .Subscribe(hpValues =>
+            {
+                OnHPChanged.OnNext((hpValues.Previous, hpValues.Current));
+                if (hpValues.Current <= 0)
+                {
+                    OnPlayerDeath.OnNext(Unit.Default);
+                }
+            })
+            .AddTo(disposables);
+    }
+
     public ReactiveProperty<int> CurrentHP { get; private set; } = new ReactiveProperty<int>(100);
     public ReactiveProperty<int> MaxHP { get; private set; } = new ReactiveProperty<int>(100);
+    public Subject<(int oldValue, int newValue)> OnHPChanged = new Subject<(int, int)>();
+    public Subject<Unit> OnPlayerDeath = new Subject<Unit>();
     public ReactiveProperty<float> CurrentStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> MaxStamina { get; private set; } = new ReactiveProperty<float>(100);
 
@@ -19,4 +36,6 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
 
     public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
+
+    private CompositeDisposable disposables = new CompositeDisposable();
 }
