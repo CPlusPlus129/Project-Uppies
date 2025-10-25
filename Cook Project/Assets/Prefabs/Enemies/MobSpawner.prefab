@@ -67,10 +67,10 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8f51ef995a8e9264eb75615eed9ed6e7, type: 2}
-  - {fileID: 2100000, guid: 7259e867e4493674d9d46b8d122c578e, type: 2}
-  - {fileID: 2100000, guid: 536f515efdfa02648b55cd3d80aa2b7f, type: 2}
-  - {fileID: 2100000, guid: 7259e867e4493674d9d46b8d122c578e, type: 2}
+  - {fileID: 8457844215688837651, guid: 41fc2dbc2693128479b2d1c4edb7f537, type: 3}
+  - {fileID: 2100000, guid: 83f0ee6b4629d0c47a3844307245c506, type: 2}
+  - {fileID: -7643982688591299800, guid: c114843bba4a8c046a004d619bf7a801, type: 3}
+  - {fileID: 8457844215688837651, guid: 41fc2dbc2693128479b2d1c4edb7f537, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -107,7 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MobSpawner
   mobPrefab: {fileID: 1302521468039500994, guid: 2a3ee6b3e3b6e2a4ebf32a0854a1c9a9, type: 3}
   maxMobs: 5
-  spawnInterval: 4
+  spawnInterval: 2
   spawnOnStart: 1
   autoSpawn: 1
   spawnRadius: 2
@@ -117,21 +117,6 @@ MonoBehaviour:
   cycleSpawnPoints: 0
   autoAssignPlayer: 1
   playerTransform: {fileID: 0}
-  randomizeColor: 1
-  useColorPalette: 0
-  colorPalette:
-  - {r: 1, g: 0.3, b: 0.3, a: 1}
-  - {r: 0.3, g: 0.3, b: 1, a: 1}
-  - {r: 0.3, g: 1, b: 0.3, a: 1}
-  - {r: 1, g: 1, b: 0.3, a: 1}
-  - {r: 1, g: 0.3, b: 1, a: 1}
-  - {r: 0.3, g: 1, b: 1, a: 1}
-  - {r: 1, g: 0.6, b: 0.2, a: 1}
-  - {r: 0.6, g: 0.3, b: 1, a: 1}
-  minBrightness: 0.4
-  maxBrightness: 1
-  minSaturation: 0.6
-  maxSaturation: 1
-  showDebugInfo: 0
+  showDebugInfo: 1
   showGizmos: 1
   spawnAreaColor: {r: 1, g: 0, b: 0, a: 1}
