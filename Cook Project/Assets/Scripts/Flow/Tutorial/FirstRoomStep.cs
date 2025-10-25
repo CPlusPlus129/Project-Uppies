@@ -13,7 +13,7 @@ class FirstRoomStep : ITutorialStep
     private readonly string orderName;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, string dialogueName, string orderName)
+    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, string dialogueName, string orderName, NvJ.Rendering.FlamePillarEffect stanTeleportEffect)
     {
         this.dialogueService = dialogueService;
         this.orderManager = orderManager;

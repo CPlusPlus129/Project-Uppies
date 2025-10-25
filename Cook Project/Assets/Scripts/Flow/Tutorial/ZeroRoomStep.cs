@@ -1,5 +1,8 @@
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Triggers;
+using NvJ.Rendering;
 using R3;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 
@@ -16,15 +19,17 @@ class ZeroRoomStep : ITutorialStep
     private readonly string secondDialogueName;
 
     private readonly GameObject satanLight;
+    private readonly FlamePillarEffect flamePillarEffect;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public ZeroRoomStep(IDialogueService dialogueService, TriggerZone triggerZone, string firstDialogueName, string secondDialogueName, GameObject satanLight)
+    public ZeroRoomStep(IDialogueService dialogueService, TriggerZone triggerZone, string firstDialogueName, string secondDialogueName, GameObject satanLight, FlamePillarEffect flamePillarEffect)
     {
         this.dialogueService = dialogueService;
         this.triggerZone = triggerZone;
         this.firstDialogueName = firstDialogueName;
         this.secondDialogueName = secondDialogueName;
         this.satanLight = satanLight;
+        this.flamePillarEffect = flamePillarEffect;
     }
 
     public async UniTask ExecuteAsync()
@@ -47,6 +52,13 @@ class ZeroRoomStep : ITutorialStep
         Debug.Log($"[ZeroRoomStep] Starting second dialogue: {secondDialogueName}");
         await dialogueService.StartDialogueAsync(secondDialogueName);
         Debug.Log($"[ZeroRoomStep] Second dialogue completed: {secondDialogueName}");
+
+        // Satan Exits!!
+        await flamePillarEffect.PlayTeleportEffect(50, 500, 2f, true);
+
+        // Turn Lighting off
+        satanLight.gameObject.SetActive(false);
+
         Debug.Log("[ZeroRoomStep] Step completed!");
     }
 
