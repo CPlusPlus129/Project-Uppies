@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
@@ -26,6 +27,7 @@ class FirstRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        Debug.Log("HERE!");
         customer.specifiedNextOrderName = orderName;
         UnityEngine.Debug.Log("Waiting for player to take order...");
         await WaitUntilPlayerGetsOrder();
