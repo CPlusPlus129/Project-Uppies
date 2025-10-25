@@ -20,7 +20,6 @@ class FourthRoomStep : ITutorialStep
         await WaitUntilPlayerGetsGun();
         door.Open();
         await WaitUntilPlayerGetsFoodFromSource();
-        //TODO arrow
     }
 
     private async UniTask WaitUntilPlayerGetsGun()

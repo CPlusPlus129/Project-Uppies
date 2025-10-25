@@ -1,7 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
 
 public class TutorialFlow : MonoBehaviour
 {
@@ -9,6 +8,7 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private Customer customer;
     [SerializeField] private SimpleDoor[] doors;
     [SerializeField] private FoodSource[] foods;
+    [SerializeField] private EmissionIndicator[] doorArrows;
     [SerializeField] private GameObject backToFirstRoomArrow;
 
     [SerializeField] private GameObject satanLight;
@@ -49,17 +49,21 @@ public class TutorialFlow : MonoBehaviour
         {
             foods[i].SetItemName(recipe.ingredients[i]);
         }
+        foreach (var doorArrow in doorArrows)
+        {
+            doorArrow.SetIsOn(false);
+        }
         var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
         var orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         var steps = new List<ITutorialStep>
         {
             new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName, satanLight),
-            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], firstRoomDialogueName, orderName),
-            new SecondRoomStep(inventorySystem, foods[0], doors[1]),
-            new ThirdRoomStep(inventorySystem, foods[1], doors[2]),
+            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], doorArrows[0], firstRoomDialogueName, orderName),
+            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0]),
+            new ThirdRoomStep(inventorySystem, foods[1], doors[2], doorArrows[2], doorArrows[1]),
             new FourthRoomStep(inventorySystem, foods[2], doors[3]),
-            new CookingStep(inventorySystem, backToFirstRoomArrow, orderName),
+            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName),
             new ServeMealStep(orderManager, orderName)
         };
 
