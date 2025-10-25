@@ -80,4 +80,16 @@ public class InputManager : MonoSingleton<InputManager>
         else
             Cursor.lockState = CursorLockMode.None;
     }
+
+    public string GetBindingDisplayString(string actionName, string controlScheme)
+    {
+        var action = InputSystem.actions.FindAction(actionName, true);
+        if (action == null)
+        {
+            Debug.LogError($"Action '{actionName}' not found.");
+            return string.Empty;
+        }
+        var bindingIndex = action.GetBindingIndex(InputBinding.MaskByGroup(controlScheme));
+        return action.GetBindingDisplayString(bindingIndex);
+    }
 }

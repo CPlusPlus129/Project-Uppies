@@ -6,25 +6,38 @@ public class PlayerInteract : MonoBehaviour
     public LayerMask interactLayer;
     public IInventorySystem inventorySystem { get; set; }
 
-    public void Interact(Camera cam)
+    public void UpdateCurrentInteractableTarget(Camera cam)
     {
+        var currentInteractableTarget = PlayerStatSystem.Instance.CurrentInteractableTarget;
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-#if UNITY_EDITOR
-        Debug.DrawRay(ray.origin, ray.direction * interactDistance, Color.red, 1f);
-#endif
         if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
+        {
+            currentInteractableTarget.Value = null;
             return;
+        }
 
         if (hit.collider.TryGetComponent(out IInteractable interactable))
-            interactable.Interact();
+            currentInteractableTarget.Value = interactable;
+        else
+            currentInteractableTarget.Value = null;
+    }
 
-        if (hit.collider.TryGetComponent(out ItemBase item))
+    public void Interact(Camera cam)
+    {
+        var currentInteractableTarget = PlayerStatSystem.Instance.CurrentInteractableTarget;
+        if (currentInteractableTarget.Value == null)
+            return;
+
+        IInteractable interactable = currentInteractableTarget.Value;
+        interactable.Interact();
+
+        if (interactable is ItemBase item)
         {
             if (inventorySystem.AddItem(item))
                 item.gameObject.SetActive(false);
         }
 
-        if (hit.collider.TryGetComponent(out Customer customer))
+        if (interactable is Customer customer)
         {
             var heldItem = inventorySystem.GetSelectedItem();
             if (heldItem != null && customer.CanReceiveMeal(heldItem))
@@ -33,7 +46,7 @@ public class PlayerInteract : MonoBehaviour
             }
         }
 
-        if (hit.collider.TryGetComponent(out FoodSource foodSource) && !    inventorySystem.IsInventoryFull())
+        if (interactable is FoodSource foodSource && !inventorySystem.IsInventoryFull())
         {
             var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
             var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
