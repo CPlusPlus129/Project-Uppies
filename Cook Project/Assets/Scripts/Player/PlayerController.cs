@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     {
         var moveValue = moveAction.ReadValue<Vector2>();
         motor.ProcessMove(moveValue);
+        interact.UpdateCurrentInteractableTarget(camlook.cam);        
     }
 
     void LateUpdate()
