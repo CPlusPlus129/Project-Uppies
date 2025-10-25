@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 
-public class OrderUI : MonoBehaviour
+public class OrderUI : MonoBehaviour, IUIInitializable
 {
     public Transform listRoot;
     public OrderListItem orderListItemPrefab;
     private IOrderManager orderManager;
     private List<OrderListItem> itemList = new List<OrderListItem>();
 
-    private async void Awake()
+    public async UniTask Init()
     {
         orderListItemPrefab.gameObject.SetActive(false);
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         orderManager.OnNewOrder.Subscribe(OnNewOrder).AddTo(this);
         orderManager.OnOrderServed.Subscribe(OnOrderServed).AddTo(this);
@@ -25,7 +24,7 @@ public class OrderUI : MonoBehaviour
     {
         var item = Instantiate(orderListItemPrefab, listRoot);
         item.gameObject.SetActive(true);
-        item.SetupUI(order, order.CustomerName, order.MealName);
+        item.SetupUI(order);
         itemList.Add(item);
     }
 

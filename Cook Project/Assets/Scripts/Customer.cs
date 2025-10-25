@@ -39,21 +39,27 @@ public class Customer : MonoBehaviour, IInteractable
 
     private void PlaceOrder()
     {
-        string mealName = null;
+        Recipe recipe = null;
         if (!string.IsNullOrEmpty(specifiedNextOrderName))
         {
-            mealName = specifiedNextOrderName;
+            var mealName = specifiedNextOrderName;
             specifiedNextOrderName = null;
+            recipe = Database.Instance.recipeData.GetRecipeByName(mealName);
         }
         else
         {
-            var randRecipe = Database.Instance.recipeData.GetRandomRecipe();
-            mealName = randRecipe.mealName;
+            recipe = Database.Instance.recipeData.GetRandomRecipe();
+        }
+        if (recipe == null)
+        {
+            Debug.LogError("Failed to find recipe to place order.");
+            return;
         }
         var order = new Order
         {
             CustomerName = customerName,
-            MealName = mealName
+            MealName = recipe.mealName,
+            Recipe = recipe
         };
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;

@@ -2,6 +2,7 @@ public class Order
 {
     public string CustomerName;
     public string MealName;
+    public Recipe Recipe;
 
     public override bool Equals(object obj)
     {
