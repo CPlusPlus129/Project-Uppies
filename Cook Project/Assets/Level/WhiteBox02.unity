@@ -12594,6 +12594,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: e085479f7e17a7e4685167bbbe7a514a, type: 2}
+    - target: {fileID: 3201705174588527448, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4825173545663693834, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_Antialiasing
       value: 2
@@ -12633,7 +12637,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2140928474}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8985326193973131990, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 416698676}
   m_SourcePrefab: {fileID: 100100000, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
 --- !u!1001 &262813647
 PrefabInstance:
@@ -14538,6 +14545,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 477482, guid: 131ea53cf3b9d0245b3e1a6840d4e4b4, type: 3}
   m_PrefabInstance: {fileID: 294922457}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &297075434 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8985326193973131990, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+  m_PrefabInstance: {fileID: 261736250}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &298497625 stripped
 GameObject:
@@ -21006,6 +21018,28 @@ MeshFilter:
 --- !u!4 &416698675 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
+  m_PrefabInstance: {fileID: 261736250}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &416698676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 297075434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15491364e7188bd4aae18920aeb2f1ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFootsteps
+  audioSource: {fileID: 416698677}
+  runningClip: {fileID: 8300000, guid: 89fe10c7e305e7349817bd8cc9979112, type: 3}
+  volume: 0.8
+  fadeSpeed: 5
+  minMoveThreshold: 0.1
+--- !u!82 &416698677 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3201705174588527448, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
   m_PrefabInstance: {fileID: 261736250}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &419815556
