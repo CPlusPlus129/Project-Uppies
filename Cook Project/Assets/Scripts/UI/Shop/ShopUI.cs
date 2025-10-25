@@ -44,10 +44,13 @@ public class ShopUI : MonoBehaviour
     {
         ResetShopItems();
         var list = ShopSystem.Instance.GetShopItems();
+        
         for (int i = 0; i < list.Count; i++)
         {
             var itemData = list[i];
             ShopItemUI uiItem = null;
+            
+            // Create new UI item if needed
             if (i >= itemList.Count)
             {
                 uiItem = Instantiate(itemPrefab, itemsContainer);
@@ -57,23 +60,37 @@ public class ShopUI : MonoBehaviour
             {
                 uiItem = itemList[i];
             }
+            
             uiItem.gameObject.SetActive(true);
-            uiItem.SetupUI(itemData.itemId, itemData.itemId, itemData.price, itemData.stock, itemId =>
+            
+            // Use the enhanced setup method if upgrade data is available
+            if (itemData.upgradeData != null)
             {
-                if (ShopSystem.Instance.PurchaseItem(itemId))
-                {
-                    Debug.Log($"Purchased item: {itemId}");
-                    RefreshShopItems();
-                }
-                else
-                {
-                    Debug.Log($"Failed to purchase item: {itemId}");
-                }
-            });
+                uiItem.SetupUI(
+                    itemData.itemId, 
+                    itemData.upgradeData, 
+                    itemData.price, 
+                    itemData.stock, 
+                    OnPurchaseItem
+                );
+            }
+            else
+            {
+                // Fallback to basic setup
+                uiItem.SetupUI(
+                    itemData.itemId, 
+                    itemData.itemId, 
+                    itemData.price, 
+                    itemData.stock, 
+                    OnPurchaseItem
+                );
+            }
         }
-        if(itemList.Count > list.Count)
+        
+        // Hide excess UI items
+        if (itemList.Count > list.Count)
         {
-            for(int j = list.Count; j < itemList.Count; j++)
+            for (int j = list.Count; j < itemList.Count; j++)
             {
                 itemList[j].gameObject.SetActive(false);
             }
@@ -86,6 +103,19 @@ public class ShopUI : MonoBehaviour
         {
             item.ResetUI();
             item.gameObject.SetActive(false);
+        }
+    }
+
+    private void OnPurchaseItem(string itemId)
+    {
+        if (ShopSystem.Instance.PurchaseItem(itemId))
+        {
+            Debug.Log($"Successfully purchased: {itemId}");
+            RefreshShopItems();
+        }
+        else
+        {
+            Debug.Log($"Failed to purchase: {itemId}");
         }
     }
 }
