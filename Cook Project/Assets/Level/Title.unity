@@ -799,7 +799,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.Volume
   m_IsGlobal: 0
   priority: 0
-  blendDistance: 1
+  blendDistance: 20
   weight: 1
   sharedProfile: {fileID: 11400000, guid: 35ea7854e8d7e154eac4251103c59857, type: 2}
 --- !u!65 &664311202
@@ -928,7 +928,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 0
-  m_Color: {r: 1, g: 0.19339621, b: 0.19339621, a: 1}
+  m_Color: {r: 0.6981132, g: 0.08891065, b: 0.08891065, a: 1}
   m_Intensity: 0.56
   m_Range: 10
   m_SpotAngle: 85.468475

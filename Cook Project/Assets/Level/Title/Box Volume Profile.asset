@@ -15,19 +15,19 @@ MonoBehaviour:
   active: 1
   postExposure:
     m_OverrideState: 1
-    m_Value: -3.14
+    m_Value: -1.58
   contrast:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 30
   colorFilter:
     m_OverrideState: 1
-    m_Value: {r: 0.6981132, g: 0.26014596, b: 0.26014596, a: 1}
+    m_Value: {r: 0.4811321, g: 0.39262193, b: 0.39262193, a: 1}
   hueShift:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: -0
   saturation:
-    m_OverrideState: 0
-    m_Value: 0
+    m_OverrideState: 1
+    m_Value: 68
 --- !u!114 &-1562491696378809680
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -134,17 +134,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.Vignette
   active: 1
   color:
-    m_OverrideState: 0
-    m_Value: {r: 0, g: 0, b: 0, a: 1}
+    m_OverrideState: 1
+    m_Value: {r: 0.41509432, g: 0.0763617, b: 0.0763617, a: 1}
   center:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: {x: 0.5, y: 0.5}
   intensity:
     m_OverrideState: 1
-    m_Value: 0.345
+    m_Value: 0.471
   smoothness:
-    m_OverrideState: 0
-    m_Value: 0.2
+    m_OverrideState: 1
+    m_Value: 0.424
   rounded:
     m_OverrideState: 0
     m_Value: 0
