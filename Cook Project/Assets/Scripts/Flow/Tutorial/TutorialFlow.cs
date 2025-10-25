@@ -17,14 +17,13 @@ public class TutorialFlow : MonoBehaviour
 
     [SerializeField] private GameObject satanLight;
 
-    [Header("Settings")]
-    
-    [SerializeField] private string orderName = "SoulShake";
+    private string orderName = "SoulShake";
     
     private string startDialogueName = "GameStart";
     private string zeroRoomSecondDialogueName = "ZeroRoomReachArea";
     private string firstRoomDialogueName = "FirstRoomIntro";
     private string endDialogueName = "TutorialStart";
+
     private void Start()
     {
         StartTutorial().Forget();
