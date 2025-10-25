@@ -16,6 +16,7 @@ public class FridgeGlowController : MonoBehaviour
 
     [Header("Material Settings")]
     [SerializeField] private Material glowMaterial;
+    [SerializeField] private MeshFilter targetMesh;
     
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
@@ -52,7 +53,7 @@ public class FridgeGlowController : MonoBehaviour
 
     private void CreateGlowObject()
     {
-        MeshFilter meshFilter = GetComponentInChildren<MeshFilter>();
+        MeshFilter meshFilter = targetMesh;
         if (meshFilter == null)
         {
             if (enableDebugLogs) Debug.LogWarning($"FridgeGlowController: No MeshFilter found on '{gameObject.name}'");

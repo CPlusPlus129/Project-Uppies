@@ -6,18 +6,24 @@ class SecondRoomStep : ITutorialStep
     private readonly IInventorySystem inventorySystem;
     private readonly FoodSource foodSource;
     private readonly SimpleDoor door;
+    private readonly EmissionIndicator doorArrow;
+    private readonly EmissionIndicator prevDoorArrow;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public SecondRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door)
+    public SecondRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, EmissionIndicator doorArrow, EmissionIndicator prevDoorArrow)
     {
         this.inventorySystem = inventorySystem;
         this.foodSource = foodSource;
         this.door = door;
+        this.doorArrow = doorArrow;
+        this.prevDoorArrow = prevDoorArrow;
     }
 
     public async UniTask ExecuteAsync()
     {
         await WaitUntilPlayerGetsFoodFromSource();
+        doorArrow?.SetIsOn(true);
+        prevDoorArrow?.gameObject.SetActive(false);
         door.Open();
     }
 

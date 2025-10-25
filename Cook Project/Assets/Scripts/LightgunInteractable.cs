@@ -3,7 +3,7 @@ using UnityEngine;
 public class LightgunInteractable : MonoBehaviour, IInteractable
 {
     public Renderer rend;
-    public Color emissionBaseColor = new Color(1f, 1f, 0.3f);
+    [ColorUsage(true, true)]  public Color emissionBaseColor = new Color(1f, 1f, 0.3f);
     public float intensity = 0.2f;
     public float speed = 1f;
 
@@ -29,6 +29,6 @@ public class LightgunInteractable : MonoBehaviour, IInteractable
 
         Color finalColor = emissionBaseColor * (t * intensity);
 
-        _mat.SetColor("_EmissionColor", finalColor);
+        _mat.SetVector("_EmissionColor", finalColor);
     }
 }

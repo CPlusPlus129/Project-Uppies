@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using R3;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LightAmmoList : MonoBehaviour
 {
     [SerializeField] private GameObject ammoPrefab;
+    [SerializeField] private Image reloadGauge;
     private List<GameObject> ammoList = new List<GameObject>();
 
     private void Awake()
@@ -20,18 +22,25 @@ public class LightAmmoList : MonoBehaviour
         var currentLight = playerStatSystem.CurrentLight.Value;
         var cost = playerStatSystem.LightCostPerShot.Value;
         var ammoCount = cost == 0 ? 0 : (int)(currentLight / cost);
-        if (ammoCount > ammoList.Count)
+        var reloadGaugeFill = (cost == 0) ? 0f : (currentLight % cost) / cost;
+        UpdateAmmoList(ammoCount);
+        UpdateReloadGauge(reloadGaugeFill);
+    }
+
+    private void UpdateAmmoList(int targetCount)
+    {
+        if (targetCount > ammoList.Count)
         {
-            for (int i = ammoList.Count; i < ammoCount; i++)
+            for (int i = ammoList.Count; i < targetCount; i++)
             {
                 var ammo = Instantiate(ammoPrefab, ammoPrefab.transform.parent);
                 ammo.SetActive(true);
                 ammoList.Add(ammo);
             }
         }
-        else if(ammoCount < ammoList.Count)
+        else if (targetCount < ammoList.Count)
         {
-            var diff = ammoList.Count - ammoCount;
+            var diff = ammoList.Count - targetCount;
             for (int i = 0; i < diff; i++)
             {
                 var ammo = ammoList[ammoList.Count - 1];
@@ -39,5 +48,10 @@ public class LightAmmoList : MonoBehaviour
                 Destroy(ammo);
             }
         }
+    }
+
+    private void UpdateReloadGauge(float fill)
+    {
+        reloadGauge.fillAmount = fill;
     }
 }

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
@@ -9,16 +8,18 @@ class FirstRoomStep : ITutorialStep
     private readonly IOrderManager orderManager;
     private readonly Customer customer;
     private readonly SimpleDoor door;
+    private readonly EmissionIndicator doorArrow;
     private readonly string dialogueName;
     private readonly string orderName;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, string dialogueName, string orderName, NvJ.Rendering.FlamePillarEffect stanTeleportEffect)
+    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, EmissionIndicator doorArrow, string dialogueName, string orderName, NvJ.Rendering.FlamePillarEffect stanTeleportEffect)
     {
         this.dialogueService = dialogueService;
         this.orderManager = orderManager;
         this.customer = customer;
         this.door = door;
+        this.doorArrow = doorArrow;
         this.dialogueName = dialogueName;
         this.orderName = orderName;
     }
@@ -31,7 +32,7 @@ class FirstRoomStep : ITutorialStep
         UnityEngine.Debug.Log("Taking order...");
         await dialogueService.StartDialogueAsync(dialogueName);
 
-
+        doorArrow?.SetIsOn(true);
         door.Open();
     }
 
