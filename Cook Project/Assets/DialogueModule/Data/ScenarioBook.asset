@@ -283,16 +283,25 @@ MonoBehaviour:
         - Arg1
         - Arg2
         - Arg3
+        - Arg4
+        - Arg5
+        - Arg6
         - Text
       - strings:
-        - '*GameStart'
+        - '*tutorial_start'
       - strings:
+        - 
+        - Player
+        - 
         - 
         - 
         - 
         - 
         - "Ugh\u2026 my head. Where\u2026 am I? I feel like I'm burning up\u2026"
       - strings:
+        - 
+        - Player
+        - 
         - 
         - 
         - 
@@ -301,425 +310,787 @@ MonoBehaviour:
       - strings:
         - EndScenario
       - strings:
-        - '*ZeroRoomReachArea'
+        - 
+      - strings:
+        - '*meeting_satan'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - "Well, look who fell through the floorboards of the universe. Welcome to
-          Hell's Kitchen \u2014 and no, not the TV show, we're currently suing them
-          for copyright."
+        - charM
+        - 
+        - 
+        - 
+        - "Well, look who's up and walking! Welcome to Hell's Kitchen \u2014 and
+          no, not the TV show, we're currently suing them for copyright."
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - What's going on here? Am I being filmed? Who are you?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - I wish! But the union is striking right now for fair wages. Can you believe
           it?!
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - Union?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Yep. Even in Hell, you gotta pay your dues.
       - strings:
         - 
-        - satan
+        - Player
         - 
-        - charR
-        - As for me? I think even you can figure that out. The big "L"? The horribly-misunderstood-but-you-can't-help-but-root-for-him
+        - 
+        - 
+        - 
+        - 
+        - Hell?! So, then you're-
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - The big "L"? The horribly-misunderstood-but-you-can't-help-but-root-for-him
           fallen angel?
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
-        - "You're\u2026 The Devil? So there really is a God?"
+        - 
+        - 
+        - 
+        - 
+        - "So, there really is a God. And that means\u2026"
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - God! All anyone wants to talk about is that old geezer. Everyone loves
-          to hate mean old Satan, but way more people have been killed in the name
-          of the big G than little old me.
+        - charM
+        - 
+        - 
+        - 
+        - God! Kids these days, it's all greater deities and angry British men to
+          them. Eternal damnation just doesn't fit into a 7 second video!
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - ...
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - "I'm dead\u2026?"
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Oh, cheer up, buttercup! Don't think too hard about it for now. Alright,
-          that's enough explaining from me. You can move, so you can work.
+        - charM
+        - 
+        - 
+        - 
+        - Don't think too hard about it for now. Alright, that's enough explaining
+          from me. You can move, so you can work.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - You haven't explained anything yet! How did I die? Who even am I? Why can't
           I remember?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Yeah yeah, file a complaint with the union. Moving on. Head in to the next
-          room and say hi to Stan for me.
+        - charM
+        - 
+        - 
+        - 
+        - Yeah yeah, file a complaint with the union. Moving on. Get going to the
+          next room, and say hi to Stan for me.
       - strings:
         - EndScenario
       - strings:
-        - '*FirstRoomIntro'
+        - 
+      - strings:
+        - '*tutorial_first_room_entering'
       - strings:
         - 
-        - satan
+        - Player
         - 
-        - charR
+        - 
+        - 
+        - 
+        - 
+        - "What is this place? It looks more like a basement than\u2026"
+      - strings:
+        - 
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
+        - ...
+      - strings:
+        - 
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
+        - "I wonder what I did to end up here. If this really is Hell\u2026 Well,
+          nothing I can do about it for now. I guess I'll find Stan."
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_first_room_orders'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
         - Ah, Stan! It's been too long. How've you been, my friend?
       - strings:
         - 
         - stan
         - 
-        - charM
+        - charL
+        - 
+        - 
+        - 
         - AAAAAAH, IT BURNS. MY EYES. MY FACE. OH GOD HELP ME
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Sounds like someone's hungry! Go to the counter and take their order with
-          E.
+        - charM
+        - 
+        - 
+        - 
+        - Sounds like someone's hungry! See that in the top left of your screen?
+          That's Stan's order. Now you've gotta gather all 3 ingredients.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - Uhhh, they don't sound hungry to-
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Be polite! You're here to serve them, and it better be with a smile!
-      - strings:
+        - charM
         - 
-        - satan
         - 
-        - charR
-        - "See that in the top left of your screen? That's the order. Now get cooking.
-          Serve the dish to the guest before they get hangry \u2014 and by hangry,
+        - 
+        - "And do it quickly before the customer gets hangry \u2014 and by hangry,
           I mean they'll start removing your limbs alphabetically."
       - strings:
         - EndScenario
       - strings:
-        - '*SecondRoomIngredients'
+        - 
+      - strings:
+        - '*tutorial_second_room'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Now, pick up that soul on the floor. Don't think about why it's screaming.
-          Just press E to grab it.
+        - charM
+        - 
+        - 
+        - 
+        - Now, go grab food from the fridge. Don't think about why it's screaming.
+          Just press E on the fridge to take food out of it.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - Why-
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - I said don't think about it.
-      - strings:
-        - 
-        - satan
-        - 
-        - charR
-        - Lovely. Be careful, they bite. Drop it with Q before you lose an arm.
-      - strings:
-        - 
-        - player
-        - 
-        - charL
-        - You just told me to drop it.
-      - strings:
-        - 
-        - satan
-        - 
-        - charR
-        - Yeah, and I'm telling you to pick it up again.
-      - strings:
-        - 
-        - satan
-        - 
-        - charR
-        - Now listen here. You work for me now. You're going to be my chef at my
-          little diner I've opened up.
-      - strings:
-        - 
-        - player
-        - 
-        - charL
-        - A diner. I think I always wanted to open a diner.
-      - strings:
-        - 
-        - satan
-        - 
-        - charR
-        - Oh, I'm sure you did.
       - strings:
         - EndScenario
       - strings:
-        - '*ThirdRoomDarkness'
+        - 
+      - strings:
+        - '*tutorial_second_room_gathered'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Oh good. The all-consuming darkness is awake. Coworkers, amirite?
+        - charM
+        - 
+        - 
+        - 
+        - You can press Q to drop it on the ground if you're feeling encumbered.
+          Don't worry about being unsanitary, I sent all Health Inspectors to Superhell
+          forever ago.
+      - strings:
+        - EndScenario
       - strings:
         - 
-        - player
-        - 
-        - charL
-        - I'm not scared of the dark.
+      - strings:
+        - '*tutorial_third_room'
       - strings:
         - 
-        - satan
+        - Player
         - 
-        - charR
-        - Maybe you should be.
+        - 
+        - 
+        - 
+        - 
+        - Why's this room so dark?
       - strings:
         - 
-        - player
+        - Satan
         - 
-        - charL
+        - charM
+        - 
+        - 
+        - 
+        - Meet your coworker, all-consuming darkness. All-consuming darkness, meet
+          Player.
+      - strings:
+        - 
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
+        - ...
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - What, scared of the dark? Get moving!
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_third_room_damage'
+      - strings:
+        - 
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
         - Ah! Why does it feel like my head's being stabbed with needles?!
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Nothing like a practical lesson. If you stay in the darkness for too long,
           it'll slowly consume your being and consciousness until you're an empty
           husk.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - Okay, maybe I'm a little scared of the dark.
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Don't worry, I'll drag you back as many times as I need. That said, it
-          doesn't mean you can just run around all willy-nilly. Death can be painful,
-          and I will make it painful, just for you.
+        - charM
+        - 
+        - 
+        - 
+        - Don't worry, I'll drag you back as many times as I need.
       - strings:
         - EndScenario
       - strings:
-        - '*FourthRoomLightGun'
+        - 
+      - strings:
+        - '*tutorial_fourth_room'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - "Since I'm the best boss around, here's a nifty little device to ward off
           the darkness. Use your left mouse button to shoot. The bullets create light
           \u2014 your only defense down here."
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - "You're just giving this to me? Aren't you worried I'm going to\u2026 y'know."
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - That's not just any gunpowder rifle. That's God's Little Shotgun! It'll
           be fine. Besides, if you die, I'll just bring you right back! Dying is
           too easy of an escape.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - God's little what-
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Anyways! Go forth and get more ingredients!
       - strings:
-        - 
-        - player
-        - 
-        - charL
-        - What the hell is that?!
+        - EndScenario
       - strings:
         - 
-        - satan
+      - strings:
+        - '*tutorial_fifth_room'
+      - strings:
         - 
-        - charR
-        - Oh, just another soul of the damned. You can use your light gun to defeat
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
+        - What the hell are those?!
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - Oh, just some souls of the damned. You can use your light gun to defeat
           them.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - I thought they were already dead.
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - You're dead too, in case you forgot. Yet here you are, wasting my valuable
           time that could be spent on winning that lawsuit!
       - strings:
         - EndScenario
       - strings:
-        - '*CookingTutorial'
+        - 
+      - strings:
+        - '*tutorial_cooking'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Head back to the pot and we'll cook something up for that starving customer.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - A pot? What am I, a witch?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Maybe a witch with a B.
+        - charM
+        - 
+        - 
+        - 
+        - You wish. You're much, much worse than a Witch.
       - strings:
         - 
-        - satan
+        - Player
         - 
-        - charR
-        - Select the dish you want to make and click "COOK"
+        - 
+        - 
+        - 
+        - 
+        - You know what? I bet I wasn't even a bad person, and you're just doing
+          this for fun.
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - You need to press the buttons in the order shown to complete the dish.
+        - charM
+        - 
+        - 
+        - 
+        - Sure thing, kiddo. That's what they all say.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_cooking_manual'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - "For your pain, let me read you the manual. Don't say I never did nothing
+          for you, capiche? Let's see here\u2026"
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - "'Select the dish you want to make and click COOK. You must then complete
+          the incantation'... let's see, flip to page 20018\u2026 Ah! Here."
+      - strings:
+        - 
+        - Satan
+        - 
+        - charM
+        - 
+        - 
+        - 
+        - '''You need to press the buttons in the order shown to complete the dish.
           The buttons are WASD and your arrow keys. If you mess up, you have to start
-          over. Our customers deserve perfection.
+          over. Our customers deserve perfection.'''
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - Don't forget to add love. Or just bash it in until it stops moving. Either
-          works.
+        - charM
+        - 
+        - 
+        - 
+        - You're welcome. Don't forget to add some love, by the way. Or just bash
+          it in until it stops moving. Either works.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
-        - "Is there any salt I can add? Or\u2026 any non-screaming ingredients?"
+        - 
+        - 
+        - 
+        - 
+        - "Great\u2026 Guess I'll just give it a shot, then."
+      - strings:
+        - EndScenario
       - strings:
         - 
-        - satan
-        - 
-        - charR
-        - Ugh. Cry me a river. You're so needy!
+      - strings:
+        - '*tutorial_cooking_complete'
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - You'll earn money from these culinary crimes. Use it to buy power-ups and
-          items from the shop. Some might even be useful.
+        - charM
+        - 
+        - 
+        - 
+        - You'll earn money from these culinary crimes, by the by. Use it to buy
+          power-ups and items from the shop. Some might even be useful.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - Wait, there's money? What do you even need money for?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
-        - "That's Capitalism, baby! Do all that right, and you might live long enough
-          to make it to your next shift. Mess it up\u2026 and congratulations, you'll
-          be the next special on the menu."
+        - charM
+        - 
+        - 
+        - 
+        - That's Capitalism, baby! Just do your little job, and I'll worry about
+          the rest.
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - So, what? I'm just supposed to throw crap in a Witch's cauldron for all
           eternity? I don't even remember what I'm being punished for!
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Punishment? This is much, much more than a punishment. Besides, who said
           it was eternal?
       - strings:
         - 
-        - player
+        - Player
         - 
-        - charL
+        - 
+        - 
+        - 
+        - 
         - I don't understand. If I'm not being punished, and I'm not here forever,
           then what's the point?
       - strings:
         - 
-        - satan
+        - Satan
         - 
-        - charR
+        - charM
+        - 
+        - 
+        - 
         - Ugh, you humans. Why does everything need to have a "point"? Look. All
           you gotta do is survive the week. 5 days, 40 hours, the American way. Get
           to the end, and we'll talk.
       - strings:
         - EndScenario
       - strings:
-        - '*TutorialStart'
+        - 
+      - strings:
+        - '*tutorial_choice'
+      - strings:
+        - 
+        - Player
+        - 
+        - 
+        - 
+        - 
+        - 
+        - "[Name]? I've heard that name before. But\u2026 I can't remember\u2026"
+      - strings:
+        - Selection
+        - '*tutorial_choice_no'
+        - 
+        - 
+        - 
+        - 
+        - 
+        - If they have to ask, they were probably an asshole.
+      - strings:
+        - Selection
+        - '*tutorial_choice_yes'
+        - 
+        - 
+        - 
+        - 
+        - 
+        - If their name is on a wall, then they're probably important.
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_choice_no'
       - strings:
         - 
         - 
         - 
         - 
-        - Tutorial complete! Ready for your first real shift?
+        - 
+        - 
+        - 
+        - You chose the 'No' door.
+      - strings:
+        - Jump
+        - '*tutorial_end'
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_choice_yes'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - You chose the 'Yes' door.
+      - strings:
+        - Jump
+        - '*tutorial_end'
+      - strings:
+        - 
+      - strings:
+        - '*tutorial_end'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - The tutorial begins...
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_kids_room'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Act 1 - Kids Room content to be added
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_bank_vault'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Act 2 - Bank Vault content to be added
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act3_old_kitchen'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - Act 3 - Old Kitchen content to be added
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*game_end'
+      - strings:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - End of game content to be added
       - strings:
         - EndScenario

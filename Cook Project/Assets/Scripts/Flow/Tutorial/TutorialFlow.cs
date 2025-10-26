@@ -6,6 +6,10 @@ using UnityEngine;
 public class TutorialFlow : MonoBehaviour
 {
     [SerializeField] private TriggerZone zeroRoomTriggerZone;
+    [SerializeField] private TriggerZone secondRoomTriggerZone;
+    [SerializeField] private TriggerZone thirdRoomTriggerZone;
+    [SerializeField] private TriggerZone fourthRoomTriggerZone;
+    [SerializeField] private TriggerZone cookingRoomTriggerZone;
     [SerializeField] private Customer customer;
     [SerializeField] private SimpleDoor[] doors;
     [SerializeField] private FoodSource[] foods;
@@ -19,10 +23,23 @@ public class TutorialFlow : MonoBehaviour
 
     private string orderName = "SoulShake";
     
-    private string startDialogueName = "GameStart";
-    private string zeroRoomSecondDialogueName = "ZeroRoomReachArea";
-    private string firstRoomDialogueName = "FirstRoomIntro";
-    private string endDialogueName = "TutorialStart";
+    // Room 0 Dialogue
+    private string startDialogueName = "tutorial_start";
+    private string zeroRoomSecondDialogueName = "meeting_satan";
+
+    // Room 1 Dialogue
+    private string firstRoomEnterDialogueName = "tutorial_first_room_entering";
+    private string firstRoomStanDialogueName = "tutorial_first_room_orders";
+
+    // Room 2 Dialogue
+    private string secondRoomEnterDialogueName = "tutorial_second_room";
+
+    // Room 3 Dialogue
+    private string thirdRoomEnterDialogueName = "tutorial_third_room";
+    private string thirdRoomDarknessDialogueName = "tutorial_third_room_damage";
+
+    // Room 4 Dialogue
+    private string fourthRoomEnterDialogueName = "tutorial_fourth_room";
 
     private void Start()
     {
@@ -62,11 +79,11 @@ public class TutorialFlow : MonoBehaviour
         var steps = new List<ITutorialStep>
         {
             new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName, satanLight, satanTeleportEffect),
-            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], doorArrows[0], firstRoomDialogueName, orderName, stanTeleportEffect),
-            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0]),
-            new ThirdRoomStep(inventorySystem, foods[1], doors[2], doorArrows[2], doorArrows[1]),
-            new FourthRoomStep(inventorySystem, foods[2], doors[3]),
-            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName),
+            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], doorArrows[0], firstRoomEnterDialogueName, firstRoomStanDialogueName, orderName, stanTeleportEffect),
+            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0], secondRoomEnterDialogueName, dialogueService, secondRoomTriggerZone),
+            new ThirdRoomStep(inventorySystem, foods[1], doors[2], doorArrows[2], doorArrows[1], thirdRoomEnterDialogueName, thirdRoomDarknessDialogueName, dialogueService, thirdRoomTriggerZone),
+            new FourthRoomStep(inventorySystem, foods[2], doors[3], fourthRoomEnterDialogueName, dialogueService, fourthRoomTriggerZone),
+            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName, cookingRoomTriggerZone),
             new ServeMealStep(orderManager, orderName)
         };
 
@@ -76,7 +93,6 @@ public class TutorialFlow : MonoBehaviour
             await step.ExecuteAsync();
         }
 
-        await dialogueService.StartDialogueAsync(endDialogueName);
         Debug.Log("Tutorial Finished!");
         var sceneManagementService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
         // for current game, this is sufficient

@@ -253,10 +253,7 @@ public class PlayerLightDamage : MonoBehaviour
         isTakingDamage = false;
         accumulatedDamage = 0f;
         
-        if (showDebugInfo)
-        {
-            Debug.Log("Player entered SAFE ZONE - protected from darkness damage!");
-        }
+        Debug.Log("Player entered SAFE ZONE - protected from darkness damage!");
     }
     
     /// <summary>
@@ -266,10 +263,7 @@ public class PlayerLightDamage : MonoBehaviour
     {
         isInSafeZone = false;
         
-        if (showDebugInfo)
-        {
-            Debug.Log("Player left safe zone - vulnerable to darkness damage!");
-        }
+        Debug.Log("Player left safe zone - vulnerable to darkness damage!");
     }
     
     // Visualize damage state in editor

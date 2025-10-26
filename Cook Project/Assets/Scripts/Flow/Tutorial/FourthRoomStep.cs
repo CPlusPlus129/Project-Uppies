@@ -7,19 +7,43 @@ class FourthRoomStep : ITutorialStep
     private readonly FoodSource foodSource;
     private readonly SimpleDoor door;
     private CompositeDisposable disposables = new CompositeDisposable();
+    private readonly string fourthRoomDialogueName;
+    private readonly IDialogueService dialogueService;
+    private readonly TriggerZone triggerZone;
 
-    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door)
+    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, string fourthRoomDialogueName, IDialogueService dialogueService, TriggerZone triggerZone)
     {
         this.inventorySystem = inventorySystem;
         this.foodSource = foodSource;
         this.door = door;
+        this.fourthRoomDialogueName = fourthRoomDialogueName;
+        this.dialogueService = dialogueService;
+        this.triggerZone = triggerZone;
     }
 
     public async UniTask ExecuteAsync()
     {
+        await WaitForPlayerToEnterZone();
+        await dialogueService.StartDialogueAsync(fourthRoomDialogueName);
         await WaitUntilPlayerGetsGun();
         door.Open();
         await WaitUntilPlayerGetsFoodFromSource();
+    }
+
+    private async UniTask WaitForPlayerToEnterZone()
+    {
+        var tcs = new UniTaskCompletionSource();
+        
+        triggerZone.OnPlayerEnter
+            .Take(1)
+            .Subscribe(_ =>
+            {
+                disposables.Clear();
+                tcs.TrySetResult();
+            })
+            .AddTo(disposables);
+
+        await tcs.Task;
     }
 
     private async UniTask WaitUntilPlayerGetsGun()

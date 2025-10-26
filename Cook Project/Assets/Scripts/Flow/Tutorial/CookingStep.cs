@@ -8,21 +8,41 @@ class CookingStep : ITutorialStep
     private readonly GameObject backArrow;
     private readonly EmissionIndicator prevDoorArrow;
     private readonly string orderName;
+    private readonly TriggerZone triggerZone;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public CookingStep(IInventorySystem inventorySystem, GameObject backArrow, EmissionIndicator prevDoorArrow, string orderName)
+    public CookingStep(IInventorySystem inventorySystem, GameObject backArrow, EmissionIndicator prevDoorArrow, string orderName, TriggerZone triggerZone)
     {
         this.inventorySystem = inventorySystem;
         this.backArrow = backArrow;
         this.orderName = orderName;
         this.prevDoorArrow = prevDoorArrow;
+        this.triggerZone = triggerZone;
     }
 
     public async UniTask ExecuteAsync()
     {
+        triggerZone.gameObject.SetActive(true);
+        await WaitForPlayerToEnterZone();
         backArrow?.SetActive(true);
         prevDoorArrow?.gameObject.SetActive(false);
         await WaitUntilPlayerCookedMeal();
+    }
+
+    private async UniTask WaitForPlayerToEnterZone()
+    {
+        var tcs = new UniTaskCompletionSource();
+        
+        triggerZone.OnPlayerEnter
+            .Take(1)
+            .Subscribe(_ =>
+            {
+                disposables.Clear();
+                tcs.TrySetResult();
+            })
+            .AddTo(disposables);
+
+        await tcs.Task;
     }
 
     private async UniTask WaitUntilPlayerCookedMeal()
