@@ -28,11 +28,11 @@ class CookingStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        backArrow?.SetActive(true);
+        prevDoorArrow?.gameObject.SetActive(false);
         triggerZone.gameObject.SetActive(true);
         await WaitForPlayerToEnterZone();
         await dialogueService.StartDialogueAsync(startCookingDialogueName);
-        backArrow?.SetActive(true);
-        prevDoorArrow?.gameObject.SetActive(false);
         await WaitUntilPlayerCookedMeal();
 
         await UniTask.WaitForSeconds(1);

@@ -15,6 +15,7 @@ class ServeMealStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        UnityEngine.Debug.Log("ServeMealStep: Waiting for player to serve order " + orderName);
         await WaitUntilPlayerServedOrder();
     }
 
@@ -22,7 +23,7 @@ class ServeMealStep : ITutorialStep
     {
         var tcs = new UniTaskCompletionSource();
         orderManager.OnOrderServed
-            .Where(order => order.MealName == orderName)
+            .Where(order => string.Equals(order.MealName, orderName, System.StringComparison.InvariantCultureIgnoreCase))
             .Take(1)
             .Subscribe(_ => tcs.TrySetResult())
             .AddTo(disposables);
