@@ -1,21 +1,25 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class CompleteUI : MonoBehaviour //This purpose is too specific, will need to rename or refactor in the future
+//This purpose is too specific, will need to rename or refactor in the future
+public class CompleteUI : MonoBehaviour, IUIInitializable
 {
     public WorldPosFollowUI followPrefab;
     private IOrderManager orderManager;
+    private List<WorldPosFollowUI> displayingFollowUIs = new List<WorldPosFollowUI>();
+    private CompositeDisposable disposables = new CompositeDisposable();
 
-    private async void Awake()
+    public async UniTask Init()
     {
         followPrefab.gameObject.SetActive(false);
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         orderManager.OnOrderServed.Subscribe(order =>
         {
             // need to get customer transform from order somehow, this is inefficient
-            var allCustomerArr = Object.FindObjectsByType<Customer>(FindObjectsSortMode.None);
+            var allCustomerArr = UnityEngine.Object.FindObjectsByType<Customer>(FindObjectsSortMode.None);
             foreach (var customer in allCustomerArr)
             {
                 if (customer.customerName == order.CustomerName)
@@ -23,11 +27,33 @@ public class CompleteUI : MonoBehaviour //This purpose is too specific, will nee
                     var followUI = Instantiate(followPrefab, followPrefab.transform.parent);
                     followUI.target = customer.transform;
                     followUI.gameObject.SetActive(true);
-                    Destroy(followUI.gameObject, 2f); // Destroy after 2 seconds
+                    displayingFollowUIs.Add(followUI);
+                    Observable.Timer(TimeSpan.FromSeconds(2))
+                    .Take(1)
+                    .Subscribe(_ =>
+                    {
+                        displayingFollowUIs.Remove(followUI);
+                        Destroy(followUI.gameObject);
+                    }).AddTo(disposables);
                     break;
                 }
             }
         }).AddTo(this);
+    }
+
+    private void OnDisable()
+    {
+        DestroyAllFollowUIs();
+    }
+
+    private void DestroyAllFollowUIs()
+    {
+        disposables.Clear();
+        foreach (var ui in displayingFollowUIs)
+        {
+            Destroy(ui.gameObject);
+        }
+        displayingFollowUIs.Clear();
     }
 
     public void Open()
