@@ -1,5 +1,7 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,13 +14,13 @@ public enum SceneTransitionType
 public class SceneManagementService : ISceneManagementService
 {
     public ReactiveProperty<string> CurrentSceneName { get; private set; } = new ReactiveProperty<string>();
-    private string[] sceneList = new[] { "Title", "TutorialLevel", "WhiteBox02" };
+    private List<string> sceneList;
     private string pendingSpawnPointId;
 
     public async UniTask Init()
     {
         CurrentSceneName.Value = SceneManager.GetActiveScene().name;
-
+        sceneList = GetAllSceneNamesInBuild();
         // Listen for scene loaded events
         SceneManager.sceneLoaded += OnSceneLoaded;
         await UniTask.CompletedTask;
@@ -70,15 +72,28 @@ public class SceneManagementService : ISceneManagementService
 
     public string GetNextSceneName()
     {
-        for (int i = 0; i < sceneList.Length; i++)
+        for (int i = 0; i < sceneList.Count; i++)
         {
             var sceneName = sceneList[i];
             if (sceneName == CurrentSceneName.Value)
             {
-                return i + 1 >= sceneList.Length ? null : sceneList[i + 1];
+                return i + 1 >= sceneList.Count ? null : sceneList[i + 1];
             }
         }
         return null;
+    }
+
+    private List<string> GetAllSceneNamesInBuild()
+    {
+        List<string> names = new List<string>();
+        int sceneCount = SceneManager.sceneCountInBuildSettings;
+        for (int i = 0; i < sceneCount; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = Path.GetFileNameWithoutExtension(scenePath);
+            names.Add(sceneName);
+        }
+        return names;
     }
 
 
