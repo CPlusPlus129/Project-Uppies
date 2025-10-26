@@ -31,6 +31,7 @@ class SecondRoomStep : ITutorialStep
     public async UniTask ExecuteAsync()
     {
         // Wait for player to walk into room
+        triggerZone.gameObject.SetActive(true);
         await WaitForPlayerToEnterZone();
         await dialogueService.StartDialogueAsync(secondRoomEnterDialogue);
 
@@ -44,6 +45,7 @@ class SecondRoomStep : ITutorialStep
         doorArrow?.SetIsOn(true);
         prevDoorArrow?.gameObject.SetActive(false);
         door.Open();
+        triggerZone.gameObject.SetActive(false);
     }
 
     private async UniTask WaitForPlayerToEnterZone()

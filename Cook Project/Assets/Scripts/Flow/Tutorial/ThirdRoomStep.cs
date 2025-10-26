@@ -30,6 +30,7 @@ class ThirdRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        triggerZone.gameObject.SetActive(true);
         await WaitForPlayerToEnterZone();
         await dialogueService.StartDialogueAsync(thirdRoomDialogue);
 
@@ -51,6 +52,7 @@ class ThirdRoomStep : ITutorialStep
         doorArrow?.SetIsOn(true);
         prevDoorArrow?.gameObject.SetActive(false);
         door.Open();
+        triggerZone.gameObject.SetActive(false);
     }
 
     private async UniTask WaitForPlayerToExitAllSafeZones()

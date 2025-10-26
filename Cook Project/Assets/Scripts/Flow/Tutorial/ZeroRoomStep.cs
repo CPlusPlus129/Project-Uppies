@@ -29,6 +29,7 @@ class ZeroRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        triggerZone.gameObject.SetActive(true);
         Debug.Log($"[ZeroRoomStep] Starting first dialogue: {firstDialogueName}");
         // Start the first dialogue automatically
 
@@ -53,7 +54,7 @@ class ZeroRoomStep : ITutorialStep
 
         // Turn Lighting off
         satanLight.gameObject.SetActive(false);
-
+        triggerZone.gameObject.SetActive(false);
         Debug.Log("[ZeroRoomStep] Step completed!");
     }
 

@@ -25,6 +25,7 @@ class FourthRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
+        triggerZone.gameObject.SetActive(true);
         await WaitForPlayerToEnterZone();
         await dialogueService.StartDialogueAsync(fourthRoomEnterDialogueName);
         await WaitUntilPlayerGetsGun();
@@ -35,6 +36,7 @@ class FourthRoomStep : ITutorialStep
         WorldBroadcastSystem.Instance.TutorialHint(false, "");
 
         await dialogueService.StartDialogueAsync(fourthRoomGatherDialogueName);
+        triggerZone.gameObject.SetActive(false);
     }
 
     private async UniTask WaitForPlayerToEnterZone()

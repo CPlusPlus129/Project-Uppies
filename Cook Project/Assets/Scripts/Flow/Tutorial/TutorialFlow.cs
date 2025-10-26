@@ -22,6 +22,7 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private GameObject satanLight;
 
     private string orderName = "SoulShake";
+    private List<TriggerZone> zones;
 
     private void Start()
     {
@@ -73,7 +74,19 @@ public class TutorialFlow : MonoBehaviour
         }
         backToFirstRoomArrow.SetActive(false);
         PlayerStatSystem.Instance.CanUseWeapon.Value = false;
-        WorldBroadcastSystem.Instance.TutorialHint(false, "");        
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");
+        zones = new List<TriggerZone>
+        {
+            zeroRoomTriggerZone,
+            secondRoomTriggerZone,
+            thirdRoomTriggerZone,
+            fourthRoomTriggerZone,
+            cookingRoomTriggerZone
+        };
+        foreach (var zone in zones)
+        {
+            zone.gameObject.SetActive(false);
+        }
 
         //setup food sources
         var recipe = Database.Instance.recipeData.GetRecipeByName(orderName);
@@ -93,21 +106,14 @@ public class TutorialFlow : MonoBehaviour
         var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
         var orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
-        var zones = new[]
-        {
-            zeroRoomTriggerZone,
-            secondRoomTriggerZone,
-            thirdRoomTriggerZone,
-            fourthRoomTriggerZone,
-            cookingRoomTriggerZone
-        };
+        
         var interactKey = InputManager.Instance.GetBindingDisplayString("Interact", "keyboard&mouse");
         var discardKey = InputManager.Instance.GetBindingDisplayString("Discard", "keyboard&mouse");
         var hotbarKey = InputManager.Instance.GetBindingDisplayString("HotbarShortcut", "keyboard&mouse");
         var tutorialHints = new Queue<string>();
         tutorialHints.Enqueue($"Press {interactKey} to talk to {customer.customerName}.");
-        tutorialHints.Enqueue($"Press {interactKey} to gather ingredients. Press {discardKey} to discard items");
-        tutorialHints.Enqueue("Find a light source to stay safe from the darkness.");
+        tutorialHints.Enqueue($"Press {interactKey} to gather ingredients. Press {discardKey} to discard items. Please gather ingredients from the fridge.");
+        tutorialHints.Enqueue("Find a light source to stay safe from the darkness. And gather more ingredients.");
         tutorialHints.Enqueue("Use the shotgun to create light and defeat enemies.");
         tutorialHints.Enqueue("Go back to the first room and cook.");
         tutorialHints.Enqueue($"Use mouse scroll or {hotbarKey} to select the meal. Serve the meal to {customer.customerName}");

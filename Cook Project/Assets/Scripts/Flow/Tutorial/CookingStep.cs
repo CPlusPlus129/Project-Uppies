@@ -39,6 +39,7 @@ class CookingStep : ITutorialStep
 
         await UniTask.WaitForSeconds(1);
         await dialogueService.StartDialogueAsync(endCookingDialogueName);
+        triggerZone.gameObject.SetActive(false);
     }
 
     private async UniTask WaitForPlayerToEnterZone()
