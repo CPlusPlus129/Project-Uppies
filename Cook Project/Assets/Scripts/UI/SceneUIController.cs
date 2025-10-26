@@ -22,6 +22,11 @@ public class SceneUIController : MonoBehaviour
             case "Title":
                 root.GetUIComponent<TitleUI>()?.gameObject.SetActive(true);
                 break;
+            case "TutorialLevel":
+                root.GetUIComponent<TutorialUI>()?.gameObject.SetActive(true);
+                root.GetUIComponent<HUD>()?.gameObject.SetActive(true);
+                root.GetUIComponent<CompleteUI>()?.gameObject.SetActive(true);
+                break;
             default:
                 root.GetUIComponent<HUD>()?.gameObject.SetActive(true);
                 root.GetUIComponent<CompleteUI>()?.gameObject.SetActive(true);

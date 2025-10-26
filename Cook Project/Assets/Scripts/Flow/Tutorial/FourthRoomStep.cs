@@ -1,27 +1,26 @@
-using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 using R3;
 
 class FourthRoomStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
+    private readonly IDialogueService dialogueService;
     private readonly FoodSource foodSource;
     private readonly SimpleDoor door;
     private CompositeDisposable disposables = new CompositeDisposable();
-    private readonly string fourthRoomEnterDialogueName;
-    private readonly string fourthRoomGatherDialogueName;
-    private readonly IDialogueService dialogueService;
+    private readonly string fourthRoomEnterDialogueName = "tutorial_fourth_room";
+    private readonly string fourthRoomGatherDialogueName = "tutorial_fourth_room_gathered";
+    private readonly string hintText;
     private readonly TriggerZone triggerZone;
 
-    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, string fourthRoomEnterDialogueName, string fourthRoomGatherDialogueName, IDialogueService dialogueService, TriggerZone triggerZone)
+    public FourthRoomStep(TutorialContext context)
     {
-        this.inventorySystem = inventorySystem;
-        this.foodSource = foodSource;
-        this.door = door;
-        this.fourthRoomEnterDialogueName = fourthRoomEnterDialogueName;
-        this.fourthRoomGatherDialogueName = fourthRoomGatherDialogueName;
-        this.dialogueService = dialogueService;
-        this.triggerZone = triggerZone;
+        this.inventorySystem = context.InventorySystem;
+        this.dialogueService = context.DialogueService;
+        this.foodSource = context.Foods.Dequeue();
+        this.door = context.Doors.Dequeue();
+        this.triggerZone = context.TriggerZones.Dequeue();
+        this.hintText = context.TutorialHints.Dequeue();
     }
 
     public async UniTask ExecuteAsync()
@@ -31,7 +30,9 @@ class FourthRoomStep : ITutorialStep
         await WaitUntilPlayerGetsGun();
         UnityEngine.Debug.Log("Door Open!");
         door.Open();
+        WorldBroadcastSystem.Instance.TutorialHint(true, hintText);
         await WaitUntilPlayerGetsFoodFromSource();
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");
 
         await dialogueService.StartDialogueAsync(fourthRoomGatherDialogueName);
     }

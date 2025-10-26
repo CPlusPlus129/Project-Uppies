@@ -1,10 +1,7 @@
 using Cysharp.Threading.Tasks;
-using Cysharp.Threading.Tasks.Triggers;
 using NvJ.Rendering;
 using R3;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
 
 /// <summary>
 /// Tutorial step that introduces the player to the game world.
@@ -15,21 +12,19 @@ class ZeroRoomStep : ITutorialStep
 {
     private readonly IDialogueService dialogueService;
     private readonly TriggerZone triggerZone;
-    private readonly string firstDialogueName;
-    private readonly string secondDialogueName;
+    private readonly string firstDialogueName = "tutorial_start";
+    private readonly string secondDialogueName= "meeting_satan";
 
     private readonly GameObject satanLight;
     private readonly FlamePillarEffect flamePillarEffect;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public ZeroRoomStep(IDialogueService dialogueService, TriggerZone triggerZone, string firstDialogueName, string secondDialogueName, GameObject satanLight, FlamePillarEffect flamePillarEffect)
+    public ZeroRoomStep(TutorialContext context)
     {
-        this.dialogueService = dialogueService;
-        this.triggerZone = triggerZone;
-        this.firstDialogueName = firstDialogueName;
-        this.secondDialogueName = secondDialogueName;
-        this.satanLight = satanLight;
-        this.flamePillarEffect = flamePillarEffect;
+        this.dialogueService = context.DialogueService;
+        this.triggerZone = context.TriggerZones.Dequeue();
+        this.satanLight = context.satanLight;
+        this.flamePillarEffect = context.satanTeleportEffect;
     }
 
     public async UniTask ExecuteAsync()

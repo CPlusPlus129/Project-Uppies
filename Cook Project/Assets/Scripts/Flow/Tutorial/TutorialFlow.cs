@@ -22,30 +22,6 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private GameObject satanLight;
 
     private string orderName = "SoulShake";
-    
-    // Room 0 Dialogue
-    private string startDialogueName = "tutorial_start";
-    private string zeroRoomSecondDialogueName = "meeting_satan";
-
-    // Room 1 Dialogue
-    private string firstRoomEnterDialogueName = "tutorial_first_room_entering";
-    private string firstRoomStanDialogueName = "tutorial_first_room_orders";
-
-    // Room 2 Dialogue
-    private string secondRoomEnterDialogueName = "tutorial_second_room";
-    private string secondRoomFoodDialogueName = "tutorial_second_room_gathered";
-
-    // Room 3 Dialogue
-    private string thirdRoomEnterDialogueName = "tutorial_third_room";
-    private string thirdRoomDarknessDialogueName = "tutorial_third_room_damage";
-
-    // Room 4 Dialogue
-    private string fourthRoomEnterDialogueName = "tutorial_fourth_room";
-    private string fourthRoomGatherDialogueName = "tutorial_fourth_room_gathered";
-
-    // Cook Dialogue
-    private string startCookingDialogueName = "tutorial_cooking_manual";
-    private string endCookingDialogueName = "tutorial_cooking_complete";
 
     private void Start()
     {
@@ -59,38 +35,17 @@ public class TutorialFlow : MonoBehaviour
         await UniTask.Delay(2000); //wait for webgl to load
 #endif
         Debug.Log("Start tutorial!");
-        foreach (var door in doors)
-        {
-            door.Close();
-        }
-        backToFirstRoomArrow.SetActive(false);
-        PlayerStatSystem.Instance.CanUseWeapon.Value = false;
-        var recipe = Database.Instance.recipeData.GetRecipeByName(orderName);
-        if (recipe == null || recipe.ingredients.Length != 3)
-        {
-            Debug.LogError($"Failed to find 3 ingredient recipe for order name {orderName}.");
-            return;
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            foods[i].SetItemName(recipe.ingredients[i]);
-        }
-        foreach (var doorArrow in doorArrows)
-        {
-            doorArrow.SetIsOn(false);
-        }
-        var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
-        var orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
-        var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        Setup();
+        var context = await GetContext();
         var steps = new List<ITutorialStep>
         {
-            new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName, satanLight, satanTeleportEffect),
-            new FirstRoomStep(dialogueService, orderManager, customer, doors[0], doorArrows[0], firstRoomEnterDialogueName, firstRoomStanDialogueName, orderName, stanTeleportEffect),
-            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0], secondRoomEnterDialogueName,secondRoomFoodDialogueName, dialogueService, secondRoomTriggerZone),
-            new ThirdRoomStep(inventorySystem, foods[1], doors[2], doorArrows[2], doorArrows[1], thirdRoomEnterDialogueName, thirdRoomDarknessDialogueName, dialogueService, thirdRoomTriggerZone),
-            new FourthRoomStep(inventorySystem, foods[2], doors[3], fourthRoomEnterDialogueName, fourthRoomGatherDialogueName, dialogueService, fourthRoomTriggerZone),
-            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName, cookingRoomTriggerZone, dialogueService, startCookingDialogueName, endCookingDialogueName),
-            new ServeMealStep(orderManager, orderName)
+            new ZeroRoomStep(context),
+            new FirstRoomStep(context),
+            new SecondRoomStep(context),
+            new ThirdRoomStep(context),
+            new FourthRoomStep(context),
+            new CookingStep(context),
+            new ServeMealStep(context)
         };
 
         foreach (var step in steps)
@@ -104,6 +59,81 @@ public class TutorialFlow : MonoBehaviour
         // for current game, this is sufficient
         var nextSceneName = sceneManagementService.GetNextSceneName();
         await sceneManagementService.LoadSceneAsync(nextSceneName, null, SceneTransitionType.Fade);
+    }
+
+    private void Setup()
+    {
+        foreach (var door in doors)
+        {
+            door.Close();
+        }
+        foreach (var doorArrow in doorArrows)
+        {
+            doorArrow.SetIsOn(false);
+        }
+        backToFirstRoomArrow.SetActive(false);
+        PlayerStatSystem.Instance.CanUseWeapon.Value = false;
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");        
+
+        //setup food sources
+        var recipe = Database.Instance.recipeData.GetRecipeByName(orderName);
+        if (recipe == null || recipe.ingredients.Length != 3)
+        {
+            Debug.LogError($"Failed to find 3 ingredient recipe for order name {orderName}.");
+            return;
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            foods[i].SetItemName(recipe.ingredients[i]);
+        }
+    }
+
+    private async UniTask<TutorialContext> GetContext()
+    {
+        var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
+        var orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
+        var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        var zones = new[]
+        {
+            zeroRoomTriggerZone,
+            secondRoomTriggerZone,
+            thirdRoomTriggerZone,
+            fourthRoomTriggerZone,
+            cookingRoomTriggerZone
+        };
+        var interactKey = InputManager.Instance.GetBindingDisplayString("Interact", "keyboard&mouse");
+        var discardKey = InputManager.Instance.GetBindingDisplayString("Discard", "keyboard&mouse");
+        var hotbarKey = InputManager.Instance.GetBindingDisplayString("HotbarShortcut", "keyboard&mouse");
+        var tutorialHints = new Queue<string>();
+        tutorialHints.Enqueue($"Press {interactKey} to talk to {customer.customerName}.");
+        tutorialHints.Enqueue($"Press {interactKey} to gather ingredients. Press {discardKey} to discard items");
+        tutorialHints.Enqueue("Find a light source to stay safe from the darkness.");
+        tutorialHints.Enqueue("Use the shotgun to create light and defeat enemies.");
+        tutorialHints.Enqueue("Go back to the first room and cook.");
+        tutorialHints.Enqueue($"Use mouse scroll or {hotbarKey} to select the meal. Serve the meal to {customer.customerName}");
+        
+        var context = new TutorialContext
+        {
+            DialogueService = dialogueService,
+            OrderManager = orderManager,
+            InventorySystem = inventorySystem,
+            Customer = customer,
+            Doors = new Queue<SimpleDoor>(doors),
+            DoorArrows = new Queue<EmissionIndicator>(doorArrows),
+            PrevDoorArrows = new Queue<EmissionIndicator>(doorArrows),
+            Foods = new Queue<FoodSource>(foods),
+            TriggerZones = new Queue<TriggerZone>(zones),
+            TutorialHints = tutorialHints,
+
+            satanTeleportEffect = satanTeleportEffect,
+            stanTeleportEffect = stanTeleportEffect,
+            satanLight = satanLight,
+            backArrow = backToFirstRoomArrow,
+
+            OrderName = orderName
+        };
+
+        return context;
     }
 
 }

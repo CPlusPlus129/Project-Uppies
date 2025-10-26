@@ -5,27 +5,27 @@ using UnityEngine;
 class SecondRoomStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
+    private readonly IDialogueService dialogueService;
     private readonly FoodSource foodSource;
     private readonly SimpleDoor door;
     private readonly EmissionIndicator doorArrow;
     private readonly EmissionIndicator prevDoorArrow;
     private CompositeDisposable disposables = new CompositeDisposable();
-    private readonly string secondRoomEnterDialogue;
-    private readonly string secondRoomFoodDialogue;
-    private readonly IDialogueService dialogueService;
+    private readonly string secondRoomEnterDialogue = "tutorial_second_room";
+    private readonly string secondRoomFoodDialogue = "tutorial_second_room_gathered";
+    private readonly string hintText;
     private readonly TriggerZone triggerZone;
 
-    public SecondRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, EmissionIndicator doorArrow, EmissionIndicator prevDoorArrow, string secondRoomEnterDialogue, string secondRoomFoodDialogue, IDialogueService dialogueService, TriggerZone secondRoomTriggerZone)
+    public SecondRoomStep(TutorialContext context)
     {
-        this.inventorySystem = inventorySystem;
-        this.foodSource = foodSource;
-        this.door = door;
-        this.doorArrow = doorArrow;
-        this.prevDoorArrow = prevDoorArrow;
-        this.secondRoomEnterDialogue = secondRoomEnterDialogue;
-        this.secondRoomFoodDialogue = secondRoomFoodDialogue;
-        this.dialogueService = dialogueService;
-        this.triggerZone = secondRoomTriggerZone;
+        this.inventorySystem = context.InventorySystem;
+        this.dialogueService = context.DialogueService;
+        this.foodSource = context.Foods.Dequeue();
+        this.door = context.Doors.Dequeue();
+        this.doorArrow = context.DoorArrows.Dequeue();
+        this.prevDoorArrow = context.PrevDoorArrows.Dequeue();
+        this.triggerZone = context.TriggerZones.Dequeue();
+        this.hintText = context.TutorialHints.Dequeue();
     }
 
     public async UniTask ExecuteAsync()
@@ -35,7 +35,9 @@ class SecondRoomStep : ITutorialStep
         await dialogueService.StartDialogueAsync(secondRoomEnterDialogue);
 
         // Wit until player grabs food item
+        WorldBroadcastSystem.Instance.TutorialHint(true, hintText);
         await WaitUntilPlayerGetsFoodFromSource();
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");
         await dialogueService.StartDialogueAsync(secondRoomFoodDialogue);
 
         // Enable arrow & open door

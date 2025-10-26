@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 
 public class TutorialUI : MonoBehaviour, IUIInitializable
@@ -9,6 +10,19 @@ public class TutorialUI : MonoBehaviour, IUIInitializable
     public async UniTask Init()
     {
         HideTutorial();
+        WorldBroadcastSystem.Instance.onTutorialHint.Subscribe(tuple =>
+        {
+            string message = tuple.message;
+            bool isOn = tuple.isOn;
+            if (isOn)
+            {
+                ShowTutorial(message);
+            }
+            else
+            {
+                HideTutorial();
+            }
+        }).AddTo(this);
         await UniTask.CompletedTask;
     }
 

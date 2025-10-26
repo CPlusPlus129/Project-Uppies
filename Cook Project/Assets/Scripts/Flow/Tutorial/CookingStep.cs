@@ -5,25 +5,25 @@ using UnityEngine;
 class CookingStep : ITutorialStep
 {
     private readonly IInventorySystem inventorySystem;
+    private readonly IDialogueService dialogueService;
     private readonly GameObject backArrow;
     private readonly EmissionIndicator prevDoorArrow;
     private readonly string orderName;
     private readonly TriggerZone triggerZone;
-    private readonly IDialogueService dialogueService;
-    private readonly string startCookingDialogueName;
-    private readonly string endCookingDialogueName;
+    private readonly string startCookingDialogueName = "tutorial_cooking_manual";
+    private readonly string endCookingDialogueName = "tutorial_cooking_complete";
+    private readonly string hintText;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    public CookingStep(IInventorySystem inventorySystem, GameObject backArrow, EmissionIndicator prevDoorArrow, string orderName, TriggerZone triggerZone, IDialogueService dialogueService, string startCookingDialogueName, string endCookingDialogueName)
+    public CookingStep(TutorialContext context)
     {
-        this.inventorySystem = inventorySystem;
-        this.backArrow = backArrow;
-        this.orderName = orderName;
-        this.prevDoorArrow = prevDoorArrow;
-        this.triggerZone = triggerZone;
-        this.dialogueService = dialogueService;
-        this.startCookingDialogueName = startCookingDialogueName;
-        this.endCookingDialogueName = endCookingDialogueName;
+        this.inventorySystem = context.InventorySystem;
+        this.dialogueService = context.DialogueService;
+        this.backArrow = context.backArrow;
+        this.orderName = context.OrderName;
+        this.prevDoorArrow = context.PrevDoorArrows.Dequeue();
+        this.triggerZone = context.TriggerZones.Dequeue();
+        this.hintText = context.TutorialHints.Dequeue();
     }
 
     public async UniTask ExecuteAsync()
@@ -31,7 +31,9 @@ class CookingStep : ITutorialStep
         backArrow?.SetActive(true);
         prevDoorArrow?.gameObject.SetActive(false);
         triggerZone.gameObject.SetActive(true);
+        WorldBroadcastSystem.Instance.TutorialHint(true, hintText);
         await WaitForPlayerToEnterZone();
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");
         await dialogueService.StartDialogueAsync(startCookingDialogueName);
         await WaitUntilPlayerCookedMeal();
 

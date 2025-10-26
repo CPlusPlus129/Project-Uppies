@@ -12,24 +12,24 @@ class FirstRoomStep : ITutorialStep
     private readonly SimpleDoor door;
     private readonly EmissionIndicator doorArrow;
 
-    private readonly string enterDilaogueName;
-    private readonly string stanDialogueName;
+    private readonly string enterDilaogueName = "tutorial_first_room_entering";
+    private readonly string stanDialogueName = "tutorial_first_room_orders";
     private readonly string orderName;
+    private readonly string hintText;
     private CompositeDisposable disposables = new CompositeDisposable();
 
     private FlamePillarEffect stanTeleportEffect;
 
-    public FirstRoomStep(IDialogueService dialogueService, IOrderManager orderManager, Customer customer, SimpleDoor door, EmissionIndicator doorArrow, string enterDialogueName, string stanDialogueName, string orderName, FlamePillarEffect stanTeleportEffect)
+    public FirstRoomStep(TutorialContext context)
     {
-        this.dialogueService = dialogueService;
-        this.orderManager = orderManager;
-        this.customer = customer;
-        this.door = door;
-        this.doorArrow = doorArrow;
-        this.enterDilaogueName = enterDialogueName;
-        this.stanDialogueName = stanDialogueName;
-        this.orderName = orderName;
-        this.stanTeleportEffect = stanTeleportEffect;
+        this.dialogueService = context.DialogueService;
+        this.orderManager = context.OrderManager;
+        this.customer = context.Customer;
+        this.door = context.Doors.Dequeue();
+        this.doorArrow = context.DoorArrows.Dequeue();
+        this.orderName = context.OrderName;
+        this.hintText = context.TutorialHints.Dequeue();
+        this.stanTeleportEffect = context.stanTeleportEffect;
     }
 
     public async UniTask ExecuteAsync()
@@ -38,8 +38,10 @@ class FirstRoomStep : ITutorialStep
         // await dialogueService.StartDialogueAsync(enterDilaogueName);
 
         customer.specifiedNextOrderName = orderName;
+        WorldBroadcastSystem.Instance.TutorialHint(true, hintText);
         UnityEngine.Debug.Log("Waiting for player to take order...");
         await WaitUntilPlayerGetsOrder();
+        WorldBroadcastSystem.Instance.TutorialHint(false, "");
         UnityEngine.Debug.Log("Taking order...");
         await dialogueService.StartDialogueAsync(stanDialogueName);
 
