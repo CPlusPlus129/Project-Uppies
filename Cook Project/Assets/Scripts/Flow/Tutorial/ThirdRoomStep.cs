@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using UnityEngine;
 
 class ThirdRoomStep : ITutorialStep
 {
@@ -31,20 +32,39 @@ class ThirdRoomStep : ITutorialStep
     {
         await WaitForPlayerToEnterZone();
         await dialogueService.StartDialogueAsync(thirdRoomDialogue);
-        
-        var playerTookDamage = new UniTaskCompletionSource();
-        PlayerStatSystem.Instance.CurrentHP.Subscribe(hp =>
-        {
-            playerTookDamage.TrySetResult();
-        }).AddTo(disposables);
 
-        await playerTookDamage.Task;
+        await WaitForPlayerToExitAllSafeZones();
+
+        var player = GameObject.FindWithTag("Player");
+        var lightDamage = player?.GetComponent<PlayerLightDamage>();
+
+        await UniTask.WaitForSeconds(1);
+        if (lightDamage != null) lightDamage.SetDamageDisabled(true);
+
         await dialogueService.StartDialogueAsync(thirdRoomDarknessDialogueName);
+
+        if (lightDamage != null) lightDamage.SetDamageDisabled(false);
 
         await WaitUntilPlayerGetsFoodFromSource();
         doorArrow?.SetIsOn(true);
         prevDoorArrow?.gameObject.SetActive(false);
         door.Open();
+    }
+
+    private async UniTask WaitForPlayerToExitAllSafeZones()
+    {
+        var tcs = new UniTaskCompletionSource();
+
+        // Wait until player is in a safe zone, then wait until they are not.
+        Observable.EveryUpdate()
+            .SkipWhile(_ => !SafeZone.IsPlayerInAnySafeZone) // Wait until we are in a zone
+            .SkipWhile(_ => SafeZone.IsPlayerInAnySafeZone)  // Then wait until we are out of the zone
+            .Take(1)
+            .Subscribe(_ => {
+                tcs.TrySetResult();
+            }).AddTo(disposables);
+
+        await tcs.Task;
     }
 
     private async UniTask WaitForPlayerToEnterZone()

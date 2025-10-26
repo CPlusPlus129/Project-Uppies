@@ -33,6 +33,7 @@ public class TutorialFlow : MonoBehaviour
 
     // Room 2 Dialogue
     private string secondRoomEnterDialogueName = "tutorial_second_room";
+    private string secondRoomFoodDialogueName = "tutorial_second_room_gathered";
 
     // Room 3 Dialogue
     private string thirdRoomEnterDialogueName = "tutorial_third_room";
@@ -40,6 +41,11 @@ public class TutorialFlow : MonoBehaviour
 
     // Room 4 Dialogue
     private string fourthRoomEnterDialogueName = "tutorial_fourth_room";
+    private string fourthRoomGatherDialogueName = "tutorial_fourth_room_gathered";
+
+    // Cook Dialogue
+    private string startCookingDialogueName = "tutorial_cooking_manual";
+    private string endCookingDialogueName = "tutorial_cooking_complete";
 
     private void Start()
     {
@@ -80,10 +86,10 @@ public class TutorialFlow : MonoBehaviour
         {
             new ZeroRoomStep(dialogueService, zeroRoomTriggerZone, startDialogueName, zeroRoomSecondDialogueName, satanLight, satanTeleportEffect),
             new FirstRoomStep(dialogueService, orderManager, customer, doors[0], doorArrows[0], firstRoomEnterDialogueName, firstRoomStanDialogueName, orderName, stanTeleportEffect),
-            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0], secondRoomEnterDialogueName, dialogueService, secondRoomTriggerZone),
+            new SecondRoomStep(inventorySystem, foods[0], doors[1], doorArrows[1], doorArrows[0], secondRoomEnterDialogueName,secondRoomFoodDialogueName, dialogueService, secondRoomTriggerZone),
             new ThirdRoomStep(inventorySystem, foods[1], doors[2], doorArrows[2], doorArrows[1], thirdRoomEnterDialogueName, thirdRoomDarknessDialogueName, dialogueService, thirdRoomTriggerZone),
-            new FourthRoomStep(inventorySystem, foods[2], doors[3], fourthRoomEnterDialogueName, dialogueService, fourthRoomTriggerZone),
-            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName, cookingRoomTriggerZone),
+            new FourthRoomStep(inventorySystem, foods[2], doors[3], fourthRoomEnterDialogueName, fourthRoomGatherDialogueName, dialogueService, fourthRoomTriggerZone),
+            new CookingStep(inventorySystem, backToFirstRoomArrow, doorArrows[2], orderName, cookingRoomTriggerZone, dialogueService, startCookingDialogueName, endCookingDialogueName),
             new ServeMealStep(orderManager, orderName)
         };
 

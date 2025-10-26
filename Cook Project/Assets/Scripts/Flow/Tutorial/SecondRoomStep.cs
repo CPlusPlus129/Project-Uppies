@@ -10,18 +10,20 @@ class SecondRoomStep : ITutorialStep
     private readonly EmissionIndicator doorArrow;
     private readonly EmissionIndicator prevDoorArrow;
     private CompositeDisposable disposables = new CompositeDisposable();
-    private readonly string secondRoomDialogue;
+    private readonly string secondRoomEnterDialogue;
+    private readonly string secondRoomFoodDialogue;
     private readonly IDialogueService dialogueService;
     private readonly TriggerZone triggerZone;
 
-    public SecondRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, EmissionIndicator doorArrow, EmissionIndicator prevDoorArrow, string secondRoomDialogue, IDialogueService dialogueService, TriggerZone secondRoomTriggerZone)
+    public SecondRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, EmissionIndicator doorArrow, EmissionIndicator prevDoorArrow, string secondRoomEnterDialogue, string secondRoomFoodDialogue, IDialogueService dialogueService, TriggerZone secondRoomTriggerZone)
     {
         this.inventorySystem = inventorySystem;
         this.foodSource = foodSource;
         this.door = door;
         this.doorArrow = doorArrow;
         this.prevDoorArrow = prevDoorArrow;
-        this.secondRoomDialogue = secondRoomDialogue;
+        this.secondRoomEnterDialogue = secondRoomEnterDialogue;
+        this.secondRoomFoodDialogue = secondRoomFoodDialogue;
         this.dialogueService = dialogueService;
         this.triggerZone = secondRoomTriggerZone;
     }
@@ -30,10 +32,11 @@ class SecondRoomStep : ITutorialStep
     {
         // Wait for player to walk into room
         await WaitForPlayerToEnterZone();
-        await dialogueService.StartDialogueAsync(secondRoomDialogue);
+        await dialogueService.StartDialogueAsync(secondRoomEnterDialogue);
 
         // Wit until player grabs food item
         await WaitUntilPlayerGetsFoodFromSource();
+        await dialogueService.StartDialogueAsync(secondRoomFoodDialogue);
 
         // Enable arrow & open door
         doorArrow?.SetIsOn(true);

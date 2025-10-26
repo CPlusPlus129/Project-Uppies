@@ -24,7 +24,8 @@ public class PlayerLightDamage : MonoBehaviour
     [SerializeField] private bool showDebugInfo = false;
     
     // Internal state
-    private bool isInSafeZone = false;
+    private bool isDamageDisabled = false;
+    private int safeZoneCount = 0;
     private float timeInDarkness = 0f;
     private bool isTakingDamage = false;
     private float lastDamageTime = 0f;
@@ -35,7 +36,7 @@ public class PlayerLightDamage : MonoBehaviour
     private CharacterController characterController;
     
     // Public properties
-    public bool IsInSafeZone => isInSafeZone;
+    public bool IsInSafeZone => safeZoneCount > 0;
     public bool IsTakingDamage => isTakingDamage;
     public float TimeInDarkness => timeInDarkness;
     
@@ -91,8 +92,14 @@ public class PlayerLightDamage : MonoBehaviour
     
     private void CheckLightDamage()
     {
+        // Don't damage if disabled
+        if (isDamageDisabled)
+        {
+            return;
+        }
+
         // Don't damage if in safe zone
-        if (isInSafeZone)
+        if (safeZoneCount > 0)
         {
             timeInDarkness = 0f;
             isTakingDamage = false;
@@ -248,12 +255,12 @@ public class PlayerLightDamage : MonoBehaviour
     /// </summary>
     public void EnterSafeZone()
     {
-        isInSafeZone = true;
+        safeZoneCount++;
         timeInDarkness = 0f;
         isTakingDamage = false;
         accumulatedDamage = 0f;
         
-        Debug.Log("Player entered SAFE ZONE - protected from darkness damage!");
+        Debug.Log($"Player entered SAFE ZONE - protected from darkness damage! Safe zone count: {safeZoneCount}");
     }
     
     /// <summary>
@@ -261,9 +268,28 @@ public class PlayerLightDamage : MonoBehaviour
     /// </summary>
     public void ExitSafeZone()
     {
-        isInSafeZone = false;
+        safeZoneCount = Mathf.Max(0, safeZoneCount - 1);
         
-        Debug.Log("Player left safe zone - vulnerable to darkness damage!");
+        Debug.Log($"Player left safe zone - vulnerable to darkness damage! Safe zone count: {safeZoneCount}");
+    }
+
+    /// <summary>
+    /// Temporarily enables or disables the player from taking light damage.
+    /// </summary>
+    public void SetDamageDisabled(bool isDisabled)
+    {
+        isDamageDisabled = isDisabled;
+        if (isDisabled)
+        {
+            // Reset damage state when disabling
+            timeInDarkness = 0f;
+            isTakingDamage = false;
+            accumulatedDamage = 0f;
+        }
+        if (showDebugInfo)
+        {
+            Debug.Log($"Player light damage has been {(isDisabled ? "DISABLED" : "ENABLED")}.");
+        }
     }
     
     // Visualize damage state in editor
@@ -271,12 +297,12 @@ public class PlayerLightDamage : MonoBehaviour
     {
         if (!Application.isPlaying) return;
         
-        if (isTakingDamage && !isInSafeZone)
+        if (isTakingDamage && safeZoneCount == 0)
         {
             Gizmos.color = damageGizmoColor;
             Gizmos.DrawWireSphere(transform.position, 1f);
         }
-        else if (isInSafeZone)
+        else if (safeZoneCount > 0)
         {
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(transform.position, 1f);

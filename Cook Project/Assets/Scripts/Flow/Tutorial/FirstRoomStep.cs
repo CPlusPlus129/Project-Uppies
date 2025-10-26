@@ -34,9 +34,8 @@ class FirstRoomStep : ITutorialStep
 
     public async UniTask ExecuteAsync()
     {
-        Debug.Log("HERE!");
-        await UniTask.WaitForSeconds(2);
-        await dialogueService.StartDialogueAsync(enterDilaogueName);
+        // await UniTask.WaitForSeconds(2);
+        // await dialogueService.StartDialogueAsync(enterDilaogueName);
 
         customer.specifiedNextOrderName = orderName;
         UnityEngine.Debug.Log("Waiting for player to take order...");

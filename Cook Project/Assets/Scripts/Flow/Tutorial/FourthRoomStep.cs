@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Cysharp.Threading.Tasks;
 using R3;
 
@@ -7,16 +8,18 @@ class FourthRoomStep : ITutorialStep
     private readonly FoodSource foodSource;
     private readonly SimpleDoor door;
     private CompositeDisposable disposables = new CompositeDisposable();
-    private readonly string fourthRoomDialogueName;
+    private readonly string fourthRoomEnterDialogueName;
+    private readonly string fourthRoomGatherDialogueName;
     private readonly IDialogueService dialogueService;
     private readonly TriggerZone triggerZone;
 
-    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, string fourthRoomDialogueName, IDialogueService dialogueService, TriggerZone triggerZone)
+    public FourthRoomStep(IInventorySystem inventorySystem, FoodSource foodSource, SimpleDoor door, string fourthRoomEnterDialogueName, string fourthRoomGatherDialogueName, IDialogueService dialogueService, TriggerZone triggerZone)
     {
         this.inventorySystem = inventorySystem;
         this.foodSource = foodSource;
         this.door = door;
-        this.fourthRoomDialogueName = fourthRoomDialogueName;
+        this.fourthRoomEnterDialogueName = fourthRoomEnterDialogueName;
+        this.fourthRoomGatherDialogueName = fourthRoomGatherDialogueName;
         this.dialogueService = dialogueService;
         this.triggerZone = triggerZone;
     }
@@ -24,10 +27,13 @@ class FourthRoomStep : ITutorialStep
     public async UniTask ExecuteAsync()
     {
         await WaitForPlayerToEnterZone();
-        await dialogueService.StartDialogueAsync(fourthRoomDialogueName);
+        await dialogueService.StartDialogueAsync(fourthRoomEnterDialogueName);
         await WaitUntilPlayerGetsGun();
+        UnityEngine.Debug.Log("Door Open!");
         door.Open();
         await WaitUntilPlayerGetsFoodFromSource();
+
+        await dialogueService.StartDialogueAsync(fourthRoomGatherDialogueName);
     }
 
     private async UniTask WaitForPlayerToEnterZone()
