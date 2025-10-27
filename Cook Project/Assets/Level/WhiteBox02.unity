@@ -2283,6 +2283,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodenTrain_01_Wagon_01 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 489131566359146512, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8772955839078463576, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 39.139
@@ -7539,7 +7543,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &154037003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11343,7 +11347,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 266c3d2ab03ba7d40a96fffc7b3c7c81, type: 2}
+  - {fileID: 2100000, guid: 6b949776ba38fe043b0c317f8ad8461f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13364,7 +13368,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 87.3
+      value: 36.95
       objectReference: {fileID: 0}
     - target: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_LocalPosition.y
@@ -13372,7 +13376,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.11
+      value: -49.5
       objectReference: {fileID: 0}
     - target: {fileID: 317857072473185683, guid: badca7e791d3d554fb18b23f23eb6752, type: 3}
       propertyPath: m_LocalRotation.w
@@ -16885,6 +16889,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7310893416372837467, guid: e0195c5fa47302643b5a58876f5f37e1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 9027840246476646535, guid: e0195c5fa47302643b5a58876f5f37e1, type: 3}
       propertyPath: m_Name
       value: Doll_01
@@ -17429,7 +17437,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 266c3d2ab03ba7d40a96fffc7b3c7c81, type: 2}
+  - {fileID: 2100000, guid: 6b949776ba38fe043b0c317f8ad8461f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -20213,7 +20221,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 581a187fdd696844a839f788be30afe8, type: 2}
+  - {fileID: 2100000, guid: 30b8927a8b5f72a4980a5166fa2e83c7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21185,6 +21193,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7929812189871490316, guid: 57827e15ed6e879498da2cd187d91bb6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8516460966794785232, guid: 57827e15ed6e879498da2cd187d91bb6, type: 3}
       propertyPath: m_Name
       value: Fish_01
@@ -24766,49 +24778,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 449290169}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!21 &450151725
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Billboard Material (Satan)
-  m_Shader: {fileID: 4800000, guid: 9f854fdf1359dc242bad7e1fd7597343, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 38135de447b0a6f44804610ffa8977c8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _BillboardType: 1
-    - _BumpScale: 1
-    - _Cull: 0
-    - _Cutoff: 0.5
-    - _LightingMode: 1
-    - _UseNormalMap: 0
-    m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-  m_BuildTextureStacks: []
-  m_AllowLocking: 1
 --- !u!1 &450356300
 GameObject:
   m_ObjectHideFlags: 0
@@ -25904,6 +25873,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 762591659}
     m_Modifications:
+    - target: {fileID: 242472933306488625, guid: 84a7ec46ef4b35447ad3cc28822b2b0c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 1973062438743139309, guid: 84a7ec46ef4b35447ad3cc28822b2b0c, type: 3}
       propertyPath: m_Name
       value: Counter_01
@@ -27663,6 +27636,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7445264642207065737, guid: e20421abc0f71be4d9ecc45a7dbf3a98, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 9182332432019690069, guid: e20421abc0f71be4d9ecc45a7dbf3a98, type: 3}
       propertyPath: m_Name
       value: Bunny_01
@@ -29389,6 +29366,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 762591659}
     m_Modifications:
+    - target: {fileID: 4886206451467274929, guid: c90903837049738429d316ad7f576023, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 5257990297523999728, guid: c90903837049738429d316ad7f576023, type: 3}
       propertyPath: m_Name
       value: WoodenTrain_01_Front
@@ -30947,6 +30928,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 762591659}
     m_Modifications:
+    - target: {fileID: 5329668223714234651, guid: 15ba51a82d90c6b4a898945c88f88c4e, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 5893557208578172359, guid: 15ba51a82d90c6b4a898945c88f88c4e, type: 3}
       propertyPath: m_Name
       value: RockingHorse_01
@@ -35713,6 +35698,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodenTrain_01_Wagon_01 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 489131566359146512, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8772955839078463576, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 38.959
@@ -45812,6 +45801,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: RedFogVolume
       objectReference: {fileID: 0}
+    - target: {fileID: 6412282157603403671, guid: 765553265ad30a345a912807c503835b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7155052779857098510, guid: 765553265ad30a345a912807c503835b, type: 3}
       propertyPath: blendDistance
       value: 2
@@ -48523,6 +48516,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sheep_01
       objectReference: {fileID: 0}
+    - target: {fileID: 6243769120349854477, guid: 1016d39d5ce22304abd5c496ea34f5ca, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8701479201670520258, guid: 1016d39d5ce22304abd5c496ea34f5ca, type: 3}
       propertyPath: m_LocalPosition.x
       value: 39.651
@@ -50735,6 +50732,49 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!21 &959952156
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Billboard Material (Satan)
+  m_Shader: {fileID: 4800000, guid: 9f854fdf1359dc242bad7e1fd7597343, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 38135de447b0a6f44804610ffa8977c8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BillboardType: 1
+    - _BumpScale: 1
+    - _Cull: 0
+    - _Cutoff: 0.5
+    - _LightingMode: 1
+    - _UseNormalMap: 0
+    m_Colors:
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &960454722
 GameObject:
   m_ObjectHideFlags: 0
@@ -52075,6 +52115,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodenTrain_01_Wagon_02
       objectReference: {fileID: 0}
+    - target: {fileID: 5206952444120313148, guid: 326706bb604cb0444bbe3c611f7021f6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8499636780115901141, guid: 326706bb604cb0444bbe3c611f7021f6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 39.173
@@ -53678,6 +53722,184 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1026278257}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!43 &1027552082
+Mesh:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Billboard Quad
+  serializedVersion: 12
+  m_SubMeshes:
+  - serializedVersion: 2
+    firstByte: 0
+    indexCount: 6
+    topology: 0
+    baseVertex: 0
+    firstVertex: 0
+    vertexCount: 4
+    localAABB:
+      m_Center: {x: 0, y: 0, z: 0}
+      m_Extent: {x: 0.5, y: 1.25, z: 0}
+  m_Shapes:
+    vertices: []
+    shapes: []
+    channels: []
+    fullWeights: []
+  m_BindPose: []
+  m_BoneNameHashes: 
+  m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
+  m_MeshCompression: 0
+  m_IsReadable: 1
+  m_KeepVertices: 1
+  m_KeepIndices: 1
+  m_IndexFormat: 0
+  m_IndexBuffer: 000002000100020003000100
+  m_VertexData:
+    serializedVersion: 3
+    m_VertexCount: 4
+    m_Channels:
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 12
+      format: 0
+      dimension: 3
+    - stream: 0
+      offset: 24
+      format: 0
+      dimension: 4
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 40
+      format: 0
+      dimension: 2
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    - stream: 0
+      offset: 0
+      format: 0
+      dimension: 0
+    m_DataSize: 192
+    _typelessdata: 000000bf0000a0bf000000000000000000000000000080bf0000803f00000000000000000000803fc88b883e3664913c0000003f0000a0bf000000000000000000000000000080bf0000803f00000000000000000000803f5d064d3f3664913c000000bf0000a03f000000000000000000000000000080bf0000803f00000000000000000000803fc88b883ed40f793f0000003f0000a03f000000000000000000000000000080bf0000803f00000000000000000000803f5d064d3fd40f793f
+  m_CompressedMesh:
+    m_Vertices:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UV:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Normals:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Tangents:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Weights:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_NormalSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_TangentSigns:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_FloatColors:
+      m_NumItems: 0
+      m_Range: 0
+      m_Start: 0
+      m_Data: 
+      m_BitSize: 0
+    m_BoneIndices:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_Triangles:
+      m_NumItems: 0
+      m_Data: 
+      m_BitSize: 0
+    m_UVInfo: 0
+  m_LocalAABB:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0.5, y: 1.25, z: 0}
+  m_MeshUsageFlags: 0
+  m_CookingOptions: 30
+  m_BakedConvexCollisionMesh: 
+  m_BakedTriangleCollisionMesh: 
+  'm_MeshMetrics[0]': 1
+  'm_MeshMetrics[1]': 1
+  m_MeshOptimizationFlags: 1
+  m_StreamData:
+    serializedVersion: 2
+    offset: 0
+    size: 0
+    path: 
+  m_MeshLodInfo:
+    serializedVersion: 2
+    m_LodSelectionCurve:
+      serializedVersion: 1
+      m_LodSlope: 0
+      m_LodBias: 0
+    m_NumLevels: 1
+    m_SubMeshes:
+    - serializedVersion: 2
+      m_Levels:
+      - serializedVersion: 1
+        m_IndexStart: 0
+        m_IndexCount: 0
 --- !u!1001 &1028883919
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -61348,7 +61570,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 266c3d2ab03ba7d40a96fffc7b3c7c81, type: 2}
+  - {fileID: 2100000, guid: 6b949776ba38fe043b0c317f8ad8461f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -76950,7 +77172,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 266c3d2ab03ba7d40a96fffc7b3c7c81, type: 2}
+  - {fileID: 2100000, guid: 6b949776ba38fe043b0c317f8ad8461f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -79855,184 +80077,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1505341183}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!43 &1507800845
-Mesh:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Billboard Quad
-  serializedVersion: 12
-  m_SubMeshes:
-  - serializedVersion: 2
-    firstByte: 0
-    indexCount: 6
-    topology: 0
-    baseVertex: 0
-    firstVertex: 0
-    vertexCount: 4
-    localAABB:
-      m_Center: {x: 0, y: 0, z: 0}
-      m_Extent: {x: 0.5, y: 1.25, z: 0}
-  m_Shapes:
-    vertices: []
-    shapes: []
-    channels: []
-    fullWeights: []
-  m_BindPose: []
-  m_BoneNameHashes: 
-  m_RootBoneNameHash: 0
-  m_BonesAABB: []
-  m_VariableBoneCountWeights:
-    m_Data: 
-  m_MeshCompression: 0
-  m_IsReadable: 1
-  m_KeepVertices: 1
-  m_KeepIndices: 1
-  m_IndexFormat: 0
-  m_IndexBuffer: 000002000100020003000100
-  m_VertexData:
-    serializedVersion: 3
-    m_VertexCount: 4
-    m_Channels:
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 12
-      format: 0
-      dimension: 3
-    - stream: 0
-      offset: 24
-      format: 0
-      dimension: 4
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 40
-      format: 0
-      dimension: 2
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    - stream: 0
-      offset: 0
-      format: 0
-      dimension: 0
-    m_DataSize: 192
-    _typelessdata: 000000bf0000a0bf000000000000000000000000000080bf0000803f00000000000000000000803fc88b883e3664913c0000003f0000a0bf000000000000000000000000000080bf0000803f00000000000000000000803f5d064d3f3664913c000000bf0000a03f000000000000000000000000000080bf0000803f00000000000000000000803fc88b883ed40f793f0000003f0000a03f000000000000000000000000000080bf0000803f00000000000000000000803f5d064d3fd40f793f
-  m_CompressedMesh:
-    m_Vertices:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UV:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Normals:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Tangents:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Weights:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_NormalSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_TangentSigns:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_FloatColors:
-      m_NumItems: 0
-      m_Range: 0
-      m_Start: 0
-      m_Data: 
-      m_BitSize: 0
-    m_BoneIndices:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_Triangles:
-      m_NumItems: 0
-      m_Data: 
-      m_BitSize: 0
-    m_UVInfo: 0
-  m_LocalAABB:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0.5, y: 1.25, z: 0}
-  m_MeshUsageFlags: 0
-  m_CookingOptions: 30
-  m_BakedConvexCollisionMesh: 
-  m_BakedTriangleCollisionMesh: 
-  'm_MeshMetrics[0]': 1
-  'm_MeshMetrics[1]': 1
-  m_MeshOptimizationFlags: 1
-  m_StreamData:
-    serializedVersion: 2
-    offset: 0
-    size: 0
-    path: 
-  m_MeshLodInfo:
-    serializedVersion: 2
-    m_LodSelectionCurve:
-      serializedVersion: 1
-      m_LodSlope: 0
-      m_LodBias: 0
-    m_NumLevels: 1
-    m_SubMeshes:
-    - serializedVersion: 2
-      m_Levels:
-      - serializedVersion: 1
-        m_IndexStart: 0
-        m_IndexCount: 0
 --- !u!1 &1508497313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 103136, guid: 07f4a007d7093a64bbbdc962a82b494a, type: 3}
@@ -95655,7 +95699,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 450151725}
+  - {fileID: 959952156}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -95685,7 +95729,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1774090986}
-  m_Mesh: {fileID: 1507800845}
+  m_Mesh: {fileID: 1027552082}
 --- !u!114 &1774090990
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97241,6 +97285,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4119377434185232956, guid: 08969be1fac40c344a3246465bf43109, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -98735,6 +98783,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Horse_01
       objectReference: {fileID: 0}
+    - target: {fileID: 8799841056674744551, guid: 3ab601fba8f50b343868616df9ee2dd2, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -102539,6 +102591,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodenTrain_01_Wagon_01
       objectReference: {fileID: 0}
+    - target: {fileID: 489131566359146512, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 8772955839078463576, guid: da906da93b42ae74599e71ef31b185a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 38.825
@@ -107673,6 +107729,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WoodenTrain_01_Wagon_03
       objectReference: {fileID: 0}
+    - target: {fileID: 8796899684147480684, guid: a9b6491a2e7b46d4fbb2d8fd324ae2ce, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -118056,6 +118116,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2697411828696349121, guid: ea2b0e4538d0a834aa0feef5ee53be9d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e18b34ef53697974eb9dc042a1f91375, type: 2}
     - target: {fileID: 4419148101838949661, guid: ea2b0e4538d0a834aa0feef5ee53be9d, type: 3}
       propertyPath: m_Name
       value: Dollhouse_01
