@@ -13,7 +13,7 @@ namespace DialogueModule
         [SerializeField] private GameObject nameTextRoot;
         [SerializeField] private AudioSource voiceAudioSource;
 
-        private const float DefaultTypeWaitTime = 0.001f;
+        private const float DefaultTypeWaitTime = 0.01f;
         private const float MinTypeWaitTime = 0.0025f;
         private const float MinClipWaitTime = 0.0005f;
 
