@@ -9,17 +9,24 @@ public class PlayerInteract : MonoBehaviour
     public void UpdateCurrentInteractableTarget(Camera cam)
     {
         var currentInteractableTarget = PlayerStatSystem.Instance.CurrentInteractableTarget;
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-        if (!Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayer))
+        var rayOrigin = cam.transform.position;
+        var rayDirection = cam.transform.forward;
+        IInteractable nextTarget = null;
+
+        if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hit, interactDistance, interactLayer))
         {
-            currentInteractableTarget.Value = null;
+            if (hit.collider.TryGetComponent(out IInteractable interactable))
+            {
+                nextTarget = interactable;
+            }
+        }
+
+        if (ReferenceEquals(currentInteractableTarget.Value, nextTarget))
+        {
             return;
         }
 
-        if (hit.collider.TryGetComponent(out IInteractable interactable))
-            currentInteractableTarget.Value = interactable;
-        else
-            currentInteractableTarget.Value = null;
+        currentInteractableTarget.Value = nextTarget;
     }
 
     public void Interact(Camera cam)

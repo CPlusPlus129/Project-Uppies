@@ -36,15 +36,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        var moveValue = moveAction.ReadValue<Vector2>();
-        motor.ProcessMove(moveValue);
-        interact.UpdateCurrentInteractableTarget(camlook.cam);        
-    }
-
-    void LateUpdate()
-    {
         var lookValue = lookAction.ReadValue<Vector2>();
         camlook.ProcessLook(lookValue);
+
+        interact.UpdateCurrentInteractableTarget(camlook.cam);
+
+        var moveValue = moveAction.ReadValue<Vector2>();
+        motor.ProcessMove(moveValue);
     }
 
     private void SubscribeEvents()
