@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using NvJ.Rendering;
-using R3;
 using UnityEngine;
 
 /// <summary>
@@ -17,7 +16,6 @@ class ZeroRoomStep : ITutorialStep
 
     private readonly GameObject satanLight;
     private readonly FlamePillarEffect flamePillarEffect;
-    private CompositeDisposable disposables = new CompositeDisposable();
 
     public ZeroRoomStep(TutorialContext context)
     {
@@ -60,18 +58,7 @@ class ZeroRoomStep : ITutorialStep
 
     private async UniTask WaitForPlayerToEnterZone()
     {
-        var tcs = new UniTaskCompletionSource();
-        
-        triggerZone.OnPlayerEnter
-            .Take(1)
-            .Subscribe(_ =>
-            {
-                Debug.Log("[ZeroRoomStep] Trigger zone activated!");
-                disposables.Clear();
-                tcs.TrySetResult();
-            })
-            .AddTo(disposables);
-
-        await tcs.Task;
+        await TutorialDialogueStepUtility.WaitForTriggerAsync(triggerZone);
+        Debug.Log("[ZeroRoomStep] Trigger zone activated!");
     }
 }
