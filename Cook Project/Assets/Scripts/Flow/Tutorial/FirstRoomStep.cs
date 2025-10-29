@@ -12,7 +12,7 @@ class FirstRoomStep : ITutorialStep
     private readonly SimpleDoor door;
     private readonly EmissionIndicator doorArrow;
 
-    private readonly string enterDilaogueName = "tutorial_first_room_entering";
+    //private readonly string enterDialogueName = "tutorial_first_room_entering";
     private readonly string stanDialogueName = "tutorial_first_room_orders";
     private readonly string orderName;
     private readonly string hintText;

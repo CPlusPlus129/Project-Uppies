@@ -22,7 +22,7 @@ When you reset `UnityInteractable` it will:
 
 Example wiring for dialogue:
 1. Drag the `DialogueEventPlayer` component into the `On Interact` list.
-2. Choose `DialogueEventPlayer → Play()` (or `PlayAndQueue()` if you want queueing behaviour).
+2. Choose `DialogueEventPlayer → Play()` for single events, or `PlayCollection()` if you have assigned a dialogue collection.
 
 ## 4. Verify Raycast Settings
 - Check that the object’s layer is included in `PlayerInteract.interactLayer` (defaults to the `Interactable` layer in the Player prefab).

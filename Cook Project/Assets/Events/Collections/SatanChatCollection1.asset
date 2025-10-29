@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26ecfc0ac84adeb44a7a3418c1bbb31d, type: 3}
+  m_Name: SatanChatCollection1
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.DialogueEventCollection
+  dialogueEvents:
+  - {fileID: 11400000, guid: 92aa35adc14421d4192c0330cee9d5ae, type: 2}
+  - {fileID: 11400000, guid: ca66e69b7a4c96c45b32af2cec88dd77, type: 2}
+  - {fileID: 11400000, guid: 987862b54271f134da628a060ba4fd27, type: 2}
+  defaultPlaybackMode: 1
+  loopSequential: 1
+  avoidImmediateRepeat: 1
+  exhaustBeforeRepeat: 1
+  allowRepeatLast: 1

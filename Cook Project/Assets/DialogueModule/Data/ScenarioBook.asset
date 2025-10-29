@@ -15,6 +15,7 @@ MonoBehaviour:
   scenarioData:
     keys:
     - ExampleDialogue
+    - SatanLines
     - TutorialDialogue
     values:
     - rows:
@@ -277,6 +278,89 @@ MonoBehaviour:
         - End of story test 3.
       - strings:
         - EndScenario
+    - rows:
+      - strings:
+        - Command
+        - Arg1
+        - Arg2
+        - Arg3
+        - Arg4
+        - Arg5
+        - Arg6
+        - Text
+      - strings:
+        - 
+      - strings:
+        - '*reference'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - WHAT ARE YOU
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - ... an idiot sandwich
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*satanChat1'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Can you go bother someone else? I'm trying to watch my soaps.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*satanChat2'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Sorry to break this to you... But you're dead. Just kidding! Well, I'm
+          not. But you already knew that, right?
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*satanChat3'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - 'Fun fact: 90% of souls think they didn''t deserve to end up here. The
+          other 10% are still alive.'
+      - strings:
+        - EndScenario
+      - strings:
+        - 
     - rows:
       - strings:
         - Command

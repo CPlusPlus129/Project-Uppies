@@ -20,6 +20,12 @@
   - `Dialogue Trigger Authoring` → `On Enter` (fires once the trigger succeeds) and `On Denied`.
 - Use the custom inspector buttons to size the collider (`Configure Box Trigger`, `Fit Collider To Children`) or to create another event asset quickly.
 
+### Dialogue Event Collections
+- Create a `Dialogue/Event Collection` asset to bundle multiple events.
+- Choose a playback mode on the collection: **Sequential** (optionally looping) or **Random** (with options to avoid repeats or exhaust the list before reshuffling).
+- Assign the collection to a `DialogueEventPlayer` and call `Play()`/`PlayCollection()` for delivery, `PlayCollectionAndQueue()` if you need to defer playback, or `RepeatLastDialogue()` to immediately reuse the most recent line.
+- Swap collections at runtime via `DialogueEventPlayer.SetActiveCollection(newCollection)` to change what a character says as the story progresses.
+
 ## 4. Optional: Manual Triggering
 - Any script can store a reference to `DialogueEventPlayer` and call:
   ```csharp
