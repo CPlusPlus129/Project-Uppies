@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using DialogueModule;
 using UnityEngine;
 using UnityEngine.Events;
+using R3;
 
 [DisallowMultipleComponent]
 public class DialogueEventPlayer : MonoBehaviour
@@ -23,6 +24,7 @@ public class DialogueEventPlayer : MonoBehaviour
     [SerializeField] private UnityEvent onDialogueStarted;
     [SerializeField] private UnityEvent onDialogueCompleted;
     [SerializeField] private UnityEvent onDialogueDenied;
+    [SerializeField] private bool enableDebugLogging = false;
 
     private readonly Queue<DialogueEventAsset> queuedEvents = new();
     private readonly HashSet<DialogueEventAsset> playedAssets = new();
@@ -35,6 +37,7 @@ public class DialogueEventPlayer : MonoBehaviour
     /// </summary>
     public void Play()
     {
+        DebugLog($"Play() requested on {name} (default event: {defaultEvent?.name ?? "<null>"})");
         Play(defaultEvent).Forget();
     }
 
@@ -75,6 +78,7 @@ public class DialogueEventPlayer : MonoBehaviour
     /// </summary>
     public bool TryPlay(DialogueEventAsset dialogueEventAsset)
     {
+        DebugLog($"TryPlay() requested on {name} (event: {dialogueEventAsset?.name ?? "<null>"})");
         if (dialogueEventAsset == null)
         {
             Debug.LogWarning($"[{nameof(DialogueEventPlayer)}] Missing DialogueEventAsset on {name}.");
@@ -84,12 +88,14 @@ public class DialogueEventPlayer : MonoBehaviour
 
         if (dialogueEventAsset.PlayOnce && playedAssets.Contains(dialogueEventAsset))
         {
+            DebugLog($"Denied: {dialogueEventAsset.name} marked PlayOnce and already played.");
             onDialogueDenied?.Invoke();
             return false;
         }
 
         if (isPlaying)
         {
+            DebugLog("Denied: dialogue currently playing.");
             onDialogueDenied?.Invoke();
             return false;
         }
@@ -109,6 +115,7 @@ public class DialogueEventPlayer : MonoBehaviour
 
         if (dialogueEventAsset.PlayOnce && playedAssets.Contains(dialogueEventAsset))
         {
+            DebugLog($"PlayInternalAsync abort: {dialogueEventAsset.name} already recorded as played once.");
             onDialogueDenied?.Invoke();
             return;
         }
@@ -117,10 +124,12 @@ public class DialogueEventPlayer : MonoBehaviour
         {
             if (allowQueue)
             {
+                DebugLog($"Queueing dialogue {dialogueEventAsset.name}.");
                 queuedEvents.Enqueue(dialogueEventAsset);
             }
             else
             {
+                DebugLog($"Play request denied: already playing {dialogueEventAsset.name}.");
                 onDialogueDenied?.Invoke();
             }
             return;
@@ -136,11 +145,38 @@ public class DialogueEventPlayer : MonoBehaviour
 
         isPlaying = true;
         onDialogueStarted?.Invoke();
+        DebugLog($"Starting dialogue {dialogueEventAsset.name}.");
+
+        bool completed = false;
+
+        void MarkCompleted()
+        {
+            if (completed)
+            {
+                return;
+            }
+
+            completed = true;
+
+            if (dialogueEventAsset.PlayOnce)
+            {
+                playedAssets.Add(dialogueEventAsset);
+            }
+        }
 
         try
         {
+            if (service is DialogueEngine_Gaslight gaslight)
+            {
+                gaslight.onEndScenario
+                    .Take(1)
+                    .Subscribe(_ => MarkCompleted())
+                    .AddTo(this);
+            }
+
             await service.PlayDialogueAsync(dialogueEventAsset);
-            playedAssets.Add(dialogueEventAsset);
+            MarkCompleted();
+            DebugLog($"Dialogue {dialogueEventAsset.name} completed (PlayOnce={dialogueEventAsset.PlayOnce}).");
             onDialogueCompleted?.Invoke();
         }
         catch (Exception ex)
@@ -156,6 +192,7 @@ public class DialogueEventPlayer : MonoBehaviour
         if (queuedEvents.Count > 0)
         {
             var next = queuedEvents.Dequeue();
+            DebugLog($"Processing queued dialogue {next.name}.");
             await PlayInternalAsync(next, false);
         }
     }
@@ -188,5 +225,15 @@ public class DialogueEventPlayer : MonoBehaviour
         }
 
         return cachedService;
+    }
+
+    private void DebugLog(string message)
+    {
+        if (!enableDebugLogging)
+        {
+            return;
+        }
+
+        Debug.Log($"[{nameof(DialogueEventPlayer)}] {message}", this);
     }
 }
