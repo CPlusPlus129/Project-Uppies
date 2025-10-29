@@ -24,11 +24,17 @@ namespace DialogueModule
             onInit?.Invoke(initData);
         }
 
-        public void PlayText(string characterDisplayName, string fullText)
+        public void PlayText(string characterDisplayName, string fullText, AudioClip voiceClip, float voiceSpeedMultiplier)
         {
             currentLine.Value = fullText;
             controllerStatus = ControllerStatus.TypingText;
-            onPlayText?.Invoke(new MessageData() { name = characterDisplayName, message = fullText });
+            onPlayText?.Invoke(new MessageData()
+            {
+                name = characterDisplayName,
+                message = fullText,
+                voiceClip = voiceClip,
+                voiceSpeedMultiplier = voiceSpeedMultiplier
+            });
         }
 
         public void PlayTextEnd()

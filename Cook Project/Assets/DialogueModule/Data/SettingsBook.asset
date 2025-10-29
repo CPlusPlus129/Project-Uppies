@@ -27,6 +27,8 @@ MonoBehaviour:
         - Y
         - Scale
         - FileName
+        - VoiceFileName
+        - VoiceSpeedMultiplier
       - strings:
         - butcher
         - Modrek
@@ -34,6 +36,8 @@ MonoBehaviour:
         - 
         - 
         - Res:/Images/butcher.png
+        - 
+        - 1
       - strings:
         - elder
         - Gamlo
@@ -41,6 +45,8 @@ MonoBehaviour:
         - 
         - 
         - Res:/Images/elder.png
+        - 
+        - 1
       - strings:
         - farmerwoman
         - Mira
@@ -48,6 +54,8 @@ MonoBehaviour:
         - 
         - 
         - Res:/Images/farmerwoman.png
+        - 
+        - 1
       - strings:
         - Satan
         - Satan
@@ -55,15 +63,35 @@ MonoBehaviour:
         - -500
         - 0.75
         - Res:/Images/satan_2.png
+        - Res:/Audio/SatanVoice.wav
+        - ' 1'
       - strings:
         - Player
         - Player
+        - 
+        - 
+        - 
+        - 
+        - Res:/Audio/PlayerVoice.wav
+        - 1
       - strings:
         - stan
         - Stan
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 1
       - strings:
         - ido
         - Ido
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 1
   - keys:
     - Layer
     values:

@@ -1,8 +1,8 @@
-CharacterName,DisplayName,X,Y,Scale,FileName
-butcher,Modrek,,,,Res:/Images/butcher.png
-elder,Gamlo,,,,Res:/Images/elder.png
-farmerwoman,Mira,,,,Res:/Images/farmerwoman.png
-Satan,Satan,200,-500,0.75,Res:/Images/satan_2.png
-Player,Player
-stan,Stan
-ido,Ido
+CharacterName,DisplayName,X,Y,Scale,FileName,VoiceFileName,VoiceSpeedMultiplier
+butcher,Modrek,,,,Res:/Images/butcher.png,,1
+elder,Gamlo,,,,Res:/Images/elder.png,,1
+farmerwoman,Mira,,,,Res:/Images/farmerwoman.png,,1
+Satan,Satan,200,-500,0.75,Res:/Images/satan_2.png,Res:/Audio/SatanVoice.wav, 1
+Player,Player,,,,,Res:/Audio/PlayerVoice.wav,1
+stan,Stan,,,,,,1
+ido,Ido,,,,,,1

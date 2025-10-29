@@ -8,6 +8,8 @@ namespace DialogueModule
         public float y;
         public float scale;
         public string fileName;
+        public string voiceFileName;
+        public float voiceSpeedMultiplier = 1f;
 
         public CharacterSettingData(StringGridRow headerRow, StringGridRow row)
         {
@@ -41,6 +43,15 @@ namespace DialogueModule
                         break;
                     case "FileName":
                         fileName = value;
+                        break;
+                    case "VoiceFileName":
+                        voiceFileName = value;
+                        break;
+                    case "VoiceSpeedMultiplier":
+                        if (!float.TryParse(value, out voiceSpeedMultiplier))
+                            throw new System.InvalidCastException($"Error from Character sheet: header {header}, cell {value}, row {row}");
+                        if (voiceSpeedMultiplier <= 0f)
+                            voiceSpeedMultiplier = 1f;
                         break;
                     default:
                         break;

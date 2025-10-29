@@ -13,7 +13,7 @@ namespace DialogueModule
         {
             engine.adapter.characterAdapter.HideLayer("");
             var parsedText = engine.dataManager.ParseDialogueText(textContent);
-            engine.adapter.PlayText("", parsedText);
+            engine.adapter.PlayText("", parsedText, null, 1f);
             isWaiting = true;
         }
     }

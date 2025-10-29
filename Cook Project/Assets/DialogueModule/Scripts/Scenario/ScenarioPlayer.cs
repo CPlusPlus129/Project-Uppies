@@ -83,6 +83,8 @@ namespace DialogueModule
         IEnumerator PreloadAssets()
         {
             var usingList = new HashSet<string>();
+            var spriteFileNames = new HashSet<string>();
+            var audioFileNames = new HashSet<string>();
             List<Coroutine> loadTasks = new();
             foreach (var cmd in currentLabelData.commands)
             {
@@ -97,18 +99,34 @@ namespace DialogueModule
                 }
 
                 if (!string.IsNullOrEmpty(characterSettingData.fileName))
+                {
                     usingList.Add(characterSettingData.fileName);
+                    spriteFileNames.Add(characterSettingData.fileName);
+                }
+
+                if (!string.IsNullOrEmpty(characterSettingData.voiceFileName))
+                {
+                    usingList.Add(characterSettingData.voiceFileName);
+                    audioFileNames.Add(characterSettingData.voiceFileName);
+                }
             }
             foreach (var key in engine.assetManager.CurrentUsingAssetDict.Keys.ToArray())
             {
                 if (!usingList.Contains(key))
                     engine.assetManager.Release(key);
             }
-            foreach (var fileName in usingList)
+            foreach (var fileName in spriteFileNames)
             {
                 if (!engine.assetManager.CurrentUsingAssetDict.ContainsKey(fileName))
                 {
                     loadTasks.Add(StartCoroutine(engine.assetManager.LoadCoroutine<Sprite>(fileName))); //only sprite for now
+                }
+            }
+            foreach (var fileName in audioFileNames)
+            {
+                if (!engine.assetManager.CurrentUsingAssetDict.ContainsKey(fileName))
+                {
+                    loadTasks.Add(StartCoroutine(engine.assetManager.LoadCoroutine<AudioClip>(fileName)));
                 }
             }
 

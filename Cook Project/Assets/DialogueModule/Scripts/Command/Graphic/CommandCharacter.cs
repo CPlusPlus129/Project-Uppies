@@ -46,7 +46,20 @@ namespace DialogueModule
             if (!string.IsNullOrEmpty(textContent))
             {
                 var parsedText = engine.dataManager.ParseDialogueText(textContent);
-                engine.adapter.PlayText(characterSettingData.displayName, parsedText);
+                AudioClip voiceClip = null;
+                if (!string.IsNullOrEmpty(characterSettingData.voiceFileName))
+                {
+                    if (engine.assetManager.CurrentUsingAssetDict.TryGetValue(characterSettingData.voiceFileName, out var audioObj))
+                        voiceClip = audioObj as AudioClip;
+                    else
+                        Debug.LogError($"Cannot find character voice clip in assetmanager! fileName: {characterSettingData.voiceFileName}, characterID {characterId}");
+                }
+
+                engine.adapter.PlayText(
+                    characterSettingData.displayName,
+                    parsedText,
+                    voiceClip,
+                    characterSettingData.voiceSpeedMultiplier <= 0f ? 1f : characterSettingData.voiceSpeedMultiplier);
                 isWaiting = true;
             }
         }

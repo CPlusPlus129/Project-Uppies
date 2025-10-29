@@ -11,13 +11,31 @@ namespace DialogueModule
         [SerializeField] private GameObject ongoingNextIcon;
         [SerializeField] private GameObject waitNextIcon;
         [SerializeField] private GameObject nameTextRoot;
+        [SerializeField] private AudioSource voiceAudioSource;
+
+        private const float DefaultTypeWaitTime = 0.001f;
+        private const float MinTypeWaitTime = 0.0025f;
+        private const float MinClipWaitTime = 0.0005f;
+
         private ScenarioUIAdapter adapter;
         private int visibleCharacterCount = 0;
+        private int targetCharacterCount = 0;
         private bool isTyping = false;
-        private float typeWaitTime = 0.01f;
+        private float typeWaitTime = DefaultTypeWaitTime;
+        private float currentVoiceSpeed = 1f;
+        private AudioClip currentVoiceClip;
+        private float voicePlaybackCooldown = 0f;
 
         private void Awake()
         {
+            if (voiceAudioSource == null)
+            {
+                voiceAudioSource = GetComponent<AudioSource>();
+                if (voiceAudioSource == null)
+                    voiceAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+            voiceAudioSource.playOnAwake = false;
+            voiceAudioSource.loop = false;
             Clear();
         }
 
@@ -42,6 +60,12 @@ namespace DialogueModule
             ongoingNextIcon?.SetActive(false);
             waitNextIcon?.SetActive(false);
             nameTextRoot?.SetActive(false);
+            StopVoicePlayback();
+            targetCharacterCount = 0;
+            typeWaitTime = DefaultTypeWaitTime;
+            currentVoiceSpeed = 1f;
+            currentVoiceClip = null;
+            voicePlaybackCooldown = 0f;
         }
 
         private void OnNewText(MessageData data)
@@ -55,8 +79,27 @@ namespace DialogueModule
                 nameTextRoot.SetActive(false);
 
             contentText.text = data.message;
-            visibleCharacterCount = 0;
             contentText.maxVisibleCharacters = 0;
+            contentText.ForceMeshUpdate();
+            visibleCharacterCount = 0;
+            targetCharacterCount = contentText.textInfo.characterCount;
+            if (targetCharacterCount == 0 && !string.IsNullOrEmpty(data.message))
+                targetCharacterCount = data.message.Length;
+
+            StopVoicePlayback();
+            currentVoiceClip = data.voiceClip;
+            voicePlaybackCooldown = 0f;
+            currentVoiceSpeed = data.voiceSpeedMultiplier <= 0f ? 1f : data.voiceSpeedMultiplier;
+            typeWaitTime = GetDefaultTypeWaitTime(currentVoiceSpeed);
+
+            if (currentVoiceClip != null && voiceAudioSource != null)
+            {
+                typeWaitTime = GetTypeWaitTimeForClip(currentVoiceClip, currentVoiceSpeed);
+                voiceAudioSource.pitch = currentVoiceSpeed;
+            }
+
+            typeWaitTime = Mathf.Max(typeWaitTime, MinClipWaitTime);
+
             StopAllCoroutines();
             StartCoroutine(TypeRoutine());
         }
@@ -64,18 +107,82 @@ namespace DialogueModule
         private IEnumerator TypeRoutine()
         {
             isTyping = true;
+            contentText.ForceMeshUpdate();
 
-            while (visibleCharacterCount < contentText.text.Length)
+            if (targetCharacterCount == 0 && !string.IsNullOrEmpty(contentText.text))
             {
-                visibleCharacterCount++;
-                contentText.maxVisibleCharacters = visibleCharacterCount;
-                UpdateIconActiveAndPosition();
-                yield return new WaitForSeconds(typeWaitTime);
+                targetCharacterCount = contentText.textInfo.characterCount;
+                if (targetCharacterCount == 0)
+                    targetCharacterCount = contentText.text.Length;
+            }
+
+            float elapsed = 0f;
+
+            while (visibleCharacterCount < targetCharacterCount)
+            {
+                float delta = Time.deltaTime;
+                elapsed += delta;
+
+                if (voicePlaybackCooldown > 0f)
+                {
+                    voicePlaybackCooldown -= delta;
+                    if (voicePlaybackCooldown < 0f)
+                        voicePlaybackCooldown = 0f;
+                }
+
+                int steps;
+                if (typeWaitTime <= Mathf.Epsilon)
+                {
+                    steps = targetCharacterCount - visibleCharacterCount;
+                    elapsed = 0f;
+                }
+                else
+                {
+                    steps = Mathf.FloorToInt(elapsed / typeWaitTime);
+                    if (steps > 0)
+                        elapsed -= steps * typeWaitTime;
+                }
+
+                if (steps <= 0)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                for (int i = 0; i < steps && visibleCharacterCount < targetCharacterCount; i++)
+                {
+                    visibleCharacterCount++;
+                    contentText.maxVisibleCharacters = visibleCharacterCount;
+                    UpdateIconActiveAndPosition();
+                    TryPlayVoiceTick(visibleCharacterCount - 1);
+                }
+
+                yield return null;
             }
 
             isTyping = false;
+            visibleCharacterCount = targetCharacterCount;
+            contentText.maxVisibleCharacters = visibleCharacterCount;
             UpdateIconActiveAndPosition();
             adapter?.PlayTextEnd();
+        }
+
+        private void TryPlayVoiceTick(int characterIndex)
+        {
+            if (voiceAudioSource == null || currentVoiceClip == null)
+                return;
+            if (voicePlaybackCooldown > 0f)
+                return;
+            if (characterIndex < 0 || characterIndex >= contentText.textInfo.characterCount)
+                return;
+
+            var charInfo = contentText.textInfo.characterInfo[characterIndex];
+            if (!charInfo.isVisible || char.IsWhiteSpace(charInfo.character))
+                return;
+
+            voiceAudioSource.pitch = currentVoiceSpeed;
+            voiceAudioSource.PlayOneShot(currentVoiceClip);
+            voicePlaybackCooldown = GetVoicePlaybackInterval(currentVoiceClip, currentVoiceSpeed);
         }
 
         private void UpdateIconActiveAndPosition()
@@ -115,12 +222,46 @@ namespace DialogueModule
             if (!isTyping) return;
 
             StopAllCoroutines();
-            visibleCharacterCount = contentText.text.Length;
+            StopVoicePlayback();
+            visibleCharacterCount = targetCharacterCount;
             contentText.maxVisibleCharacters = visibleCharacterCount;
             isTyping = false;
             UpdateIconActiveAndPosition();
             adapter?.PlayTextEnd();
         }
 
+        private void StopVoicePlayback()
+        {
+            currentVoiceClip = null;
+            voicePlaybackCooldown = 0f;
+            if (voiceAudioSource == null)
+                return;
+            voiceAudioSource.Stop();
+            voiceAudioSource.clip = null;
+            voiceAudioSource.pitch = 1f;
+        }
+
+        private float GetTypeWaitTimeForClip(AudioClip clip, float speedMultiplier)
+        {
+            if (clip == null)
+                return GetDefaultTypeWaitTime(speedMultiplier);
+
+            float interval = GetVoicePlaybackInterval(clip, speedMultiplier);
+            return Mathf.Max(interval, MinClipWaitTime);
+        }
+
+        private float GetDefaultTypeWaitTime(float speedMultiplier)
+        {
+            float effectiveSpeed = Mathf.Max(speedMultiplier, 0.01f);
+            float perCharacter = DefaultTypeWaitTime / effectiveSpeed;
+            return Mathf.Max(perCharacter, MinTypeWaitTime);
+        }
+
+        private float GetVoicePlaybackInterval(AudioClip clip, float speedMultiplier)
+        {
+            if (clip == null)
+                return 0f;
+            return Mathf.Max(clip.length / Mathf.Max(speedMultiplier, 0.01f), MinClipWaitTime);
+        }
     }
 }
