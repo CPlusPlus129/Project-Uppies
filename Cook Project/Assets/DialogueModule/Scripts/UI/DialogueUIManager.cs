@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,17 +18,22 @@ namespace DialogueModule
         private bool disableInteractionDuringDialogue = true;
         [SerializeField]
         private bool disableRaycastsDuringDialogue = true;
+        [SerializeField, Min(0f)]
+        private float fadeDuration = 0.25f;
 
         private bool _isInited = false;
         private readonly List<IScenarioBindable> _bindables = new List<IScenarioBindable>();
         private readonly Dictionary<CanvasGroup, LayerState> _layerStateCache = new Dictionary<CanvasGroup, LayerState>();
+        private readonly Dictionary<CanvasGroup, Coroutine> _layerCoroutines = new Dictionary<CanvasGroup, Coroutine>();
         private bool _layersDimmed = false;
+        private Coroutine _pendingDeactivate;
 
         private struct LayerState
         {
             public float alpha;
             public bool interactable;
             public bool blocksRaycasts;
+            public bool enabled;
         }
 
         protected void Awake()
@@ -40,7 +46,7 @@ namespace DialogueModule
             engine.uiHasInit = false;
             UnbindSelf();
             Unbind();
-            RestoreLayerStates();
+            ForceRestoreLayerStates();
         }
 
         public void Init()
@@ -112,14 +118,24 @@ namespace DialogueModule
 
         private void OnStartScenario()
         {
+            if (_pendingDeactivate != null)
+            {
+                StopCoroutine(_pendingDeactivate);
+                _pendingDeactivate = null;
+            }
+
             gameObject.SetActive(true);
             ApplyDialogueLayerStates();
         }
 
         private void OnEndScenario()
         {
-            gameObject.SetActive(false);
             RestoreLayerStates();
+            if (_pendingDeactivate != null)
+            {
+                StopCoroutine(_pendingDeactivate);
+            }
+            _pendingDeactivate = StartCoroutine(DeactivateAfterFades());
         }
 
         private void SetEngine()
@@ -156,7 +172,8 @@ namespace DialogueModule
                 {
                     alpha = group.alpha,
                     interactable = group.interactable,
-                    blocksRaycasts = group.blocksRaycasts
+                    blocksRaycasts = group.blocksRaycasts,
+                    enabled = group.enabled
                 };
             }
         }
@@ -185,17 +202,11 @@ namespace DialogueModule
                     };
                 }
 
-                group.alpha = dialogueOpacity;
-
-                if (disableInteractionDuringDialogue)
-                {
-                    group.interactable = false;
-                }
-
-                if (disableRaycastsDuringDialogue)
-                {
-                    group.blocksRaycasts = false;
-                }
+                StartFade(group,
+                    dialogueOpacity,
+                    disableInteractionDuringDialogue ? false : _layerStateCache[group].interactable,
+                    disableRaycastsDuringDialogue ? false : _layerStateCache[group].blocksRaycasts,
+                    true);
             }
 
             _layersDimmed = true;
@@ -217,9 +228,129 @@ namespace DialogueModule
                     continue;
                 }
 
+                StartFade(group, state.alpha, state.interactable, state.blocksRaycasts, state.enabled);
+            }
+
+            _layersDimmed = false;
+        }
+
+        private void StartFade(CanvasGroup group, float targetAlpha, bool targetInteractable, bool targetBlocksRaycasts, bool targetEnabled)
+        {
+            if (group == null)
+            {
+                return;
+            }
+
+            if (!isActiveAndEnabled)
+            {
+                if (_layerCoroutines.TryGetValue(group, out var pending) && pending != null)
+                {
+                    StopCoroutine(pending);
+                }
+
+                group.enabled = targetEnabled;
+                group.interactable = targetInteractable;
+                group.blocksRaycasts = targetBlocksRaycasts;
+                group.alpha = targetAlpha;
+                _layerCoroutines[group] = null;
+                return;
+            }
+
+            if (_layerCoroutines.TryGetValue(group, out var existing) && existing != null)
+            {
+                StopCoroutine(existing);
+            }
+
+            if (Mathf.Approximately(fadeDuration, 0f))
+            {
+                group.enabled = targetEnabled;
+                group.interactable = targetInteractable;
+                group.blocksRaycasts = targetBlocksRaycasts;
+                group.alpha = targetAlpha;
+                _layerCoroutines[group] = null;
+                return;
+            }
+
+            IEnumerator FadeRoutine()
+            {
+                float initialAlpha = group.alpha;
+                float elapsed = 0f;
+                bool wasEnabled = group.enabled;
+                if (!wasEnabled)
+                {
+                    group.enabled = true;
+                }
+
+                group.interactable = targetInteractable;
+                group.blocksRaycasts = targetBlocksRaycasts;
+
+                while (elapsed < fadeDuration)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    float t = Mathf.Clamp01(elapsed / fadeDuration);
+                    group.alpha = Mathf.Lerp(initialAlpha, targetAlpha, t);
+                    yield return null;
+                }
+
+                group.alpha = targetAlpha;
+                group.enabled = targetEnabled;
+                _layerCoroutines[group] = null;
+            }
+
+            var coroutine = StartCoroutine(FadeRoutine());
+            _layerCoroutines[group] = coroutine;
+        }
+
+        private IEnumerator DeactivateAfterFades()
+        {
+            while (HasActiveFades())
+            {
+                yield return null;
+            }
+
+            gameObject.SetActive(false);
+            _pendingDeactivate = null;
+        }
+
+        private bool HasActiveFades()
+        {
+            foreach (var kvp in _layerCoroutines)
+            {
+                if (kvp.Value != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void ForceRestoreLayerStates()
+        {
+            if (_pendingDeactivate != null)
+            {
+                StopCoroutine(_pendingDeactivate);
+                _pendingDeactivate = null;
+            }
+
+            foreach (var kvp in _layerStateCache)
+            {
+                var group = kvp.Key;
+                var state = kvp.Value;
+                if (group == null)
+                {
+                    continue;
+                }
+
+                if (_layerCoroutines.TryGetValue(group, out var existing) && existing != null)
+                {
+                    StopCoroutine(existing);
+                    _layerCoroutines[group] = null;
+                }
+
                 group.alpha = state.alpha;
                 group.interactable = state.interactable;
                 group.blocksRaycasts = state.blocksRaycasts;
+                group.enabled = state.enabled;
             }
 
             _layersDimmed = false;
