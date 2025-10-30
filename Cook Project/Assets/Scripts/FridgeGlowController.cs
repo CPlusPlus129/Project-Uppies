@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -37,22 +38,128 @@ public class FridgeGlowController : MonoBehaviour
     private bool isGlowing = false;
     private float pulseTimer = 0f;
     private int glowLayer = -1;
+    private Coroutine glowDurationRoutine;
 
     private void Awake()
     {
         glowLayer = LayerMask.NameToLayer(GLOW_LAYER_NAME);
-        
+
         if (glowLayer == -1)
         {
             Debug.LogError($"FridgeGlowController: Layer '{GLOW_LAYER_NAME}' not found! Create this layer in Project Settings > Tags and Layers");
             return;
         }
-        
+
+        if (!TryResolveTargetMesh())
+        {
+            if (enableDebugLogs)
+            {
+                Debug.LogWarning($"FridgeGlowController: No MeshFilter assigned or found for '{gameObject.name}' – glow will stay disabled");
+            }
+            return;
+        }
+
         CreateGlowObject();
+    }
+
+    private bool TryResolveTargetMesh()
+    {
+        if (targetMesh != null)
+        {
+            return true;
+        }
+
+        if (TryGetComponent(out MeshFilter selfMeshFilter) && HasValidMesh(selfMeshFilter) && !IsTextMeshFilter(selfMeshFilter))
+        {
+            targetMesh = selfMeshFilter;
+            if (enableDebugLogs)
+            {
+                Debug.Log($"FridgeGlowController: Auto-assigned MeshFilter '{selfMeshFilter.name}' on '{gameObject.name}'");
+            }
+            return true;
+        }
+
+        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(true);
+        MeshFilter bestMatch = null;
+        float bestScore = float.MinValue;
+
+        foreach (MeshFilter meshFilter in meshFilters)
+        {
+            if (!HasValidMesh(meshFilter) || IsTextMeshFilter(meshFilter))
+            {
+                continue;
+            }
+
+            float score = GetMeshWeight(meshFilter);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestMatch = meshFilter;
+            }
+        }
+
+        if (bestMatch != null)
+        {
+            targetMesh = bestMatch;
+            if (enableDebugLogs)
+            {
+                Debug.Log($"FridgeGlowController: Auto-assigned child MeshFilter '{bestMatch.name}' on '{gameObject.name}'");
+            }
+            return true;
+        }
+
+        // Fall back to any available MeshFilter so legacy behaviour still works if only text meshes are present.
+        foreach (MeshFilter meshFilter in meshFilters)
+        {
+            if (!HasValidMesh(meshFilter))
+            {
+                continue;
+            }
+
+            targetMesh = meshFilter;
+            if (enableDebugLogs)
+            {
+                Debug.LogWarning($"FridgeGlowController: Only text meshes found, using '{meshFilter.name}' on '{gameObject.name}'");
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool HasValidMesh(MeshFilter meshFilter)
+    {
+        return meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.vertexCount > 0;
+    }
+
+    private bool IsTextMeshFilter(MeshFilter meshFilter)
+    {
+        if (meshFilter == null)
+        {
+            return false;
+        }
+
+        if (meshFilter.GetComponent<TMPro.TMP_SubMesh>() != null || meshFilter.GetComponent<TMPro.TMP_SubMeshUI>() != null)
+        {
+            return true;
+        }
+
+        TMPro.TMP_Text parentText = meshFilter.GetComponentInParent<TMPro.TMP_Text>(true);
+        return parentText != null;
+    }
+
+    private float GetMeshWeight(MeshFilter meshFilter)
+    {
+        return meshFilter.sharedMesh != null ? meshFilter.sharedMesh.vertexCount : 0f;
     }
 
     private void CreateGlowObject()
     {
+        if (glowObject != null)
+        {
+            return;
+        }
+
         MeshFilter meshFilter = targetMesh;
         if (meshFilter == null)
         {
@@ -154,15 +261,61 @@ public class FridgeGlowController : MonoBehaviour
         {
             isGlowing = false;
             glowObject.SetActive(false);
+            CancelGlowDurationRoutine();
 
             if (enableDebugLogs) Debug.Log($"Stopped glowing: {gameObject.name}");
         }
     }
 
+    public void EnableGlow()
+    {
+        StartGlowing();
+    }
+
+    public void DisableGlow()
+    {
+        StopGlowing();
+    }
+
+    public void EnableGlowForDuration(float seconds)
+    {
+        if (seconds <= 0f)
+        {
+            EnableGlow();
+            return;
+        }
+
+        CancelGlowDurationRoutine();
+        glowDurationRoutine = StartCoroutine(GlowDurationCoroutine(seconds));
+    }
+
+    private IEnumerator GlowDurationCoroutine(float seconds)
+    {
+        EnableGlow();
+        yield return new WaitForSeconds(seconds);
+        glowDurationRoutine = null;
+        DisableGlow();
+    }
+
+    private void CancelGlowDurationRoutine()
+    {
+        if (glowDurationRoutine != null)
+        {
+            StopCoroutine(glowDurationRoutine);
+            glowDurationRoutine = null;
+        }
+    }
+
     public bool IsGlowing => isGlowing;
+
+    private void OnDisable()
+    {
+        CancelGlowDurationRoutine();
+    }
 
     private void OnDestroy()
     {
+        CancelGlowDurationRoutine();
         if (glowMaterialInstance != null) Destroy(glowMaterialInstance);
         if (glowObject != null) Destroy(glowObject);
     }

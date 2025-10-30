@@ -60,7 +60,7 @@ public class FoodSource : MonoBehaviour, IInteractable
     {
         if (glowController != null)
         {
-            glowController.StartGlowing();
+            glowController.EnableGlow();
         }
     }
     
@@ -68,7 +68,31 @@ public class FoodSource : MonoBehaviour, IInteractable
     {
         if (glowController != null)
         {
-            glowController.StopGlowing();
+            glowController.DisableGlow();
+        }
+    }
+
+    public void EnableGlow()
+    {
+        if (glowController != null)
+        {
+            glowController.EnableGlow();
+        }
+    }
+
+    public void DisableGlow()
+    {
+        if (glowController != null)
+        {
+            glowController.DisableGlow();
+        }
+    }
+
+    public void EnableGlowForDuration(float seconds)
+    {
+        if (glowController != null)
+        {
+            glowController.EnableGlowForDuration(seconds);
         }
     }
     
