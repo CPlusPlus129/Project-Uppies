@@ -3653,6 +3653,7 @@ GameObject:
   - component: {fileID: 2387107254206871420}
   - component: {fileID: 9077632757999625146}
   - component: {fileID: 5843373774983648159}
+  - component: {fileID: 1621024301298239147}
   m_Layer: 5
   m_Name: Canvas-HUD
   m_TagString: Untagged
@@ -3763,6 +3764,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HUD
   aimHint: {fileID: 8103017654958980822}
+--- !u!225 &1621024301298239147
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6931262126446937387}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 1
 --- !u!1 &7062348595839623561
 GameObject:
   m_ObjectHideFlags: 0

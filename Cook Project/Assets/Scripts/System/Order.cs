@@ -1,3 +1,5 @@
+using System;
+
 public class Order
 {
     public string CustomerName;
@@ -13,6 +15,9 @@ public class Order
 
     public override int GetHashCode()
     {
-        return (CustomerName, MealName).GetHashCode();
+        var comparer = StringComparer.InvariantCultureIgnoreCase;
+        int customerHash = CustomerName == null ? 0 : comparer.GetHashCode(CustomerName);
+        int mealHash = MealName == null ? 0 : comparer.GetHashCode(MealName);
+        return HashCode.Combine(customerHash, mealHash);
     }
 }

@@ -1,6 +1,5 @@
 using R3;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -31,17 +30,21 @@ public class InputManager : MonoSingleton<InputManager>
 
     public void PopActionMap(string mapName)
     {
-        if (actionMapStack.Count > 0)
-        {
-            actionMapStack.Remove(mapName);
-            string previousMap = actionMapStack.Last();
-            SwitchMap(previousMap);
-            onActionMapChanged.OnNext(previousMap);
-        }
-        else
+        if (actionMapStack.Count == 0)
         {
             Debug.LogWarning("ActionMap stack is empty. Cannot revert.");
+            return;
         }
+
+        string previousMap = actionMapStack[actionMapStack.Count - 1];
+        if (!string.IsNullOrEmpty(mapName) && previousMap != mapName)
+        {
+            Debug.LogWarning($"ActionMap stack mismatch. Expected '{mapName}' but top of stack is '{previousMap}'.");
+        }
+
+        actionMapStack.RemoveAt(actionMapStack.Count - 1);
+        SwitchMap(previousMap);
+        onActionMapChanged.OnNext(previousMap);
     }
 
     public void SetActionMap(string mapName)

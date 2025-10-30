@@ -63,8 +63,12 @@ public class LightRecoverySystem : MonoBehaviour
         
         // Apply the highest boost (safe zones and light sources don't stack, we use the better one)
         float finalMultiplier = Mathf.Max(safeZoneBoost, lightSourceBoost);
-        playerStatSystem.LightRecoverySpeed.Value = rechargeSpeed;
-        float recoverySpeed = playerStatSystem.LightRecoverySpeed.Value * finalMultiplier;
+        float baseRecoverySpeed = playerStatSystem.LightRecoverySpeed.Value;
+        if (baseRecoverySpeed <= 0f)
+        {
+            baseRecoverySpeed = rechargeSpeed;
+        }
+        float recoverySpeed = baseRecoverySpeed * finalMultiplier;
         
         // Check if we're at max light already
         if (currentLight >= maxLight)

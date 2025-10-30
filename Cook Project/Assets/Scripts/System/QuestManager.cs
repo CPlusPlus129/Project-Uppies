@@ -14,7 +14,7 @@ public class QuestManager : IQuestService
     private List<Quest> ongoingQuests = new List<Quest>();
     private List<Quest> completedQuests = new List<Quest>();
     public IReadOnlyList<Quest> ongoingQuestList => ongoingQuests;
-    public IReadOnlyList<Quest> completedQuestList => ongoingQuests;
+    public IReadOnlyList<Quest> completedQuestList => completedQuests;
 
     public QuestManager(ITableManager tableManager)
     {
