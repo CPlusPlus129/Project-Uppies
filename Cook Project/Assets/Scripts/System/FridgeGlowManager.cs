@@ -12,6 +12,8 @@ public class FridgeGlowManager : IFridgeGlowManager
     private readonly IOrderManager orderManager;
     private Dictionary<Order, List<FoodSource>> glowingFridgesPerOrder = new Dictionary<Order, List<FoodSource>>();
     private CompositeDisposable disposables = new CompositeDisposable();
+    private readonly HashSet<FoodSource> trackedFridges = new HashSet<FoodSource>();
+    private readonly List<FoodSource> fridgeBuffer = new List<FoodSource>();
 
     public FridgeGlowManager(IOrderManager orderManager)
     {
@@ -73,8 +75,8 @@ public class FridgeGlowManager : IFridgeGlowManager
 
         if (enableDebugLogs) Debug.Log($"Ingredients needed: {string.Join(", ", recipe.ingredients)}");
 
-        FoodSource[] allFridges = GameObject.FindObjectsByType<FoodSource>(FindObjectsSortMode.None);
-        if (allFridges == null || allFridges.Length == 0)
+        var allFridges = GetTrackedFridges();
+        if (allFridges.Count == 0)
         {
             if (enableDebugLogs) Debug.LogWarning("No fridges found in scene");
             return;
@@ -179,6 +181,49 @@ public class FridgeGlowManager : IFridgeGlowManager
         {
             HandleNewOrder(order);
         }
+    }
+
+    public void RegisterFoodSource(FoodSource foodSource)
+    {
+        if (foodSource == null)
+            return;
+
+        if (trackedFridges.Add(foodSource))
+        {
+            if (orderManager?.pendingOrders?.Count > 0)
+            {
+                RefreshGlowStates();
+            }
+        }
+    }
+
+    public void UnregisterFoodSource(FoodSource foodSource)
+    {
+        if (foodSource == null)
+            return;
+
+        if (!trackedFridges.Remove(foodSource))
+            return;
+
+        foreach (var kvp in glowingFridgesPerOrder.ToArray())
+        {
+            if (kvp.Value.Remove(foodSource))
+            {
+                foodSource.StopGlowing();
+                if (kvp.Value.Count == 0)
+                {
+                    glowingFridgesPerOrder.Remove(kvp.Key);
+                }
+            }
+        }
+    }
+
+    private List<FoodSource> GetTrackedFridges()
+    {
+        trackedFridges.RemoveWhere(f => f == null);
+        fridgeBuffer.Clear();
+        fridgeBuffer.AddRange(trackedFridges);
+        return fridgeBuffer;
     }
 
 }

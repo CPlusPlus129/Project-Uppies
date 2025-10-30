@@ -32,11 +32,11 @@ MonoBehaviour:
     price: 100
     maxPurchases: 3
   - upgradeId: 3
-    upgradeName: Light Up
-    description: Increases Light by 30
-    icon: {fileID: 21300000, guid: 27c03a9653c854a4a9d30730b24b2733, type: 3}
-    statType: 3
-    upgradeValue: 30
+    upgradeName: Carry up
+    description: Increases carry capacity by 1.
+    icon: {fileID: 21300000, guid: 35d99e78b5c3e9349aad357498a4438c, type: 3}
+    statType: 6
+    upgradeValue: 1
     isPercentage: 0
-    price: 100
+    price: 500
     maxPurchases: 3

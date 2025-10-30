@@ -16,13 +16,13 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
     public async UniTask Init()
     {
         recipeItemPrefab.gameObject.SetActive(false);
+        cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
         recipeItemPool = new ObjectPool<RecipeItem>(() =>
         {
             var item = Instantiate(recipeItemPrefab, recipeItemPrefab.transform.parent);
             item.cookingSystem = cookingSystem;
             return item;
         });
-        cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
         cookingSystem.currentSelectedRecipe
             .Subscribe(_ => UpdateCookButton())
             .AddTo(this);
@@ -51,6 +51,7 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
         foreach (var recipe in Database.Instance.recipeData.datas)
         {
             var item = recipeItemPool.Get();
+            item.cookingSystem = cookingSystem;
             item.gameObject.SetActive(true);
             item.Setup(recipe);
             var canCook = cookingSystem.CheckPlayerHasIngredients(recipe);

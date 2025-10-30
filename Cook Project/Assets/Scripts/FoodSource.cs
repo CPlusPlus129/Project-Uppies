@@ -24,6 +24,17 @@ public class FoodSource : MonoBehaviour, IInteractable
 
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         glowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
+        glowManager?.RegisterFoodSource(this);
+    }
+
+    private void OnEnable()
+    {
+        glowManager?.RegisterFoodSource(this);
+    }
+
+    private void OnDisable()
+    {
+        glowManager?.UnregisterFoodSource(this);
     }
 
     public void SetItemName(string name)
@@ -65,5 +76,10 @@ public class FoodSource : MonoBehaviour, IInteractable
     {
         return !string.IsNullOrEmpty(ItemName) && 
                ItemName.Equals(ingredientName, System.StringComparison.InvariantCultureIgnoreCase);
+    }
+
+    private void OnDestroy()
+    {
+        glowManager?.UnregisterFoodSource(this);
     }
 }

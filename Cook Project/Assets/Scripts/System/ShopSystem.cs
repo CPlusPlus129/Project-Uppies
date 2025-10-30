@@ -195,6 +195,29 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
                 playerStats.LightCostPerShot.Value = Mathf.Max(playerStats.LightCostPerShot.Value, 1f);
                 Debug.Log($"Light Cost Per Shot reduced to {playerStats.LightCostPerShot.Value}");
                 break;
+
+            case StatType.InventorySize:
+                {
+                    int currentSize = Mathf.Max(1, playerStats.InventorySize.Value);
+                    int delta;
+                    if (upgrade.isPercentage)
+                    {
+                        delta = Mathf.RoundToInt(currentSize * (upgradeAmount / 100f));
+                        if (delta == 0)
+                        {
+                            delta = upgradeAmount >= 0 ? 1 : -1;
+                        }
+                    }
+                    else
+                    {
+                        delta = Mathf.RoundToInt(upgradeAmount);
+                    }
+
+                    int newSize = Mathf.Max(1, currentSize + delta);
+                    playerStats.InventorySize.Value = newSize;
+                    Debug.Log($"Inventory size upgraded to {playerStats.InventorySize.Value} slots");
+                }
+                break;
         }
     }
 

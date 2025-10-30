@@ -11,7 +11,8 @@ public enum StatType
     StaminaRecoverySpeed,
     MaxLight,
     LightRecoverySpeed,
-    LightCostReduction
+    LightCostReduction,
+    InventorySize
 }
 
 /// <summary>
@@ -61,6 +62,7 @@ public class StatUpgradeData
             StatType.MaxLight => "Max Light",
             StatType.LightRecoverySpeed => "Light Recovery",
             StatType.LightCostReduction => "Light Cost Reduction",
+            StatType.InventorySize => "Inventory Slots",
             _ => statType.ToString()
         };
     }

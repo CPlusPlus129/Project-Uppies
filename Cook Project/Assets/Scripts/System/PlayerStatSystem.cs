@@ -31,6 +31,7 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<float> LightCostPerShot { get; private set; } = new ReactiveProperty<float>(40f);
 
     public ReactiveProperty<int> Money { get; private set; } = new ReactiveProperty<int>(66);
+    public ReactiveProperty<int> InventorySize { get; private set; } = new ReactiveProperty<int>(4);
 
     public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
 

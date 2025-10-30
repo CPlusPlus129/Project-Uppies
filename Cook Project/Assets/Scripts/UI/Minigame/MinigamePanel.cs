@@ -20,6 +20,9 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
 
     public Image currentSigilHighlighter;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     [Header("Visual Feedback")]
     [SerializeField][UnityEngine.Range(0f, 1f)] private float completedSigilAlpha = 0.3f;
 
@@ -39,55 +42,75 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
 
     // Holds references to instantiated sigil UI objects
     private List<GameObject> instantiatedSigils = new List<GameObject>();
-
     private ICookingSystem cookingSystem;
+    private readonly Dictionary<sigilType, Queue<GameObject>> sigilPoolByTemplate = new Dictionary<sigilType, Queue<GameObject>>();
+    private readonly Dictionary<GameObject, sigilType> activeSigilTemplates = new Dictionary<GameObject, sigilType>();
+    private RectTransform poolContainer;
 
-    // Setup key mappings and input action
-    void OnEnable()
+    private void Awake()
     {
         beatKey = new InputAction("BeatKey", InputActionType.Button);
-
-        // Bind WASD + Arrow keys, all OR'd into one action
         string[] paths = {
             "<Keyboard>/w","<Keyboard>/a","<Keyboard>/s","<Keyboard>/d",
             "<Keyboard>/upArrow","<Keyboard>/leftArrow","<Keyboard>/downArrow","<Keyboard>/rightArrow"
         };
         foreach (var p in paths)
-            beatKey.AddBinding(p).WithInteraction("press"); // edge-trigger on key down
-
-        beatKey.performed += ctx =>
         {
-            var kc = ctx.control as KeyControl;      // which key was pressed
-            if (kc != null) HandleBeat(kc.keyCode);
-        };
+            beatKey.AddBinding(p).WithInteraction("press");
+        }
+        beatKey.performed += OnBeatPerformed;
 
-        beatKey.Enable();
+        var poolGO = new GameObject("SigilPool");
+        poolContainer = poolGO.AddComponent<RectTransform>();
+        poolContainer.SetParent(transform, false);
+        poolGO.hideFlags = HideFlags.HideInHierarchy;
+        poolGO.SetActive(false);
+    }
 
-        // Generate a new sigil pattern & display
+    private void OnEnable()
+    {
+        beatKey?.Enable();
         currentSigilPattern = GenerateNewSigilPattern(3, 5);
         DisplaySigils(currentSigilPattern);
     }
 
-    // Clean up
-    void OnDisable() => beatKey?.Disable();
+    private void OnDisable()
+    {
+        beatKey?.Disable();
+    }
+
+    private void OnDestroy()
+    {
+        if (beatKey != null)
+        {
+            beatKey.performed -= OnBeatPerformed;
+            beatKey.Dispose();
+        }
+    }
+
+    private void OnBeatPerformed(InputAction.CallbackContext ctx)
+    {
+        if (ctx.control is KeyControl keyControl)
+        {
+            HandleBeat(keyControl.keyCode);
+        }
+    }
 
     // Handles beat key presses
     void HandleBeat(Key key)
     {
         // Your function call here:
         // e.g., BeatHit(key);  or BeatHit(MapKeyToIndex(key));
-        Debug.Log("Beat: " + key);
+        if (enableDebugLogs) Debug.Log("Beat: " + key);
         OnBeat?.Invoke(key);
 
         var currentSigil = currentSigilPattern[currentSigilInd];
-
-        var controlSigil = GetSigilByKey(key);
 
         // TODO Invert control sigil to show feedback
 
         if (key == currentSigil.sigilKey)
         {
-            Debug.Log("Correct!");
+            if (enableDebugLogs) Debug.Log("Correct!");
 
             // Dim the current sigil before moving to the next
             DimSigil(currentSigilInd);
@@ -101,7 +124,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
             }
             else
             {
-                Debug.Log("Pattern complete!");
+                if (enableDebugLogs) Debug.Log("Pattern complete!");
 
                 // Notify the CookingSystem that the minigame is complete
                 cookingSystem.CompleteCooking();
@@ -118,7 +141,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         }
         else
         {
-            Debug.Log("Wrong key! Expected: " + currentSigil.sigilKey);
+            if (enableDebugLogs) Debug.Log("Wrong key! Expected: " + currentSigil.sigilKey);
             // Reset progress on wrong key
             currentSigilInd = 0;
             if (instantiatedSigils.Count > 0)
@@ -165,35 +188,50 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
     // Display the sigil pattern in the UI
     private void DisplaySigils(List<sigilType> pattern)
     {
-        // Destroy all previously instantiated sigil GameObjects
         foreach (var sigil in instantiatedSigils)
         {
-            if (sigil != null)
+            if (sigil == null)
+            {
+                continue;
+            }
+
+            if (activeSigilTemplates.TryGetValue(sigil, out var template))
+            {
+                sigil.SetActive(false);
+                sigil.transform.SetParent(poolContainer, false);
+                if (!sigilPoolByTemplate.TryGetValue(template, out var pool))
+                {
+                    pool = new Queue<GameObject>();
+                    sigilPoolByTemplate[template] = pool;
+                }
+                pool.Enqueue(sigil);
+                activeSigilTemplates.Remove(sigil);
+            }
+            else
             {
                 Destroy(sigil);
             }
         }
 
-        // Clear previous instantiated sigils list
         instantiatedSigils.Clear();
 
-        // Display new sigils
-        foreach (var sigil in pattern)
+        foreach (var template in pattern)
         {
-            Debug.Log(sigil.sigilKey);
-
-            var child = Instantiate(sigil.gameObject, sigilDisplayArea.transform);
+            var child = GetOrCreateSigilInstance(template);
+            child.transform.SetParent(sigilDisplayArea.transform, false);
+            child.transform.SetAsLastSibling();
             child.transform.localScale = Vector3.one;
+            child.SetActive(true);
 
-            // Store reference to instantiated sigil
             instantiatedSigils.Add(child);
+            activeSigilTemplates[child] = template;
         }
 
-        // Reset sigil index and highlighter position to the first sigil
+        ResetAllSigilsAlpha();
         currentSigilInd = 0;
         if (instantiatedSigils.Count > 0)
         {
-            UniTask.DelayFrame(1).ContinueWith(() => // Wait a frame to ensure layout is updated
+            UniTask.DelayFrame(1).ContinueWith(() =>
             {
                 currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
             }).Forget();
@@ -270,5 +308,33 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         }
 
         return pattern;
+    }
+
+    private GameObject GetOrCreateSigilInstance(sigilType template)
+    {
+        if (!sigilPoolByTemplate.TryGetValue(template, out var pool))
+        {
+            pool = new Queue<GameObject>();
+            sigilPoolByTemplate[template] = pool;
+        }
+
+        GameObject instance;
+        if (pool.Count > 0)
+        {
+            instance = pool.Dequeue();
+        }
+        else
+        {
+            instance = Instantiate(template.gameObject, poolContainer);
+            instance.SetActive(false);
+        }
+
+        var instanceSigil = instance.GetComponent<sigilType>();
+        if (instanceSigil != null)
+        {
+            instanceSigil.sigilKey = template.sigilKey;
+        }
+
+        return instance;
     }
 }

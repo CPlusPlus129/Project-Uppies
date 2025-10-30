@@ -1,20 +1,47 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class InventorySystem : IInventorySystem
 {
     public Subject<IReadOnlyList<ItemBase>> OnInventoryChanged { get; } = new Subject<IReadOnlyList<ItemBase>>();
     public ReactiveProperty<int> SelectedIndex { get; } = new ReactiveProperty<int>(0);
     public ReactiveProperty<int> SlotCount { get; } = new ReactiveProperty<int>(4);
-    private List<ItemBase> slots = new List<ItemBase>();
-    private Dictionary<string, int> itemCache = new Dictionary<string, int>();
-    public ItemBase GetSelectedItem() => slots[SelectedIndex.Value];
+    private readonly List<ItemBase> slots = new List<ItemBase>();
+    private readonly Dictionary<string, int> itemCache = new Dictionary<string, int>();
+    public ItemBase GetSelectedItem() => slots.Count == 0 ? null : slots[Mathf.Clamp(SelectedIndex.Value, 0, slots.Count - 1)];
     public IReadOnlyList<ItemBase> GetAllItems() => slots;
 
     public async UniTask Init()
     {
+        var playerStats = PlayerStatSystem.Instance;
+        if (playerStats != null)
+        {
+            var initialSize = Mathf.Max(0, playerStats.InventorySize.Value);
+            if (SlotCount.Value != initialSize)
+            {
+                SlotCount.Value = initialSize;
+            }
+
+            playerStats.InventorySize
+                .Subscribe(size =>
+                {
+                    var clamped = Mathf.Max(0, size);
+                    if (SlotCount.Value != clamped)
+                    {
+                        SlotCount.Value = clamped;
+                    }
+                })
+                .AddTo(disposables);
+        }
+
         InitSlots();
+
+        SlotCount
+            .Subscribe(count => ResizeSlots(count))
+            .AddTo(disposables);
+
         await UniTask.CompletedTask;
     }
 
@@ -49,14 +76,20 @@ public class InventorySystem : IInventorySystem
 
     public void SelectSlot(int index)
     {
-        if (index == -1) index = SlotCount.Value - 1;
-        else if (index == SlotCount.Value) index = 0;
-        if (index >= 0 && index < SlotCount.Value)
+        if (slots.Count == 0)
+            return;
+
+        if (index == -1) index = slots.Count - 1;
+        else if (index == slots.Count) index = 0;
+        if (index >= 0 && index < slots.Count)
             SelectedIndex.Value = index;
     }
 
     public void RemoveSelectedItem()
     {
+        if (slots.Count == 0)
+            return;
+
         var originalItem = slots[SelectedIndex.Value];
         slots[SelectedIndex.Value] = null;
         if (originalItem != null)
@@ -108,11 +141,51 @@ public class InventorySystem : IInventorySystem
 
     private void InitSlots()
     {
-        slots.Clear();
-        for (int i = 0; i < SlotCount.Value; i++)
+        ResizeSlots(SlotCount.Value);
+    }
+
+    private void ResizeSlots(int desiredCount)
+    {
+        desiredCount = Mathf.Max(0, desiredCount);
+        if (slots.Count == desiredCount)
+            return;
+
+        if (slots.Count < desiredCount)
         {
-            slots.Add(null);
+            slots.AddRange(new ItemBase[desiredCount - slots.Count]);
         }
+        else
+        {
+            for (int i = slots.Count - 1; i >= desiredCount; i--)
+            {
+                if (slots[i] != null)
+                {
+                    UpdateItemCache(slots[i].ItemName, CollectionChangeType.Remove);
+                }
+                slots.RemoveAt(i);
+            }
+        }
+
+        if (slots.Count == 0)
+        {
+            SelectedIndex.Value = 0;
+        }
+        else
+        {
+            var clampedIndex = Mathf.Clamp(SelectedIndex.Value, 0, slots.Count - 1);
+            if (clampedIndex != SelectedIndex.Value)
+            {
+                SelectedIndex.Value = clampedIndex;
+            }
+        }
+
+        var playerStats = PlayerStatSystem.Instance;
+        if (playerStats != null && playerStats.InventorySize.Value != slots.Count)
+        {
+            playerStats.InventorySize.Value = slots.Count;
+        }
+
+        OnInventoryChanged.OnNext(slots);
     }
 
     enum CollectionChangeType
@@ -121,4 +194,6 @@ public class InventorySystem : IInventorySystem
         Remove,
         RemoveAll
     }
+
+    private readonly CompositeDisposable disposables = new CompositeDisposable();
 }

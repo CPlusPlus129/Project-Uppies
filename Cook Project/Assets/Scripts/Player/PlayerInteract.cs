@@ -57,9 +57,17 @@ public class PlayerInteract : MonoBehaviour
         {
             var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
             var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
-            if (foodObj != null && inventorySystem.AddItem(foodObj))
+            if (foodObj != null)
             {
-                // Optionally, you can add some feedback here, like a sound or animation
+                var wasAdded = inventorySystem.AddItem(foodObj);
+                if (wasAdded)
+                {
+                    foodObj.gameObject.SetActive(false);
+                }
+                else
+                {
+                    Destroy(foodObj.gameObject);
+                }
             }
         }
 
