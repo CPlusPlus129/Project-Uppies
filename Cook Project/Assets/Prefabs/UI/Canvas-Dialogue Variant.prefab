@@ -164,6 +164,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2350627408511790832, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 151927573555781653}
+    - targetCorrespondingSourceObject: {fileID: 8313279412587103833, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1748489384853696586}
   m_SourcePrefab: {fileID: 100100000, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
 --- !u!114 &513755184416175508 stripped
 MonoBehaviour:
@@ -187,6 +190,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ce599b2b8e77c448a179b91bd3ed15c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.DialogueWindow
+--- !u!1 &3821217405214051615 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8313279412587103833, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
+  m_PrefabInstance: {fileID: 5069086632980794182}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1748489384853696586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3821217405214051615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70633be54cfc44bd8da43551990e3ef2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.DialogueNameCardImage
+  targetImage: {fileID: 0}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &5226260023408363323 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1071404409811160189, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}

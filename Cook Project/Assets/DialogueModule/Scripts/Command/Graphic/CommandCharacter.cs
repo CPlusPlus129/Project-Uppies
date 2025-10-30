@@ -59,7 +59,8 @@ namespace DialogueModule
                     characterSettingData.displayName,
                     parsedText,
                     voiceClip,
-                    characterSettingData.voiceSpeedMultiplier <= 0f ? 1f : characterSettingData.voiceSpeedMultiplier);
+                    characterSettingData.voiceSpeedMultiplier <= 0f ? 1f : characterSettingData.voiceSpeedMultiplier,
+                    characterSettingData.hasNameCardColor ? characterSettingData.nameCardColor : (Color?)null);
                 isWaiting = true;
             }
         }

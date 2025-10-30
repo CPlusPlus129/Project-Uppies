@@ -24,7 +24,7 @@ namespace DialogueModule
             onInit?.Invoke(initData);
         }
 
-        public void PlayText(string characterDisplayName, string fullText, AudioClip voiceClip, float voiceSpeedMultiplier)
+        public void PlayText(string characterDisplayName, string fullText, AudioClip voiceClip, float voiceSpeedMultiplier, Color? nameCardColor = null)
         {
             currentLine.Value = fullText;
             controllerStatus = ControllerStatus.TypingText;
@@ -33,7 +33,9 @@ namespace DialogueModule
                 name = characterDisplayName,
                 message = fullText,
                 voiceClip = voiceClip,
-                voiceSpeedMultiplier = voiceSpeedMultiplier
+                voiceSpeedMultiplier = voiceSpeedMultiplier,
+                hasNameCardColor = nameCardColor.HasValue,
+                nameCardColor = nameCardColor ?? Color.white
             });
         }
 

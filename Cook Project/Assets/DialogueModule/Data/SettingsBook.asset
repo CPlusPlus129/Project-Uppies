@@ -29,6 +29,7 @@ MonoBehaviour:
         - FileName
         - VoiceFileName
         - VoiceSpeedMultiplier
+        - NameCardColor
       - strings:
         - butcher
         - Modrek
@@ -38,6 +39,7 @@ MonoBehaviour:
         - Res:/Images/butcher.png
         - 
         - 1
+        - '#FFFFFFFF'
       - strings:
         - elder
         - Gamlo
@@ -47,6 +49,7 @@ MonoBehaviour:
         - Res:/Images/elder.png
         - 
         - 1
+        - '#FFFFFFFF'
       - strings:
         - farmerwoman
         - Mira
@@ -56,6 +59,7 @@ MonoBehaviour:
         - Res:/Images/farmerwoman.png
         - 
         - 1
+        - '#FFFFFFFF'
       - strings:
         - Satan
         - Satan
@@ -64,7 +68,8 @@ MonoBehaviour:
         - 0.75
         - Res:/Images/satan_2.png
         - Res:/Audio/SatanVoice.wav
-        - ' 1'
+        - 1
+        - '#FFBA00'
       - strings:
         - Player
         - Player
@@ -74,6 +79,7 @@ MonoBehaviour:
         - 
         - Res:/Audio/PlayerVoice.wav
         - 1
+        - '#2CACC9'
       - strings:
         - stan
         - Stan
@@ -83,6 +89,7 @@ MonoBehaviour:
         - 
         - 
         - 1
+        - '#FFFFFFFF'
       - strings:
         - ido
         - Ido
@@ -92,6 +99,7 @@ MonoBehaviour:
         - 
         - 
         - 1
+        - '#FFFFFFFF'
   - keys:
     - Layer
     values:

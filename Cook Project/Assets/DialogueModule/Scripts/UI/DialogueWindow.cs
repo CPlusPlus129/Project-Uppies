@@ -12,6 +12,7 @@ namespace DialogueModule
         [SerializeField] private GameObject waitNextIcon;
         [SerializeField] private GameObject nameTextRoot;
         [SerializeField] private AudioSource voiceAudioSource;
+        [SerializeField] private DialogueNameCardImage nameCardBackground;
 
         private const float DefaultTypeWaitTime = 0.01f;
         private const float MinTypeWaitTime = 0.0025f;
@@ -60,6 +61,7 @@ namespace DialogueModule
             ongoingNextIcon?.SetActive(false);
             waitNextIcon?.SetActive(false);
             nameTextRoot?.SetActive(false);
+            nameCardBackground?.ResetToDefault();
             StopVoicePlayback();
             targetCharacterCount = 0;
             typeWaitTime = DefaultTypeWaitTime;
@@ -73,10 +75,17 @@ namespace DialogueModule
             if (!string.IsNullOrEmpty(data.name))
             {
                 nameText.text = data.name;
+                if (data.hasNameCardColor)
+                    nameCardBackground?.SetColor(data.nameCardColor);
+                else
+                    nameCardBackground?.ResetToDefault();
                 nameTextRoot.SetActive(true);
             }
             else
+            {
                 nameTextRoot.SetActive(false);
+                nameCardBackground?.ResetToDefault();
+            }
 
             contentText.text = data.message;
             contentText.maxVisibleCharacters = 0;

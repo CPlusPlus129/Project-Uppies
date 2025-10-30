@@ -8,5 +8,7 @@ namespace DialogueModule
         public string message;
         public AudioClip voiceClip;
         public float voiceSpeedMultiplier;
+        public bool hasNameCardColor;
+        public Color nameCardColor;
     }
 }
