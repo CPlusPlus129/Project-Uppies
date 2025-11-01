@@ -14,10 +14,321 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.ScenarioBook
   scenarioData:
     keys:
+    - Act1Dialogue
     - ExampleDialogue
     - SatanLines
     - TutorialDialogue
     values:
+    - rows:
+      - strings:
+        - Command
+        - Arg1
+        - Arg2
+        - Arg3
+        - Arg4
+        - Arg5
+        - Arg6
+        - Text
+      - strings:
+        - '*act1_kids_room'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - That's tonight's VIP. You have to serve them tonight and serve them well.
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Right. I'll be sure to treat the giant shadow baby that's crying well.
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Hey, no namecalling our VIP! You should be nicer to the important people
+          in your death.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_vip_fail'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Look what you've done now. The VIP was right there and you ignored them!
+          You better not mess it up next time!
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_vip_success'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Ah, it's about the time of day for me! Good job etcetera etcetera. I have
+          to go torture some other souls. Be good while I'm gone!
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Great. I guess I'll just count ceiling tiles again until he shows back
+          up.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_vip_return'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Motherf-
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - I mean... uh. Hello, welcome. We're closed right now but I hope your meal
+          was satisfactory?
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - I can still hear the crying, but it sounds far away... What's going on
+          now?
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_vip_chase'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Why won't this damn crying stop?! I thought my son could never shut up,
+          but this is on another level...
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - My son... I wonder if he misses me. Now he's something like 10 years old.
+          Or was it 12?
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_storage_room'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Ugh, my ears are ringing... Something about this room is different. It
+          feels almost nostalgic...
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_secret_room_entry'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - What the hell?! What is this room? And why did everything get bigger? Or,
+          maybe...
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - I know this room. Did he want me to find this? Is this some kind of test?
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_secret_room_sounds'
+      - strings:
+        - 
+        - unknown
+        - 
+        - None
+        - 
+        - 
+        - 
+        - thump thump
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - That noise. There's something else here. Could it be..?
+      - strings:
+        - 
+        - unknown
+        - 
+        - None
+        - 
+        - 
+        - 
+        - THUMP THUMP THUMP
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - The ground is shaking... Whatever that is, it's coming closer!
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_secret_room_failure'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Satan, you piece of- why am I not back in the diner?!
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_secret_room_complete'
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - What was all that? How'd I get back to the diner...?
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act1_post_secret_room'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Where did you go off to?
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - This is your realm, shouldn't you know?
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - I'm a busy guy. You'll need to go upstairs if you're looking for perfect
+          omniscience.
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Huh?
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Just keep making food, food man. That's all you need to know, right?
+      - strings:
+        - EndScenario
     - rows:
       - strings:
         - Command
@@ -381,7 +692,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "Ugh\u2026 my head. Where\u2026 am I? I feel like I'm burning up\u2026"
+        - Ugh... my head. Where... am I? I feel like I'm burning up...
       - strings:
         - 
         - Player
@@ -390,7 +701,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "The restaurant. I gotta get back\u2026 to the restaurant."
+        - The restaurant. I gotta get back... to the restaurant.
       - strings:
         - EndScenario
       - strings:
@@ -405,8 +716,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "Well, look who's up and walking! Welcome to <color=red>Hell's Kitchen</color>
-          \u2014 and no, not the TV show, we're currently suing them for copyright."
+        - Well, look who's up and walking! Welcome to <color=red>Hell's Kitchen</color>
+          -- and no, not the TV show, we're currently suing them for copyright.
       - strings:
         - 
         - Player
@@ -471,7 +782,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "So, there really is a God. And that means\u2026"
+        - So, there really is a God. And that means...
       - strings:
         - 
         - Satan
@@ -499,7 +810,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "I'm dead\u2026?"
+        - I'm dead...?
       - strings:
         - 
         - Satan
@@ -544,7 +855,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "What is this place? It looks more like a basement than\u2026"
+        - What is this place? It looks more like a basement than...
       - strings:
         - 
         - Player
@@ -562,8 +873,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "I wonder what I did to end up here. If this really is Hell\u2026 Well,
-          nothing I can do about it for now. I guess I'll find <color=red>Stan</color>."
+        - I wonder what I did to end up here. If this really is Hell... Well, nothing
+          I can do about it for now. I guess I'll find <color=red>Stan</color>.
       - strings:
         - EndScenario
       - strings:
@@ -615,8 +926,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "And do it quickly before the customer gets hangry \u2014 and by hangry,
-          I mean they'll start removing your limbs alphabetically."
+        - And do it quickly before the customer gets hangry -- and by hangry, I mean
+          they'll start removing your limbs alphabetically.
       - strings:
         - EndScenario
       - strings:
@@ -769,8 +1080,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - " Use your <color=red>left mouse button</color> to shoot. The bullets create
-          <color=yellow>light</color> \u2014 your only defense down here."
+        - Use your <color=red>left mouse button</color> to shoot. The bullets create
+          <color=yellow>light</color> -- your only defense down here.
       - strings:
         - 
         - Player
@@ -779,7 +1090,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "You're just giving this to me? Aren't you worried I'm going to\u2026 y'know."
+        - You're just giving this to me? Aren't you worried I'm going to... y'know.
       - strings:
         - 
         - Satan
@@ -920,8 +1231,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "For your pain, let me read you the manual. Don't say I never did nothing
-          for you, capiche? Let's see here\u2026"
+        - For your pain, let me read you the manual. Don't say I never did nothing
+          for you, capiche? Let's see here...
       - strings:
         - 
         - Satan
@@ -930,9 +1241,9 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "<i>'Select the dish you want to make and click <color=red>COOK</color>.
+        - <i>'Select the dish you want to make and click <color=red>COOK</color>.
           You must then complete the incantation'</i>... let's see, flip to page
-          20018\u2026 Ah! Here. "
+          20018... Ah! Here.
       - strings:
         - 
         - Satan
@@ -970,7 +1281,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "Great\u2026 Guess I'll just give it a shot, then."
+        - Great... Guess I'll just give it a shot, then.
       - strings:
         - EndScenario
       - strings:
@@ -1069,7 +1380,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - "[Name]? I've heard that name before. But\u2026 I can't remember\u2026"
+        - '[Name]? I''ve heard that name before. But... I can''t remember...'
       - strings:
         - Selection
         - '*tutorial_choice_no'
@@ -1089,6 +1400,8 @@ MonoBehaviour:
         - 
         - If their name is on a wall, then they're probably important.
       - strings:
+        - EndScenario
+      - strings:
         - 
       - strings:
         - '*tutorial_choice_no'
@@ -1105,6 +1418,8 @@ MonoBehaviour:
         - Jump
         - '*tutorial_end'
       - strings:
+        - EndScenario
+      - strings:
         - 
       - strings:
         - '*tutorial_choice_yes'
@@ -1120,6 +1435,8 @@ MonoBehaviour:
       - strings:
         - Jump
         - '*tutorial_end'
+      - strings:
+        - EndScenario
       - strings:
         - 
       - strings:
@@ -1138,60 +1455,137 @@ MonoBehaviour:
       - strings:
         - 
       - strings:
-        - '*act1_kids_room'
+        - '*act0_before_day1'
       - strings:
         - 
+        - Satan
+        - 
+        - charR
         - 
         - 
         - 
-        - 
-        - 
-        - 
-        - Act 1 - Kids Room content to be added
-      - strings:
-        - EndScenario
-      - strings:
-        - 
-      - strings:
-        - '*act2_bank_vault'
-      - strings:
-        - 
-        - 
-        - 
-        - 
-        - 
-        - 
-        - 
-        - Act 2 - Bank Vault content to be added
+        - Welcome to the big leagues, kid. Make sure to grab some orders before you
+          head out to the Darkness. I'll be here, judging you if you need me.
       - strings:
         - EndScenario
       - strings:
         - 
       - strings:
-        - '*act3_old_kitchen'
+        - '*act0_died_day1'
       - strings:
         - 
+        - Satan
+        - 
+        - charR
         - 
         - 
         - 
-        - 
-        - 
-        - 
-        - Act 3 - Old Kitchen content to be added
+        - Tough first day? Make sure you're using God's Little Shotgun to defeat
+          enemies and light your path.
       - strings:
         - EndScenario
       - strings:
         - 
       - strings:
-        - '*game_end'
+        - '*act0_day1_timeout'
       - strings:
         - 
+        - Satan
+        - 
+        - charR
         - 
         - 
         - 
+        - Looks like it's closing time. As for your performance review...
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
         - 
         - 
         - 
-        - End of game content to be added
+        - Not even one order complete! Watching that was Hell on the eyes, man. If
+          you were trying to torture me, let me say, touche.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act0_aftershift_day1_success'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Looks like it's closing time. As for your performance review...
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - X orders... Not bad for your first day.
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Alright, that's more than enough praise. Now to why I actually came. We've
+          got a VIP coming in tomorrow!
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - A VIP? Why would someone important come to a diner?
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Hey, I'll have you know this place BOTH the Michelin's!
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - You mean Michelin Stars?
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - No, I have the brothers buried out back for good luck!
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Look. You'll know the VIP when you see them. Just make sure you take care
+          of them. You never know when it'll be too late.
       - strings:
         - EndScenario

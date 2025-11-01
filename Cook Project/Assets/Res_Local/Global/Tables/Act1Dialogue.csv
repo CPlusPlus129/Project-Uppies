@@ -1,0 +1,58 @@
+Command,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Text
+*act1_kids_room
+,Satan,,charR,,,,"That's tonight's VIP. You have to serve them tonight and serve them well."
+,Player,,None,,,,"Right. I'll be sure to treat the giant shadow baby that's crying well."
+,Satan,,charR,,,,"Hey, no namecalling our VIP! You should be nicer to the important people in your death."
+EndScenario
+
+*act1_vip_fail
+,Satan,,charR,,,,"Look what you've done now. The VIP was right there and you ignored them! You better not mess it up next time!"
+EndScenario
+
+*act1_vip_success
+,Satan,,charR,,,,"Ah, it's about the time of day for me! Good job etcetera etcetera. I have to go torture some other souls. Be good while I'm gone!"
+,Player,,None,,,,"Great. I guess I'll just count ceiling tiles again until he shows back up."
+EndScenario
+
+*act1_vip_return
+,Player,,None,,,,"Motherf-"
+,Player,,None,,,,"I mean... uh. Hello, welcome. We're closed right now but I hope your meal was satisfactory?"
+,Player,,None,,,,"I can still hear the crying, but it sounds far away... What's going on now?"
+EndScenario
+
+*act1_vip_chase
+,Player,,None,,,,"Why won't this damn crying stop?! I thought my son could never shut up, but this is on another level..."
+,Player,,None,,,,"My son... I wonder if he misses me. Now he's something like 10 years old. Or was it 12?"
+EndScenario
+
+*act1_storage_room
+,Player,,None,,,,"Ugh, my ears are ringing... Something about this room is different. It feels almost nostalgic..."
+EndScenario
+
+*act1_secret_room_entry
+,Player,,None,,,,"What the hell?! What is this room? And why did everything get bigger? Or, maybe..."
+,Player,,None,,,,"I know this room. Did he want me to find this? Is this some kind of test?"
+EndScenario
+
+*act1_secret_room_sounds
+,unknown,,None,,,,"thump thump"
+,Player,,None,,,,"That noise. There's something else here. Could it be..?"
+,unknown,,None,,,,"THUMP THUMP THUMP"
+,Player,,None,,,,"The ground is shaking... Whatever that is, it's coming closer!"
+EndScenario
+
+*act1_secret_room_failure
+,Player,,None,,,,"Satan, you piece of- why am I not back in the diner?!"
+EndScenario
+
+*act1_secret_room_complete
+,Player,,None,,,,"What was all that? How'd I get back to the diner...?"
+EndScenario
+
+*act1_post_secret_room
+,Satan,,charR,,,,"Where did you go off to?"
+,Player,,None,,,,"This is your realm, shouldn't you know?"
+,Satan,,charR,,,,"I'm a busy guy. You'll need to go upstairs if you're looking for perfect omniscience."
+,Player,,None,,,,Huh?
+,Satan,,charR,,,,"Just keep making food, food man. That's all you need to know, right?"
+EndScenario
