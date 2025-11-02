@@ -43,7 +43,8 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         Register<IPuzzleGameManager>(() => new PuzzleGameManager(
             Get<IQuestService>()));
         Register<IFridgeGlowManager>(() => new FridgeGlowManager(
-            Get<IOrderManager>()));
+            Get<IOrderManager>(),
+            Get<IInventorySystem>()));
         Register<ICookingSystem>(() => new CookingSystem(
             Get<IInventorySystem>()));
         Register<IShiftSystem>(() => new ShiftSystem(

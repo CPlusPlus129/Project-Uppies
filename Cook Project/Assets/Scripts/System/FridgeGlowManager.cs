@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using R3;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -10,15 +11,25 @@ public class FridgeGlowManager : IFridgeGlowManager
     public event Action<IReadOnlyCollection<FoodSource>> EligibleFridgesChanged;
 
     private readonly IOrderManager orderManager;
+    private const float MinInventoryCheckIntervalSeconds = 0.05f;
+    private const float DefaultInventoryCheckIntervalSeconds = 0.25f;
+
     private readonly CompositeDisposable disposables = new CompositeDisposable();
     private readonly HashSet<FoodSource> trackedFridges = new HashSet<FoodSource>();
+    private readonly HashSet<string> inventoryItems = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
     private readonly bool enableDebugLogs;
+    private readonly IInventorySystem inventorySystem;
+
+    private CancellationTokenSource inventoryMonitorCts;
+    private float inventoryCheckIntervalSeconds = DefaultInventoryCheckIntervalSeconds;
     private int eligibilityVersion;
     private FoodSource[] lastEligibleSnapshot = Array.Empty<FoodSource>();
+    private FoodSource[] lastSuppressedSnapshot = Array.Empty<FoodSource>();
 
-    public FridgeGlowManager(IOrderManager orderManager)
+    public FridgeGlowManager(IOrderManager orderManager, IInventorySystem inventorySystem)
     {
         this.orderManager = orderManager;
+        this.inventorySystem = inventorySystem;
         enableDebugLogs = Debug.isDebugBuild;
     }
 
@@ -27,6 +38,7 @@ public class FridgeGlowManager : IFridgeGlowManager
     public async UniTask Init()
     {
         InitializeSubscriptions();
+        InitializeInventoryMonitoring();
         NotifyEligibleFridgesChanged();
         await UniTask.CompletedTask;
     }
@@ -53,6 +65,30 @@ public class FridgeGlowManager : IFridgeGlowManager
         {
             Debug.LogError("FridgeGlowManager: OrderManager is null!");
         }
+    }
+
+    private void InitializeInventoryMonitoring()
+    {
+        if (inventorySystem == null)
+        {
+            Debug.LogError("FridgeGlowManager: InventorySystem is null!");
+            return;
+        }
+
+        UpdateInventoryCache(inventorySystem.GetAllItems());
+
+        inventorySystem.OnInventoryChanged
+            .Subscribe(items =>
+            {
+                if (UpdateInventoryCache(items))
+                {
+                    if (enableDebugLogs) Debug.Log("FridgeGlowManager: Inventory change detected, refreshing glow states");
+                    NotifyEligibleFridgesChanged();
+                }
+            })
+            .AddTo(disposables);
+
+        RestartInventoryMonitorLoop();
     }
 
     private void HandleNewOrder(Order order)
@@ -101,6 +137,10 @@ public class FridgeGlowManager : IFridgeGlowManager
     public void RefreshGlowStates()
     {
         if (enableDebugLogs) Debug.Log("FridgeGlowManager: RefreshGlowStates invoked");
+        if (inventorySystem != null && UpdateInventoryCache(inventorySystem.GetAllItems()))
+        {
+            if (enableDebugLogs) Debug.Log("FridgeGlowManager: Inventory cache refreshed via manual glow refresh");
+        }
         NotifyEligibleFridgesChanged();
     }
 
@@ -138,17 +178,41 @@ public class FridgeGlowManager : IFridgeGlowManager
         return lastEligibleSnapshot;
     }
 
+    public void SetInventoryCheckInterval(float seconds)
+    {
+        float clamped = Mathf.Max(MinInventoryCheckIntervalSeconds, seconds);
+        if (Mathf.Approximately(inventoryCheckIntervalSeconds, clamped))
+        {
+            inventoryCheckIntervalSeconds = clamped;
+            return;
+        }
+
+        inventoryCheckIntervalSeconds = clamped;
+
+        if (enableDebugLogs) Debug.Log($"FridgeGlowManager: Inventory check interval set to {inventoryCheckIntervalSeconds:0.###} seconds");
+
+        if (inventorySystem != null)
+        {
+            RestartInventoryMonitorLoop();
+        }
+    }
+
     private void NotifyEligibleFridgesChanged()
     {
-        lastEligibleSnapshot = BuildEligibleSnapshot();
+        var allEligible = BuildEligibleSnapshot();
+        lastEligibleSnapshot = ApplyInventorySuppression(allEligible, out var suppressed);
+        lastSuppressedSnapshot = suppressed;
         eligibilityVersion++;
 
         if (enableDebugLogs)
         {
-            var names = lastEligibleSnapshot.Length > 0
+            var activeNames = lastEligibleSnapshot.Length > 0
                 ? string.Join(", ", lastEligibleSnapshot.Select(f => f != null ? f.ItemName : "<null>"))
                 : "(none)";
-            Debug.Log($"FridgeGlowManager: Eligible fridge count {lastEligibleSnapshot.Length} [{names}]");
+            var suppressedNames = lastSuppressedSnapshot.Length > 0
+                ? string.Join(", ", lastSuppressedSnapshot.Select(f => f != null ? f.ItemName : "<null>"))
+                : "(none)";
+            Debug.Log($"FridgeGlowManager: Eligible (active={lastEligibleSnapshot.Length}, suppressed={lastSuppressedSnapshot.Length}) Active[{activeNames}] Suppressed[{suppressedNames}]");
         }
 
         EligibleFridgesChanged?.Invoke(lastEligibleSnapshot);
@@ -241,5 +305,128 @@ public class FridgeGlowManager : IFridgeGlowManager
     private void PruneTrackedFridges()
     {
         trackedFridges.RemoveWhere(f => f == null);
+    }
+
+    private bool UpdateInventoryCache(IReadOnlyList<ItemBase> items)
+    {
+        if (items == null)
+        {
+            return false;
+        }
+
+        var newItems = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        foreach (var item in items)
+        {
+            if (item == null)
+            {
+                continue;
+            }
+
+            if (!string.IsNullOrWhiteSpace(item.ItemName))
+            {
+                newItems.Add(item.ItemName);
+            }
+        }
+
+        if (inventoryItems.SetEquals(newItems))
+        {
+            return false;
+        }
+
+        inventoryItems.Clear();
+        foreach (var itemName in newItems)
+        {
+            inventoryItems.Add(itemName);
+        }
+
+        return true;
+    }
+
+    private bool ShouldSuppressFridge(FoodSource fridge)
+    {
+        if (fridge == null || string.IsNullOrWhiteSpace(fridge.ItemName))
+        {
+            return false;
+        }
+
+        return inventoryItems.Contains(fridge.ItemName);
+    }
+
+    private FoodSource[] ApplyInventorySuppression(FoodSource[] fridges, out FoodSource[] suppressed)
+    {
+        if (fridges == null || fridges.Length == 0)
+        {
+            suppressed = Array.Empty<FoodSource>();
+            return Array.Empty<FoodSource>();
+        }
+
+        var activeList = new List<FoodSource>(fridges.Length);
+        List<FoodSource> suppressedList = null;
+
+        foreach (var fridge in fridges)
+        {
+            if (fridge == null)
+            {
+                continue;
+            }
+
+            if (ShouldSuppressFridge(fridge))
+            {
+                suppressedList ??= new List<FoodSource>();
+                suppressedList.Add(fridge);
+                continue;
+            }
+
+            activeList.Add(fridge);
+        }
+
+        suppressed = suppressedList == null || suppressedList.Count == 0
+            ? Array.Empty<FoodSource>()
+            : suppressedList.ToArray();
+
+        return activeList.Count == 0 ? Array.Empty<FoodSource>() : activeList.ToArray();
+    }
+
+    private void RestartInventoryMonitorLoop()
+    {
+        inventoryMonitorCts?.Cancel();
+        inventoryMonitorCts?.Dispose();
+
+        if (inventorySystem == null)
+        {
+            inventoryMonitorCts = null;
+            return;
+        }
+
+        inventoryMonitorCts = new CancellationTokenSource();
+        MonitorInventoryLoop(inventoryMonitorCts.Token).Forget();
+    }
+
+    private async UniTaskVoid MonitorInventoryLoop(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var delaySeconds = Mathf.Max(MinInventoryCheckIntervalSeconds, inventoryCheckIntervalSeconds);
+
+            try
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(delaySeconds), cancellationToken: cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            if (cancellationToken.IsCancellationRequested || inventorySystem == null)
+            {
+                continue;
+            }
+
+            if (UpdateInventoryCache(inventorySystem.GetAllItems()))
+            {
+                if (enableDebugLogs) Debug.Log("FridgeGlowManager: Inventory poll detected change");
+                NotifyEligibleFridgesChanged();
+            }
+        }
     }
 }

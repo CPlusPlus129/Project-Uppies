@@ -9,6 +9,9 @@ public class FridgeSpawnList : SpawnPointList
     public FoodSource fridgePrefab;
     public string[] essentialIngredients;
 
+    [Header("Glow Settings")]
+    [SerializeField, Min(0.05f)] private float inventoryCheckIntervalSeconds = 0.25f;
+
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
@@ -19,6 +22,7 @@ public class FridgeSpawnList : SpawnPointList
         base.Awake();
         await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
         glowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
+        glowManager?.SetInventoryCheckInterval(inventoryCheckIntervalSeconds);
         var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         shiftSystem.OnGameStart.Subscribe(_ => SpawnFridges()).AddTo(this);
     }
