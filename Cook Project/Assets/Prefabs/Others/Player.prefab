@@ -159,6 +159,7 @@ GameObject:
   - component: {fileID: 9051912068616898175}
   - component: {fileID: 3201705174588527448}
   - component: {fileID: 5165821146269913966}
+  - component: {fileID: 7245783919487480873}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -496,6 +497,25 @@ MonoBehaviour:
   volume: 0.8
   fadeSpeed: 5
   minMoveThreshold: 0.1
+--- !u!114 &7245783919487480873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20796c7ab8e0e6a468c7fe424da213e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerFridgeGuidance
+  guidanceParticlePrefab: {fileID: 3873474202521934069, guid: e00f3b24a5d301a42901512ecf7e8328, type: 3}
+  particleHeightOffset: -0.1
+  particleMoveSpeed: 5
+  pathUpdateInterval: 1.5
+  navMeshSampleRadius: 2
+  retargetInterval: 0.5
+  enableDebugLogs: 1
 --- !u!1001 &695477875812888906
 PrefabInstance:
   m_ObjectHideFlags: 0
