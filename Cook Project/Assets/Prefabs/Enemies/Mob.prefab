@@ -33,8 +33,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 60.201, y: 5.46761, z: -3.09882}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.66, y: 0.66, z: 0.66}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -162,7 +162,7 @@ MonoBehaviour:
   attackRange: 2
   pathRecalculationInterval: 0.4
   cornerArrivalThreshold: 1
-  navMeshSampleRadius: 1.5
+  navMeshSampleRadius: 3
   navMeshAreaMask: -1
   maxHealth: 50
   despawnDelay: 0.3
@@ -177,7 +177,20 @@ MonoBehaviour:
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0
-  showDebugInfo: 0
+  enablePatrol: 1
+  idleDurationRange: {x: 1.5, y: 3}
+  patrolRadius: 6
+  patrolPointTolerance: 0.6
+  regroupDuration: 2.5
+  lostSightGracePeriod: 1.5
+  enableFlocking: 1
+  neighborRadius: 3
+  separationWeight: 2
+  alignmentWeight: 1
+  cohesionWeight: 0.5
+  steeringUpdateInterval: 0.25
+  maxSteeringForce: 4
+  showDebugInfo: 1
   showGizmos: 1
 --- !u!114 &1721152598060112782
 MonoBehaviour:

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -57,12 +58,38 @@ public class Mob : MonoBehaviour
     [Header("Detection")]
     [SerializeField] private float playerDetectionRange = 30f;
     [SerializeField] private LayerMask obstacleLayer;
+
+    [Header("Behavior")]
+    [SerializeField] private bool enablePatrol = true;
+    [SerializeField] private Vector2 idleDurationRange = new Vector2(1.5f, 3f);
+    [SerializeField, Min(0.5f)] private float patrolRadius = 6f;
+    [SerializeField, Min(0.1f)] private float patrolPointTolerance = 0.6f;
+    [SerializeField, Min(0.1f)] private float regroupDuration = 2.5f;
+    [SerializeField, Min(0.1f)] private float lostSightGracePeriod = 1.5f;
+
+    [Header("Flocking")]
+    [SerializeField] private bool enableFlocking = true;
+    [SerializeField, Min(0.5f)] private float neighborRadius = 3f;
+    [SerializeField] private float separationWeight = 2f;
+    [SerializeField] private float alignmentWeight = 1f;
+    [SerializeField] private float cohesionWeight = 0.5f;
+    [SerializeField, Min(0.05f)] private float steeringUpdateInterval = 0.25f;
+    [SerializeField] private float maxSteeringForce = 4f;
     
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = true;
     [SerializeField] private bool showGizmos = true;
     
     // State
+    private enum MobState
+    {
+        Idle,
+        Patrol,
+        Chase,
+        Attack,
+        Regroup
+    }
+
     private bool isAlive = true;
     private bool hasDetectedPlayer = false;
     private Vector3 targetPosition;
@@ -70,6 +97,19 @@ public class Mob : MonoBehaviour
     private int currentPathCornerIndex;
     private float lastPathUpdateTime = float.NegativeInfinity;
     private bool hasNavMeshPath;
+    private Vector3 desiredNavDestination;
+    private bool navMeshPathIsPartial;
+    private static readonly List<Mob> ActiveMobs = new List<Mob>();
+    private MobState currentState = MobState.Idle;
+    private float stateTimer;
+    private float idleDuration;
+    private Vector3 spawnPosition;
+    private Vector3 patrolDestination;
+    private Vector3 regroupDestination;
+    private Vector3 lastKnownPlayerPosition;
+    private float lastSeenPlayerTime = float.NegativeInfinity;
+    private Vector3 steeringVelocity;
+    private float nextSteeringSampleTime;
     
     // Optional health bar reference (cached)
     private MobHealthBarController healthBarController;
@@ -95,9 +135,34 @@ public class Mob : MonoBehaviour
         currentHealth = maxHealth;
         navMeshPath = new NavMeshPath();
         targetPosition = transform.position;
+        desiredNavDestination = transform.position;
+        spawnPosition = transform.position;
+        steeringVelocity = Vector3.zero;
+        nextSteeringSampleTime = Time.time;
+
+        if (!ActiveMobs.Contains(this))
+        {
+            ActiveMobs.Add(this);
+        }
+
+        SetState(MobState.Idle, resetPath: true, logStateChange: false);
         
         // Try to find health bar controller (optional)
         healthBarController = GetComponent<MobHealthBarController>();
+    }
+
+    private void OnValidate()
+    {
+        if (idleDurationRange.y < idleDurationRange.x)
+        {
+            idleDurationRange.y = idleDurationRange.x;
+        }
+
+        neighborRadius = Mathf.Max(0.5f, neighborRadius);
+        steeringUpdateInterval = Mathf.Max(0.05f, steeringUpdateInterval);
+        patrolPointTolerance = Mathf.Max(0.1f, patrolPointTolerance);
+        regroupDuration = Mathf.Max(0.1f, regroupDuration);
+        lostSightGracePeriod = Mathf.Max(0.1f, lostSightGracePeriod);
     }
     
     private void Start()
@@ -119,54 +184,408 @@ public class Mob : MonoBehaviour
     
     private void Update()
     {
-        if (!isAlive || player == null) return;
-        
-        UpdateAI();
+        if (!isAlive)
+        {
+            return;
+        }
+
+        UpdateStateMachine();
     }
     
     private void FixedUpdate()
     {
-        if (!isAlive || player == null) return;
-        
-        if (hasDetectedPlayer)
+        if (!isAlive)
         {
-            MoveTowardsTarget();
+            return;
         }
+
+        UpdateSteering();
+        MoveTowardsTarget();
     }
     
-    private void UpdateAI()
+    private void UpdateStateMachine()
     {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        
-        // Check if player is in detection range
-        bool playerWithinRange = distanceToPlayer <= playerDetectionRange;
+        stateTimer += Time.deltaTime;
 
-        if (!playerWithinRange || !HasLineOfSight(player.position))
+        bool playerAvailable = player != null;
+        float distanceToPlayer = float.MaxValue;
+        bool playerVisible = false;
+
+        if (playerAvailable)
         {
-            hasDetectedPlayer = false;
-            ClearPath();
+            distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            if (distanceToPlayer <= playerDetectionRange && HasLineOfSight(player.position))
+            {
+                playerVisible = true;
+                lastKnownPlayerPosition = player.position;
+                lastSeenPlayerTime = Time.time;
+            }
+        }
+
+        switch (currentState)
+        {
+            case MobState.Idle:
+                HandleIdleState(playerVisible);
+                break;
+            case MobState.Patrol:
+                HandlePatrolState(playerVisible);
+                break;
+            case MobState.Chase:
+                HandleChaseState(playerVisible, playerAvailable, distanceToPlayer);
+                break;
+            case MobState.Attack:
+                HandleAttackState(playerVisible, playerAvailable, distanceToPlayer);
+                break;
+            case MobState.Regroup:
+                HandleRegroupState(playerVisible);
+                break;
+        }
+
+        hasDetectedPlayer = currentState == MobState.Chase || currentState == MobState.Attack;
+    }
+
+    private void HandleIdleState(bool playerVisible)
+    {
+        if (playerVisible)
+        {
+            SetState(MobState.Chase, resetPath: true);
             return;
+        }
+
+        if (!enablePatrol)
+        {
+            return;
+        }
+
+        if (stateTimer >= idleDuration)
+        {
+            SetState(MobState.Patrol, resetPath: true);
+        }
+    }
+
+    private void HandlePatrolState(bool playerVisible)
+    {
+        if (playerVisible)
+        {
+            SetState(MobState.Chase, resetPath: true);
+            return;
+        }
+
+        if (!hasNavMeshPath)
+        {
+            if (!EnsureNavMeshPath(patrolDestination, forceRebuild: true, destinationIsPlayer: false))
+            {
+                if (!TrySelectPatrolDestination(out patrolDestination) ||
+                    !EnsureNavMeshPath(patrolDestination, forceRebuild: true, destinationIsPlayer: false))
+                {
+                    SetState(MobState.Idle, resetPath: true);
+                    return;
+                }
+            }
         }
 
         bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval;
-        if (!EnsureNavMeshPath(forceRebuild))
+        if (!EnsureNavMeshPath(patrolDestination, forceRebuild, destinationIsPlayer: false))
         {
-            hasDetectedPlayer = false;
+            SetState(MobState.Idle, resetPath: true);
             return;
         }
 
-        hasDetectedPlayer = true;
+        float distanceToDestination = Vector3.Distance(transform.position, patrolDestination);
+        if (distanceToDestination <= Mathf.Max(stoppingDistance, patrolPointTolerance))
+        {
+            SetState(MobState.Idle, resetPath: true);
+        }
+    }
 
-        // Check if in attack range
+    private void HandleChaseState(bool playerVisible, bool playerAvailable, float distanceToPlayer)
+    {
+        if (!playerAvailable)
+        {
+            TransitionToPostChaseState();
+            return;
+        }
+
+        if (!playerVisible && Time.time - lastSeenPlayerTime > lostSightGracePeriod)
+        {
+            TransitionToPostChaseState();
+            return;
+        }
+
+        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
+                            (desiredNavDestination - player.position).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
+
+        if (!EnsureNavMeshPath(player.position, forceRebuild, destinationIsPlayer: true))
+        {
+            TransitionToPostChaseState();
+            return;
+        }
+
+        if (navMeshPathIsPartial)
+        {
+            lastKnownPlayerPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
+            TransitionToPostChaseState();
+            return;
+        }
+
+        if (distanceToPlayer <= attackRange)
+        {
+            SetState(MobState.Attack, resetPath: false);
+        }
+    }
+
+    private void HandleAttackState(bool playerVisible, bool playerAvailable, float distanceToPlayer)
+    {
+        if (!playerAvailable)
+        {
+            TransitionToPostChaseState();
+            return;
+        }
+
         if (distanceToPlayer <= attackRange)
         {
             TryAttackPlayer();
         }
-        
-        if (showDebugInfo)
+
+        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
+                            (desiredNavDestination - player.position).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
+        if (!EnsureNavMeshPath(player.position, forceRebuild, destinationIsPlayer: true))
         {
-            Debug.Log($"Mob tracking player via NavMesh. Distance: {distanceToPlayer:F2}m");
+            TransitionToPostChaseState();
+            return;
         }
+
+        if (navMeshPathIsPartial)
+        {
+            lastKnownPlayerPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
+            TransitionToPostChaseState();
+            return;
+        }
+
+        float disengageDistance = attackRange + Mathf.Max(0.5f, stoppingDistance * 0.25f);
+        if (distanceToPlayer > disengageDistance)
+        {
+            SetState(MobState.Chase, resetPath: false);
+            return;
+        }
+
+        if (!playerVisible && Time.time - lastSeenPlayerTime > lostSightGracePeriod)
+        {
+            TransitionToPostChaseState();
+        }
+    }
+
+    private void HandleRegroupState(bool playerVisible)
+    {
+        if (playerVisible)
+        {
+            SetState(MobState.Chase, resetPath: true);
+            return;
+        }
+
+        if (!HasLastKnownPlayerPosition())
+        {
+            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
+            return;
+        }
+
+        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
+                            (desiredNavDestination - regroupDestination).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
+
+        if (!EnsureNavMeshPath(regroupDestination, forceRebuild, destinationIsPlayer: false))
+        {
+            lastSeenPlayerTime = float.NegativeInfinity;
+            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
+            return;
+        }
+
+        float distanceToRegroup = Vector3.Distance(transform.position, regroupDestination);
+        if (distanceToRegroup <= Mathf.Max(stoppingDistance, patrolPointTolerance) || stateTimer >= regroupDuration)
+        {
+            lastSeenPlayerTime = float.NegativeInfinity;
+            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
+        }
+    }
+
+    private void TransitionToPostChaseState()
+    {
+        if (HasLastKnownPlayerPosition())
+        {
+            regroupDestination = lastKnownPlayerPosition;
+            SetState(MobState.Regroup, resetPath: true);
+        }
+        else
+        {
+            lastSeenPlayerTime = float.NegativeInfinity;
+            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
+        }
+    }
+
+    private bool HasLastKnownPlayerPosition()
+    {
+        return !float.IsNegativeInfinity(lastSeenPlayerTime);
+    }
+
+    private void SetState(MobState newState, bool resetPath, bool logStateChange = true)
+    {
+        if (currentState == newState)
+        {
+            stateTimer = 0f;
+            if (resetPath)
+            {
+                ClearPath();
+            }
+            OnEnterState(newState);
+            return;
+        }
+
+        currentState = newState;
+        stateTimer = 0f;
+
+        if (resetPath)
+        {
+            ClearPath();
+        }
+
+        if (showDebugInfo && logStateChange)
+        {
+            Debug.Log($"Mob state changed to {currentState}", this);
+        }
+
+        OnEnterState(newState);
+    }
+
+    private void OnEnterState(MobState state)
+    {
+        switch (state)
+        {
+            case MobState.Idle:
+                idleDuration = enablePatrol ? Mathf.Max(0.25f, Random.Range(idleDurationRange.x, idleDurationRange.y)) : float.PositiveInfinity;
+                break;
+            case MobState.Patrol:
+                if (!TrySelectPatrolDestination(out patrolDestination))
+                {
+                    SetState(MobState.Idle, resetPath: true, logStateChange: false);
+                }
+                break;
+            case MobState.Chase:
+                break;
+            case MobState.Attack:
+                break;
+            case MobState.Regroup:
+                if (!HasLastKnownPlayerPosition())
+                {
+                    SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true, logStateChange: false);
+                    return;
+                }
+
+                regroupDestination = lastKnownPlayerPosition;
+                EnsureNavMeshPath(regroupDestination, forceRebuild: true, destinationIsPlayer: false);
+                break;
+        }
+    }
+
+    private bool TrySelectPatrolDestination(out Vector3 destination)
+    {
+        for (int attempt = 0; attempt < 6; attempt++)
+        {
+            Vector2 randomCircle = Random.insideUnitCircle * patrolRadius;
+            Vector3 candidate = spawnPosition + new Vector3(randomCircle.x, 0f, randomCircle.y);
+
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, navMeshSampleRadius, navMeshAreaMask))
+            {
+                destination = hit.position;
+                return true;
+            }
+        }
+
+        destination = spawnPosition;
+        return false;
+    }
+
+    private void UpdateSteering()
+    {
+        if (!enableFlocking || ActiveMobs.Count <= 1)
+        {
+            steeringVelocity = Vector3.zero;
+            return;
+        }
+
+        if (Time.time < nextSteeringSampleTime)
+        {
+            return;
+        }
+
+        nextSteeringSampleTime = Time.time + steeringUpdateInterval;
+
+        Vector3 separation = Vector3.zero;
+        Vector3 alignment = Vector3.zero;
+        Vector3 cohesion = Vector3.zero;
+        int neighborCount = 0;
+
+        float neighborRadiusSqr = neighborRadius * neighborRadius;
+
+        foreach (Mob other in ActiveMobs)
+        {
+            if (other == null || other == this || !other.isAlive)
+            {
+                continue;
+            }
+
+            Vector3 offset = other.transform.position - transform.position;
+            float sqrDistance = offset.x * offset.x + offset.z * offset.z;
+
+            if (sqrDistance <= Mathf.Epsilon || sqrDistance > neighborRadiusSqr)
+            {
+                continue;
+            }
+
+            float distance = Mathf.Sqrt(sqrDistance);
+            Vector3 horizontalOffset = new Vector3(offset.x, 0f, offset.z);
+            Vector3 directionToOther = horizontalOffset / distance;
+
+            separation -= directionToOther / Mathf.Max(distance, 0.1f);
+
+            if (other.rb != null)
+            {
+                alignment += Vector3.ProjectOnPlane(other.rb.linearVelocity, Vector3.up);
+            }
+
+            cohesion += other.transform.position;
+            neighborCount++;
+        }
+
+        if (neighborCount == 0)
+        {
+            steeringVelocity = Vector3.zero;
+            return;
+        }
+
+        Vector3 alignmentForce = alignment / neighborCount;
+        Vector3 cohesionVector = ((cohesion / neighborCount) - transform.position);
+        cohesionVector.y = 0f;
+        Vector3 combined = Vector3.zero;
+
+        if (separation.sqrMagnitude > 0.0001f)
+        {
+            combined += separation.normalized * separationWeight;
+        }
+
+        if (alignmentForce.sqrMagnitude > 0.0001f)
+        {
+            Vector3 alignmentDir = alignmentForce.normalized * moveSpeed;
+            alignmentDir -= Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
+            combined += alignmentDir * alignmentWeight;
+        }
+
+        if (cohesionVector.sqrMagnitude > 0.0001f)
+        {
+            combined += cohesionVector.normalized * cohesionWeight;
+        }
+
+        combined = Vector3.ClampMagnitude(combined, maxSteeringForce);
+
+        steeringVelocity = Vector3.Lerp(steeringVelocity, combined, 0.6f);
     }
     
     private bool HasLineOfSight(Vector3 targetPos)
@@ -186,35 +605,48 @@ public class Mob : MonoBehaviour
     
     private void MoveTowardsTarget()
     {
-        if (!hasNavMeshPath)
+        bool stateRequiresNavigation = currentState == MobState.Patrol ||
+                                       currentState == MobState.Chase ||
+                                       currentState == MobState.Attack ||
+                                       currentState == MobState.Regroup;
+
+        Vector3 planarVelocity = Vector3.ProjectOnPlane(steeringVelocity, Vector3.up);
+
+        if (stateRequiresNavigation && hasNavMeshPath)
         {
-            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            AdvancePathCornerIfNeeded();
+
+            Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+            Vector3 toTarget = planarTarget - transform.position;
+            float distanceToTarget = toTarget.magnitude;
+
+            if (distanceToTarget > Mathf.Epsilon)
+            {
+                Vector3 direction = toTarget / distanceToTarget;
+                direction.y = 0f;
+
+                if (distanceToTarget > stoppingDistance)
+                {
+                    planarVelocity += direction * moveSpeed;
+                }
+            }
+        }
+
+        if (!stateRequiresNavigation && planarVelocity.sqrMagnitude < 0.0001f)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
 
-        AdvancePathCornerIfNeeded();
+        planarVelocity = Vector3.ClampMagnitude(planarVelocity, moveSpeed);
 
-        Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-        Vector3 direction = (planarTarget - transform.position).normalized;
-        
-        float distanceToTarget = Vector3.Distance(transform.position, planarTarget);
-        
-        // Stop if too close
-        if (distanceToTarget <= stoppingDistance)
+        Vector3 finalVelocity = new Vector3(planarVelocity.x, rb.linearVelocity.y, planarVelocity.z);
+        rb.linearVelocity = finalVelocity;
+
+        Vector3 forward = new Vector3(finalVelocity.x, 0f, finalVelocity.z);
+        if (forward.sqrMagnitude > 0.0001f)
         {
-            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
-            return;
-        }
-        
-        // Move towards target
-        Vector3 moveVelocity = direction * moveSpeed;
-        moveVelocity.y = rb.linearVelocity.y; // Preserve vertical velocity for gravity
-        rb.linearVelocity = moveVelocity;
-        
-        // Rotate to face target
-        if (direction != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Quaternion targetRotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
         }
     }
@@ -411,25 +843,38 @@ public class Mob : MonoBehaviour
         ClearPath();
     }
 
-    private bool EnsureNavMeshPath(bool forceRebuild)
+    private bool EnsureNavMeshPath(Vector3 destination, bool forceRebuild, bool destinationIsPlayer)
     {
         if (navMeshPath == null)
         {
             navMeshPath = new NavMeshPath();
+        }
+
+        bool destinationChanged = (desiredNavDestination - destination).sqrMagnitude > 0.01f;
+        if (destinationChanged)
+        {
             forceRebuild = true;
         }
 
+        desiredNavDestination = destination;
+
         if (!forceRebuild && hasNavMeshPath && navMeshPath.corners != null && navMeshPath.corners.Length > 0)
         {
-            currentPathCornerIndex = Mathf.Clamp(currentPathCornerIndex, 0, navMeshPath.corners.Length - 1);
-            targetPosition = navMeshPath.corners[currentPathCornerIndex];
-            return true;
+            float endDistanceSqr = (navMeshPath.corners[navMeshPath.corners.Length - 1] - destination).sqrMagnitude;
+            if (endDistanceSqr <= navMeshSampleRadius * navMeshSampleRadius)
+            {
+                currentPathCornerIndex = Mathf.Clamp(currentPathCornerIndex, 0, navMeshPath.corners.Length - 1);
+                targetPosition = navMeshPath.corners[currentPathCornerIndex];
+                return true;
+            }
+
+            forceRebuild = true;
         }
 
-        return RecalculateNavMeshPath();
+        return RecalculateNavMeshPath(destination, destinationIsPlayer);
     }
 
-    private bool RecalculateNavMeshPath()
+    private bool RecalculateNavMeshPath(Vector3 destination, bool destinationIsPlayer)
     {
         lastPathUpdateTime = Time.time;
 
@@ -443,11 +888,12 @@ public class Mob : MonoBehaviour
             return false;
         }
 
-        if (!NavMesh.SamplePosition(player.position, out NavMeshHit endHit, navMeshSampleRadius, navMeshAreaMask))
+        if (!NavMesh.SamplePosition(destination, out NavMeshHit endHit, navMeshSampleRadius, navMeshAreaMask))
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"Mob: Unable to sample NavMesh near player position. Radius: {navMeshSampleRadius}", this);
+                string destinationLabel = destinationIsPlayer ? "player position" : "destination";
+                Debug.LogWarning($"Mob: Unable to sample NavMesh near {destinationLabel}. Radius: {navMeshSampleRadius}", this);
             }
             hasNavMeshPath = false;
             return false;
@@ -460,17 +906,37 @@ public class Mob : MonoBehaviour
                 Debug.LogWarning("Mob: NavMesh.CalculatePath failed.", this);
             }
             hasNavMeshPath = false;
+            navMeshPathIsPartial = false;
             return false;
         }
 
-        if (navMeshPath.status != NavMeshPathStatus.PathComplete || navMeshPath.corners == null || navMeshPath.corners.Length == 0)
+        if (navMeshPath.corners == null || navMeshPath.corners.Length == 0)
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"Mob: NavMesh path invalid. Status: {navMeshPath.status}", this);
+                Debug.LogWarning("Mob: NavMesh path returned with no corners.", this);
             }
             hasNavMeshPath = false;
+            navMeshPathIsPartial = false;
             return false;
+        }
+
+        navMeshPathIsPartial = navMeshPath.status == NavMeshPathStatus.PathPartial;
+
+        if (navMeshPath.status == NavMeshPathStatus.PathInvalid)
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning("Mob: NavMesh path invalid.", this);
+            }
+            hasNavMeshPath = false;
+            navMeshPathIsPartial = false;
+            return false;
+        }
+
+        if (navMeshPathIsPartial && showDebugInfo)
+        {
+            Debug.Log($"Mob: Partial path calculated, using last reachable corner at {navMeshPath.corners[navMeshPath.corners.Length - 1]}", this);
         }
 
         currentPathCornerIndex = navMeshPath.corners.Length > 1 ? 1 : 0;
@@ -505,6 +971,9 @@ public class Mob : MonoBehaviour
     {
         hasNavMeshPath = false;
         currentPathCornerIndex = 0;
+        targetPosition = transform.position;
+        desiredNavDestination = transform.position;
+        navMeshPathIsPartial = false;
         if (navMeshPath != null)
         {
             navMeshPath.ClearCorners();
@@ -583,5 +1052,23 @@ public class Mob : MonoBehaviour
             Gizmos.color = Color.magenta;
             Gizmos.DrawWireSphere(transform.position + particleOffset, 0.3f);
         }
+    }
+
+    private void OnEnable()
+    {
+        if (!ActiveMobs.Contains(this))
+        {
+            ActiveMobs.Add(this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        ActiveMobs.Remove(this);
+    }
+
+    private void OnDestroy()
+    {
+        ActiveMobs.Remove(this);
     }
 }
