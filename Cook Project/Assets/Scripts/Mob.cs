@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// Main mob component that handles AI, movement towards player, and health management.
@@ -17,6 +18,16 @@ public class Mob : MonoBehaviour
     [SerializeField] private float stoppingDistance = 1.5f;
     [Tooltip("How close the mob needs to be to attack")]
     [SerializeField] private float attackRange = 2f;
+
+    [Header("Navigation")]
+    [Tooltip("Seconds between NavMesh path recalculations while chasing the player.")]
+    [SerializeField, Min(0.05f)] private float pathRecalculationInterval = 0.4f;
+    [Tooltip("How close the mob must get to a path corner before advancing to the next one.")]
+    [SerializeField, Min(0.05f)] private float cornerArrivalThreshold = 0.35f;
+    [Tooltip("Sampling radius used when projecting the mob and player onto the NavMesh surface.")]
+    [SerializeField, Min(0.1f)] private float navMeshSampleRadius = 1.5f;
+    [Tooltip("NavMesh area mask to use when building paths.")]
+    [SerializeField] private int navMeshAreaMask = NavMesh.AllAreas;
     
     [Header("Health")]
     [SerializeField] private int maxHealth = 50;
@@ -55,6 +66,10 @@ public class Mob : MonoBehaviour
     private bool isAlive = true;
     private bool hasDetectedPlayer = false;
     private Vector3 targetPosition;
+    private NavMeshPath navMeshPath;
+    private int currentPathCornerIndex;
+    private float lastPathUpdateTime = float.NegativeInfinity;
+    private bool hasNavMeshPath;
     
     // Optional health bar reference (cached)
     private MobHealthBarController healthBarController;
@@ -78,6 +93,8 @@ public class Mob : MonoBehaviour
         rb.useGravity = true;
         
         currentHealth = maxHealth;
+        navMeshPath = new NavMeshPath();
+        targetPosition = transform.position;
         
         // Try to find health bar controller (optional)
         healthBarController = GetComponent<MobHealthBarController>();
@@ -122,29 +139,33 @@ public class Mob : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         
         // Check if player is in detection range
-        if (distanceToPlayer <= playerDetectionRange)
-        {
-            // Optional: Check line of sight
-            if (HasLineOfSight(player.position))
-            {
-                hasDetectedPlayer = true;
-                targetPosition = player.position;
-                
-                // Check if in attack range
-                if (distanceToPlayer <= attackRange)
-                {
-                    TryAttackPlayer();
-                }
-            }
-        }
-        else
+        bool playerWithinRange = distanceToPlayer <= playerDetectionRange;
+
+        if (!playerWithinRange || !HasLineOfSight(player.position))
         {
             hasDetectedPlayer = false;
+            ClearPath();
+            return;
+        }
+
+        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval;
+        if (!EnsureNavMeshPath(forceRebuild))
+        {
+            hasDetectedPlayer = false;
+            return;
+        }
+
+        hasDetectedPlayer = true;
+
+        // Check if in attack range
+        if (distanceToPlayer <= attackRange)
+        {
+            TryAttackPlayer();
         }
         
-        if (showDebugInfo && hasDetectedPlayer)
+        if (showDebugInfo)
         {
-            Debug.Log($"Mob tracking player. Distance: {distanceToPlayer:F2}m");
+            Debug.Log($"Mob tracking player via NavMesh. Distance: {distanceToPlayer:F2}m");
         }
     }
     
@@ -165,10 +186,18 @@ public class Mob : MonoBehaviour
     
     private void MoveTowardsTarget()
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        direction.y = 0; // Keep movement on horizontal plane
+        if (!hasNavMeshPath)
+        {
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            return;
+        }
+
+        AdvancePathCornerIfNeeded();
+
+        Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+        Vector3 direction = (planarTarget - transform.position).normalized;
         
-        float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
+        float distanceToTarget = Vector3.Distance(transform.position, planarTarget);
         
         // Stop if too close
         if (distanceToTarget <= stoppingDistance)
@@ -359,6 +388,7 @@ public class Mob : MonoBehaviour
         // Stop movement
         rb.linearVelocity = Vector3.zero;
         rb.isKinematic = true;
+        ClearPath();
         
         // Disable components
         enabled = false;
@@ -367,6 +397,118 @@ public class Mob : MonoBehaviour
         
         // Destroy after configurable delay
         Destroy(gameObject, despawnDelay);
+    }
+
+    /// <summary>
+    /// Overrides NavMesh steering parameters when spawned dynamically.
+    /// </summary>
+    public void ApplyNavMeshOverrides(float sampleRadius, float pathInterval, float cornerThreshold, int areaMask)
+    {
+        navMeshSampleRadius = Mathf.Max(0.1f, sampleRadius);
+        pathRecalculationInterval = Mathf.Max(0.05f, pathInterval);
+        cornerArrivalThreshold = Mathf.Max(0.05f, cornerThreshold);
+        navMeshAreaMask = areaMask;
+        ClearPath();
+    }
+
+    private bool EnsureNavMeshPath(bool forceRebuild)
+    {
+        if (navMeshPath == null)
+        {
+            navMeshPath = new NavMeshPath();
+            forceRebuild = true;
+        }
+
+        if (!forceRebuild && hasNavMeshPath && navMeshPath.corners != null && navMeshPath.corners.Length > 0)
+        {
+            currentPathCornerIndex = Mathf.Clamp(currentPathCornerIndex, 0, navMeshPath.corners.Length - 1);
+            targetPosition = navMeshPath.corners[currentPathCornerIndex];
+            return true;
+        }
+
+        return RecalculateNavMeshPath();
+    }
+
+    private bool RecalculateNavMeshPath()
+    {
+        lastPathUpdateTime = Time.time;
+
+        if (!NavMesh.SamplePosition(transform.position, out NavMeshHit startHit, navMeshSampleRadius, navMeshAreaMask))
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning($"Mob: Unable to sample NavMesh at mob position. Radius: {navMeshSampleRadius}", this);
+            }
+            hasNavMeshPath = false;
+            return false;
+        }
+
+        if (!NavMesh.SamplePosition(player.position, out NavMeshHit endHit, navMeshSampleRadius, navMeshAreaMask))
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning($"Mob: Unable to sample NavMesh near player position. Radius: {navMeshSampleRadius}", this);
+            }
+            hasNavMeshPath = false;
+            return false;
+        }
+
+        if (!NavMesh.CalculatePath(startHit.position, endHit.position, navMeshAreaMask, navMeshPath))
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning("Mob: NavMesh.CalculatePath failed.", this);
+            }
+            hasNavMeshPath = false;
+            return false;
+        }
+
+        if (navMeshPath.status != NavMeshPathStatus.PathComplete || navMeshPath.corners == null || navMeshPath.corners.Length == 0)
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning($"Mob: NavMesh path invalid. Status: {navMeshPath.status}", this);
+            }
+            hasNavMeshPath = false;
+            return false;
+        }
+
+        currentPathCornerIndex = navMeshPath.corners.Length > 1 ? 1 : 0;
+        targetPosition = navMeshPath.corners[currentPathCornerIndex];
+        hasNavMeshPath = true;
+        return true;
+    }
+
+    private void AdvancePathCornerIfNeeded()
+    {
+        if (!hasNavMeshPath || navMeshPath?.corners == null || navMeshPath.corners.Length == 0)
+        {
+            return;
+        }
+
+        Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
+        float sqrDistance = (planarTarget - transform.position).sqrMagnitude;
+        float threshold = cornerArrivalThreshold * cornerArrivalThreshold;
+
+        if (sqrDistance <= threshold && currentPathCornerIndex < navMeshPath.corners.Length - 1)
+        {
+            currentPathCornerIndex++;
+            targetPosition = navMeshPath.corners[currentPathCornerIndex];
+        }
+        else if (currentPathCornerIndex >= navMeshPath.corners.Length - 1)
+        {
+            targetPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
+        }
+    }
+
+    private void ClearPath()
+    {
+        hasNavMeshPath = false;
+        currentPathCornerIndex = 0;
+        if (navMeshPath != null)
+        {
+            navMeshPath.ClearCorners();
+        }
     }
     
     private void SpawnDeathParticles()

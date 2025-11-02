@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// Spawns mobs at regular intervals or on demand.
@@ -33,6 +34,12 @@ public class MobSpawner : MonoBehaviour
     [Tooltip("Automatically assign player reference to spawned mobs")]
     [SerializeField] private bool autoAssignPlayer = true;
     [SerializeField] private Transform playerTransform;
+    [Tooltip("Apply NavMesh overrides to spawned mobs so they use a consistent surface configuration")]
+    [SerializeField] private bool applyNavMeshOverrides = false;
+    [SerializeField, Min(0.1f)] private float navMeshSampleRadius = 1.5f;
+    [SerializeField, Min(0.05f)] private float navMeshPathInterval = 0.4f;
+    [SerializeField, Min(0.05f)] private float navMeshCornerThreshold = 0.35f;
+    [SerializeField] private int navMeshAreaMask = NavMesh.AllAreas;
     
     [Header("Visual Customization")]
     [Tooltip("Randomize mob color on spawn")]
@@ -194,19 +201,21 @@ public class MobSpawner : MonoBehaviour
     
     private void SetupMob(GameObject mob)
     {
+        Mob mobComponent = mob.GetComponent<Mob>();
+
         // Auto-assign player reference if enabled
-        if (autoAssignPlayer && playerTransform != null)
+        if (autoAssignPlayer && playerTransform != null && mobComponent != null)
         {
-            Mob mobComponent = mob.GetComponent<Mob>();
-            if (mobComponent != null)
+            var playerField = typeof(Mob).GetField("player", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (playerField != null)
             {
-                // Use reflection to set the private player field
-                var playerField = typeof(Mob).GetField("player", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (playerField != null)
-                {
-                    playerField.SetValue(mobComponent, playerTransform);
-                }
+                playerField.SetValue(mobComponent, playerTransform);
             }
+        }
+
+        if (applyNavMeshOverrides && mobComponent != null)
+        {
+            mobComponent.ApplyNavMeshOverrides(navMeshSampleRadius, navMeshPathInterval, navMeshCornerThreshold, navMeshAreaMask);
         }
         
         // Randomize color if enabled

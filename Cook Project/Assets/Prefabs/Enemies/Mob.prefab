@@ -160,6 +160,10 @@ MonoBehaviour:
   rotationSpeed: 5
   stoppingDistance: 1.5
   attackRange: 2
+  pathRecalculationInterval: 0.4
+  cornerArrivalThreshold: 1
+  navMeshSampleRadius: 1.5
+  navMeshAreaMask: -1
   maxHealth: 50
   despawnDelay: 0.3
   deathParticlePrefab: {fileID: 6187265442713106288, guid: 9c895f8ed3e20cb4cbe176b7916713da, type: 3}
