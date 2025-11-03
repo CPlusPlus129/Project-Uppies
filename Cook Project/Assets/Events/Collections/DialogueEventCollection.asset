@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26ecfc0ac84adeb44a7a3418c1bbb31d, type: 3}
   m_Name: DialogueEventCollection
   m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.DialogueEventCollection
-  dialogueEvents: []
+  dialogueEvents:
+  - {fileID: 11400000, guid: 7f88924a8e7a7d84cba584126c841480, type: 2}
   defaultPlaybackMode: 0
   loopSequential: 1
   avoidImmediateRepeat: 1
