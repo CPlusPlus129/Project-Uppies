@@ -246,15 +246,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.5
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.5
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.5
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 400112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -430,7 +430,10 @@ MonoBehaviour:
     lostSightGrace: 1.6
     obstacleLayer:
       serializedVersion: 2
-      m_Bits: 2035
+      m_Bits: 0
+    targetLayers:
+      serializedVersion: 2
+      m_Bits: 0
   patrol:
     enabled: 0
     idleTimeRange: {x: 1.5, y: 3}
