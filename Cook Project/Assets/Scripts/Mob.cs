@@ -1,187 +1,226 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// Main mob component that handles AI, movement towards player, and health management.
-/// Takes damage from bright lights (opposite of player).
+/// High level mob brain that handles perception, navigation, combat, and health.
+/// Navigation is driven through a NavMeshAgent that feeds a custom locomotion controller so
+/// mobs continue moving even while adjusting their path or attacking.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(NavMeshAgent))]
 public class Mob : MonoBehaviour
 {
+    #region Inspector Configuration
+
     [Header("References")]
     [SerializeField] private Transform player;
-    [SerializeField] private Rigidbody rb;
-    
-    [Header("Movement")]
-    [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private float rotationSpeed = 5f;
-    [SerializeField] private float stoppingDistance = 1.5f;
-    [Tooltip("How close the mob needs to be to attack")]
-    [SerializeField] private float attackRange = 2f;
+    [SerializeField] private MobHealthBarController healthBarController;
 
-    [Header("Navigation")]
-    [Tooltip("Seconds between NavMesh path recalculations while chasing the player.")]
-    [SerializeField, Min(0.05f)] private float pathRecalculationInterval = 0.4f;
-    [Tooltip("How close the mob must get to a path corner before advancing to the next one.")]
-    [SerializeField, Min(0.05f)] private float cornerArrivalThreshold = 0.35f;
-    [Tooltip("Sampling radius used when projecting the mob and player onto the NavMesh surface.")]
-    [SerializeField, Min(0.1f)] private float navMeshSampleRadius = 1.5f;
-    [Tooltip("NavMesh area mask to use when building paths.")]
-    [SerializeField] private int navMeshAreaMask = NavMesh.AllAreas;
-    
-    [Header("Health")]
-    [SerializeField] private int maxHealth = 50;
-    private int currentHealth;
-    
-    [Header("Death")]
-    [Tooltip("Time in seconds before the mob despawns after dying")]
-    [SerializeField] private float despawnDelay = 2f;
-    [Tooltip("Particle effect to spawn when the mob dies (optional)")]
-    [SerializeField] private GameObject deathParticlePrefab;
-    [Tooltip("Offset from mob position where particles spawn")]
-    [SerializeField] private Vector3 particleOffset = Vector3.zero;
-    [Tooltip("If true, particle system will auto-destroy after playing. If false, you must handle cleanup.")]
-    [SerializeField] private bool autoDestroyParticles = true;
-    
-    [Header("Attack")]
-    [SerializeField] private float attackDamage = 10f;
-    [SerializeField] private float attackCooldown = 1.5f;
-    private float lastAttackTime = -999f;
-    
-    [Header("Light Source Damage")]
-    [Tooltip("Time in seconds to reduce from nearest light source when attacking")]
-    [SerializeField] private float lightLifetimeReduction = 2f;
-    [Tooltip("Maximum range to search for light sources to damage")]
-    [SerializeField] private float lightDamageRange = 15f;
-    
-    [Header("Detection")]
-    [SerializeField] private float playerDetectionRange = 30f;
-    [SerializeField] private LayerMask obstacleLayer;
+    [Serializable]
+    private class LocomotionSettings
+    {
+        [Header("Speed")]
+        public float baseSpeed = 3.5f;
+        [Tooltip("Multiplier applied while chasing the player.")]
+        public float chaseSpeedMultiplier = 1.15f;
+        [Tooltip("Multiplier applied while attacking, keeps forward momentum up close.")]
+        public float attackSpeedMultiplier = 1.25f;
+        [Header("Motion Tuning")]
+        public float acceleration = 18f;
+        public float deceleration = 22f;
+        [Tooltip("Degrees per second the mob can rotate while in motion.")]
+        public float turnRate = 540f;
+        [Tooltip("Damping used when blending towards the desired planar velocity.")]
+        public float velocitySmoothing = 12f;
+        [Tooltip("How strongly to keep mobs glued to the ground.")]
+        public float gravityCompensation = 2f;
 
-    [Header("Behavior")]
-    [SerializeField] private bool enablePatrol = true;
-    [SerializeField] private Vector2 idleDurationRange = new Vector2(1.5f, 3f);
-    [SerializeField, Min(0.5f)] private float patrolRadius = 6f;
-    [SerializeField, Min(0.1f)] private float patrolPointTolerance = 0.6f;
-    [SerializeField, Min(0.1f)] private float regroupDuration = 2.5f;
-    [SerializeField, Min(0.1f)] private float lostSightGracePeriod = 1.5f;
+        [Header("Navigation Sampling")]
+        [Min(0.1f)] public float destinationSampleRadius = 1.25f;
+        [Tooltip("If the cached path endpoint drifts further than this (meters), rebuild immediately.")]
+        [Min(0.05f)] public float maxDestinationDrift = 0.75f;
+        [Tooltip("Time between path rebuilds for non-combat states.")]
+        [Min(0.05f)] public float basePathRefreshInterval = 0.45f;
+        [Tooltip("Time between path rebuilds for chase state.")]
+        [Min(0.05f)] public float chasePathRefreshInterval = 0.18f;
+        [Tooltip("Time between path rebuilds for attack state.")]
+        [Min(0.05f)] public float attackPathRefreshInterval = 0.1f;
+        [Tooltip("Maximum lookahead time (seconds) when predicting the player's future position.")]
+        [Min(0f)] public float targetPredictionTime = 0.35f;
+        [Tooltip("Cap on predicted offset distance to avoid overshooting corners.")]
+        [Min(0.1f)] public float maxPredictionDistance = 6f;
+    }
 
-    [Header("Flocking")]
-    [SerializeField] private bool enableFlocking = true;
-    [SerializeField, Min(0.5f)] private float neighborRadius = 3f;
-    [SerializeField] private float separationWeight = 2f;
-    [SerializeField] private float alignmentWeight = 1f;
-    [SerializeField] private float cohesionWeight = 0.5f;
-    [SerializeField, Min(0.05f)] private float steeringUpdateInterval = 0.25f;
-    [SerializeField] private float maxSteeringForce = 4f;
-    
+    [Serializable]
+    private class AttackSettings
+    {
+        public float range = 2f;
+        public float preferredDistance = 1.5f;
+        public float distanceTolerance = 0.6f;
+        [Tooltip("Forward pursuit weight when blending nav velocity with attack orbiting.")]
+        [Range(0f, 1f)] public float pursuitBlend = 0.55f;
+        [Tooltip("Speed (meters/sec) used for orbiting around the player.")]
+        public float orbitSpeed = 2.6f;
+        [Tooltip("Additional tangential boost applied based on proximity to the preferred distance.")]
+        public float orbitBoost = 1.1f;
+        [Tooltip("Radial correction factor helping mobs maintain preferred distance during orbit.")]
+        public float radialSpringStrength = 3f;
+        public float damage = 10f;
+        public float cooldown = 1.3f;
+    }
+
+    [Serializable]
+    private class PerceptionSettings
+    {
+        public float detectionRange = 30f;
+        [Range(0f, 180f)] public float fieldOfView = 160f;
+        public float lostSightGrace = 1.6f;
+        public LayerMask obstacleLayer = Physics.DefaultRaycastLayers;
+    }
+
+    [Serializable]
+    private class PatrolSettings
+    {
+        public bool enabled = true;
+        public Vector2 idleTimeRange = new Vector2(1.5f, 3f);
+        [Min(0.5f)] public float radius = 6f;
+        [Min(0.1f)] public float tolerance = 0.75f;
+    }
+
+    [Serializable]
+    private class HealthSettings
+    {
+        public int maxHealth = 50;
+    }
+
+    [Serializable]
+    private class DeathSettings
+    {
+        public float despawnDelay = 2f;
+        public GameObject deathParticles = null;
+        public Vector3 particleOffset = Vector3.zero;
+        public bool autoDestroyParticles = true;
+    }
+
+    [Serializable]
+    private class LightDamageSettings
+    {
+        public float attackLifetimeReduction = 2f;
+        public float searchRadius = 15f;
+    }
+
+    [Serializable]
+    private class FlockingSettings
+    {
+        public bool enabled = true;
+        [Min(0.5f)] public float neighborRadius = 3f;
+        public float separationWeight = 2.2f;
+        public float alignmentWeight = 0.7f;
+        public float cohesionWeight = 0.35f;
+    }
+
+    [SerializeField] private LocomotionSettings locomotion = new LocomotionSettings();
+    [SerializeField] private AttackSettings attack = new AttackSettings();
+    [SerializeField] private PerceptionSettings perception = new PerceptionSettings();
+    [SerializeField] private PatrolSettings patrol = new PatrolSettings();
+    [SerializeField] private HealthSettings health = new HealthSettings();
+    [SerializeField] private DeathSettings death = new DeathSettings();
+    [SerializeField] private LightDamageSettings lightDamage = new LightDamageSettings();
+    [SerializeField] private FlockingSettings flocking = new FlockingSettings();
+
     [Header("Debug")]
-    [SerializeField] private bool showDebugInfo = true;
-    [SerializeField] private bool showGizmos = true;
-    
-    // State
+    [SerializeField] private bool showDebug = false;
+    [SerializeField] private bool drawGizmos = false;
+
+    #endregion
+
+    #region State
+
     private enum MobState
     {
         Idle,
         Patrol,
         Chase,
         Attack,
-        Regroup
+        BreakOff
     }
 
-    private bool isAlive = true;
-    private bool hasDetectedPlayer = false;
-    private Vector3 targetPosition;
-    private NavMeshPath navMeshPath;
-    private int currentPathCornerIndex;
-    private float lastPathUpdateTime = float.NegativeInfinity;
-    private bool hasNavMeshPath;
-    private Vector3 desiredNavDestination;
-    private bool navMeshPathIsPartial;
     private static readonly List<Mob> ActiveMobs = new List<Mob>();
-    private MobState currentState = MobState.Idle;
+    private Rigidbody body;
+    private NavMeshAgent agent;
+    private bool isAlive = true;
+    private MobState state = MobState.Idle;
     private float stateTimer;
     private float idleDuration;
-    private Vector3 spawnPosition;
-    private Vector3 patrolDestination;
-    private Vector3 regroupDestination;
-    private Vector3 lastKnownPlayerPosition;
+    private float lastAttackTime = -999f;
     private float lastSeenPlayerTime = float.NegativeInfinity;
-    private Vector3 steeringVelocity;
-    private float nextSteeringSampleTime;
-    
-    // Optional health bar reference (cached)
-    private MobHealthBarController healthBarController;
-    
-    // Public properties
-    public int CurrentHealth => currentHealth;
-    public int MaxHealth => maxHealth;
-    public bool IsAlive => isAlive;
-    public float HealthPercentage => (float)currentHealth / maxHealth;
-    
+    private Vector3 lastKnownPlayerPosition;
+    private Vector3 currentDestination;
+    private Vector3 destinationRequest;
+    private float nextPathRefreshTime;
+    private Vector3 desiredPlanarVelocity;
+    private Vector3 currentPlanarVelocity;
+    private Vector3 playerVelocity;
+    private Vector3 previousPlayerPosition;
+    private float previousPlayerSampleTime;
+    private int orbitDirection;
+    private Vector3 spawnPosition;
+
+    private int currentHealth;
+    private bool hasRegistered;
+    private int navMeshAreaMask = NavMesh.AllAreas;
+
+    #endregion
+
+    #region Unity Lifecycle
+
     private void Awake()
     {
-        // Get Rigidbody
-        if (rb == null)
-        {
-            rb = GetComponent<Rigidbody>();
-        }
-        
-        // Configure Rigidbody for ground movement
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
-        rb.useGravity = true;
-        
-        currentHealth = maxHealth;
-        navMeshPath = new NavMeshPath();
-        targetPosition = transform.position;
-        desiredNavDestination = transform.position;
-        spawnPosition = transform.position;
-        steeringVelocity = Vector3.zero;
-        nextSteeringSampleTime = Time.time;
+        body = GetComponent<Rigidbody>();
+        agent = GetComponent<NavMeshAgent>();
 
-        if (!ActiveMobs.Contains(this))
+        ConfigureRigidbody();
+        ConfigureAgent();
+
+        spawnPosition = transform.position;
+        currentHealth = health.maxHealth;
+        orbitDirection = UnityEngine.Random.value < 0.5f ? 1 : -1;
+        idleDuration = GetNextIdleDuration();
+        previousPlayerPosition = Vector3.positiveInfinity;
+        previousPlayerSampleTime = Time.time;
+
+        TryAutoAssignReferences();
+    }
+
+    private void OnEnable()
+    {
+        if (!hasRegistered)
         {
             ActiveMobs.Add(this);
+            hasRegistered = true;
         }
-
-        SetState(MobState.Idle, resetPath: true, logStateChange: false);
-        
-        // Try to find health bar controller (optional)
-        healthBarController = GetComponent<MobHealthBarController>();
     }
 
-    private void OnValidate()
+    private void OnDisable()
     {
-        if (idleDurationRange.y < idleDurationRange.x)
+        if (hasRegistered)
         {
-            idleDurationRange.y = idleDurationRange.x;
+            ActiveMobs.Remove(this);
+            hasRegistered = false;
         }
-
-        neighborRadius = Mathf.Max(0.5f, neighborRadius);
-        steeringUpdateInterval = Mathf.Max(0.05f, steeringUpdateInterval);
-        patrolPointTolerance = Mathf.Max(0.1f, patrolPointTolerance);
-        regroupDuration = Mathf.Max(0.1f, regroupDuration);
-        lostSightGracePeriod = Mathf.Max(0.1f, lostSightGracePeriod);
     }
-    
+
     private void Start()
     {
-        // Try to find player if not assigned
-        if (player == null)
+        TryAutoAssignPlayer();
+        if (healthBarController == null)
         {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
-            else
-            {
-                Debug.LogWarning("Mob: No player found! Make sure player has 'Player' tag.", this);
-            }
+            healthBarController = GetComponent<MobHealthBarController>();
         }
     }
-    
+
     private void Update()
     {
         if (!isAlive)
@@ -189,9 +228,13 @@ public class Mob : MonoBehaviour
             return;
         }
 
-        UpdateStateMachine();
+        float deltaTime = Time.deltaTime;
+        SamplePlayerMotion(deltaTime);
+        UpdatePerception(deltaTime);
+        UpdateStateMachine(deltaTime);
+        UpdateNavigation(deltaTime);
     }
-    
+
     private void FixedUpdate()
     {
         if (!isAlive)
@@ -199,666 +242,780 @@ public class Mob : MonoBehaviour
             return;
         }
 
-        UpdateSteering();
-        MoveTowardsTarget();
-    }
-    
-    private void UpdateStateMachine()
-    {
-        stateTimer += Time.deltaTime;
-
-        bool playerAvailable = player != null;
-        float distanceToPlayer = float.MaxValue;
-        bool playerVisible = false;
-
-        if (playerAvailable)
-        {
-            distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= playerDetectionRange && HasLineOfSight(player.position))
-            {
-                playerVisible = true;
-                lastKnownPlayerPosition = player.position;
-                lastSeenPlayerTime = Time.time;
-            }
-        }
-
-        switch (currentState)
-        {
-            case MobState.Idle:
-                HandleIdleState(playerVisible);
-                break;
-            case MobState.Patrol:
-                HandlePatrolState(playerVisible);
-                break;
-            case MobState.Chase:
-                HandleChaseState(playerVisible, playerAvailable, distanceToPlayer);
-                break;
-            case MobState.Attack:
-                HandleAttackState(playerVisible, playerAvailable, distanceToPlayer);
-                break;
-            case MobState.Regroup:
-                HandleRegroupState(playerVisible);
-                break;
-        }
-
-        hasDetectedPlayer = currentState == MobState.Chase || currentState == MobState.Attack;
+        float deltaTime = Time.fixedDeltaTime;
+        ApplyMovement(deltaTime);
+        UpdateFacing(deltaTime);
     }
 
-    private void HandleIdleState(bool playerVisible)
+    #endregion
+
+    #region Initialization Helpers
+
+    private void ConfigureRigidbody()
     {
-        if (playerVisible)
+        body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+        body.useGravity = false;
+        body.isKinematic = true;
+    }
+
+    private void ConfigureAgent()
+    {
+        agent.updatePosition = false;
+        agent.updateRotation = false;
+        agent.speed = locomotion.baseSpeed;
+        agent.acceleration = locomotion.acceleration;
+        agent.stoppingDistance = 0f;
+        agent.autoBraking = false;
+        agent.autoRepath = true;
+        agent.angularSpeed = locomotion.turnRate;
+        agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+    }
+
+    private void TryAutoAssignReferences()
+    {
+        if (healthBarController == null)
         {
-            SetState(MobState.Chase, resetPath: true);
+            healthBarController = GetComponent<MobHealthBarController>();
+        }
+    }
+
+    private void TryAutoAssignPlayer()
+    {
+        if (player != null)
+        {
             return;
         }
 
-        if (!enablePatrol)
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
         {
+            player = playerObj.transform;
+        }
+        else if (showDebug)
+        {
+            Debug.LogWarning("Mob: Unable to find player with tag 'Player'. Assign target manually.", this);
+        }
+    }
+
+    #endregion
+
+    #region Perception & Player Tracking
+
+    private void SamplePlayerMotion(float deltaTime)
+    {
+        if (player == null)
+        {
+            playerVelocity = Vector3.zero;
+            previousPlayerPosition = Vector3.positiveInfinity;
+            return;
+        }
+
+        if (!float.IsFinite(previousPlayerPosition.x))
+        {
+            previousPlayerPosition = player.position;
+            previousPlayerSampleTime = Time.time;
+            playerVelocity = Vector3.zero;
+            return;
+        }
+
+        float timeSinceLastSample = Mathf.Max(0.0001f, Time.time - previousPlayerSampleTime);
+        Vector3 delta = player.position - previousPlayerPosition;
+        playerVelocity = Vector3.Lerp(playerVelocity, delta / timeSinceLastSample, 1f - Mathf.Exp(-6f * deltaTime));
+        previousPlayerPosition = player.position;
+        previousPlayerSampleTime = Time.time;
+    }
+
+    private void UpdatePerception(float deltaTime)
+    {
+        bool canSeePlayer = PlayerIsVisible();
+
+        if (canSeePlayer)
+        {
+            lastSeenPlayerTime = Time.time;
+            lastKnownPlayerPosition = player.position;
+        }
+        else if (Time.time - lastSeenPlayerTime > perception.lostSightGrace && state == MobState.Attack)
+        {
+            // If we lose sight while attacking, flip orbit direction to help weave around obstacles next time.
+            orbitDirection *= -1;
+        }
+    }
+
+    private bool PlayerIsVisible()
+    {
+        if (player == null)
+        {
+            return false;
+        }
+
+        Vector3 toPlayer = player.position - transform.position;
+        float distance = toPlayer.magnitude;
+        if (distance > perception.detectionRange)
+        {
+            return false;
+        }
+
+        Vector3 toPlayerFlat = Vector3.ProjectOnPlane(toPlayer, Vector3.up);
+        if (state == MobState.Idle || state == MobState.Patrol)
+        {
+            float angle = Vector3.Angle(transform.forward, toPlayerFlat);
+            if (angle > perception.fieldOfView * 0.5f)
+            {
+                return false;
+            }
+        }
+
+        Vector3 origin = transform.position + Vector3.up * 0.7f;
+        Vector3 direction = toPlayer;
+        if (Physics.Raycast(origin, direction.normalized, out RaycastHit hit, distance, perception.obstacleLayer, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.transform != player)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    #endregion
+
+    #region State Machine
+
+    private void UpdateStateMachine(float deltaTime)
+    {
+        stateTimer += deltaTime;
+
+        switch (state)
+        {
+            case MobState.Idle:
+                TickIdle();
+                break;
+            case MobState.Patrol:
+                TickPatrol();
+                break;
+            case MobState.Chase:
+                TickChase();
+                break;
+            case MobState.Attack:
+                TickAttack(deltaTime);
+                break;
+            case MobState.BreakOff:
+                TickBreakOff();
+                break;
+        }
+    }
+
+    private void TickIdle()
+    {
+        if (PlayerIsVisible())
+        {
+            TransitionTo(MobState.Chase);
+            return;
+        }
+
+        if (!patrol.enabled)
+        {
+            desiredPlanarVelocity = Vector3.zero;
+            if (stateTimer >= idleDuration)
+            {
+                idleDuration = GetNextIdleDuration();
+                stateTimer = 0f;
+            }
             return;
         }
 
         if (stateTimer >= idleDuration)
         {
-            SetState(MobState.Patrol, resetPath: true);
+            TransitionTo(MobState.Patrol);
         }
     }
 
-    private void HandlePatrolState(bool playerVisible)
+    private void TickPatrol()
     {
-        if (playerVisible)
+        if (PlayerIsVisible())
         {
-            SetState(MobState.Chase, resetPath: true);
+            TransitionTo(MobState.Chase);
             return;
         }
 
-        if (!hasNavMeshPath)
+        if (!agent.hasPath || agent.remainingDistance <= patrol.tolerance)
         {
-            if (!EnsureNavMeshPath(patrolDestination, forceRebuild: true, destinationIsPlayer: false))
+            Vector3 patrolPoint;
+            if (TryPickPatrolDestination(out patrolPoint))
             {
-                if (!TrySelectPatrolDestination(out patrolDestination) ||
-                    !EnsureNavMeshPath(patrolDestination, forceRebuild: true, destinationIsPlayer: false))
-                {
-                    SetState(MobState.Idle, resetPath: true);
-                    return;
-                }
+                RequestDestination(patrolPoint, locomotion.basePathRefreshInterval);
+            }
+            else
+            {
+                TransitionTo(MobState.Idle);
             }
         }
-
-        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval;
-        if (!EnsureNavMeshPath(patrolDestination, forceRebuild, destinationIsPlayer: false))
-        {
-            SetState(MobState.Idle, resetPath: true);
-            return;
-        }
-
-        float distanceToDestination = Vector3.Distance(transform.position, patrolDestination);
-        if (distanceToDestination <= Mathf.Max(stoppingDistance, patrolPointTolerance))
-        {
-            SetState(MobState.Idle, resetPath: true);
-        }
     }
 
-    private void HandleChaseState(bool playerVisible, bool playerAvailable, float distanceToPlayer)
+    private void TickChase()
     {
-        if (!playerAvailable)
+        if (player == null)
         {
-            TransitionToPostChaseState();
+            TransitionTo(MobState.BreakOff);
             return;
         }
 
-        if (!playerVisible && Time.time - lastSeenPlayerTime > lostSightGracePeriod)
+        bool canSeePlayer = PlayerIsVisible();
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer <= attack.range * 1.1f)
         {
-            TransitionToPostChaseState();
+            TransitionTo(MobState.Attack);
             return;
         }
 
-        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
-                            (desiredNavDestination - player.position).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
-
-        if (!EnsureNavMeshPath(player.position, forceRebuild, destinationIsPlayer: true))
+        if (!canSeePlayer && Time.time - lastSeenPlayerTime > perception.lostSightGrace)
         {
-            TransitionToPostChaseState();
+            TransitionTo(MobState.BreakOff);
             return;
         }
 
-        if (navMeshPathIsPartial)
-        {
-            lastKnownPlayerPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
-            TransitionToPostChaseState();
-            return;
-        }
-
-        if (distanceToPlayer <= attackRange)
-        {
-            SetState(MobState.Attack, resetPath: false);
-        }
+        Vector3 predicted = PredictPlayerPosition();
+        RequestDestination(predicted, locomotion.chasePathRefreshInterval);
     }
 
-    private void HandleAttackState(bool playerVisible, bool playerAvailable, float distanceToPlayer)
+    private void TickAttack(float deltaTime)
     {
-        if (!playerAvailable)
+        if (player == null)
         {
-            TransitionToPostChaseState();
+            TransitionTo(MobState.BreakOff);
             return;
         }
 
-        if (distanceToPlayer <= attackRange)
-        {
-            TryAttackPlayer();
-        }
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        bool canSeePlayer = PlayerIsVisible();
 
-        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
-                            (desiredNavDestination - player.position).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
-        if (!EnsureNavMeshPath(player.position, forceRebuild, destinationIsPlayer: true))
+        if (!canSeePlayer && Time.time - lastSeenPlayerTime > perception.lostSightGrace)
         {
-            TransitionToPostChaseState();
+            TransitionTo(MobState.BreakOff);
             return;
         }
 
-        if (navMeshPathIsPartial)
+        if (distanceToPlayer > attack.range * 1.35f)
         {
-            lastKnownPlayerPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
-            TransitionToPostChaseState();
+            TransitionTo(MobState.Chase);
             return;
         }
 
-        float disengageDistance = attackRange + Mathf.Max(0.5f, stoppingDistance * 0.25f);
-        if (distanceToPlayer > disengageDistance)
-        {
-            SetState(MobState.Chase, resetPath: false);
-            return;
-        }
+        Vector3 predicted = PredictPlayerPosition();
+        RequestDestination(predicted, locomotion.attackPathRefreshInterval);
 
-        if (!playerVisible && Time.time - lastSeenPlayerTime > lostSightGracePeriod)
-        {
-            TransitionToPostChaseState();
-        }
+        TryAttackPlayer(distanceToPlayer, deltaTime);
     }
 
-    private void HandleRegroupState(bool playerVisible)
+    private void TickBreakOff()
     {
-        if (playerVisible)
+        if (PlayerIsVisible())
         {
-            SetState(MobState.Chase, resetPath: true);
+            TransitionTo(MobState.Chase);
             return;
         }
 
-        if (!HasLastKnownPlayerPosition())
+        if (!float.IsNegativeInfinity(lastSeenPlayerTime))
         {
-            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
-            return;
-        }
-
-        bool forceRebuild = Time.time - lastPathUpdateTime >= pathRecalculationInterval ||
-                            (desiredNavDestination - regroupDestination).sqrMagnitude > navMeshSampleRadius * navMeshSampleRadius;
-
-        if (!EnsureNavMeshPath(regroupDestination, forceRebuild, destinationIsPlayer: false))
-        {
-            lastSeenPlayerTime = float.NegativeInfinity;
-            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
-            return;
-        }
-
-        float distanceToRegroup = Vector3.Distance(transform.position, regroupDestination);
-        if (distanceToRegroup <= Mathf.Max(stoppingDistance, patrolPointTolerance) || stateTimer >= regroupDuration)
-        {
-            lastSeenPlayerTime = float.NegativeInfinity;
-            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
-        }
-    }
-
-    private void TransitionToPostChaseState()
-    {
-        if (HasLastKnownPlayerPosition())
-        {
-            regroupDestination = lastKnownPlayerPosition;
-            SetState(MobState.Regroup, resetPath: true);
+            RequestDestination(lastKnownPlayerPosition, locomotion.basePathRefreshInterval);
+            float remaining = agent.remainingDistance;
+            if (!agent.hasPath || remaining <= patrol.tolerance)
+            {
+                lastSeenPlayerTime = float.NegativeInfinity;
+                TransitionTo(patrol.enabled ? MobState.Patrol : MobState.Idle);
+            }
         }
         else
         {
-            lastSeenPlayerTime = float.NegativeInfinity;
-            SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true);
+            TransitionTo(patrol.enabled ? MobState.Patrol : MobState.Idle);
         }
     }
 
-    private bool HasLastKnownPlayerPosition()
+    private void TransitionTo(MobState newState)
     {
-        return !float.IsNegativeInfinity(lastSeenPlayerTime);
-    }
-
-    private void SetState(MobState newState, bool resetPath, bool logStateChange = true)
-    {
-        if (currentState == newState)
+        if (state == newState)
         {
             stateTimer = 0f;
-            if (resetPath)
-            {
-                ClearPath();
-            }
-            OnEnterState(newState);
             return;
         }
 
-        currentState = newState;
+        state = newState;
         stateTimer = 0f;
 
-        if (resetPath)
-        {
-            ClearPath();
-        }
-
-        if (showDebugInfo && logStateChange)
-        {
-            Debug.Log($"Mob state changed to {currentState}", this);
-        }
-
-        OnEnterState(newState);
-    }
-
-    private void OnEnterState(MobState state)
-    {
-        switch (state)
+        switch (newState)
         {
             case MobState.Idle:
-                idleDuration = enablePatrol ? Mathf.Max(0.25f, Random.Range(idleDurationRange.x, idleDurationRange.y)) : float.PositiveInfinity;
+                idleDuration = GetNextIdleDuration();
+                ClearPath();
                 break;
             case MobState.Patrol:
-                if (!TrySelectPatrolDestination(out patrolDestination))
+                idleDuration = GetNextIdleDuration();
+                if (!agent.hasPath)
                 {
-                    SetState(MobState.Idle, resetPath: true, logStateChange: false);
+                    Vector3 patrolPoint;
+                    if (TryPickPatrolDestination(out patrolPoint))
+                    {
+                        RequestDestination(patrolPoint, locomotion.basePathRefreshInterval);
+                    }
                 }
                 break;
             case MobState.Chase:
+                agent.speed = locomotion.baseSpeed * locomotion.chaseSpeedMultiplier;
                 break;
             case MobState.Attack:
+                agent.speed = locomotion.baseSpeed * locomotion.attackSpeedMultiplier;
                 break;
-            case MobState.Regroup:
-                if (!HasLastKnownPlayerPosition())
-                {
-                    SetState(enablePatrol ? MobState.Patrol : MobState.Idle, resetPath: true, logStateChange: false);
-                    return;
-                }
-
-                regroupDestination = lastKnownPlayerPosition;
-                EnsureNavMeshPath(regroupDestination, forceRebuild: true, destinationIsPlayer: false);
+            case MobState.BreakOff:
+                agent.speed = locomotion.baseSpeed * 0.9f;
                 break;
         }
     }
 
-    private bool TrySelectPatrolDestination(out Vector3 destination)
+    private float GetNextIdleDuration()
     {
-        for (int attempt = 0; attempt < 6; attempt++)
-        {
-            Vector2 randomCircle = Random.insideUnitCircle * patrolRadius;
-            Vector3 candidate = spawnPosition + new Vector3(randomCircle.x, 0f, randomCircle.y);
-
-            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, navMeshSampleRadius, navMeshAreaMask))
-            {
-                destination = hit.position;
-                return true;
-            }
-        }
-
-        destination = spawnPosition;
-        return false;
+        return Mathf.Max(0.5f, UnityEngine.Random.Range(patrol.idleTimeRange.x, patrol.idleTimeRange.y));
     }
 
-    private void UpdateSteering()
+    #endregion
+
+    #region Navigation & Movement
+
+    private void RequestDestination(Vector3 worldPoint, float refreshInterval)
     {
-        if (!enableFlocking || ActiveMobs.Count <= 1)
-        {
-            steeringVelocity = Vector3.zero;
-            return;
-        }
+        float time = Time.time;
+        bool destinationChanged = (worldPoint - destinationRequest).sqrMagnitude > locomotion.maxDestinationDrift * locomotion.maxDestinationDrift;
+        bool intervalExpired = time >= nextPathRefreshTime;
 
-        if (Time.time < nextSteeringSampleTime)
+        if (!destinationChanged && !intervalExpired && agent.hasPath)
         {
             return;
         }
 
-        nextSteeringSampleTime = Time.time + steeringUpdateInterval;
+        destinationRequest = worldPoint;
 
+        if (!NavMesh.SamplePosition(worldPoint, out NavMeshHit hit, locomotion.destinationSampleRadius, navMeshAreaMask))
+        {
+            return;
+        }
+
+        currentDestination = hit.position;
+        agent.SetDestination(currentDestination);
+        nextPathRefreshTime = time + refreshInterval;
+    }
+
+    private void ClearPath()
+    {
+        if (agent != null)
+        {
+            agent.ResetPath();
+        }
+        desiredPlanarVelocity = Vector3.zero;
+    }
+
+    private Vector3 PredictPlayerPosition()
+    {
+        if (player == null)
+        {
+            return lastKnownPlayerPosition;
+        }
+
+        float predictionTime = locomotion.targetPredictionTime;
+        Vector3 predictedOffset = playerVelocity * predictionTime;
+        if (predictedOffset.sqrMagnitude > locomotion.maxPredictionDistance * locomotion.maxPredictionDistance)
+        {
+            predictedOffset = predictedOffset.normalized * locomotion.maxPredictionDistance;
+        }
+
+        return player.position + predictedOffset;
+    }
+
+    private void UpdateNavigation(float deltaTime)
+    {
+        if (!agent.enabled)
+        {
+            return;
+        }
+
+        agent.nextPosition = transform.position;
+
+        Vector3 navVelocity = agent.hasPath
+            ? Vector3.ProjectOnPlane(agent.desiredVelocity, Vector3.up)
+            : Vector3.zero;
+
+        float targetSpeed = GetTargetSpeed();
+        if (navVelocity.sqrMagnitude > 0.0001f)
+        {
+            navVelocity = navVelocity.normalized * targetSpeed;
+        }
+
+        Vector3 steering = ComputeSteering(navVelocity);
+        desiredPlanarVelocity = Vector3.ClampMagnitude(steering, targetSpeed);
+    }
+
+    private Vector3 ComputeSteering(Vector3 navVelocity)
+    {
+        Vector3 result = navVelocity;
+
+        if (state == MobState.Attack && player != null)
+        {
+            Vector3 attackVelocity = ComputeAttackVelocity();
+            result = Vector3.Lerp(result, attackVelocity, attack.pursuitBlend);
+        }
+
+        if (flocking.enabled)
+        {
+            result += ComputeFlockingForce();
+        }
+
+        return result;
+    }
+
+    private Vector3 ComputeAttackVelocity()
+    {
+        Vector3 toPlayer = player.position - transform.position;
+        Vector3 planarToPlayer = Vector3.ProjectOnPlane(toPlayer, Vector3.up);
+        float distance = Mathf.Max(0.05f, planarToPlayer.magnitude);
+        Vector3 direction = planarToPlayer / distance;
+
+        float preferred = Mathf.Max(0.1f, attack.preferredDistance);
+        float tolerance = Mathf.Max(0.1f, attack.distanceTolerance);
+        float radialError = Mathf.Clamp((distance - preferred) / tolerance, -1f, 1f);
+
+        Vector3 forward = direction * locomotion.baseSpeed * locomotion.attackSpeedMultiplier;
+        Vector3 tangential = Vector3.Cross(Vector3.up, direction) * attack.orbitSpeed * orbitDirection;
+        float proximityBoost = Mathf.Lerp(attack.orbitBoost, 1f, Mathf.Clamp01(distance / preferred));
+        tangential *= proximityBoost;
+
+        Vector3 radialCorrection = -direction * radialError * attack.radialSpringStrength;
+
+        Vector3 attackVelocity = forward + tangential + radialCorrection;
+        return attackVelocity;
+    }
+
+    private Vector3 ComputeFlockingForce()
+    {
         Vector3 separation = Vector3.zero;
         Vector3 alignment = Vector3.zero;
         Vector3 cohesion = Vector3.zero;
         int neighborCount = 0;
 
-        float neighborRadiusSqr = neighborRadius * neighborRadius;
+        float radius = flocking.neighborRadius;
+        float radiusSqr = radius * radius;
 
-        foreach (Mob other in ActiveMobs)
+        for (int i = 0; i < ActiveMobs.Count; i++)
         {
+            Mob other = ActiveMobs[i];
             if (other == null || other == this || !other.isAlive)
             {
                 continue;
             }
 
             Vector3 offset = other.transform.position - transform.position;
-            float sqrDistance = offset.x * offset.x + offset.z * offset.z;
+            Vector3 planarOffset = Vector3.ProjectOnPlane(offset, Vector3.up);
+            float sqrDistance = planarOffset.sqrMagnitude;
 
-            if (sqrDistance <= Mathf.Epsilon || sqrDistance > neighborRadiusSqr)
+            if (sqrDistance <= Mathf.Epsilon || sqrDistance > radiusSqr)
             {
                 continue;
             }
 
             float distance = Mathf.Sqrt(sqrDistance);
-            Vector3 horizontalOffset = new Vector3(offset.x, 0f, offset.z);
-            Vector3 directionToOther = horizontalOffset / distance;
+            Vector3 direction = planarOffset / distance;
 
-            separation -= directionToOther / Mathf.Max(distance, 0.1f);
-
-            if (other.rb != null)
-            {
-                alignment += Vector3.ProjectOnPlane(other.rb.linearVelocity, Vector3.up);
-            }
-
+            separation -= direction / Mathf.Max(distance, 0.2f);
+            alignment += other.currentPlanarVelocity;
             cohesion += other.transform.position;
             neighborCount++;
         }
 
         if (neighborCount == 0)
         {
-            steeringVelocity = Vector3.zero;
+            return Vector3.zero;
+        }
+
+        Vector3 separationForce = separation.normalized * flocking.separationWeight;
+        Vector3 alignmentForce = (alignment / neighborCount).normalized * flocking.alignmentWeight;
+        Vector3 cohesionForce = (cohesion / neighborCount - transform.position);
+        cohesionForce = Vector3.ProjectOnPlane(cohesionForce, Vector3.up).normalized * flocking.cohesionWeight;
+
+        return separationForce + alignmentForce + cohesionForce;
+    }
+
+    private float GetTargetSpeed()
+    {
+        switch (state)
+        {
+            case MobState.Attack:
+                return locomotion.baseSpeed * locomotion.attackSpeedMultiplier;
+            case MobState.Chase:
+                return locomotion.baseSpeed * locomotion.chaseSpeedMultiplier;
+            case MobState.Patrol:
+                return locomotion.baseSpeed * 0.9f;
+            case MobState.BreakOff:
+                return locomotion.baseSpeed;
+            default:
+                return locomotion.baseSpeed * 0.6f;
+        }
+    }
+
+    private void ApplyMovement(float deltaTime)
+    {
+        Vector3 planarVelocity = Vector3.MoveTowards(
+            currentPlanarVelocity,
+            desiredPlanarVelocity,
+            locomotion.acceleration * deltaTime);
+
+        if (desiredPlanarVelocity.sqrMagnitude < 0.0001f)
+        {
+            planarVelocity = Vector3.MoveTowards(planarVelocity, Vector3.zero, locomotion.deceleration * deltaTime);
+        }
+
+        currentPlanarVelocity = Vector3.Lerp(
+            planarVelocity,
+            desiredPlanarVelocity,
+            1f - Mathf.Exp(-locomotion.velocitySmoothing * deltaTime));
+
+        if (body.isKinematic)
+        {
+            Vector3 displacement = currentPlanarVelocity * deltaTime;
+            Vector3 candidate = transform.position + displacement;
+
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, locomotion.destinationSampleRadius, navMeshAreaMask))
+            {
+                candidate.y = Mathf.Lerp(transform.position.y, hit.position.y, 0.35f);
+            }
+
+            body.MovePosition(candidate);
             return;
         }
 
-        Vector3 alignmentForce = alignment / neighborCount;
-        Vector3 cohesionVector = ((cohesion / neighborCount) - transform.position);
-        cohesionVector.y = 0f;
-        Vector3 combined = Vector3.zero;
+        Vector3 existingVelocity = body.linearVelocity;
+        Vector3 newVelocity = new Vector3(currentPlanarVelocity.x, existingVelocity.y, currentPlanarVelocity.z);
+        body.linearVelocity = newVelocity;
 
-        if (separation.sqrMagnitude > 0.0001f)
+        if (body.useGravity)
         {
-            combined += separation.normalized * separationWeight;
+            body.AddForce(Vector3.down * locomotion.gravityCompensation, ForceMode.Acceleration);
         }
-
-        if (alignmentForce.sqrMagnitude > 0.0001f)
-        {
-            Vector3 alignmentDir = alignmentForce.normalized * moveSpeed;
-            alignmentDir -= Vector3.ProjectOnPlane(rb.linearVelocity, Vector3.up);
-            combined += alignmentDir * alignmentWeight;
-        }
-
-        if (cohesionVector.sqrMagnitude > 0.0001f)
-        {
-            combined += cohesionVector.normalized * cohesionWeight;
-        }
-
-        combined = Vector3.ClampMagnitude(combined, maxSteeringForce);
-
-        steeringVelocity = Vector3.Lerp(steeringVelocity, combined, 0.6f);
     }
-    
-    private bool HasLineOfSight(Vector3 targetPos)
+
+    private void UpdateFacing(float deltaTime)
     {
-        Vector3 direction = targetPos - transform.position;
-        float distance = direction.magnitude;
-        
-        // Simple raycast check - can be enhanced with more sophisticated detection
-        if (Physics.Raycast(transform.position + Vector3.up * 0.5f, direction.normalized, out RaycastHit hit, distance, obstacleLayer))
+        Vector3 planarVelocity = currentPlanarVelocity;
+
+        if (planarVelocity.sqrMagnitude < 0.05f && player != null)
         {
-            // Hit an obstacle before reaching player
-            return false;
-        }
-        
-        return true;
-    }
-    
-    private void MoveTowardsTarget()
-    {
-        bool stateRequiresNavigation = currentState == MobState.Patrol ||
-                                       currentState == MobState.Chase ||
-                                       currentState == MobState.Attack ||
-                                       currentState == MobState.Regroup;
-
-        Vector3 planarVelocity = Vector3.ProjectOnPlane(steeringVelocity, Vector3.up);
-
-        if (stateRequiresNavigation && hasNavMeshPath)
-        {
-            AdvancePathCornerIfNeeded();
-
-            Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-            Vector3 toTarget = planarTarget - transform.position;
-            float distanceToTarget = toTarget.magnitude;
-
-            if (distanceToTarget > Mathf.Epsilon)
-            {
-                Vector3 direction = toTarget / distanceToTarget;
-                direction.y = 0f;
-
-                if (distanceToTarget > stoppingDistance)
-                {
-                    planarVelocity += direction * moveSpeed;
-                }
-            }
+            planarVelocity = Vector3.ProjectOnPlane(player.position - transform.position, Vector3.up);
         }
 
-        if (rb.isKinematic)
+        if (planarVelocity.sqrMagnitude < 0.0001f)
         {
-            if (!stateRequiresNavigation && planarVelocity.sqrMagnitude < 0.0001f)
-            {
-                return;
-            }
-
-            planarVelocity = Vector3.ClampMagnitude(planarVelocity, moveSpeed);
-            Vector3 displacement = planarVelocity * Time.fixedDeltaTime;
-            displacement.y = 0f;
-
-            if (displacement.sqrMagnitude > 0.0000001f)
-            {
-                Vector3 targetPos = transform.position + displacement;
-                rb.MovePosition(new Vector3(targetPos.x, transform.position.y, targetPos.z));
-
-                Quaternion targetRotation = Quaternion.LookRotation(displacement.normalized, Vector3.up);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
-            }
-
             return;
         }
 
-        if (!stateRequiresNavigation && planarVelocity.sqrMagnitude < 0.0001f)
+        Quaternion targetRotation = Quaternion.LookRotation(planarVelocity.normalized, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, locomotion.turnRate * deltaTime);
+    }
+
+    #endregion
+
+    #region Combat & Damage
+
+    private void TryAttackPlayer(float distanceToPlayer, float deltaTime)
+    {
+        if (Time.time - lastAttackTime < attack.cooldown)
         {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
             return;
         }
 
-        planarVelocity = Vector3.ClampMagnitude(planarVelocity, moveSpeed);
-
-        Vector3 finalVelocity = new Vector3(planarVelocity.x, rb.linearVelocity.y, planarVelocity.z);
-        rb.linearVelocity = finalVelocity;
-
-        Vector3 forward = new Vector3(finalVelocity.x, 0f, finalVelocity.z);
-        if (forward.sqrMagnitude > 0.0001f)
+        if (distanceToPlayer > attack.range)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+            return;
         }
-    }
-    
-    private void TryAttackPlayer()
-    {
-        if (Time.time - lastAttackTime < attackCooldown) return;
-        
+
         lastAttackTime = Time.time;
-        
-        // Try to damage player through health system
-        var playerHealth = PlayerStatSystem.Instance;
-        if (playerHealth != null)
+
+        PlayerStatSystem playerStats = PlayerStatSystem.Instance;
+        if (playerStats != null)
         {
-            int currentHP = playerHealth.CurrentHP.Value;
-            int damage = Mathf.FloorToInt(attackDamage);
+            int currentHP = playerStats.CurrentHP.Value;
+            int damage = Mathf.RoundToInt(attack.damage);
             int newHP = Mathf.Max(0, currentHP - damage);
-            
-            playerHealth.CurrentHP.Value = newHP;
-            
-            if (showDebugInfo)
+            playerStats.CurrentHP.Value = newHP;
+
+            if (showDebug)
             {
-                Debug.Log($"Mob attacked player for {damage} damage! Player HP: {newHP}/{playerHealth.MaxHP.Value}");
+                Debug.Log($"Mob attacked player for {damage} damage. Player HP: {newHP}/{playerStats.MaxHP.Value}", this);
             }
         }
+
+        DamageNearestLightSource();
     }
-    
-    /// <summary>
-    /// Finds and damages the nearest light source (explosion with TimedObjectDestroyer)
-    /// </summary>
-    public void DamageNearestLightSource()
+
+    public void TakeDamage(int amount)
     {
-        // Find all Light components in range, then check for TimedObjectDestroyer
-        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-                
-        if (allLights.Length == 0)
+        if (!isAlive)
         {
             return;
         }
-        
-        // Find the nearest light that has TimedObjectDestroyer (on itself or parent)
-        TimedObjectDestroyer nearestLightSource = null;
-        float nearestDistance = float.MaxValue;
-        Light nearestLight = null;
-        
-        foreach (Light light in allLights)
-        {
-            if (!light.enabled) continue;
-            
-            float distance = Vector3.Distance(transform.position, light.transform.position);
-            
-            // Check for TimedObjectDestroyer on the same object first, then parents
-            TimedObjectDestroyer destroyer = light.GetComponent<TimedObjectDestroyer>();
-            if (destroyer == null)
-            {
-                destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
-            }
-            
-            if (destroyer != null)
-            {
-                string hierarchyInfo = destroyer.gameObject == light.gameObject ? "same object" : $"parent: '{destroyer.name}'";
-                
-                if (distance < nearestDistance && distance <= lightDamageRange)
-                {
-                    nearestDistance = distance;
-                    nearestLightSource = destroyer;
-                    nearestLight = light;
-                }
-            }
-        }
-        
-        // Reduce lifetime of the nearest light source
-        if (nearestLightSource != null)
-        {
-            float oldLifetime = nearestLightSource.lifeTime;
-            nearestLightSource.lifeTime = Mathf.Max(0.1f, nearestLightSource.lifeTime - lightLifetimeReduction);
-            
-            
-            // If the light's lifetime is very low, give it a slight flicker effect
-            if (nearestLightSource.lifeTime < 1f && nearestLight != null)
-            {
-                StartCoroutine(FlickerLight(nearestLight));
-            }
-        }
-    }
-    
-    /// <summary>
-    /// Helper method to get the full hierarchy path of a transform for debugging
-    /// </summary>
-    private string GetHierarchyPath(Transform transform)
-    {
-        string path = transform.name;
-        Transform current = transform.parent;
-        
-        while (current != null)
-        {
-            path = current.name + "/" + path;
-            current = current.parent;
-        }
-        
-        return path;
-    }
-    
-    /// <summary>
-    /// Creates a flicker effect on a light that's about to expire
-    /// </summary>
-    private System.Collections.IEnumerator FlickerLight(Light light)
-    {
-        if (light == null) yield break;
-        
-        float originalIntensity = light.intensity;
-        float flickerDuration = 0.3f;
-        float elapsed = 0f;
-        
-        while (elapsed < flickerDuration)
-        {
-            if (light == null) yield break;
-            
-            light.intensity = originalIntensity * Random.Range(0.5f, 1f);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-        
-        if (light != null)
-        {
-            light.intensity = originalIntensity;
-        }
-    }
-    
-    /// <summary>
-    /// Apply damage to the mob. Called by MobLightDamage or other damage sources.
-    /// </summary>
-    public void TakeDamage(int damage)
-    {
-        if (!isAlive) return;
-        
-        currentHealth -= damage;
-        currentHealth = Mathf.Max(0, currentHealth);
-        
-        // Trigger health bar flash effect if available
+
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+
         if (healthBarController != null)
         {
             healthBarController.FlashDamage();
         }
-        
-        if (showDebugInfo)
+
+        if (showDebug)
         {
-            Debug.Log($"Mob took {damage} damage. Health: {currentHealth}/{maxHealth}");
+            Debug.Log($"Mob took {amount} damage. HP: {currentHealth}/{health.maxHealth}", this);
         }
-        
+
         if (currentHealth <= 0)
         {
             Die();
         }
     }
-    
+
     private void Die()
     {
-        if (!isAlive) return;
-        
-        isAlive = false;
-        
-        if (showDebugInfo)
+        if (!isAlive)
         {
-            Debug.Log("Mob died!");
+            return;
         }
-        
-        // Spawn death particle effect
-        SpawnDeathParticles();
-        
-        // Stop movement
-        rb.linearVelocity = Vector3.zero;
-        rb.isKinematic = true;
+
+        isAlive = false;
         ClearPath();
-        
-        // Disable components
+        body.linearVelocity = Vector3.zero;
+        body.isKinematic = true;
+        agent.enabled = false;
+
+        SpawnDeathParticles();
         enabled = false;
-        
-        // Optional: Play death animation, spawn loot, etc.
-        
-        // Destroy after configurable delay
-        Destroy(gameObject, despawnDelay);
+
+        Destroy(gameObject, death.despawnDelay);
     }
 
-    /// <summary>
-    /// Forces the mob into the chase state immediately. Optionally overrides the player target.
-    /// </summary>
-    /// <param name="target">Player transform to chase. If null, uses the existing assigned target or attempts to find one by tag.</param>
-    /// <param name="resetPath">Whether to rebuild the NavMesh path from scratch.</param>
+    private void SpawnDeathParticles()
+    {
+        if (death.deathParticles == null)
+        {
+            return;
+        }
+
+        Vector3 position = transform.position + death.particleOffset;
+        GameObject particle = Instantiate(death.deathParticles, position, Quaternion.identity);
+
+        if (death.autoDestroyParticles)
+        {
+            ParticleSystem ps = particle.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                Destroy(particle, ps.main.duration + ps.main.startLifetimeMultiplier);
+            }
+            else
+            {
+                Destroy(particle, 5f);
+            }
+        }
+    }
+
+    public void DamageNearestLightSource()
+    {
+        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+        if (allLights == null || allLights.Length == 0)
+        {
+            return;
+        }
+
+        TimedObjectDestroyer closest = null;
+        Light closestLight = null;
+        float closestDistance = float.MaxValue;
+
+        for (int i = 0; i < allLights.Length; i++)
+        {
+            Light light = allLights[i];
+            if (!light.enabled)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance(transform.position, light.transform.position);
+            if (distance > lightDamage.searchRadius || distance >= closestDistance)
+            {
+                continue;
+            }
+
+            TimedObjectDestroyer destroyer = light.GetComponent<TimedObjectDestroyer>();
+            if (destroyer == null)
+            {
+                destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
+            }
+
+            if (destroyer == null)
+            {
+                continue;
+            }
+
+            closest = destroyer;
+            closestLight = light;
+            closestDistance = distance;
+        }
+
+        if (closest == null)
+        {
+            return;
+        }
+
+        closest.lifeTime = Mathf.Max(0.1f, closest.lifeTime - lightDamage.attackLifetimeReduction);
+
+        if (closest.lifeTime < 1f && closestLight != null)
+        {
+            StartCoroutine(FlickerLight(closestLight));
+        }
+    }
+
+    private System.Collections.IEnumerator FlickerLight(Light light)
+    {
+        if (light == null)
+        {
+            yield break;
+        }
+
+        float originalIntensity = light.intensity;
+        float duration = 0.35f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            if (light == null)
+            {
+                yield break;
+            }
+
+            light.intensity = originalIntensity * UnityEngine.Random.Range(0.5f, 1f);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        if (light != null)
+        {
+            light.intensity = originalIntensity;
+        }
+    }
+
+    #endregion
+
+    #region Public API
+
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => health.maxHealth;
+    public bool IsAlive => isAlive;
+    public float HealthPercentage => health.maxHealth <= 0 ? 0f : (float)currentHealth / health.maxHealth;
+
     public void ForceChase(Transform target = null, bool resetPath = true)
     {
         if (!isAlive)
@@ -870,33 +1027,32 @@ public class Mob : MonoBehaviour
         {
             player = target;
         }
-
-        if (player == null)
+        else if (player == null)
         {
-            var playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
+            TryAutoAssignPlayer();
         }
 
         if (player == null)
         {
-            Debug.LogWarning("Mob: ForceChase called but no player target is assigned.", this);
+            if (showDebug)
+            {
+                Debug.LogWarning("Mob.ForceChase called but no player is assigned.", this);
+            }
             return;
         }
 
         lastKnownPlayerPosition = player.position;
         lastSeenPlayerTime = Time.time;
-        hasDetectedPlayer = true;
-        stateTimer = 0f;
-        SetState(MobState.Chase, resetPath);
+
+        if (resetPath)
+        {
+            ClearPath();
+        }
+
+        TransitionTo(MobState.Chase);
+        RequestDestination(PredictPlayerPosition(), locomotion.chasePathRefreshInterval);
     }
 
-    /// <summary>
-    /// Stops the chase behaviour and returns to patrol or idle.
-    /// </summary>
-    /// <param name="resumePatrol">If true, return to patrol; otherwise, idle.</param>
     public void StopChase(bool resumePatrol = true)
     {
         if (!isAlive)
@@ -904,250 +1060,79 @@ public class Mob : MonoBehaviour
             return;
         }
 
-        hasDetectedPlayer = false;
-        stateTimer = 0f;
-        var nextState = resumePatrol && enablePatrol ? MobState.Patrol : MobState.Idle;
-        SetState(nextState, resetPath: true);
+        ClearPath();
+        lastSeenPlayerTime = float.NegativeInfinity;
+
+        if (resumePatrol && patrol.enabled)
+        {
+            TransitionTo(MobState.Patrol);
+        }
+        else
+        {
+            TransitionTo(MobState.Idle);
+        }
     }
 
-    /// <summary>
-    /// Overrides NavMesh steering parameters when spawned dynamically.
-    /// </summary>
     public void ApplyNavMeshOverrides(float sampleRadius, float pathInterval, float cornerThreshold, int areaMask)
     {
-        navMeshSampleRadius = Mathf.Max(0.1f, sampleRadius);
-        pathRecalculationInterval = Mathf.Max(0.05f, pathInterval);
-        cornerArrivalThreshold = Mathf.Max(0.05f, cornerThreshold);
+        locomotion.destinationSampleRadius = Mathf.Max(0.1f, sampleRadius);
+        locomotion.basePathRefreshInterval = Mathf.Max(0.05f, pathInterval);
+        locomotion.chasePathRefreshInterval = Mathf.Max(0.05f, pathInterval * 0.6f);
+        locomotion.attackPathRefreshInterval = Mathf.Max(0.05f, locomotion.chasePathRefreshInterval * 0.7f);
+        attack.distanceTolerance = Mathf.Max(0.1f, cornerThreshold);
         navMeshAreaMask = areaMask;
         ClearPath();
     }
 
-    private bool EnsureNavMeshPath(Vector3 destination, bool forceRebuild, bool destinationIsPlayer)
+    #endregion
+
+    #region Patrol
+
+    private bool TryPickPatrolDestination(out Vector3 destination)
     {
-        if (navMeshPath == null)
+        for (int attempt = 0; attempt < 6; attempt++)
         {
-            navMeshPath = new NavMeshPath();
-        }
+            Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * patrol.radius;
+            Vector3 candidate = spawnPosition + new Vector3(randomCircle.x, 0f, randomCircle.y);
 
-        bool destinationChanged = (desiredNavDestination - destination).sqrMagnitude > 0.01f;
-        if (destinationChanged)
-        {
-            forceRebuild = true;
-        }
-
-        desiredNavDestination = destination;
-
-        if (!forceRebuild && hasNavMeshPath && navMeshPath.corners != null && navMeshPath.corners.Length > 0)
-        {
-            float endDistanceSqr = (navMeshPath.corners[navMeshPath.corners.Length - 1] - destination).sqrMagnitude;
-            if (endDistanceSqr <= navMeshSampleRadius * navMeshSampleRadius)
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, locomotion.destinationSampleRadius, navMeshAreaMask))
             {
-                currentPathCornerIndex = Mathf.Clamp(currentPathCornerIndex, 0, navMeshPath.corners.Length - 1);
-                targetPosition = navMeshPath.corners[currentPathCornerIndex];
+                destination = hit.position;
                 return true;
             }
-
-            forceRebuild = true;
         }
 
-        return RecalculateNavMeshPath(destination, destinationIsPlayer);
+        destination = transform.position;
+        return false;
     }
 
-    private bool RecalculateNavMeshPath(Vector3 destination, bool destinationIsPlayer)
+    #endregion
+
+    #region Gizmos
+
+    private void OnDrawGizmosSelected()
     {
-        lastPathUpdateTime = Time.time;
-
-        if (!NavMesh.SamplePosition(transform.position, out NavMeshHit startHit, navMeshSampleRadius, navMeshAreaMask))
-        {
-            if (showDebugInfo)
-            {
-                Debug.LogWarning($"Mob: Unable to sample NavMesh at mob position. Radius: {navMeshSampleRadius}", this);
-            }
-            hasNavMeshPath = false;
-            return false;
-        }
-
-        if (!NavMesh.SamplePosition(destination, out NavMeshHit endHit, navMeshSampleRadius, navMeshAreaMask))
-        {
-            if (showDebugInfo)
-            {
-                string destinationLabel = destinationIsPlayer ? "player position" : "destination";
-                Debug.LogWarning($"Mob: Unable to sample NavMesh near {destinationLabel}. Radius: {navMeshSampleRadius}", this);
-            }
-            hasNavMeshPath = false;
-            return false;
-        }
-
-        if (!NavMesh.CalculatePath(startHit.position, endHit.position, navMeshAreaMask, navMeshPath))
-        {
-            if (showDebugInfo)
-            {
-                Debug.LogWarning("Mob: NavMesh.CalculatePath failed.", this);
-            }
-            hasNavMeshPath = false;
-            navMeshPathIsPartial = false;
-            return false;
-        }
-
-        if (navMeshPath.corners == null || navMeshPath.corners.Length == 0 && showDebugInfo)
-        {
-            if (showDebugInfo)
-            {
-                Debug.LogWarning("Mob: NavMesh path returned with no corners.", this);
-            }
-            hasNavMeshPath = false;
-            navMeshPathIsPartial = false;
-            return false;
-        }
-
-        navMeshPathIsPartial = navMeshPath.status == NavMeshPathStatus.PathPartial;
-
-        if (navMeshPath.status == NavMeshPathStatus.PathInvalid && showDebugInfo)
-        {
-            if (showDebugInfo)
-            {
-                Debug.LogWarning("Mob: NavMesh path invalid.", this);
-            }
-            hasNavMeshPath = false;
-            navMeshPathIsPartial = false;
-            return false;
-        }
-
-        if (navMeshPathIsPartial && showDebugInfo)
-        {
-            Debug.Log($"Mob: Partial path calculated, using last reachable corner at {navMeshPath.corners[navMeshPath.corners.Length - 1]}", this);
-        }
-
-        currentPathCornerIndex = navMeshPath.corners.Length > 1 ? 1 : 0;
-        targetPosition = navMeshPath.corners[currentPathCornerIndex];
-        hasNavMeshPath = true;
-        return true;
-    }
-
-    private void AdvancePathCornerIfNeeded()
-    {
-        if (!hasNavMeshPath || navMeshPath?.corners == null || navMeshPath.corners.Length == 0)
+        if (!drawGizmos)
         {
             return;
         }
 
-        Vector3 planarTarget = new Vector3(targetPosition.x, transform.position.y, targetPosition.z);
-        float sqrDistance = (planarTarget - transform.position).sqrMagnitude;
-        float threshold = cornerArrivalThreshold * cornerArrivalThreshold;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attack.range);
 
-        if (sqrDistance <= threshold && currentPathCornerIndex < navMeshPath.corners.Length - 1)
-        {
-            currentPathCornerIndex++;
-            targetPosition = navMeshPath.corners[currentPathCornerIndex];
-        }
-        else if (currentPathCornerIndex >= navMeshPath.corners.Length - 1)
-        {
-            targetPosition = navMeshPath.corners[navMeshPath.corners.Length - 1];
-        }
-    }
-
-    private void ClearPath()
-    {
-        hasNavMeshPath = false;
-        currentPathCornerIndex = 0;
-        targetPosition = transform.position;
-        desiredNavDestination = transform.position;
-        navMeshPathIsPartial = false;
-        if (navMeshPath != null)
-        {
-            navMeshPath.ClearCorners();
-        }
-    }
-    
-    private void SpawnDeathParticles()
-    {
-        if (deathParticlePrefab == null) return;
-        
-        // Calculate spawn position with offset
-        Vector3 spawnPosition = transform.position + particleOffset;
-        
-        // Instantiate the particle effect
-        GameObject particleObject = Instantiate(deathParticlePrefab, spawnPosition, Quaternion.identity);
-        
-        if (showDebugInfo)
-        {
-            Debug.Log($"Spawned death particles at {spawnPosition}");
-        }
-        
-        // Auto-destroy particles if enabled
-        if (autoDestroyParticles)
-        {
-            // Try to get the ParticleSystem component
-            ParticleSystem ps = particleObject.GetComponent<ParticleSystem>();
-            
-            if (ps != null)
-            {
-                // Calculate total duration (main duration + start lifetime)
-                float totalDuration = ps.main.duration + ps.main.startLifetime.constantMax;
-                
-                // Destroy after the particle system finishes
-                Destroy(particleObject, totalDuration);
-                
-                if (showDebugInfo)
-                {
-                    Debug.Log($"Death particles will auto-destroy after {totalDuration:F2} seconds");
-                }
-            }
-            else
-            {
-                // If no ParticleSystem found, destroy after a default time
-                Debug.LogWarning("Death particle prefab has no ParticleSystem component. Using default cleanup time of 5 seconds.");
-                Destroy(particleObject, 5f);
-            }
-        }
-    }
-    
-    private void OnDrawGizmos()
-    {
-        if (!showGizmos) return;
-        
-        // Draw detection range
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, playerDetectionRange);
-        
-        // Draw stopping distance
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, stoppingDistance);
-        
-        // Draw attack range
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-        
-        // Draw line to player if detected
-        if (Application.isPlaying && hasDetectedPlayer && player != null)
+        Gizmos.DrawWireSphere(transform.position, perception.detectionRange);
+
+        if (agent != null && agent.hasPath)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position + Vector3.up, player.position + Vector3.up);
-        }
-        
-        // Draw particle spawn position
-        if (deathParticlePrefab != null)
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawWireSphere(transform.position + particleOffset, 0.3f);
+            Gizmos.color = Color.cyan;
+            Vector3[] corners = agent.path.corners;
+            for (int i = 0; i < corners.Length - 1; i++)
+            {
+                Gizmos.DrawLine(corners[i], corners[i + 1]);
+            }
         }
     }
 
-    private void OnEnable()
-    {
-        if (!ActiveMobs.Contains(this))
-        {
-            ActiveMobs.Add(this);
-        }
-    }
-
-    private void OnDisable()
-    {
-        ActiveMobs.Remove(this);
-    }
-
-    private void OnDestroy()
-    {
-        ActiveMobs.Remove(this);
-    }
+    #endregion
 }

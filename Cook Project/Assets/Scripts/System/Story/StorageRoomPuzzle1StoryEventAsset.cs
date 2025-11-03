@@ -8,6 +8,11 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
 {
     private const string LogPrefix = "[StorageRoomPuzzle1]";
     private static Vector3? cachedOriginalScale;
+    private static float? cachedOriginalSpeed;
+    private static float? cachedOriginalSprintSpeed;
+    private static float? cachedOriginalJumpHeight;
+    private static float? cachedOriginalStepOffset;
+    private static float? cachedOriginalInteractDistance;
 
     [Header("Player Shrink Settings")]
     [SerializeField]
@@ -26,6 +31,15 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
     [SerializeField]
     [Tooltip("Disable the player's weapon during the puzzle.")]
     private bool disableWeapon = true;
+
+    [Header("Movement Speed")]
+    [SerializeField]
+    [Tooltip("When enabled, the player's base speed will be overridden instead of being scaled with the shrink multiplier.")]
+    private bool useCustomSpeedOverride = false;
+
+    [SerializeField]
+    [Tooltip("Movement speed to apply when the custom override is enabled.")]
+    private float customSpeedOverride = 2f;
 
     public static bool TryGetCachedOriginalScale(out Vector3 scale)
     {
@@ -49,13 +63,39 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
             return StoryEventResult.Failed(message);
         }
 
+        var playerMotor = playerController.GetComponent<PlayerMotor>() ?? playerController.GetComponentInChildren<PlayerMotor>();
+        if (playerMotor == null)
+        {
+            var message = "PlayerMotor not found on PlayerController.";
+            Debug.LogError($"{LogPrefix} {message}");
+            return StoryEventResult.Failed(message);
+        }
+
+        var characterController = playerMotor.GetComponent<CharacterController>();
+        if (characterController == null)
+        {
+            var message = "CharacterController not found on the player motor.";
+            Debug.LogError($"{LogPrefix} {message}");
+            return StoryEventResult.Failed(message);
+        }
+
+        var playerInteract = playerController.GetComponent<PlayerInteract>() ?? playerController.GetComponentInChildren<PlayerInteract>();
+        if (playerInteract == null)
+        {
+            Debug.LogWarning($"{LogPrefix} PlayerInteract component not found; interaction distance will not be scaled.");
+        }
+
         var playerTransform = playerController.transform;
         if (!cachedOriginalScale.HasValue)
         {
             cachedOriginalScale = playerTransform.localScale;
         }
 
+        CacheOriginalMovementSettings(playerMotor, characterController, playerInteract);
+
         await ResizePlayerAsync(playerTransform, cancellationToken);
+
+        ApplyMovementScaling(playerMotor, characterController, playerTransform, playerInteract);
 
         if (disableWeapon)
         {
@@ -101,6 +141,90 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
         {
             Debug.LogWarning($"{LogPrefix} Failed to disable weapon: {ex.Message}");
         }
+    }
+
+    private static void CacheOriginalMovementSettings(PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract)
+    {
+        if (!cachedOriginalSpeed.HasValue)
+        {
+            cachedOriginalSpeed = playerMotor.speed;
+        }
+
+        if (!cachedOriginalSprintSpeed.HasValue)
+        {
+            cachedOriginalSprintSpeed = playerMotor.sprintSpeed;
+        }
+
+        if (!cachedOriginalJumpHeight.HasValue)
+        {
+            cachedOriginalJumpHeight = playerMotor.jumpHeight;
+        }
+
+        if (!cachedOriginalStepOffset.HasValue)
+        {
+            cachedOriginalStepOffset = characterController.stepOffset;
+        }
+
+        if (!cachedOriginalInteractDistance.HasValue && playerInteract != null)
+        {
+            cachedOriginalInteractDistance = playerInteract.interactDistance;
+        }
+    }
+
+    private void ApplyMovementScaling(PlayerMotor playerMotor, CharacterController characterController, Transform playerTransform, PlayerInteract playerInteract)
+    {
+        var originalSpeed = cachedOriginalSpeed ?? playerMotor.speed;
+        var originalSprintSpeed = cachedOriginalSprintSpeed ?? playerMotor.sprintSpeed;
+        var originalJumpHeight = cachedOriginalJumpHeight ?? playerMotor.jumpHeight;
+        var originalStepOffset = cachedOriginalStepOffset ?? characterController.stepOffset;
+        var originalInteractDistance = cachedOriginalInteractDistance ?? playerInteract?.interactDistance ?? 0f;
+
+        var scaleRatio = Mathf.Max(GetScaleRatio(playerTransform), 0f);
+
+        float targetBaseSpeed;
+
+        if (useCustomSpeedOverride)
+        {
+            targetBaseSpeed = Mathf.Max(customSpeedOverride, 0f);
+        }
+        else
+        {
+            targetBaseSpeed = originalSpeed * scaleRatio;
+        }
+
+        var sprintToBaseRatio = Mathf.Approximately(originalSpeed, 0f) ? 1f : originalSprintSpeed / originalSpeed;
+        var scaledSprintFromBase = targetBaseSpeed * sprintToBaseRatio;
+        var scaledSprintFromScale = originalSprintSpeed * scaleRatio;
+        var targetSprintSpeed = Mathf.Max(Mathf.Max(scaledSprintFromBase, scaledSprintFromScale), targetBaseSpeed);
+        var targetJumpHeight = originalJumpHeight * scaleRatio;
+        var targetStepOffset = Mathf.Clamp(originalStepOffset * scaleRatio, 0f, originalStepOffset);
+
+        playerMotor.speed = targetBaseSpeed;
+        playerMotor.sprintSpeed = targetSprintSpeed;
+        playerMotor.jumpHeight = targetJumpHeight;
+        characterController.stepOffset = targetStepOffset;
+
+        if (playerInteract != null)
+        {
+            playerInteract.interactDistance = Mathf.Max(originalInteractDistance * scaleRatio, 0f);
+        }
+    }
+
+    private float GetScaleRatio(Transform playerTransform)
+    {
+        if (!cachedOriginalScale.HasValue)
+        {
+            return 1f;
+        }
+
+        var originalMagnitude = cachedOriginalScale.Value.magnitude;
+        if (Mathf.Approximately(originalMagnitude, 0f))
+        {
+            return 1f;
+        }
+
+        var currentMagnitude = playerTransform.localScale.magnitude;
+        return Mathf.Clamp(currentMagnitude / originalMagnitude, 0f, 10f);
     }
 
     private static PlayerController FindPlayerController()
