@@ -20,7 +20,7 @@ public class FridgeSpawnList : SpawnPointList
     protected override async void Awake()
     {
         base.Awake();
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         glowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
         glowManager?.SetInventoryCheckInterval(inventoryCheckIntervalSeconds);
         var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();

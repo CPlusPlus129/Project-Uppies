@@ -26,6 +26,8 @@ namespace DialogueModule
         private float currentVoiceSpeed = 1f;
         private AudioClip currentVoiceClip;
         private float voicePlaybackCooldown = 0f;
+        private bool hasPendingMessage = false;
+        private MessageData pendingMessage;
 
         private void Awake()
         {
@@ -54,6 +56,16 @@ namespace DialogueModule
             this.adapter = null;
         }
 
+        private void OnEnable()
+        {
+            if (hasPendingMessage)
+            {
+                var message = pendingMessage;
+                hasPendingMessage = false;
+                DisplayMessage(message);
+            }
+        }
+
         private void Clear()
         {
             nameText.text = string.Empty;
@@ -72,6 +84,23 @@ namespace DialogueModule
 
         private void OnNewText(MessageData data)
         {
+            if (!isActiveAndEnabled)
+            {
+                pendingMessage = data;
+                hasPendingMessage = true;
+                if (!gameObject.activeInHierarchy)
+                {
+                    gameObject.SetActive(true);
+                }
+                return;
+            }
+
+            DisplayMessage(data);
+        }
+
+        private void DisplayMessage(MessageData data)
+        {
+            hasPendingMessage = false;
             if (!string.IsNullOrEmpty(data.name))
             {
                 nameText.text = data.name;

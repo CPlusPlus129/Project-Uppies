@@ -7,7 +7,7 @@ public class RestaurantDoor : MonoBehaviour, IInteractable
 
     private async void Awake()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>(); 
     }
 

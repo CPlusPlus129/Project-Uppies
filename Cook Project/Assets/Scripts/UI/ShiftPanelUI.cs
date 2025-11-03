@@ -17,7 +17,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     public async UniTask Init()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
         shiftSystem.OnGameStart.Subscribe(_ => UpdateActiveState());

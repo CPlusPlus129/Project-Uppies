@@ -6,7 +6,7 @@ public class SceneUIController : MonoBehaviour
 {
     private async void Awake()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         var sceneService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
         sceneService.CurrentSceneName.Subscribe(name => SetupUIForScene(name)).AddTo(this);
         SetupUIForScene(sceneService.CurrentSceneName.Value);

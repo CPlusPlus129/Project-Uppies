@@ -106,7 +106,7 @@ GameObject:
   - component: {fileID: 4306439633421963981}
   - component: {fileID: 4112449942275388913}
   - component: {fileID: 8586400320726057519}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: MobSpawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -202,9 +202,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f000fe65cda0cf044bec74555ab40865, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobSpawner
-  mobPrefab: {fileID: 1302521468039500994, guid: 2a3ee6b3e3b6e2a4ebf32a0854a1c9a9, type: 3}
-  maxMobs: 3
-  spawnInterval: 2
+  mobPrefab: {fileID: 8875196279972678129, guid: 28e1e6b9c7658924e915469f7be944a7, type: 3}
+  maxMobs: 5
+  spawnInterval: 10
   spawnOnStart: 1
   autoSpawn: 1
   spawnRadius: 2
@@ -214,7 +214,7 @@ MonoBehaviour:
   - {fileID: 3588773092375458487}
   - {fileID: 1409018114223864895}
   - {fileID: 2370306854291610182}
-  cycleSpawnPoints: 0
+  cycleSpawnPoints: 1
   autoAssignPlayer: 1
   playerTransform: {fileID: 0}
   applyNavMeshOverrides: 0

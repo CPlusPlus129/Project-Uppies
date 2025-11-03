@@ -15,7 +15,7 @@ public class MobLightDamage : MonoBehaviour
     [SerializeField] private bool includeAmbientLight = true;
     
     [Header("Sensitivity Settings")]
-    [SerializeField] [Range(0.01f, 5f)] private float lightSensitivity = 0.5f;
+    [SerializeField] [Range(0.01f, 15f)] private float lightSensitivity = 0.5f;
     [SerializeField] [Range(0f, 1f)] private float ambientStrength = 0.1f;
     [SerializeField] private bool useRealisticFalloff = true;
     

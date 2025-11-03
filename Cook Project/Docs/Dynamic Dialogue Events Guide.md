@@ -14,6 +14,7 @@
 
 ## 3. Configure Behaviour
 - Assign your new `DialogueEventAsset` to the `Dialogue Event Player` component.
+- To wire dialogue directly into the narrative queue, create a `DialogueStoryEventAsset` (**Create ▸ Game Flow ▸ Story Events ▸ Dialogue Event**) and drop the same `DialogueEventAsset` reference onto it, then place the story event inside a `StorySequenceAsset`.
 - Pick a trigger mode: **Play Immediately**, **Queue If Busy** (default), or **Try Play Only**.
 - Hook optional UnityEvents:
   - `Dialogue Event Player` → `On Dialogue Started/Completed/Denied`.

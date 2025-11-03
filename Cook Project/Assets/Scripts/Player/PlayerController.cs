@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
 
         SubscribeEvents();
 
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         actionController.inventorySystem = inventorySystem;
         interact.inventorySystem = inventorySystem;
