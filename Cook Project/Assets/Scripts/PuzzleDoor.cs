@@ -18,7 +18,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         {
             questTargetId = $"door_{GetInstanceID()}";
         }
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
         questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
     }

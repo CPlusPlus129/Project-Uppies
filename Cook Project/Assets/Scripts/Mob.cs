@@ -910,7 +910,7 @@ public class Mob : MonoBehaviour
             return false;
         }
 
-        if (navMeshPath.corners == null || navMeshPath.corners.Length == 0)
+        if (navMeshPath.corners == null || navMeshPath.corners.Length == 0 && showDebugInfo)
         {
             if (showDebugInfo)
             {
@@ -923,7 +923,7 @@ public class Mob : MonoBehaviour
 
         navMeshPathIsPartial = navMeshPath.status == NavMeshPathStatus.PathPartial;
 
-        if (navMeshPath.status == NavMeshPathStatus.PathInvalid)
+        if (navMeshPath.status == NavMeshPathStatus.PathInvalid && showDebugInfo)
         {
             if (showDebugInfo)
             {

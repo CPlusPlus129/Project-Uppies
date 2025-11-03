@@ -31,7 +31,7 @@ public class TutorialFlow : MonoBehaviour
 
     private async UniTaskVoid StartTutorial()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
 #if UNITY_WEBGL && !UNITY_EDITOR
         await UniTask.Delay(2000); //wait for webgl to load
 #endif

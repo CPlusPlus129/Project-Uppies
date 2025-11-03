@@ -43,7 +43,10 @@ The importer first tries HTML-style hex strings, then looks for space/semicolon/
 3. **Refresh generated assets whenever CSVs change:**
    - Menu: **Tools ▸ Update Dialogue Assets**.
    - The importer scans every configured folder, regenerates `ScenarioBook.asset` and `SettingsBook.asset`, and prints a summary in the Console.
-4. **Verify in the inspector:**
+4. **Regenerate dialogue event assets (optional but recommended):**
+   - Menu: **Tools ▸ Generate Dialogue Event Assets**.
+   - Creates or updates `DialogueEventAsset` files under `Assets/Events/Generated/<CSV Name>/` for every `*label` in the CSVs so designers can drop them into Story Sequences without manual setup.
+5. **Verify in the inspector:**
    - Select `Assets/DialogueModule/Data/SettingsBook.asset`, expand the `Character` collection, and confirm each row reflects the latest CSV values (including `NameCardColor`).
    - Optionally Play Mode test: trigger a dialogue line and confirm the name card tint matches the CSV.
 

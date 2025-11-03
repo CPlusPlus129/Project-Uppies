@@ -14,7 +14,7 @@ public class DebugManager : MonoBehaviour, IDebugService
 
     private async void Awake()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
     }

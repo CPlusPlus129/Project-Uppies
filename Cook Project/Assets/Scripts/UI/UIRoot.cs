@@ -44,7 +44,7 @@ public class UIRoot : MonoSingleton<UIRoot>
 
     private async UniTaskVoid InitChildren()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         var uiList = GetComponentsInChildren<IUIInitializable>(true);
         var taskList = new List<UniTask>();
         foreach (var item in uiList)

@@ -61,7 +61,7 @@ public class PlayerFridgeGuidance : MonoBehaviour
 
         try
         {
-            await UniTask.WaitUntil(() => GameFlow.Instance != null && GameFlow.Instance.isInitialized, cancellationToken: destroyToken);
+            await UniTask.WaitUntil(() => GameFlow.Instance != null && GameFlow.Instance.IsInitialized, cancellationToken: destroyToken);
             fridgeGlowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
         }
         catch (OperationCanceledException)

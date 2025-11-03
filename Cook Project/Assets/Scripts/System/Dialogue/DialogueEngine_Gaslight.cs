@@ -5,10 +5,16 @@ using R3;
 class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
 {
     public Subject<Unit> onEndScenario { get; } = new Subject<Unit>();
+    private readonly UniTaskCompletionSource readyTcs = new UniTaskCompletionSource();
+    private bool isRuntimeReady;
 
     protected void OnDestroy()
     {
         scenarioManager.onEndScenario -= OnEndScenario;
+        if (!isRuntimeReady)
+        {
+            readyTcs.TrySetCanceled();
+        }
     }
 
     public async UniTask StartDialogueAsync(string label)
@@ -24,6 +30,13 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
         await UniTask.NextFrame();
     }
 
+    public bool IsRuntimeReady => isRuntimeReady;
+
+    public UniTask WaitUntilReadyAsync()
+    {
+        return isRuntimeReady ? UniTask.CompletedTask : readyTcs.Task;
+    }
+
     async UniTask IGameService.Init()
     {
         Init();
@@ -33,11 +46,13 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
 
     async UniTaskVoid InitGaslightRelatedService()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         var assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
         assetManager = new DialogueAssetManager(assetLoader);
         
         scenarioManager.onEndScenario += OnEndScenario;
+        isRuntimeReady = true;
+        readyTcs.TrySetResult();
     }
 
     private void OnEndScenario()

@@ -19,7 +19,7 @@ public class Customer : MonoBehaviour, IInteractable
     private async void Awake()
     {
         nameText.text = customerName;
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
     }

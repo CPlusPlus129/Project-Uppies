@@ -22,7 +22,7 @@ public class FoodSource : MonoBehaviour, IInteractable
             glowController = gameObject.AddComponent<FridgeGlowController>();
         }
 
-        await UniTask.WaitUntil(() => GameFlow.Instance.isInitialized);
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         glowManager = await ServiceLocator.Instance.GetAsync<IFridgeGlowManager>();
         glowManager?.RegisterFoodSource(this);
     }
