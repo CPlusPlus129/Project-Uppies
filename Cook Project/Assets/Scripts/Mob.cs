@@ -171,6 +171,9 @@ public class Mob : MonoBehaviour
     private Vector3 spawnPosition;
     private int cachedPlayerLayerMask;
     private int cachedPlayerInstanceId;
+    private readonly List<Collider> cachedPlayerColliders = new List<Collider>(8);
+    private Vector3 cachedPlayerScale = new Vector3(float.NaN, float.NaN, float.NaN);
+    private float nextPlayerLayerRefreshTime;
 
     private int currentHealth;
     private bool hasRegistered;
@@ -314,17 +317,26 @@ public class Mob : MonoBehaviour
         {
             cachedPlayerLayerMask = 0;
             cachedPlayerInstanceId = 0;
+            cachedPlayerColliders.Clear();
+            cachedPlayerScale = new Vector3(float.NaN, float.NaN, float.NaN);
+            nextPlayerLayerRefreshTime = 0f;
             return;
         }
 
         int instanceId = player.GetInstanceID();
-        if (!force && cachedPlayerInstanceId == instanceId && cachedPlayerLayerMask != 0)
+        bool scaleChanged = !Approximately(player.lossyScale, cachedPlayerScale);
+        bool refreshDue = Time.time >= nextPlayerLayerRefreshTime;
+
+        if (!force && cachedPlayerInstanceId == instanceId && cachedPlayerLayerMask != 0 && cachedPlayerColliders.Count > 0 && !scaleChanged && !refreshDue)
         {
             return;
         }
 
         cachedPlayerInstanceId = instanceId;
         cachedPlayerLayerMask = 0;
+        cachedPlayerColliders.Clear();
+        cachedPlayerScale = player.lossyScale;
+        nextPlayerLayerRefreshTime = Time.time + 0.5f;
 
         Collider[] colliders = player.GetComponentsInChildren<Collider>(true);
         if (colliders != null)
@@ -337,6 +349,7 @@ public class Mob : MonoBehaviour
                     continue;
                 }
 
+                cachedPlayerColliders.Add(col);
                 cachedPlayerLayerMask |= 1 << col.gameObject.layer;
             }
         }
@@ -417,7 +430,7 @@ public class Mob : MonoBehaviour
             return false;
         }
 
-        Vector3 playerPosition = player.position + Vector3.up * 0.75f;
+        Vector3 playerPosition = GetPlayerVisibilityPoint();
         Vector3 origin = transform.position + Vector3.up * 0.85f;
         Vector3 toPlayer = playerPosition - origin;
         float distance = toPlayer.magnitude;
@@ -492,6 +505,69 @@ public class Mob : MonoBehaviour
         }
 
         return false;
+    }
+
+    private Vector3 GetPlayerVisibilityPoint()
+    {
+        if (player == null)
+        {
+            return transform.position;
+        }
+
+        if (TryGetPlayerBounds(out Bounds bounds))
+        {
+            Vector3 point = bounds.center;
+            point.y = Mathf.Lerp(bounds.min.y, bounds.max.y, 0.65f);
+            return point;
+        }
+
+        float scaledHeight = Mathf.Clamp(player.lossyScale.y, 0.1f, 3f);
+        return player.position + Vector3.up * (0.75f * scaledHeight);
+    }
+
+    private bool TryGetPlayerBounds(out Bounds bounds)
+    {
+        bounds = default;
+        if (player == null)
+        {
+            return false;
+        }
+
+        EnsurePlayerLayerMaskUpToDate();
+        if (BuildPlayerBoundsFromCache(ref bounds))
+        {
+            return true;
+        }
+
+        EnsurePlayerLayerMaskUpToDate(true);
+        return BuildPlayerBoundsFromCache(ref bounds);
+    }
+
+    private bool BuildPlayerBoundsFromCache(ref Bounds bounds)
+    {
+        bool hasBounds = false;
+
+        for (int i = 0; i < cachedPlayerColliders.Count; i++)
+        {
+            Collider col = cachedPlayerColliders[i];
+            if (col == null || !col.enabled || !col.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            Bounds colBounds = col.bounds;
+            if (!hasBounds)
+            {
+                bounds = colBounds;
+                hasBounds = true;
+            }
+            else
+            {
+                bounds.Encapsulate(colBounds);
+            }
+        }
+
+        return hasBounds;
     }
 
     private bool IsPlayerTransform(Transform candidate)
@@ -1322,6 +1398,25 @@ public class Mob : MonoBehaviour
 
         destination = transform.position;
         return false;
+    }
+
+    #endregion
+
+    #region Utility
+
+    private static bool Approximately(Vector3 a, Vector3 b, float tolerance = 0.001f)
+    {
+        if (float.IsNaN(a.x) || float.IsNaN(a.y) || float.IsNaN(a.z))
+        {
+            return false;
+        }
+
+        if (float.IsNaN(b.x) || float.IsNaN(b.y) || float.IsNaN(b.z))
+        {
+            return false;
+        }
+
+        return (a - b).sqrMagnitude <= tolerance * tolerance;
     }
 
     #endregion
