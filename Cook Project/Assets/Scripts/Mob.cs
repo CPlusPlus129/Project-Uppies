@@ -632,6 +632,29 @@ public class Mob : MonoBehaviour
             }
         }
 
+        if (rb.isKinematic)
+        {
+            if (!stateRequiresNavigation && planarVelocity.sqrMagnitude < 0.0001f)
+            {
+                return;
+            }
+
+            planarVelocity = Vector3.ClampMagnitude(planarVelocity, moveSpeed);
+            Vector3 displacement = planarVelocity * Time.fixedDeltaTime;
+            displacement.y = 0f;
+
+            if (displacement.sqrMagnitude > 0.0000001f)
+            {
+                Vector3 targetPos = transform.position + displacement;
+                rb.MovePosition(new Vector3(targetPos.x, transform.position.y, targetPos.z));
+
+                Quaternion targetRotation = Quaternion.LookRotation(displacement.normalized, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+            }
+
+            return;
+        }
+
         if (!stateRequiresNavigation && planarVelocity.sqrMagnitude < 0.0001f)
         {
             rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
@@ -829,6 +852,62 @@ public class Mob : MonoBehaviour
         
         // Destroy after configurable delay
         Destroy(gameObject, despawnDelay);
+    }
+
+    /// <summary>
+    /// Forces the mob into the chase state immediately. Optionally overrides the player target.
+    /// </summary>
+    /// <param name="target">Player transform to chase. If null, uses the existing assigned target or attempts to find one by tag.</param>
+    /// <param name="resetPath">Whether to rebuild the NavMesh path from scratch.</param>
+    public void ForceChase(Transform target = null, bool resetPath = true)
+    {
+        if (!isAlive)
+        {
+            return;
+        }
+
+        if (target != null)
+        {
+            player = target;
+        }
+
+        if (player == null)
+        {
+            var playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+        }
+
+        if (player == null)
+        {
+            Debug.LogWarning("Mob: ForceChase called but no player target is assigned.", this);
+            return;
+        }
+
+        lastKnownPlayerPosition = player.position;
+        lastSeenPlayerTime = Time.time;
+        hasDetectedPlayer = true;
+        stateTimer = 0f;
+        SetState(MobState.Chase, resetPath);
+    }
+
+    /// <summary>
+    /// Stops the chase behaviour and returns to patrol or idle.
+    /// </summary>
+    /// <param name="resumePatrol">If true, return to patrol; otherwise, idle.</param>
+    public void StopChase(bool resumePatrol = true)
+    {
+        if (!isAlive)
+        {
+            return;
+        }
+
+        hasDetectedPlayer = false;
+        stateTimer = 0f;
+        var nextState = resumePatrol && enablePatrol ? MobState.Patrol : MobState.Idle;
+        SetState(nextState, resetPath: true);
     }
 
     /// <summary>

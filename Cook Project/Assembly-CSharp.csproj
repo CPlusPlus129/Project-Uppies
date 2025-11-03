@@ -199,6 +199,7 @@
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Easy Camera Shake\Vibration.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IOrderManager.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StorageRoomPuzzle1StoryEventAsset.cs" />
     <Compile Include="Assets\Scripts\System\ShopManager.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Easy Camera Shake\Demo\VibrationDemo.cs" />
     <Compile Include="Assets\Scripts\ShopInteractable.cs" />
@@ -239,6 +240,7 @@
     <Compile Include="Assets\Scripts\Rendering\FridgeGlowRenderPass.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Logic\UIAdapter\ScenarioUIAdapter.cs" />
     <Compile Include="Assets\Scripts\System\FridgeGlowManager.cs" />
+    <Compile Include="Assets\Scripts\System\Story\BossChaseController.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IAssetLoader.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventTypes.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\SecondRoomStep.cs" />
@@ -278,6 +280,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandCharacterOff.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\Observable\ObservableValue.cs" />
     <Compile Include="Assets\Scripts\PuzzleDoor.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StoryEventTriggerAuthoring.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleUtils.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IDebugService.cs" />
     <Compile Include="Assets\Scripts\Common\UnityInteractable.cs" />
@@ -287,6 +290,7 @@
     <Compile Include="Assets\Scripts\UI\CardSwipeGame\DraggableCard.cs" />
     <Compile Include="Assets\Scripts\System\GameFlow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\SettingDataManager.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StorySequenceActivator.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IShiftSystem.cs" />
     <Compile Include="Assets\Scripts\Common\EaseUtility.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\ScenarioImporter\CsvParser.cs" />
