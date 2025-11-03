@@ -349,8 +349,11 @@ public class Mob : MonoBehaviour
             return false;
         }
 
-        Vector3 toPlayer = player.position - transform.position;
+        Vector3 playerPosition = player.position + Vector3.up * 0.75f;
+        Vector3 origin = transform.position + Vector3.up * 0.85f;
+        Vector3 toPlayer = playerPosition - origin;
         float distance = toPlayer.magnitude;
+
         if (distance > perception.detectionRange)
         {
             return false;
@@ -366,17 +369,82 @@ public class Mob : MonoBehaviour
             }
         }
 
-        Vector3 origin = transform.position + Vector3.up * 0.7f;
-        Vector3 direction = toPlayer;
-        if (Physics.Raycast(origin, direction.normalized, out RaycastHit hit, distance, perception.obstacleLayer, QueryTriggerInteraction.Ignore))
+        Vector3 direction = distance > 0.0001f ? toPlayer / distance : Vector3.forward;
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance, perception.obstacleLayer, QueryTriggerInteraction.Ignore);
+
+        if (hits == null || hits.Length == 0)
         {
-            if (hit.transform != player)
+            return true;
+        }
+
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Transform hitTransform = hits[i].transform;
+
+            if (hitTransform == null)
             {
-                return false;
+                continue;
             }
+
+            if (hitTransform == transform || hitTransform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            if (IsPlayerTransform(hitTransform))
+            {
+                return true;
+            }
+
+            if (BelongsToMob(hitTransform))
+            {
+                continue;
+            }
+
+            return false;
         }
 
         return true;
+    }
+
+    private bool IsPlayerTransform(Transform candidate)
+    {
+        if (candidate == null || player == null)
+        {
+            return false;
+        }
+
+        if (candidate == player || candidate.IsChildOf(player))
+        {
+            return true;
+        }
+
+        Rigidbody rb = candidate.GetComponentInParent<Rigidbody>();
+        if (rb == null)
+        {
+            return false;
+        }
+
+        Transform rbTransform = rb.transform;
+        return rbTransform == player || rbTransform.IsChildOf(player);
+    }
+
+    private bool BelongsToMob(Transform candidate)
+    {
+        if (candidate == null)
+        {
+            return false;
+        }
+
+        Mob mobComponent = candidate.GetComponentInParent<Mob>();
+        if (mobComponent == null)
+        {
+            return false;
+        }
+
+        return mobComponent != this;
     }
 
     #endregion
@@ -667,7 +735,17 @@ public class Mob : MonoBehaviour
 
         if (flocking.enabled)
         {
-            result += ComputeFlockingForce();
+            float flockWeight = GetFlockingWeightForState();
+            if (flockWeight > 0.0001f)
+            {
+                Vector3 flockForce = ComputeFlockingForce(result) * flockWeight;
+                result += flockForce;
+            }
+        }
+
+        if (navVelocity.sqrMagnitude > 0.0001f && result.sqrMagnitude < navVelocity.sqrMagnitude * 0.25f)
+        {
+            result = Vector3.Lerp(result, navVelocity, 0.65f);
         }
 
         return result;
@@ -695,8 +773,13 @@ public class Mob : MonoBehaviour
         return attackVelocity;
     }
 
-    private Vector3 ComputeFlockingForce()
+    private Vector3 ComputeFlockingForce(Vector3 baseVelocity)
     {
+        if (ActiveMobs.Count <= 1)
+        {
+            return Vector3.zero;
+        }
+
         Vector3 separation = Vector3.zero;
         Vector3 alignment = Vector3.zero;
         Vector3 cohesion = Vector3.zero;
@@ -736,12 +819,53 @@ public class Mob : MonoBehaviour
             return Vector3.zero;
         }
 
-        Vector3 separationForce = separation.normalized * flocking.separationWeight;
-        Vector3 alignmentForce = (alignment / neighborCount).normalized * flocking.alignmentWeight;
-        Vector3 cohesionForce = (cohesion / neighborCount - transform.position);
-        cohesionForce = Vector3.ProjectOnPlane(cohesionForce, Vector3.up).normalized * flocking.cohesionWeight;
+        Vector3 separationAvg = separation / Mathf.Max(1, neighborCount);
+        Vector3 alignmentAvg = alignment / Mathf.Max(1, neighborCount);
+        Vector3 cohesionAvg = (cohesion / Mathf.Max(1, neighborCount)) - transform.position;
 
-        return separationForce + alignmentForce + cohesionForce;
+        separationAvg = Vector3.ProjectOnPlane(separationAvg, Vector3.up);
+        alignmentAvg = Vector3.ProjectOnPlane(alignmentAvg, Vector3.up);
+        cohesionAvg = Vector3.ProjectOnPlane(cohesionAvg, Vector3.up);
+
+        Vector3 force = Vector3.zero;
+
+        if (separationAvg.sqrMagnitude > 0.0001f)
+        {
+            force += separationAvg.normalized * flocking.separationWeight;
+        }
+
+        if (alignmentAvg.sqrMagnitude > 0.0001f)
+        {
+            Vector3 baseDir = baseVelocity.sqrMagnitude > 0.0001f
+                ? baseVelocity
+                : transform.forward * locomotion.baseSpeed * 0.5f;
+            float desiredSpeed = Mathf.Max(baseDir.magnitude, locomotion.baseSpeed * 0.5f);
+            Vector3 desiredDirection = alignmentAvg.normalized * desiredSpeed;
+            force += (desiredDirection - baseDir) * flocking.alignmentWeight;
+        }
+
+        if (cohesionAvg.sqrMagnitude > 0.0001f)
+        {
+            force += cohesionAvg.normalized * flocking.cohesionWeight;
+        }
+
+        float maxForce = Mathf.Max(1f, locomotion.baseSpeed * 0.6f);
+        return Vector3.ClampMagnitude(force, maxForce);
+    }
+
+    private float GetFlockingWeightForState()
+    {
+        switch (state)
+        {
+            case MobState.Attack:
+                return 0f;
+            case MobState.Chase:
+                return 0.25f;
+            case MobState.BreakOff:
+                return 0.4f;
+            default:
+                return 1f;
+        }
     }
 
     private float GetTargetSpeed()
@@ -889,7 +1013,10 @@ public class Mob : MonoBehaviour
 
         isAlive = false;
         ClearPath();
-        body.linearVelocity = Vector3.zero;
+        if (!body.isKinematic)
+        {
+            body.linearVelocity = Vector3.zero;
+        }
         body.isKinematic = true;
         agent.enabled = false;
 

@@ -203,8 +203,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobSpawner
   mobPrefab: {fileID: 8875196279972678129, guid: 28e1e6b9c7658924e915469f7be944a7, type: 3}
-  maxMobs: 3
-  spawnInterval: 2
+  maxMobs: 5
+  spawnInterval: 10
   spawnOnStart: 1
   autoSpawn: 1
   spawnRadius: 2
@@ -214,7 +214,7 @@ MonoBehaviour:
   - {fileID: 3588773092375458487}
   - {fileID: 1409018114223864895}
   - {fileID: 2370306854291610182}
-  cycleSpawnPoints: 0
+  cycleSpawnPoints: 1
   autoAssignPlayer: 1
   playerTransform: {fileID: 0}
   applyNavMeshOverrides: 0

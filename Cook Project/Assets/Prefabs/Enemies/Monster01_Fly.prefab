@@ -183,22 +183,22 @@ MonoBehaviour:
     damage: 10
     cooldown: 1.3
   perception:
-    detectionRange: 10
+    detectionRange: 15
     fieldOfView: 160
     lostSightGrace: 1.6
     obstacleLayer:
       serializedVersion: 2
-      m_Bits: 2035
+      m_Bits: 1
   patrol:
     enabled: 1
     idleTimeRange: {x: 1.5, y: 3}
-    radius: 6
+    radius: 50
     tolerance: 0.75
   health:
     maxHealth: 75
   death:
-    despawnDelay: 2
-    deathParticles: {fileID: 0}
+    despawnDelay: 0.5
+    deathParticles: {fileID: 6187265442713106288, guid: 9c895f8ed3e20cb4cbe176b7916713da, type: 3}
     particleOffset: {x: 0, y: 0, z: 0}
     autoDestroyParticles: 1
   lightDamage:
@@ -207,7 +207,7 @@ MonoBehaviour:
   flocking:
     enabled: 0
     neighborRadius: 3
-    separationWeight: 2.2
+    separationWeight: 1.5
     alignmentWeight: 0.7
     cohesionWeight: 0.35
   showDebug: 0
