@@ -33,10 +33,12 @@ Lifecycle
 
 Authoring Sequences
 -------------------
-1. **Create Events**: Right-click in the Project window → **Create ▸ Game Flow ▸ Story Events ▸ Unity Event** (or your custom subclass). Configure inspector fields and ensure unique `EventId` values.
-2. **Create Sequence**: Right-click → **Create ▸ Game Flow ▸ Story Sequence**. Add events in execution order. Use meaningful `sequenceId` strings for debugging.
-3. **Assign to GameFlow**: In the persistent singleton GameObject, drag the sequence into `startingSequence` or call `GameFlow.Instance.EnqueueSequence` at runtime.
-4. **Test**: Enter Play Mode, verify the expected event order, and watch the Console for optional logs when `logStoryFlow` is enabled.
+1. **Create Events**: Right-click in the Project window → **Create ▸ Game Flow ▸ Story Events ▸ \<Event Type\>**. Configure inspector fields—the `EventId` auto-fills to the next available value, but you can override it if you need a specific string.
+2. **Group Events**: Right-click → **Create ▸ Game Flow ▸ Story Sequence**. Add the event assets in execution order; rename the asset or set `sequenceId` to something designer-friendly (e.g., `intro_boot_01`).
+3. **Reference Sequence**: 
+   - Inspector-based: assign the asset to `GameFlow.startingSequence` for an automatic boot sequence.
+   - Runtime-based: call `GameFlow.Instance.EnqueueSequence(sequenceAsset)` from code, or wire it through a UnityEvent.
+4. **Playtest**: Enter Play Mode, verify the order and timing, and enable `logStoryFlow` on the `GameFlow` prefab to print queue operations while iterating.
 
 Custom Story Events
 -------------------
@@ -80,3 +82,19 @@ Troubleshooting
 - **Queue stalls**: Look for events returning `StoryEventResult.Pause(...)` or waiting on signals that are never fired.
 - **Repeated events**: Set `replayable` false to skip once completed. Verify no other scripts re-enqueue the same asset.
 - **Singleton duplicates**: `GameFlow` derives from `MonoSingleton`. Ensure only one instance exists in your bootstrap scenes.
+
+Triggering Sequences & Events at Runtime
+----------------------------------------
+Use the helper methods on `GameFlow` to control what comes next in the story queue:
+
+- `EnqueueSequence(sequenceAsset, insertAtFront: false)` — Adds every event in the sequence to the back of the queue. Ideal for scheduling the next chapter while the current one is running.
+- `EnqueueSequence(sequenceAsset, insertAtFront: true)` — Inserts the sequence so its first event is processed immediately after the current one finishes (or even before if the queue is empty). Great for interrupts or high-priority beats.
+- `EnqueueEvent(eventAsset, insertAtFront: false)` — Pushes a single event without authoring a full sequence. Use this for ad-hoc triggers or dynamic one-offs.
+- `EnqueueEvent(eventAsset, insertAtFront: true)` — Forces the event to run next. Useful when a player action demands instant feedback.
+- `StoryEventResult.Completed(message, nextSequence)` — Returned from an event’s `ExecuteAsync`. When `nextSequence` is non-null, `GameFlow` enqueues it automatically, enabling branching without extra glue code.
+- `StoryEventResult.Pause(...)` — Pauses the queue after the current event; call `GameFlow.ResumeStoryFlow()` once your external system (e.g., gameplay moment) is ready to continue.
+
+Tips:
+- Prefer sequences for designer-authored flows; they document the intended order and are easier to reuse.
+- Mix and match. A designer can author a sequence while code enqueues a one-off “cleanup” event afterward.
+- When building dynamic chains, log the queue (`logStoryFlow`) to verify your calls are ordered as expected.
