@@ -183,12 +183,15 @@ MonoBehaviour:
     damage: 10
     cooldown: 1.3
   perception:
-    detectionRange: 2
+    detectionRange: 8
     fieldOfView: 160
     lostSightGrace: 1.6
     obstacleLayer:
       serializedVersion: 2
       m_Bits: 65
+    targetLayers:
+      serializedVersion: 2
+      m_Bits: 0
   patrol:
     enabled: 1
     idleTimeRange: {x: 1.5, y: 3}

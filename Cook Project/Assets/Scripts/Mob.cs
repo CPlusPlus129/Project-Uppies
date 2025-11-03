@@ -78,6 +78,8 @@ public class Mob : MonoBehaviour
         [Range(0f, 180f)] public float fieldOfView = 160f;
         public float lostSightGrace = 1.6f;
         public LayerMask obstacleLayer = Physics.DefaultRaycastLayers;
+        [Tooltip("Layers considered valid targets. Leave empty to auto-detect from the assigned player's colliders.")]
+        public LayerMask targetLayers = 0;
     }
 
     [Serializable]
@@ -167,6 +169,8 @@ public class Mob : MonoBehaviour
     private float previousPlayerSampleTime;
     private int orbitDirection;
     private Vector3 spawnPosition;
+    private int cachedPlayerLayerMask;
+    private int cachedPlayerInstanceId;
 
     private int currentHealth;
     private bool hasRegistered;
@@ -215,6 +219,7 @@ public class Mob : MonoBehaviour
     private void Start()
     {
         TryAutoAssignPlayer();
+        EnsurePlayerLayerMaskUpToDate(true);
         if (healthBarController == null)
         {
             healthBarController = GetComponent<MobHealthBarController>();
@@ -291,6 +296,7 @@ public class Mob : MonoBehaviour
         if (playerObj != null)
         {
             player = playerObj.transform;
+            EnsurePlayerLayerMaskUpToDate(true);
         }
         else if (showDebug)
         {
@@ -301,6 +307,62 @@ public class Mob : MonoBehaviour
     #endregion
 
     #region Perception & Player Tracking
+
+    private void EnsurePlayerLayerMaskUpToDate(bool force = false)
+    {
+        if (player == null)
+        {
+            cachedPlayerLayerMask = 0;
+            cachedPlayerInstanceId = 0;
+            return;
+        }
+
+        int instanceId = player.GetInstanceID();
+        if (!force && cachedPlayerInstanceId == instanceId && cachedPlayerLayerMask != 0)
+        {
+            return;
+        }
+
+        cachedPlayerInstanceId = instanceId;
+        cachedPlayerLayerMask = 0;
+
+        Collider[] colliders = player.GetComponentsInChildren<Collider>(true);
+        if (colliders != null)
+        {
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                Collider col = colliders[i];
+                if (col == null)
+                {
+                    continue;
+                }
+
+                cachedPlayerLayerMask |= 1 << col.gameObject.layer;
+            }
+        }
+
+        if (cachedPlayerLayerMask == 0)
+        {
+            cachedPlayerLayerMask = 1 << player.gameObject.layer;
+        }
+    }
+
+    private int GetEffectiveTargetLayerMask()
+    {
+        int configuredMask = perception.targetLayers.value;
+        if (configuredMask != 0)
+        {
+            return configuredMask;
+        }
+
+        if (player == null)
+        {
+            return 0;
+        }
+
+        EnsurePlayerLayerMaskUpToDate();
+        return cachedPlayerLayerMask;
+    }
 
     private void SamplePlayerMotion(float deltaTime)
     {
@@ -349,6 +411,12 @@ public class Mob : MonoBehaviour
             return false;
         }
 
+        int targetMask = GetEffectiveTargetLayerMask();
+        if (targetMask == 0)
+        {
+            return false;
+        }
+
         Vector3 playerPosition = player.position + Vector3.up * 0.75f;
         Vector3 origin = transform.position + Vector3.up * 0.85f;
         Vector3 toPlayer = playerPosition - origin;
@@ -370,11 +438,14 @@ public class Mob : MonoBehaviour
         }
 
         Vector3 direction = distance > 0.0001f ? toPlayer / distance : Vector3.forward;
-        RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance, perception.obstacleLayer, QueryTriggerInteraction.Ignore);
+        int obstacleMask = perception.obstacleLayer.value;
+        int combinedMask = obstacleMask | targetMask;
+
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance, combinedMask, QueryTriggerInteraction.Ignore);
 
         if (hits == null || hits.Length == 0)
         {
-            return true;
+            return false;
         }
 
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
@@ -393,12 +464,26 @@ public class Mob : MonoBehaviour
                 continue;
             }
 
-            if (IsPlayerTransform(hitTransform))
+            if (BelongsToMob(hitTransform))
+            {
+                continue;
+            }
+
+            int layerBit = 1 << hitTransform.gameObject.layer;
+            bool isTargetLayer = (targetMask & layerBit) != 0;
+
+            if (isTargetLayer && IsPlayerTransform(hitTransform))
             {
                 return true;
             }
 
-            if (BelongsToMob(hitTransform))
+            bool isObstacleLayer = (obstacleMask & layerBit) != 0;
+            if (isObstacleLayer)
+            {
+                return false;
+            }
+
+            if (isTargetLayer)
             {
                 continue;
             }
@@ -406,7 +491,7 @@ public class Mob : MonoBehaviour
             return false;
         }
 
-        return true;
+        return false;
     }
 
     private bool IsPlayerTransform(Transform candidate)
@@ -1153,10 +1238,16 @@ public class Mob : MonoBehaviour
         if (target != null)
         {
             player = target;
+            EnsurePlayerLayerMaskUpToDate(true);
         }
         else if (player == null)
         {
             TryAutoAssignPlayer();
+        }
+
+        if (player != null)
+        {
+            EnsurePlayerLayerMaskUpToDate();
         }
 
         if (player == null)
