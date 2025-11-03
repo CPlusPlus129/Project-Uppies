@@ -183,12 +183,12 @@ MonoBehaviour:
     damage: 10
     cooldown: 1.3
   perception:
-    detectionRange: 15
+    detectionRange: 2
     fieldOfView: 160
     lostSightGrace: 1.6
     obstacleLayer:
       serializedVersion: 2
-      m_Bits: 1
+      m_Bits: 65
   patrol:
     enabled: 1
     idleTimeRange: {x: 1.5, y: 3}
@@ -199,7 +199,7 @@ MonoBehaviour:
   death:
     despawnDelay: 0.5
     deathParticles: {fileID: 6187265442713106288, guid: 9c895f8ed3e20cb4cbe176b7916713da, type: 3}
-    particleOffset: {x: 0, y: 0, z: 0}
+    particleOffset: {x: 0, y: 1, z: 0}
     autoDestroyParticles: 1
   lightDamage:
     attackLifetimeReduction: 2
