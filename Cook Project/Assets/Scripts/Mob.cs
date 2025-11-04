@@ -138,6 +138,12 @@ public class Mob : MonoBehaviour
 
     #endregion
 
+    #region Public Accessors
+
+    public Transform PlayerTransform => player;
+
+    #endregion
+
     #region State
 
     private enum MobState
