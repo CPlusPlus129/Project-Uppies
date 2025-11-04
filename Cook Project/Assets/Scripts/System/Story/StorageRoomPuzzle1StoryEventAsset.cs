@@ -7,12 +7,28 @@ using UnityEngine;
 public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
 {
     private const string LogPrefix = "[StorageRoomPuzzle1]";
+
+    private enum EffectMode
+    {
+        Apply,
+        Revert
+    }
+
+    [Header("Mode")]
+    [SerializeField]
+    [Tooltip("Choose whether this event applies the shrink effects or restores the player's defaults.")]
+    private EffectMode effectMode = EffectMode.Apply;
+
+    private static bool effectsApplied;
+    private static readonly SemaphoreSlim effectSemaphore = new SemaphoreSlim(1, 1);
     private static Vector3? cachedOriginalScale;
     private static float? cachedOriginalSpeed;
     private static float? cachedOriginalSprintSpeed;
     private static float? cachedOriginalJumpHeight;
     private static float? cachedOriginalStepOffset;
     private static float? cachedOriginalInteractDistance;
+    private static bool? cachedOriginalCanUseWeapon;
+    private static bool weaponStateModifiedByEvent;
 
     [Header("Player Shrink Settings")]
     [SerializeField]
@@ -91,24 +107,89 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
             cachedOriginalScale = playerTransform.localScale;
         }
 
-        CacheOriginalMovementSettings(playerMotor, characterController, playerInteract);
-
-        await ResizePlayerAsync(playerTransform, cancellationToken);
-
-        ApplyMovementScaling(playerMotor, characterController, playerTransform, playerInteract);
-
-        if (disableWeapon)
+        await effectSemaphore.WaitAsync(cancellationToken);
+        try
         {
-            DisablePlayerWeapon();
+            switch (effectMode)
+            {
+                case EffectMode.Apply:
+                    return await ApplyEffectsAsync(playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
+
+                case EffectMode.Revert:
+                    return await RevertEffectsAsync(playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
+
+                default:
+                    var message = $"{LogPrefix} Unsupported effect mode '{effectMode}'.";
+                    Debug.LogError(message);
+                    return StoryEventResult.Failed(message);
+            }
+        }
+        finally
+        {
+            effectSemaphore.Release();
+        }
+    }
+
+    private async UniTask<StoryEventResult> ApplyEffectsAsync(
+        PlayerMotor playerMotor,
+        CharacterController characterController,
+        PlayerInteract playerInteract,
+        Transform playerTransform,
+        CancellationToken cancellationToken)
+    {
+        if (effectsApplied)
+        {
+            Debug.Log($"{LogPrefix} Effects already applied; skipping duplicate request.");
+            return StoryEventResult.Completed("Storage room puzzle shrink already applied.");
         }
 
+        CaptureOriginalState(playerMotor, characterController, playerInteract, playerTransform);
+
+        var targetScale = Vector3.Scale(playerTransform.localScale, Vector3.one * Mathf.Clamp(shrinkScaleMultiplier, 0.01f, 1f));
+
+        await ResizePlayerAsync(playerTransform, targetScale, cancellationToken);
+
+        ApplyMovementScaling(playerMotor, characterController, playerTransform, playerInteract);
+        DisablePlayerWeaponIfNeeded();
+
+        effectsApplied = true;
         return StoryEventResult.Completed("Player shrunk for storage room puzzle.");
     }
 
-    private async UniTask ResizePlayerAsync(Transform playerTransform, CancellationToken cancellationToken)
+    private async UniTask<StoryEventResult> RevertEffectsAsync(
+        PlayerMotor playerMotor,
+        CharacterController characterController,
+        PlayerInteract playerInteract,
+        Transform playerTransform,
+        CancellationToken cancellationToken)
+    {
+        if (!effectsApplied)
+        {
+            Debug.Log($"{LogPrefix} Effects already reverted or were never applied; skipping.");
+            return StoryEventResult.Completed("Storage room puzzle shrink already reverted.");
+        }
+
+        if (!cachedOriginalScale.HasValue)
+        {
+            var message = $"{LogPrefix} Cannot revert because the original scale was not cached.";
+            Debug.LogWarning(message);
+            return StoryEventResult.Failed(message);
+        }
+
+        await ResizePlayerAsync(playerTransform, cachedOriginalScale.Value, cancellationToken);
+
+        RestoreMovementSettings(playerMotor, characterController, playerInteract);
+        RestorePlayerWeaponState();
+
+        effectsApplied = false;
+        CaptureOriginalState(playerMotor, characterController, playerInteract, playerTransform);
+
+        return StoryEventResult.Completed("Player restored to original size for storage room puzzle.");
+    }
+
+    private async UniTask ResizePlayerAsync(Transform playerTransform, Vector3 targetScale, CancellationToken cancellationToken)
     {
         var startScale = playerTransform.localScale;
-        var targetScale = Vector3.Scale(startScale, Vector3.one * Mathf.Clamp(shrinkScaleMultiplier, 0.01f, 1f));
 
         var duration = Mathf.Max(0f, shrinkDurationSeconds);
         if (duration <= 0f)
@@ -131,11 +212,28 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
         playerTransform.localScale = targetScale;
     }
 
-    private void DisablePlayerWeapon()
+    private void DisablePlayerWeaponIfNeeded()
     {
+        if (!disableWeapon)
+        {
+            return;
+        }
+
         try
         {
-            PlayerStatSystem.Instance.CanUseWeapon.Value = false;
+            var statSystem = PlayerStatSystem.Instance;
+            if (statSystem == null || statSystem.CanUseWeapon == null)
+            {
+                return;
+            }
+
+            if (!cachedOriginalCanUseWeapon.HasValue)
+            {
+                cachedOriginalCanUseWeapon = statSystem.CanUseWeapon.Value;
+            }
+
+            statSystem.CanUseWeapon.Value = false;
+            weaponStateModifiedByEvent = true;
         }
         catch (Exception ex)
         {
@@ -143,31 +241,78 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
         }
     }
 
-    private static void CacheOriginalMovementSettings(PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract)
+    private void RestorePlayerWeaponState()
     {
-        if (!cachedOriginalSpeed.HasValue)
+        if (!cachedOriginalCanUseWeapon.HasValue || !weaponStateModifiedByEvent)
         {
-            cachedOriginalSpeed = playerMotor.speed;
+            return;
         }
 
-        if (!cachedOriginalSprintSpeed.HasValue)
+        try
         {
-            cachedOriginalSprintSpeed = playerMotor.sprintSpeed;
+            var statSystem = PlayerStatSystem.Instance;
+            if (statSystem == null || statSystem.CanUseWeapon == null)
+            {
+                return;
+            }
+
+            statSystem.CanUseWeapon.Value = cachedOriginalCanUseWeapon.Value;
+            weaponStateModifiedByEvent = false;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"{LogPrefix} Failed to restore weapon state: {ex.Message}");
+        }
+    }
+
+    private void CaptureOriginalState(PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract, Transform playerTransform)
+    {
+        cachedOriginalScale = playerTransform.localScale;
+        cachedOriginalSpeed = playerMotor.speed;
+        cachedOriginalSprintSpeed = playerMotor.sprintSpeed;
+        cachedOriginalJumpHeight = playerMotor.jumpHeight;
+        cachedOriginalStepOffset = characterController.stepOffset;
+        cachedOriginalInteractDistance = playerInteract != null ? playerInteract.interactDistance : null;
+
+        try
+        {
+            var statSystem = PlayerStatSystem.Instance;
+            if (statSystem != null && statSystem.CanUseWeapon != null)
+            {
+                cachedOriginalCanUseWeapon = statSystem.CanUseWeapon.Value;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"{LogPrefix} Failed to cache weapon state: {ex.Message}");
+        }
+    }
+
+    private void RestoreMovementSettings(PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract)
+    {
+        if (cachedOriginalSpeed.HasValue)
+        {
+            playerMotor.speed = cachedOriginalSpeed.Value;
         }
 
-        if (!cachedOriginalJumpHeight.HasValue)
+        if (cachedOriginalSprintSpeed.HasValue)
         {
-            cachedOriginalJumpHeight = playerMotor.jumpHeight;
+            playerMotor.sprintSpeed = cachedOriginalSprintSpeed.Value;
         }
 
-        if (!cachedOriginalStepOffset.HasValue)
+        if (cachedOriginalJumpHeight.HasValue)
         {
-            cachedOriginalStepOffset = characterController.stepOffset;
+            playerMotor.jumpHeight = cachedOriginalJumpHeight.Value;
         }
 
-        if (!cachedOriginalInteractDistance.HasValue && playerInteract != null)
+        if (cachedOriginalStepOffset.HasValue)
         {
-            cachedOriginalInteractDistance = playerInteract.interactDistance;
+            characterController.stepOffset = cachedOriginalStepOffset.Value;
+        }
+
+        if (playerInteract != null && cachedOriginalInteractDistance.HasValue)
+        {
+            playerInteract.interactDistance = Mathf.Max(cachedOriginalInteractDistance.Value, 0f);
         }
     }
 
