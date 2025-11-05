@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Easy Weapons\Scripts\ProjectilePhysicsFixer.cs" />
+    <Compile Include="Assets\Scripts\Module\BlackJack\Test\BlackjackNPC.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\DialogueEngine.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventAsset.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModulePhysics2D.cs" />
@@ -57,11 +58,13 @@
     <Compile Include="Assets\Scripts\Flow\Tutorial\ServeMealStep.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleSprite.cs" />
     <Compile Include="Assets\Scripts\System\Story\DialogueStoryEventAsset.cs" />
+    <Compile Include="Assets\Scripts\Module\BlackJack\GameEnums.cs" />
     <Compile Include="Assets\Scripts\TrapRespawn.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\Layer\LayerItem.cs" />
     <Compile Include="Assets\Scripts\System\Story\UnityEventStoryEvent.cs" />
     <Compile Include="Assets\Scripts\System\SafeZone.cs" />
     <Compile Include="Assets\Scripts\System\Interface\ISceneManagementService.cs" />
+    <Compile Include="Assets\Scripts\Module\BlackJack\Hand.cs" />
     <Compile Include="Assets\Scripts\UI\Interface\IUIInitializable.cs" />
     <Compile Include="Assets\Scripts\Customer.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Logic\UIAdapter\SelectionData.cs" />
@@ -122,6 +125,7 @@
     <Compile Include="Assets\Scripts\UI\KeyPad\KeyPadGameUI.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\TutorialContext.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DataManager.cs" />
+    <Compile Include="Assets\Scripts\Module\BlackJack\Deck.cs" />
     <Compile Include="Assets\Scripts\UI\Shop\ShopUI.cs" />
     <Compile Include="Assets\Scripts\UI\Minigame\sigilType.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\ExposedData\LayerSettingData.cs" />
@@ -136,11 +140,13 @@
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueEventPlayer.cs" />
     <Compile Include="Assets\Scripts\UI\Minigame\MinigamePanel.cs" />
     <Compile Include="Assets\Scripts\System\Quest.cs" />
+    <Compile Include="Assets\Scripts\System\BlackjackSystem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandSelectionEnd.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\Selection\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Data\StatUpgradeData.cs" />
     <Compile Include="Assets\Scripts\UI\KeyPad\ClickTheButton.cs" />
     <Compile Include="Assets\Scripts\System\ServiceLocator.cs" />
+    <Compile Include="Assets\Scripts\UI\SoulMeterUI.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\FirstRoomStep.cs" />
     <Compile Include="Assets\Scripts\System\Story\GameFlowContext.cs" />
     <Compile Include="Assets\Scripts\PlayerFootsteps.cs" />
@@ -223,6 +229,7 @@
     <Compile Include="Assets\Scripts\Module\CardSwipeGame.cs" />
     <Compile Include="Assets\Scripts\FridgeGlowController.cs" />
     <Compile Include="Assets\Scripts\Rendering\FridgeGlowRenderFeature.cs" />
+    <Compile Include="Assets\Scripts\UI\Blackjack\BlackjackUI.cs" />
     <Compile Include="Assets\Scripts\Data\RecipeData.cs" />
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueEngine_Gaslight.cs" />
     <Compile Include="Assets\Scripts\Lighting\DynamicShadowDebugger.cs" />
@@ -280,6 +287,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\Extension\EnumNameExtension.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Data\ColumnName.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandCharacterOff.cs" />
+    <Compile Include="Assets\Scripts\System\Interface\IBlackjackSystem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\Observable\ObservableValue.cs" />
     <Compile Include="Assets\Scripts\PuzzleDoor.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventTriggerAuthoring.cs" />
@@ -290,7 +298,9 @@
     <Compile Include="Assets\Easy Weapons\Scripts\Spawner.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerSoulAbilityManager.cs" />
     <Compile Include="Assets\Scripts\UI\HPBarItem.cs" />
+    <Compile Include="Assets\Scripts\UI\Blackjack\CardDisplay.cs" />
     <Compile Include="Assets\Scripts\UI\CardSwipeGame\DraggableCard.cs" />
+    <Compile Include="Assets\Scripts\Module\BlackJack\Card.cs" />
     <Compile Include="Assets\Scripts\System\GameFlow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\SettingDataManager.cs" />
     <Compile Include="Assets\Scripts\System\Story\StorySequenceActivator.cs" />

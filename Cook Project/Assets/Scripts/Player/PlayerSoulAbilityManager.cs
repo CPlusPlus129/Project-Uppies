@@ -33,6 +33,20 @@ public class PlayerSoulAbilityManager : MonoBehaviour
         public UnityEvent onInsufficientSouls = new UnityEvent();
     }
 
+    public readonly struct AbilityDisplayInfo
+    {
+        public AbilityDisplayInfo(string abilityId, Key activationKey, int soulCost)
+        {
+            AbilityId = abilityId;
+            ActivationKey = activationKey;
+            SoulCost = soulCost;
+        }
+
+        public string AbilityId { get; }
+        public Key ActivationKey { get; }
+        public int SoulCost { get; }
+    }
+
     [Header("Soul Meter Initialization")]
     [SerializeField] private bool applyStartingSoulValuesOnAwake = true;
     [SerializeField, Min(0)] private int startingMaxSouls = 100;
@@ -114,6 +128,27 @@ public class PlayerSoulAbilityManager : MonoBehaviour
         }
 
         return ExecuteAbility(abilities[index]);
+    }
+
+    public void PopulateAbilityDisplayInfo(List<AbilityDisplayInfo> buffer)
+    {
+        if (buffer == null)
+        {
+            throw new ArgumentNullException(nameof(buffer));
+        }
+
+        buffer.Clear();
+
+        for (int i = 0; i < abilities.Count; i++)
+        {
+            SoulAbility ability = abilities[i];
+            if (ability == null)
+            {
+                continue;
+            }
+
+            buffer.Add(new AbilityDisplayInfo(ability.abilityId, ability.activationKey, ability.soulCost));
+        }
     }
 
     public void RefreshKeyboardDevice(InputDevice device)
