@@ -15,6 +15,10 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
+    [Header("Player Guidance")]
+    [Tooltip("Optional reference to PlayerFridgeGuidance used when glow triggering should also spin up the path effect.")]
+    [SerializeField] private PlayerFridgeGuidance fridgeGuidance;
+
     private readonly List<FoodSource> eligibleFridgeList = new List<FoodSource>();
     private readonly HashSet<FoodSource> eligibleFridgeSet = new HashSet<FoodSource>();
     private readonly List<FoodSource> previouslyEligibleFridges = new List<FoodSource>();
@@ -34,6 +38,8 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     private GlowCommand lastGlowCommand = GlowCommand.None;
     private float lastGlowDurationSeconds;
+    private bool lastGlowTriggeredGuidance;
+    private bool hasLoggedMissingGuidance;
 
     public IReadOnlyList<FoodSource> EligibleFridges => eligibleFridgeList;
 
@@ -170,19 +176,30 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     public void EnableGlowOnEligible()
     {
+        EnableGlowOnEligible(false);
+    }
+
+    public void EnableGlowOnEligible(bool activateGuidance)
+    {
         RequestLatestSnapshot();
 
         if (enableDebugLogs)
         {
-            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligible → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
+            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligible({activateGuidance}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
         }
 
         lastGlowCommand = GlowCommand.Enable;
         lastGlowDurationSeconds = 0f;
+        lastGlowTriggeredGuidance = activateGuidance;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
             fridge?.EnableGlow();
+        }
+
+        if (activateGuidance)
+        {
+            TriggerGuidance(false, 0f);
         }
     }
 
@@ -197,6 +214,7 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
         lastGlowCommand = GlowCommand.Disable;
         lastGlowDurationSeconds = 0f;
+        lastGlowTriggeredGuidance = false;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
@@ -206,19 +224,37 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     public void EnableGlowOnEligibleForDuration(float seconds)
     {
+        EnableGlowOnEligibleForDuration(seconds, false);
+    }
+
+    public void EnableGlowOnEligibleForDuration(float seconds, bool activateGuidance)
+    {
         RequestLatestSnapshot();
 
         if (enableDebugLogs)
         {
-            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligibleForDuration({seconds}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
+            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligibleForDuration({seconds}, {activateGuidance}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
         }
 
         lastGlowCommand = GlowCommand.EnableForDuration;
         lastGlowDurationSeconds = Mathf.Max(0f, seconds);
+        lastGlowTriggeredGuidance = activateGuidance;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
             fridge?.EnableGlowForDuration(seconds);
+        }
+
+        if (activateGuidance)
+        {
+            if (lastGlowDurationSeconds > 0f)
+            {
+                TriggerGuidance(true, lastGlowDurationSeconds);
+            }
+            else
+            {
+                TriggerGuidance(false, 0f);
+            }
         }
     }
 
@@ -303,6 +339,8 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
             return;
         }
 
+        bool triggeredGuidanceThisFrame = false;
+
         foreach (var fridge in eligibleFridgeList)
         {
             if (fridge == null || previouslyEligibleSet.Contains(fridge))
@@ -314,14 +352,71 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
             {
                 case GlowCommand.Enable:
                     fridge.EnableGlow();
+                    triggeredGuidanceThisFrame = true;
                     break;
                 case GlowCommand.Disable:
                     fridge.DisableGlow();
                     break;
                 case GlowCommand.EnableForDuration:
                     fridge.EnableGlowForDuration(lastGlowDurationSeconds);
+                    triggeredGuidanceThisFrame = true;
                     break;
             }
+        }
+
+        if (triggeredGuidanceThisFrame && lastGlowTriggeredGuidance)
+        {
+            if (lastGlowCommand == GlowCommand.EnableForDuration && lastGlowDurationSeconds > 0f)
+            {
+                TriggerGuidance(true, lastGlowDurationSeconds);
+            }
+            else if (lastGlowCommand == GlowCommand.Enable)
+            {
+                TriggerGuidance(false, 0f);
+            }
+        }
+    }
+
+    private PlayerFridgeGuidance ResolveFridgeGuidance()
+    {
+        if (fridgeGuidance != null)
+        {
+            return fridgeGuidance;
+        }
+
+#if UNITY_2023_1_OR_NEWER
+        fridgeGuidance = FindFirstObjectByType<PlayerFridgeGuidance>(FindObjectsInactive.Exclude);
+#else
+        fridgeGuidance = FindObjectOfType<PlayerFridgeGuidance>();
+#endif
+
+        if (fridgeGuidance == null && !hasLoggedMissingGuidance)
+        {
+            hasLoggedMissingGuidance = true;
+            if (enableDebugLogs)
+            {
+                Debug.LogWarning("FridgeGlowEligibilityTracker: Guidance activation requested but no PlayerFridgeGuidance was found in the scene.", this);
+            }
+        }
+
+        return fridgeGuidance;
+    }
+
+    private void TriggerGuidance(bool useDuration, float durationSeconds)
+    {
+        PlayerFridgeGuidance guidance = ResolveFridgeGuidance();
+        if (guidance == null)
+        {
+            return;
+        }
+
+        if (useDuration && durationSeconds > 0f)
+        {
+            guidance.ActivateGuidanceForSeconds(durationSeconds);
+        }
+        else
+        {
+            guidance.ActivateGuidance();
         }
     }
 }

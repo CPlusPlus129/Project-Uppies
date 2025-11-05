@@ -160,6 +160,7 @@ GameObject:
   - component: {fileID: 3201705174588527448}
   - component: {fileID: 5165821146269913966}
   - component: {fileID: 7245783919487480873}
+  - component: {fileID: 4730907086059992373}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -516,6 +517,64 @@ MonoBehaviour:
   navMeshSampleRadius: 2
   retargetInterval: 0.5
   enableDebugLogs: 1
+--- !u!114 &4730907086059992373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8600d100e8a4b794299572781ee880be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSoulAbilityManager
+  applyStartingSoulValuesOnAwake: 1
+  startingMaxSouls: 100
+  startingSouls: 100
+  abilities:
+  - abilityId: Fridge Glow
+    activationKey: 31
+    soulCost: 25
+    onActivated:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 0}
+          m_TargetAssemblyTypeName: FridgeGlowEligibilityTracker, Assembly-CSharp
+          m_MethodName: EnableGlowOnEligible
+          m_Mode: 6
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    onInsufficientSouls:
+      m_PersistentCalls:
+        m_Calls: []
+  - abilityId: Fridge Pathing
+    activationKey: 32
+    soulCost: 25
+    onActivated:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 7245783919487480873}
+          m_TargetAssemblyTypeName: PlayerFridgeGuidance, Assembly-CSharp
+          m_MethodName: ActivateGuidanceForSeconds
+          m_Mode: 4
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 20
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    onInsufficientSouls:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!1001 &695477875812888906
 PrefabInstance:
   m_ObjectHideFlags: 0
