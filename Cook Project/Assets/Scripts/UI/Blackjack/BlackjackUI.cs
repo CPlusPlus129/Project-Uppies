@@ -286,7 +286,7 @@ namespace BlackjackGame
 
         private async UniTaskVoid ShowDevilsDealAsync()
         {
-            await UniTask.Delay(1500);
+            await UniTask.Delay(500);
 
             if (_devilsDealPanel != null)
             {

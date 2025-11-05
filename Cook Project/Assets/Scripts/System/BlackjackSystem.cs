@@ -109,6 +109,7 @@ namespace BlackjackGame
             _deck.Reset();
 
             SetGameState(GameState.DealingInitialCards);
+            _roundCount++;
 
             await DealInitialCards();
         }
