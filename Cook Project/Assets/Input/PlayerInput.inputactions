@@ -1342,6 +1342,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Blackjack",
+            "id": "6c88751b-fb9b-441a-be2a-cb6dbb17d896",
+            "actions": [
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "207d1770-689e-44ae-8aca-42ccccd4d93e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "86aabe36-045b-4001-9e82-9e0d051820d1",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
