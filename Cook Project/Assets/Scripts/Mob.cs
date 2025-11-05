@@ -104,6 +104,8 @@ public class Mob : MonoBehaviour
         public GameObject deathParticles = null;
         public Vector3 particleOffset = Vector3.zero;
         public bool autoDestroyParticles = true;
+        [Header("Souls")]
+        [Min(0)] public int soulReward = 0;
     }
 
     [Serializable]
@@ -1188,6 +1190,7 @@ public class Mob : MonoBehaviour
         agent.enabled = false;
 
         SpawnDeathParticles();
+        AwardSouls();
         enabled = false;
 
         Destroy(gameObject, death.despawnDelay);
@@ -1214,6 +1217,27 @@ public class Mob : MonoBehaviour
             {
                 Destroy(particle, 5f);
             }
+        }
+    }
+
+    private void AwardSouls()
+    {
+        if (death.soulReward <= 0)
+        {
+            return;
+        }
+
+        PlayerStatSystem playerStats = PlayerStatSystem.Instance;
+        if (playerStats == null)
+        {
+            return;
+        }
+
+        playerStats.AddSouls(death.soulReward);
+
+        if (showDebug)
+        {
+            Debug.Log($"Mob awarded {death.soulReward} souls. Player Souls: {playerStats.CurrentSouls.Value}/{playerStats.MaxSouls.Value}", this);
         }
     }
 

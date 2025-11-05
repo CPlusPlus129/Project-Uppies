@@ -41,6 +41,7 @@ public class PlayerFridgeGuidance : MonoBehaviour
     private bool hasValidPath;
     private bool isInitialized;
     private float retargetTimer;
+    private CancellationTokenSource guidanceDurationCts;
 
     private void Awake()
     {
@@ -91,6 +92,8 @@ public class PlayerFridgeGuidance : MonoBehaviour
 
     private void OnDestroy()
     {
+        CancelGuidanceDurationTimer();
+
         if (fridgeGlowManager != null)
         {
             fridgeGlowManager.EligibleFridgesChanged -= HandleEligibleFridgesChanged;
@@ -149,6 +152,104 @@ public class PlayerFridgeGuidance : MonoBehaviour
     private void HandleEligibleFridgesChanged(IReadOnlyCollection<FoodSource> fridges)
     {
         UpdateTarget(fridges);
+    }
+
+    /// <summary>
+    /// Forces the guidance particle to acquire the current best fridge target and rebuild its path.
+    /// Useful for external triggers such as abilities.
+    /// </summary>
+    public void ActivateGuidance(bool resetTravelDistance = true)
+    {
+        if (!isInitialized)
+        {
+            return;
+        }
+
+        if (fridgeGlowManager == null)
+        {
+            UpdateTarget(null);
+            return;
+        }
+
+        CancelGuidanceDurationTimer();
+
+        IReadOnlyCollection<FoodSource> snapshot = fridgeGlowManager.GetEligibleFridgesSnapshot();
+
+        if (resetTravelDistance)
+        {
+            travelDistance = 0f;
+        }
+
+        UpdateTarget(snapshot);
+
+        if (!hasValidPath && currentTarget != null)
+        {
+            RebuildPath(forceResetTravel: resetTravelDistance);
+        }
+    }
+
+    /// <summary>
+    /// Activates guidance for the specified number of seconds, then shuts it off automatically.
+    /// </summary>
+    public void ActivateGuidanceForSeconds(float durationSeconds, bool resetTravelDistance = true)
+    {
+        if (durationSeconds <= 0f)
+        {
+            DeactivateGuidance();
+            return;
+        }
+
+        ActivateGuidance(resetTravelDistance);
+
+        CancelGuidanceDurationTimer();
+        guidanceDurationCts = new CancellationTokenSource();
+        RunGuidanceDurationAsync(durationSeconds, guidanceDurationCts.Token).Forget();
+    }
+
+    /// <summary>
+    /// Overload for UnityEvents that only support a single float argument.
+    /// </summary>
+    public void ActivateGuidanceForSeconds(float durationSeconds)
+    {
+        ActivateGuidanceForSeconds(durationSeconds, true);
+    }
+
+    /// <summary>
+    /// Immediately stops the guidance effect and clears the current target/path.
+    /// </summary>
+    public void DeactivateGuidance()
+    {
+        CancelGuidanceDurationTimer();
+        ClearPath();
+        currentTarget = null;
+    }
+
+    private async UniTaskVoid RunGuidanceDurationAsync(float durationSeconds, CancellationToken token)
+    {
+        try
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(durationSeconds), DelayType.DeltaTime, PlayerLoopTiming.Update, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        guidanceDurationCts?.Dispose();
+        guidanceDurationCts = null;
+        DeactivateGuidance();
+    }
+
+    private void CancelGuidanceDurationTimer()
+    {
+        if (guidanceDurationCts == null)
+        {
+            return;
+        }
+
+        guidanceDurationCts.Cancel();
+        guidanceDurationCts.Dispose();
+        guidanceDurationCts = null;
     }
 
     private void UpdateTarget(IReadOnlyCollection<FoodSource> fridges)
