@@ -66,6 +66,21 @@ namespace BlackjackGame
         int CurrentBet { get; }
 
         /// <summary>
+        /// Gets the minimum allowable bet for the game.
+        /// </summary>
+        int MinimumBet { get; }
+
+        /// <summary>
+        /// Gets the maximum allowable bet amount.
+        /// </summary>
+        int MaximumBet { get; }
+
+        /// <summary>
+        /// Gets the current round count.
+        /// </summary>
+        int RoundCount { get; }
+
+        /// <summary>
         /// Check if cheat mode is active (player will win after accepting devil's deal)
         /// </summary>
         bool IsCheatingForPlayer { get; }

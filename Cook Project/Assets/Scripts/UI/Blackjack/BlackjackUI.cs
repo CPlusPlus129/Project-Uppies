@@ -18,6 +18,7 @@ namespace BlackjackGame
         [SerializeField] private TextMeshProUGUI _playerValueText;
         [SerializeField] private TextMeshProUGUI _dealerValueText;
         [SerializeField] private TextMeshProUGUI _resultText;
+        [SerializeField] private TextMeshProUGUI _betInfoText;
 
         [Header("Card Display")]
         [SerializeField] private Transform _playerCardContainer;
@@ -50,6 +51,7 @@ namespace BlackjackGame
         {
             _cardPrefab.SetActive(false);
             _blackjackSystem = await ServiceLocator.Instance.GetAsync<IBlackjackSystem>();
+            _betInfoText.text = $"BET AMOUNT: {_blackjackSystem.MinimumBet}~{_blackjackSystem.MaximumBet}";
             SetupButtonListeners();
             BindToSystem();
 
@@ -279,7 +281,7 @@ namespace BlackjackGame
         private bool ShouldOfferDevilsDeal()
         {
             // Offer devil's deal after player has lost several rounds
-            return _blackjackSystem.PlayerChips.CurrentValue <= 50;
+            return _blackjackSystem.RoundCount >= 3;
         }
 
         private async UniTaskVoid ShowDevilsDealAsync()

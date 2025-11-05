@@ -2,15 +2,15 @@ using Cysharp.Threading.Tasks;
 using R3;
 using System;
 using System.Collections.Generic;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace BlackjackGame
 {
     public class BlackjackSystem : IBlackjackSystem
     {
         // Configuration
-        private const int INITIAL_CHIPS = 100;
-        private const int MINIMUM_BET = 10;
+        private const int INITIAL_CHIPS = 1000;
+        private const int MINIMUM_BET = 100;
+        private const int MAXIMUM_BET = 250;
         private const int DEALER_STAND_VALUE = 17;
 
         // State
@@ -20,6 +20,7 @@ namespace BlackjackGame
         private Hand _dealerHand;
         private int _playerChips;
         private int _currentBet;
+        private int _roundCount;
         private GameState _gameState;
         private RoundResult _lastRoundResult;
         private bool? _CheatMode; // true = player must win, false = player must lose, null = normal
@@ -44,6 +45,9 @@ namespace BlackjackGame
         public int PlayerHandValue => _playerHand.GetValue();
         public int DealerHandValue => _dealerHand.GetValue();
         public int CurrentBet => _currentBet;
+        public int MinimumBet => MINIMUM_BET;
+        public int MaximumBet => MAXIMUM_BET;
+        public int RoundCount => _roundCount;
         public bool IsCheatingForPlayer => _CheatMode == true;
 
         public BlackjackSystem()
@@ -88,7 +92,7 @@ namespace BlackjackGame
 
         public bool CanPlaceBet(int amount)
         {
-            return amount >= MINIMUM_BET && amount <= _playerChips && _gameState == GameState.WaitingForBet;
+            return amount >= MINIMUM_BET && amount <= _playerChips && amount <= MAXIMUM_BET && _gameState == GameState.WaitingForBet;
         }
 
         public async UniTask PlaceBetAndStartRound(int betAmount)
