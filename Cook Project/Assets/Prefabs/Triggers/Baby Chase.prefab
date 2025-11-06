@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8970032482508553129
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5733360094984091749}
+  - component: {fileID: 1557463073848370944}
+  - component: {fileID: 4267363117669384503}
+  - component: {fileID: 1759680020328757901}
+  m_Layer: 0
+  m_Name: Baby Chase
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5733360094984091749
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8970032482508553129}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -64.428, y: -1.238, z: -58.81}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1557463073848370944
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8970032482508553129}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4267363117669384503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8970032482508553129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1eede6c5d97c0b545ad763d2c9ee982b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueEventPlayer
+  defaultEvent: {fileID: 11400000, guid: 005c9c068ea536d4fae3eacea6309837, type: 2}
+  defaultCollection: {fileID: 0}
+  overrideCollectionMode: 0
+  collectionPlaybackOverride: 0
+  resetCollectionStateOnEnable: 0
+  resetCollectionStateOnDisable: 1
+  resolveServiceFromLocator: 1
+  dialogueServiceBehaviour: {fileID: 0}
+  onDialogueStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onDialogueCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  onDialogueDenied:
+    m_PersistentCalls:
+      m_Calls: []
+  enableDebugLogging: 0
+--- !u!114 &1759680020328757901
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8970032482508553129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7a69d91837d5454b9963bf172fdff1a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueTriggerAuthoring
+  eventPlayer: {fileID: 4267363117669384503}
+  triggeringTag: Player
+  triggerOnce: 1
+  disableColliderAfterTrigger: 1
+  triggerBehaviour: 1
+  onEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onDenied:
+    m_PersistentCalls:
+      m_Calls: []
