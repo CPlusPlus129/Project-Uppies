@@ -182,7 +182,7 @@ public class SoulMeterUI : MonoBehaviour
         text.fontSize = abilityFontSize;
         text.color = abilityTextColor;
         text.alignment = TextAlignmentOptions.Left;
-        text.enableWordWrapping = false;
+        text.textWrappingMode = TextWrappingModes.NoWrap;
         text.raycastTarget = false;
         text.text = string.Empty;
 
