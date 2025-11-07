@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5fa9304d395c7d4e9dd09844be95f51, type: 3}
+  m_Name: MainStoryFlow
+  m_EditorClassIdentifier: Assembly-CSharp::StorySequenceAsset
+  sequenceId: 0
+  events:
+  - {fileID: 11400000, guid: 75820d3923f4b79458dee6e157c36bd6, type: 2}
+  - {fileID: 11400000, guid: d84a5ae5d0064664dab671fdb263ee8b, type: 2}
+  - {fileID: 11400000, guid: 66794742f73bcf44d92db214135046f8, type: 2}
+  - {fileID: 11400000, guid: 1fe462879c826d3419f86b7e01c3cb0b, type: 2}
+  - {fileID: 11400000, guid: c17a78f5b6cf5e14ca368af312b90fa0, type: 2}
+  - {fileID: 11400000, guid: 9b4ccaedb5b072b4e885912ffdfb595e, type: 2}

@@ -383,11 +383,11 @@ public class GameFlow : MonoSingleton<GameFlow>
         }
     }
 
-    public void Signal(string signalId)
+    public bool Signal(string signalId)
     {
         if (string.IsNullOrWhiteSpace(signalId))
         {
-            return;
+            return false;
         }
 
         UniTaskCompletionSource<bool> waiter = null;
@@ -400,8 +400,10 @@ public class GameFlow : MonoSingleton<GameFlow>
             }
         }
 
+        var fulfilled = waiter != null;
         waiter?.TrySetResult(true);
-        Log($"Signal '{signalId}' received.");
+        Log($"Signal '{signalId}' received." + (fulfilled ? string.Empty : " (no waiting listeners)"));
+        return fulfilled;
     }
 
     public override void OnDestroy()

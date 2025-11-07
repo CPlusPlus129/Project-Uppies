@@ -103,6 +103,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DialogueTagReplacement\CharacterNameHandler.cs" />
     <Compile Include="Assets\Scripts\UI\MinigameUI.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleEPOOutline.cs" />
+    <Compile Include="Assets\Scripts\System\Story\OrderCompletionGateStoryEvent.cs" />
     <Compile Include="Assets\Scripts\Rendering\FlamePillarEffect.cs" />
     <Compile Include="Assets\Scripts\Flow\Title\HeartbeatLight.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandScenarioLabel.cs" />
@@ -202,6 +203,7 @@
     <Compile Include="Assets\Scripts\StartGameTrigger.cs" />
     <Compile Include="Assets\Scripts\Rendering\BillboardSprite.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerLightDamage.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StorySignalEmitter.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\StringGrid\StringGridRow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\DialogueUIManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
@@ -290,6 +292,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandCharacterOff.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IBlackjackSystem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\Observable\ObservableValue.cs" />
+    <Compile Include="Assets\Scripts\System\Story\SignalDrivenStoryEvent.cs" />
     <Compile Include="Assets\Scripts\PuzzleDoor.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventTriggerAuthoring.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleUtils.cs" />
