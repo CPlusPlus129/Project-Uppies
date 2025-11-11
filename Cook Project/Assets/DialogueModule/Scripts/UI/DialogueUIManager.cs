@@ -44,7 +44,6 @@ namespace DialogueModule
         protected void OnDestroy()
         {
             engine.uiHasInit = false;
-            UnbindSelf();
             Unbind();
             ForceRestoreLayerStates();
         }
@@ -65,15 +64,14 @@ namespace DialogueModule
         {
             engine.adapter.onStartScenario += OnStartScenario;
             engine.adapter.onEndScenario += OnEndScenario;
+            engine.OnEngineDestroy += UnbindSelf;
         }
 
         private void UnbindSelf()
         {
-            if (engine?.adapter != null)
-            {
-                engine.adapter.onStartScenario -= OnStartScenario;
-                engine.adapter.onEndScenario -= OnEndScenario;
-            }
+            engine.adapter.onStartScenario -= OnStartScenario;
+            engine.adapter.onEndScenario -= OnEndScenario;
+            engine.OnEngineDestroy -= UnbindSelf;
         }
 
         private void CacheBindables()

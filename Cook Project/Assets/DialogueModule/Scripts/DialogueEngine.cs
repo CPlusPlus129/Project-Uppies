@@ -9,6 +9,7 @@ namespace DialogueModule
     [AddComponentMenu("Dialogue Module/Dialogue Engine")]
     public class DialogueEngine : MonoBehaviour
     {
+        internal Action OnEngineDestroy;
         internal DataManager dataManager => GetComponent<DataManager>();
         internal ScenarioManager scenarioManager => GetComponent<ScenarioManager>();
         public ScenarioUIAdapter adapter => GetComponent<ScenarioUIAdapter>();
@@ -20,6 +21,12 @@ namespace DialogueModule
         protected void Awake()
         {
             Init();
+        }
+
+        protected void OnDestroy()
+        {
+            OnEngineDestroy?.Invoke();
+            OnEngineDestroy = null;
         }
 
         public void Init()
