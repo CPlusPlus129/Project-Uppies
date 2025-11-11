@@ -18,12 +18,12 @@ namespace DialogueModule
         internal bool uiHasInit { get; set; } = false;
         private bool _isInited = false;
 
-        protected void Awake()
+        protected virtual void Awake()
         {
             Init();
         }
 
-        protected void OnDestroy()
+        protected virtual void OnDestroy()
         {
             OnEngineDestroy?.Invoke();
             OnEngineDestroy = null;

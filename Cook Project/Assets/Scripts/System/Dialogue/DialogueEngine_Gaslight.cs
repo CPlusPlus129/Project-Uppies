@@ -8,8 +8,9 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
     private readonly UniTaskCompletionSource readyTcs = new UniTaskCompletionSource();
     private bool isRuntimeReady;
 
-    protected void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         scenarioManager.onEndScenario -= OnEndScenario;
         if (!isRuntimeReady)
         {
