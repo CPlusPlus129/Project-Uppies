@@ -49,7 +49,9 @@ namespace SRDebugger.Profiler
             CachedGameObject.hideFlags = HideFlags.NotEditable;
             CachedTransform.SetParent(Hierarchy.Get("SRDebugger"), true);
 
-#if UNITY_2019_3_OR_NEWER
+#if UNITY_2023_3_OR_NEWER
+            RenderPipelineManager.beginContextRendering += RenderPipelineOnBeginFrameRendering;
+#elif UNITY_2019_3_OR_NEWER
             RenderPipelineManager.beginFrameRendering += RenderPipelineOnBeginFrameRendering;
 #else
             RenderPipeline.beginFrameRendering += RenderPipelineOnBeginFrameRendering;
@@ -111,7 +113,9 @@ namespace SRDebugger.Profiler
             _updateDuration = _stopwatch.Elapsed.TotalSeconds;
         }
 
-#if UNITY_2019_3_OR_NEWER
+#if UNITY_2023_3_OR_NEWER
+        private void RenderPipelineOnBeginFrameRendering(ScriptableRenderContext context, System.Collections.Generic.List<Camera> cameras)
+#elif UNITY_2019_3_OR_NEWER
         private void RenderPipelineOnBeginFrameRendering(ScriptableRenderContext context, Camera[] cameras)
 #else
         private void RenderPipelineOnBeginFrameRendering(Camera[] obj)
