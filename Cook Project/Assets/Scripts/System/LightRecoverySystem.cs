@@ -92,7 +92,7 @@ public class LightRecoverySystem : MonoBehaviour
         {
             float newLight = currentLight + (recoverySpeed * Time.deltaTime);
             newLight = Mathf.Min(newLight, maxLight);
-            playerStatSystem.CurrentLight.Value = newLight;
+            playerStatSystem.AddLight(recoverySpeed * Time.deltaTime);
             
             if (showDebugInfo)
             {
@@ -115,8 +115,7 @@ public class LightRecoverySystem : MonoBehaviour
         var playerStatSystem = PlayerStatSystem.Instance;
         if (playerStatSystem != null)
         {
-            float newLight = Mathf.Max(0f, playerStatSystem.CurrentLight.Value - amount);
-            playerStatSystem.CurrentLight.Value = newLight;
+            playerStatSystem.ConsumeLight(amount);
         }
     }
     

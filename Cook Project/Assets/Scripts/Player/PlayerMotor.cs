@@ -33,21 +33,19 @@ public class PlayerMotor : MonoBehaviour
             playerVelocity.y = -2f;
         }
 
+        var playerStats = PlayerStatSystem.Instance;
         if (isSprinting)
         {
-            PlayerStatSystem.Instance.CurrentStamina.Value -= sprintStaminaCost * Time.deltaTime;
-            if (PlayerStatSystem.Instance.CurrentStamina.Value <= 0)
+            playerStats.ConsumeStamina(sprintStaminaCost * Time.deltaTime);
+
+            if (playerStats.CurrentStamina.CurrentValue <= 0)
             {
-                PlayerStatSystem.Instance.CurrentStamina.Value = 0;
                 isSprinting = false;
             }
         }
         else
         {
-            PlayerStatSystem.Instance.CurrentStamina.Value = Mathf.Clamp(
-                PlayerStatSystem.Instance.CurrentStamina.Value + PlayerStatSystem.Instance.StaminaRecoverySpeed.Value * Time.deltaTime,
-                0,
-                PlayerStatSystem.Instance.MaxStamina.Value);
+            playerStats.AddStamina(playerStats.StaminaRecoverySpeed.CurrentValue * Time.deltaTime);
         }
 
         float currentSpeed = isSprinting ? sprintSpeed : speed;

@@ -32,6 +32,7 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public Subject<Unit> OnPlayerDeath = new Subject<Unit>();
     public ReactiveProperty<float> CurrentStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> MaxStamina { get; private set; } = new ReactiveProperty<float>(100);
+    public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
 
     public ReactiveProperty<int> CurrentSouls { get; private set; } = new ReactiveProperty<int>(0);
     public ReactiveProperty<int> MaxSouls { get; private set; } = new ReactiveProperty<int>(100);
@@ -46,12 +47,56 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<int> Money { get; private set; } = new ReactiveProperty<int>(66);
     public ReactiveProperty<int> InventorySize { get; private set; } = new ReactiveProperty<int>(4);
 
-    public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
 
     public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
 
     private CompositeDisposable disposables = new CompositeDisposable();
+
+    public void Heal(int value, bool canOverheal = false)
+    {
+        if (canOverheal)
+            CurrentHP.Value += value;
+        else
+            CurrentHP.Value = Mathf.Clamp(CurrentHP.CurrentValue + value, 0, MaxHP.CurrentValue);
+    }
+
+    public void Damage(int value)
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (SROptions.Current.IsInvincible)
+            return;
+#endif
+        CurrentHP.Value = Mathf.Max(0, CurrentHP.CurrentValue - value);
+    }
+
+    public void AddStamina(float value)
+    {
+        CurrentStamina.Value = Mathf.Clamp(CurrentStamina.CurrentValue + value, 0, MaxStamina.CurrentValue);
+    }
+
+    public void ConsumeStamina(float value)
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (SROptions.Current.IsInfiniteStamina)
+            return;
+#endif
+        CurrentStamina.Value = Mathf.Max(0, CurrentStamina.CurrentValue - value);
+    }
+
+    public void AddLight(float value)
+    {
+        CurrentLight.Value = Mathf.Clamp(CurrentLight.CurrentValue + value, 0, MaxLight.CurrentValue);
+    }
+
+    public void ConsumeLight(float value)
+    {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (SROptions.Current.IsInfiniteAmmo)
+            return;
+#endif
+        CurrentLight.Value = Mathf.Max(0f, CurrentLight.CurrentValue - value);
+    }
 
     public void AddSouls(int amount)
     {
