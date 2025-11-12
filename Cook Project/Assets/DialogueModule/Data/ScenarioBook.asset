@@ -701,7 +701,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - The restaurant. I gotta get back... to the restaurant.
+        - I can see someone through the fog ahead... This isn't right... Where's...
+          the restaurant...?
       - strings:
         - EndScenario
       - strings:
@@ -726,7 +727,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - What's going on here? Am I being filmed? Who are you?
+        - Agh! What's going on here? Am I being filmed? Who are you?
       - strings:
         - 
         - Satan
@@ -763,7 +764,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Hell?! So, then you're-
+        - Hell?! So, then you're--
       - strings:
         - 
         - Satan
@@ -791,8 +792,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - God! Kids these days, it's all greater deities and angry <color=red>British</color>
-          men to them. Eternal damnation just doesn't fit into a 7 second video!
+        - God! Kids these days, it's all greater deities and bad hot takes. Eternal
+          damnation just doesn't fit into a 7-second video!
       - strings:
         - 
         - Player
@@ -810,7 +811,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - I'm dead...?
+        - ...I'm dead...?
       - strings:
         - 
         - Satan
@@ -820,7 +821,7 @@ MonoBehaviour:
         - 
         - 
         - Don't think too hard about it for now. Alright, that's enough explaining
-          from me. You can move, so you can work.
+          from me. Time to work!
       - strings:
         - 
         - Player
@@ -829,8 +830,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - You haven't explained anything yet! How did I die? Who even am I? Why can't
-          I remember?
+        - You haven't explained anything yet! How did I die? Why can't I remember?
       - strings:
         - 
         - Satan
@@ -840,7 +840,7 @@ MonoBehaviour:
         - 
         - 
         - Yeah yeah, file a complaint with the union. Moving on. Get going to the
-          next room, and say hi to <color=red>Stan</color> for me.
+          next room, and say hi to Stan for me.
       - strings:
         - EndScenario
       - strings:
@@ -849,32 +849,13 @@ MonoBehaviour:
         - '*tutorial_first_room_entering'
       - strings:
         - 
-        - Player
-        - 
-        - None
         - 
         - 
         - 
-        - What is this place? It looks more like a basement than...
-      - strings:
-        - 
-        - Player
-        - 
-        - None
         - 
         - 
         - 
-        - ...
-      - strings:
-        - 
-        - Player
-        - 
-        - None
-        - 
-        - 
-        - 
-        - I wonder what I did to end up here. If this really is Hell... Well, nothing
-          I can do about it for now. I guess I'll find <color=red>Stan</color>.
+        - (A customer glows.)
       - strings:
         - EndScenario
       - strings:
@@ -908,7 +889,7 @@ MonoBehaviour:
         - 
         - 
         - Sounds like someone's hungry! See that in the top left of your screen?
-          That's Stan's order. Now you've gotta <color=red>gather all 3 ingredients</color>.
+          That's Stan's order. Now you've gotta <color=yellow>gather all 3 ingredients</color>.
       - strings:
         - 
         - Player
@@ -917,7 +898,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Uhhh, they don't sound hungry to-
+        - Uhhh, they don't sound hungry to--
       - strings:
         - 
         - Satan
@@ -926,8 +907,36 @@ MonoBehaviour:
         - 
         - 
         - 
-        - And do it quickly before the customer gets hangry -- and by hangry, I mean
-          they'll start removing your limbs alphabetically.
+        - And do it quickly unless you want your limbs removed algebraically--
+      - strings:
+        - 
+        - stan
+        - 
+        - None
+        - 
+        - 
+        - 
+        - OH. OH GOD. MY ARM. MY ARM IS UNSCREWING. WHYYYY?!
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Hmm, or was it alphabetically? Either way, you get the point. <color=yellow>Speed
+          is key</color> when serving the customer!
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - (This guy's clearly nuts, devil or not. But I guess I have no choice but
+          to play along for now...)
       - strings:
         - EndScenario
       - strings:
@@ -952,7 +961,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Why-
+        - Why--
       - strings:
         - 
         - Satan
@@ -976,9 +985,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - You can press <color=red>Q</color> to drop it on the ground if you're feeling
-          encumbered. Don't worry about being unsanitary, I sent all Health Inspectors
-          to Superhell forever ago.
+        - You can press Q to drop items if you're feeling encumbered. Just remember
+          you can't pick them back up!
       - strings:
         - EndScenario
       - strings:
@@ -1003,7 +1011,7 @@ MonoBehaviour:
         - 
         - 
         - Meet your coworker, all-consuming <color=red>darkness</color>. All-consuming
-          darkness, meet Player.
+          darkness, meet your new best friend.
       - strings:
         - 
         - Player
@@ -1036,7 +1044,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Ah! Why does it feel like my head's being stabbed with needles?!
+        - Agh! It feels like little needles in my head... What is that?!
       - strings:
         - 
         - Satan
@@ -1045,8 +1053,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Nothing like a practical lesson. Unless you want your essence drained until
-          you're an empty husk, <color=red>stay out of the dark</color>.
+        - Hey, I did say it was all-consuming. Make sure to stick to the light if
+          you want to keep your everything.
       - strings:
         - 
         - Player
@@ -1055,7 +1063,27 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Okay, maybe I'm a little scared of the dark after all.
+        - (Okay, maybe I'm a little scared of the dark.)
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Don't worry, even if you're consumed, I'll drag you back as many times
+          as I need.
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - (What's the point of any of this?! Is this just to torture me? What did
+          I do to deserve all this?!)
       - strings:
         - EndScenario
       - strings:
@@ -1070,18 +1098,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Since I'm the best boss around, here's a nifty little <color=red>device</color>
-          to ward off the darkness.
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Use your <color=red>left mouse button</color> to shoot. The bullets create
-          <color=yellow>light</color> -- your only defense down here.
+        - Since I'm the best boss around, here's a nifty little device to ward off
+          the darkness.
       - strings:
         - 
         - Player
@@ -1090,7 +1108,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - You're just giving this to me? Aren't you worried I'm going to... y'know.
+        - So, you want me to fire a gun into a small, dark, enclosed room? Awesome
+          torture tactic.
       - strings:
         - 
         - Satan
@@ -1099,8 +1118,18 @@ MonoBehaviour:
         - 
         - 
         - 
-        - That's not just any gunpowder rifle. That's <color=yellow>God's Little
-          Shotgun</color>!
+        - You've got it all wrong! That's <color=yellow>God's Little Shotgun</color>!
+          The bullets create light -- your only defense down here.
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Click the <color=yellow>left button</color> to shoot a projectile to ward
+          off the dark! No reload needed, it'll recharge over time automatically!
       - strings:
         - 
         - Player
@@ -1109,7 +1138,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - God's little what-
+        - God's little what now--
       - strings:
         - 
         - Satan
@@ -1118,8 +1147,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Anyways! It'll be fine. Besides, if you die, I'll just bring you right
-          back!
+        - Anyways! Go forth and get more ingredients! Just one more before you can
+          cook!
       - strings:
         - EndScenario
       - strings:
@@ -1134,7 +1163,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - What the hell are those?!
+        - What the hell are those things?!
       - strings:
         - 
         - Satan
@@ -1143,8 +1172,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Oh, just some <color=red>souls of the damned</color>. You can use your
-          light gun to defeat them.
+        - Oh, just some souls of the damned. You can use your light gun to defeat
+          them.
       - strings:
         - 
         - Player
@@ -1165,6 +1194,25 @@ MonoBehaviour:
         - You're dead too, in case you forgot. Yet here you are, wasting my valuable
           time that could be spent on winning that lawsuit!
       - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - (There's no point in arguing with him... He clearly doesn't care what I
+          say.)
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - Just get back to the cauldron, I've got an affidavit to forge.
+      - strings:
         - EndScenario
       - strings:
         - 
@@ -1178,8 +1226,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Head back to the <color=red>pot</color> and we'll cook something up for
-          that starving customer.
+        - For your pain, let me read you the manual. Don't say I never did nothing
+          for you, capiche?
       - strings:
         - 
         - Player
@@ -1188,35 +1236,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - A pot? What am I, a witch?
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - You wish. You're much, much worse than a Witch.
-      - strings:
-        - 
-        - Player
-        - 
-        - None
-        - 
-        - 
-        - 
-        - You know what? I bet I wasn't even a bad person, and you're just doing
-          this for kicks.
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Sure thing, kiddo. That's what they all say.
+        - What?
       - strings:
         - EndScenario
       - strings:
@@ -1231,8 +1251,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - For your pain, let me read you the manual. Don't say I never did nothing
-          for you, capiche? Let's see here...
+        - Let's see here... \Select your dish and click COOK. You must then complete
+          the incantation\... blah blah... boring... skipping... Ah! Here.
       - strings:
         - 
         - Satan
@@ -1241,9 +1261,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - <i>'Select the dish you want to make and click <color=red>COOK</color>.
-          You must then complete the incantation'</i>... let's see, flip to page
-          20018... Ah! Here.
+        - \You need to press the buttons in the order shown to complete the dish.\
       - strings:
         - 
         - Satan
@@ -1252,27 +1270,9 @@ MonoBehaviour:
         - 
         - 
         - 
-        - <i>'You need to press the buttons in the order shown to complete the dish.'</i>
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - <i>'The buttons are <color=red>WASD and your arrow keys</color>. If you
-          mess up, you have to start over. Our customers deserve perfection.'</i>
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - You're welcome. Don't forget to add some love, by the way. Or just bash
-          it in until it stops moving. Either works.
+        - ' The buttons are <color=red>WASD</color> and your <color=red>arrow keys</color>.
+          By the way, if you mess up, you have to start over. Our customers deserve
+          perfection, Theo. Perfection!'
       - strings:
         - 
         - Player
@@ -1281,7 +1281,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Great... Guess I'll just give it a shot, then.
+        - Right... Guess I'll just give it a shot, then.
       - strings:
         - EndScenario
       - strings:
@@ -1297,7 +1297,7 @@ MonoBehaviour:
         - 
         - 
         - You'll earn money from these culinary crimes, by the by. Use it to buy
-          power-ups and items from the shop. Some might even be useful.
+          cool power-ups and items from the shop.
       - strings:
         - 
         - Player
@@ -1315,7 +1315,7 @@ MonoBehaviour:
         - 
         - 
         - 
-        - That's Capitalism, baby! Just do your little job, and I'll worry about
+        - Aha, that's Capitalism, baby! Just do your little job, and I'll worry about
           the rest.
       - strings:
         - 
@@ -1325,8 +1325,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - So, what? I'm just supposed to throw crap in a Witch's cauldron for all
-          eternity? I don't even remember what I'm being punished for!
+        - So, what? My eternal punishment is to throw crap in a cauldron for all
+          eternity? Why me, why all of this?!
       - strings:
         - 
         - Satan
@@ -1356,7 +1356,16 @@ MonoBehaviour:
         - 
         - 
         - Ugh, you humans. Why does everything need to have a "point"? Look. All
-          you gotta do is survive the week.
+          you gotta do is survive the week. 5 days, 40 hours, the American way.
+      - strings:
+        - 
+        - Player
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Only a week? But why? Is this some kind of test, then?
       - strings:
         - 
         - Satan
@@ -1365,7 +1374,8 @@ MonoBehaviour:
         - 
         - 
         - 
-        - Y'know, 5 days, 40 hours, the American way. Get to the end, and we'll talk.
+        - Save the game theory for the professionals, okay? Just get to the end of
+          the week, and we'll talk.
       - strings:
         - EndScenario
       - strings:
@@ -1511,81 +1521,3 @@ MonoBehaviour:
         - EndScenario
       - strings:
         - 
-      - strings:
-        - '*act0_aftershift_day1_success'
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Looks like it's closing time. As for your performance review...
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - X orders... Not bad for your first day.
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Alright, that's more than enough praise. Now to why I actually came. We've
-          got a VIP coming in tomorrow!
-      - strings:
-        - 
-        - Player
-        - 
-        - None
-        - 
-        - 
-        - 
-        - A VIP? Why would someone important come to a diner?
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Hey, I'll have you know this place BOTH the Michelin's!
-      - strings:
-        - 
-        - Player
-        - 
-        - None
-        - 
-        - 
-        - 
-        - You mean Michelin Stars?
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - No, I have the brothers buried out back for good luck!
-      - strings:
-        - 
-        - Satan
-        - 
-        - charR
-        - 
-        - 
-        - 
-        - Look. You'll know the VIP when you see them. Just make sure you take care
-          of them. You never know when it'll be too late.
-      - strings:
-        - EndScenario

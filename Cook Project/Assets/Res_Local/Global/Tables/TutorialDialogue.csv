@@ -1,105 +1,106 @@
 Command,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Text
 *tutorial_start
 ,Player,,None,,,,"Ugh... my head. Where... am I? I feel like I'm burning up..."
-,Player,,None,,,,"The restaurant. I gotta get back... to the restaurant."
+,Player,,None,,,,"I can see someone through the fog ahead... This isn't right... Where's... the restaurant...?"
 EndScenario
 
 *meeting_satan
 ,Satan,,charR,,,,"Well, look who's up and walking! Welcome to <color=red>Hell's Kitchen</color> -- and no, not the TV show, we're currently suing them for copyright."
-,Player,,None,,,,"What's going on here? Am I being filmed? Who are you?"
+,Player,,None,,,,"Agh! What's going on here? Am I being filmed? Who are you?"
 ,Satan,,charR,,,,"I wish! But the union is striking right now for fair wages. Can you believe it?!"
 ,Player,,None,,,,"Union?"
 ,Satan,,charR,,,,"Yep. Even in Hell, you gotta pay your dues."
-,Player,,None,,,,"Hell?! So, then you're-"
+,Player,,None,,,,"Hell?! So, then you're--"
 ,Satan,,charR,,,,"The big ""L""? The horribly-misunderstood-but-you-can't-help-but-root-for-him fallen angel?"
 ,Player,,None,,,,"So, there really is a God. And that means..."
-,Satan,,charR,,,,"God! Kids these days, it's all greater deities and angry <color=red>British</color> men to them. Eternal damnation just doesn't fit into a 7 second video!"
+,Satan,,charR,,,,"God! Kids these days, it's all greater deities and bad hot takes. Eternal damnation just doesn't fit into a 7-second video!"
 ,Player,,None,,,,"..."
-,Player,,None,,,,"I'm dead...?"
-,Satan,,charR,,,,"Don't think too hard about it for now. Alright, that's enough explaining from me. You can move, so you can work."
-,Player,,None,,,,"You haven't explained anything yet! How did I die? Who even am I? Why can't I remember?"
-,Satan,,charR,,,,"Yeah yeah, file a complaint with the union. Moving on. Get going to the next room, and say hi to <color=red>Stan</color> for me."
+,Player,,None,,,,"...I'm dead...?"
+,Satan,,charR,,,,"Don't think too hard about it for now. Alright, that's enough explaining from me. Time to work!"
+,Player,,None,,,,"You haven't explained anything yet! How did I die? Why can't I remember?"
+,Satan,,charR,,,,"Yeah yeah, file a complaint with the union. Moving on. Get going to the next room, and say hi to Stan for me."
 EndScenario
 
 *tutorial_first_room_entering
-,Player,,None,,,,"What is this place? It looks more like a basement than..."
-,Player,,None,,,,"..."
-,Player,,None,,,,"I wonder what I did to end up here. If this really is Hell... Well, nothing I can do about it for now. I guess I'll find <color=red>Stan</color>."
+,,,,,,,"(A customer glows.)"
 EndScenario
 
 *tutorial_first_room_orders
 ,Satan,,charR,,,,"Ah, Stan! It's been too long. How've you been, my friend?"
 ,stan,,None,,,,"<color=orange>AAAAAAH, IT BURNS. MY EYES. MY FACE. OH GOD HELP ME</color>"
-,Satan,,charR,,,,"Sounds like someone's hungry! See that in the top left of your screen? That's Stan's order. Now you've gotta <color=red>gather all 3 ingredients</color>."
-,Player,,None,,,,"Uhhh, they don't sound hungry to-"
-,Satan,,charR,,,,"And do it quickly before the customer gets hangry -- and by hangry, I mean they'll start removing your limbs alphabetically."
+,Satan,,charR,,,,"Sounds like someone's hungry! See that in the top left of your screen? That's Stan's order. Now you've gotta <color=yellow>gather all 3 ingredients</color>."
+,Player,,None,,,,"Uhhh, they don't sound hungry to--"
+,Satan,,charR,,,,"And do it quickly unless you want your limbs removed algebraically--"
+,stan,,None,,,,"OH. OH GOD. MY ARM. MY ARM IS UNSCREWING. WHYYYY?!"
+,Satan,,charR,,,,"Hmm, or was it alphabetically? Either way, you get the point. <color=yellow>Speed is key</color> when serving the customer!"
+,Player,,None,,,,"(This guy's clearly nuts, devil or not. But I guess I have no choice but to play along for now...)"
 EndScenario
 
 *tutorial_second_room
 ,Satan,,charR,,,,"Now, go grab food from the fridge. Don't think about why it's screaming. Just press <color=red>E</color> on the fridge to take food out of it."
-,Player,,None,,,,"Why-"
+,Player,,None,,,,"Why--"
 ,Satan,,charR,,,,"I said don't think about it."
 EndScenario
 
 *tutorial_second_room_gathered
-,Satan,,charR,,,,"You can press <color=red>Q</color> to drop it on the ground if you're feeling encumbered. Don't worry about being unsanitary, I sent all Health Inspectors to Superhell forever ago."
+,Satan,,charR,,,,"You can press Q to drop items if you're feeling encumbered. Just remember you can't pick them back up!"
 EndScenario
 
 *tutorial_third_room
 ,Player,,None,,,,"Why's this room so dark?"
-,Satan,,charR,,,,"Meet your coworker, all-consuming <color=red>darkness</color>. All-consuming darkness, meet Player."
+,Satan,,charR,,,,"Meet your coworker, all-consuming <color=red>darkness</color>. All-consuming darkness, meet your new best friend."
 ,Player,,None,,,,"..."
 ,Satan,,charR,,,,"What, scared of the dark? Get moving!"
 EndScenario
 
 *tutorial_third_room_damage
-,Player,,None,,,,"Ah! Why does it feel like my head's being stabbed with needles?!"
-,Satan,,charR,,,,"Nothing like a practical lesson. Unless you want your essence drained until you're an empty husk, <color=red>stay out of the dark</color>."
-,Player,,None,,,,"Okay, maybe I'm a little scared of the dark after all."
+,Player,,None,,,,"Agh! It feels like little needles in my head... What is that?!"
+,Satan,,charR,,,,"Hey, I did say it was all-consuming. Make sure to stick to the light if you want to keep your everything."
+,Player,,None,,,,"(Okay, maybe I'm a little scared of the dark.)"
+,Satan,,charR,,,,"Don't worry, even if you're consumed, I'll drag you back as many times as I need."
+,Player,,None,,,,"(What's the point of any of this?! Is this just to torture me? What did I do to deserve all this?!)"
 EndScenario
 
 *tutorial_fourth_room
-,Satan,,charR,,,,"Since I'm the best boss around, here's a nifty little <color=red>device</color> to ward off the darkness."
-,Satan,,charR,,,,"Use your <color=red>left mouse button</color> to shoot. The bullets create <color=yellow>light</color> -- your only defense down here."
-,Player,,None,,,,"You're just giving this to me? Aren't you worried I'm going to... y'know."
-,Satan,,charR,,,,"That's not just any gunpowder rifle. That's <color=yellow>God's Little Shotgun</color>!"
-,Player,,None,,,,"God's little what-"
-,Satan,,charR,,,,"Anyways! It'll be fine. Besides, if you die, I'll just bring you right back!"
+,Satan,,charR,,,,"Since I'm the best boss around, here's a nifty little device to ward off the darkness."
+,Player,,None,,,,"So, you want me to fire a gun into a small, dark, enclosed room? Awesome torture tactic."
+,Satan,,charR,,,,"You've got it all wrong! That's <color=yellow>God's Little Shotgun</color>! The bullets create light -- your only defense down here."
+,Satan,,charR,,,,"Click the <color=yellow>left button</color> to shoot a projectile to ward off the dark! No reload needed, it'll recharge over time automatically!"
+,Player,,None,,,,"God's little what now--"
+,Satan,,charR,,,,"Anyways! Go forth and get more ingredients! Just one more before you can cook!"
 EndScenario
 
 *tutorial_fourth_room_gathered
-,Player,,None,,,,"What the hell are those?!"
-,Satan,,charR,,,,"Oh, just some <color=red>souls of the damned</color>. You can use your light gun to defeat them."
+,Player,,None,,,,"What the hell are those things?!"
+,Satan,,charR,,,,"Oh, just some souls of the damned. You can use your light gun to defeat them."
 ,Player,,None,,,,"I thought they were already dead."
 ,Satan,,charR,,,,"You're dead too, in case you forgot. Yet here you are, wasting my valuable time that could be spent on winning that lawsuit!"
+,Player,,None,,,,"(There's no point in arguing with him... He clearly doesn't care what I say.)"
+,Satan,,charR,,,,"Just get back to the cauldron, I've got an affidavit to forge."
 EndScenario
 
 *tutorial_cooking
-,Satan,,charR,,,,"Head back to the <color=red>pot</color> and we'll cook something up for that starving customer."
-,Player,,None,,,,"A pot? What am I, a witch?"
-,Satan,,charR,,,,"You wish. You're much, much worse than a Witch."
-,Player,,None,,,,"You know what? I bet I wasn't even a bad person, and you're just doing this for kicks."
-,Satan,,charR,,,,"Sure thing, kiddo. That's what they all say."
+,Satan,,charR,,,,"For your pain, let me read you the manual. Don't say I never did nothing for you, capiche?"
+,Player,,None,,,,"What?"
 EndScenario
 
 *tutorial_cooking_manual
-,Satan,,charR,,,,"For your pain, let me read you the manual. Don't say I never did nothing for you, capiche? Let's see here..."
-,Satan,,charR,,,,"<i>'Select the dish you want to make and click <color=red>COOK</color>. You must then complete the incantation'</i>... let's see, flip to page 20018... Ah! Here."
-,Satan,,charR,,,,"<i>'You need to press the buttons in the order shown to complete the dish.'</i>"
-,Satan,,charR,,,,"<i>'The buttons are <color=red>WASD and your arrow keys</color>. If you mess up, you have to start over. Our customers deserve perfection.'</i>"
-,Satan,,charR,,,,"You're welcome. Don't forget to add some love, by the way. Or just bash it in until it stops moving. Either works."
-,Player,,None,,,,"Great... Guess I'll just give it a shot, then."
+,Satan,,charR,,,,"Let's see here... \"Select your dish and click COOK. You must then complete the incantation\"... blah blah... boring... skipping... Ah! Here."
+,Satan,,charR,,,,"\"You need to press the buttons in the order shown to complete the dish.\""
+,Satan,,charR,,,, "The buttons are <color=red>WASD</color> and your <color=red>arrow keys</color>. By the way, if you mess up, you have to start over. Our customers deserve perfection, Theo. Perfection!"
+,Player,,None,,,,"Right... Guess I'll just give it a shot, then."
 EndScenario
 
 *tutorial_cooking_complete
-,Satan,,charR,,,,"You'll earn money from these culinary crimes, by the by. Use it to buy power-ups and items from the shop. Some might even be useful."
+,Satan,,charR,,,,"You'll earn money from these culinary crimes, by the by. Use it to buy cool power-ups and items from the shop."
 ,Player,,None,,,,"Wait, there's money? What do you even need money for?"
-,Satan,,charR,,,,"That's Capitalism, baby! Just do your little job, and I'll worry about the rest."
-,Player,,None,,,,"So, what? I'm just supposed to throw crap in a Witch's cauldron for all eternity? I don't even remember what I'm being punished for!"
+,Satan,,charR,,,,"Aha, that's Capitalism, baby! Just do your little job, and I'll worry about the rest."
+,Player,,None,,,,"So, what? My eternal punishment is to throw crap in a cauldron for all eternity? Why me, why all of this?!"
 ,Satan,,charR,,,,"Punishment? This is much, much more than a punishment. Besides, who said it was eternal?"
 ,Player,,None,,,,"I don't understand. If I'm not being punished, and I'm not here forever, then what's the point?"
-,Satan,,charR,,,,"Ugh, you humans. Why does everything need to have a ""point""? Look. All you gotta do is survive the week."
-,Satan,,charR,,,,"Y'know, 5 days, 40 hours, the American way. Get to the end, and we'll talk."
+,Satan,,charR,,,,"Ugh, you humans. Why does everything need to have a ""point""? Look. All you gotta do is survive the week. 5 days, 40 hours, the American way."
+,Player,,None,,,,"Only a week? But why? Is this some kind of test, then?"
+,Satan,,charR,,,,"Save the game theory for the professionals, okay? Just get to the end of the week, and we'll talk."
 EndScenario
 
 *tutorial_choice
@@ -135,13 +136,3 @@ EndScenario
 ,Satan,,charR,,,,"Not even one order complete! Watching that was Hell on the eyes, man. If you were trying to torture me, let me say, touche."
 EndScenario
 
-*act0_aftershift_day1_success
-,Satan,,charR,,,,"Looks like it's closing time. As for your performance review..."
-,Satan,,charR,,,,"X orders... Not bad for your first day."
-,Satan,,charR,,,,"Alright, that's more than enough praise. Now to why I actually came. We've got a VIP coming in tomorrow!"
-,Player,,None,,,,"A VIP? Why would someone important come to a diner?"
-,Satan,,charR,,,,"Hey, I'll have you know this place BOTH the Michelin's!"
-,Player,,None,,,,"You mean Michelin Stars?"
-,Satan,,charR,,,,"No, I have the brothers buried out back for good luck!"
-,Satan,,charR,,,,"Look. You'll know the VIP when you see them. Just make sure you take care of them. You never know when it'll be too late."
-EndScenario
