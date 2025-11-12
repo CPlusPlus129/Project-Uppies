@@ -1137,7 +1137,7 @@ public class Mob : MonoBehaviour
             int currentHP = playerStats.CurrentHP.Value;
             int damage = Mathf.RoundToInt(attack.damage);
             int newHP = Mathf.Max(0, currentHP - damage);
-            playerStats.CurrentHP.Value = newHP;
+            playerStats.Damage(damage);
 
             if (showDebug)
             {

@@ -172,8 +172,8 @@ public class PlayerLightDamage : MonoBehaviour
                 Debug.LogError("PlayerStatSystem.Instance is NULL when trying to apply damage!");
                 return;
             }
-            
-            int currentHP = healthSystem.CurrentHP.Value;
+
+            int currentHP = healthSystem.CurrentHP.CurrentValue;
             int newHP = Mathf.Max(0, currentHP - damageToApply);
             
             if (showDebugInfo)
@@ -181,7 +181,7 @@ public class PlayerLightDamage : MonoBehaviour
                 Debug.Log($"[DAMAGE] Applying {damageToApply} damage (accumulated: {accumulatedDamage:F2}). HP: {currentHP} -> {newHP}");
             }
             
-            healthSystem.CurrentHP.Value = newHP;
+            healthSystem.Damage(damageToApply);
             
             // Log damage periodically
             if (Time.time - lastDamageTime >= 1f)

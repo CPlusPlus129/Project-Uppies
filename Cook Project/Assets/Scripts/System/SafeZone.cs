@@ -159,8 +159,8 @@ public class SafeZone : MonoBehaviour
             {
                 newHP = Mathf.Min(maxHP, currentHP + healingToApply);
             }
-            
-            healthSystem.CurrentHP.Value = newHP;
+
+            healthSystem.Heal(healingToApply, canOverheal);
             
             if (showDebugMessages)
             {
