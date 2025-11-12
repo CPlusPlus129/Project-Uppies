@@ -34,9 +34,6 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
 
         switch (quest.PuzzleType)
         {
-            case PuzzleGameType.NumberGuessing:
-                OpenNumberGuessingGame(quest);
-                break;
             case PuzzleGameType.CardSwipe:
                 OpenCardSwipeGame(quest);
                 break;
@@ -46,20 +43,18 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         }
     }
 
-    private void OpenNumberGuessingGame(Quest quest)
-    {
-        UIRoot.Instance.GetUIComponent<NumberGuessingGameUI>()?.Open();
-        gameInstance = puzzleGameManager.StartPuzzleGame(PuzzleGameType.NumberGuessing, quest);
-    }
-
     private void OpenCardSwipeGame(Quest quest)
     {
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
-        gameInstance = puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
+        gameInstance ??= puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
         puzzleGameManager.OnGameCompleted
             .Where(x => x == gameInstance)
             .Take(1)
-            .Subscribe(_ => PlayDoorAnimation())
+            .Subscribe(_ =>
+            {
+                PlayDoorAnimation();
+                gameInstance = null;
+            })
             .AddTo(this);
     }
 
