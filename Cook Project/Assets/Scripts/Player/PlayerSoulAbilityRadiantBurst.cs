@@ -15,6 +15,8 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
     [SerializeField, Min(0f)] private float effectRadius = 6f;
     [SerializeField, Min(0f)] private float pushForce = 14f;
     [SerializeField, Min(0f)] private float damageAmount = 22f;
+    [SerializeField, Min(0.01f), Tooltip("How many push/damage pulses occur per second while the burst is active.")]
+    private float pulsesPerSecond = 2f;
     [SerializeField, Tooltip("Layers to consider when pushing/damaging mobs.")] private LayerMask targetLayerMask = Physics.AllLayers;
 
     [Header("Feedback")]
@@ -45,9 +47,18 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
         }
 
         float elapsed = 0f;
+        float pulseInterval = GetPulseInterval();
+        float nextPulse = pulseInterval;
         while (elapsed < burstDuration)
         {
             elapsed += Time.deltaTime;
+
+            nextPulse -= Time.deltaTime;
+            if (nextPulse <= 0f)
+            {
+                PushAndDamageEnemies();
+                nextPulse += pulseInterval;
+            }
 
             if (activeLight != null)
             {
@@ -145,14 +156,15 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
             float distanceFactor = 1f - Mathf.Clamp01(distance / effectRadius);
             float appliedForce = Mathf.Max(0.5f, distanceFactor) * pushForce;
 
-            Rigidbody mobBody = mob.GetComponent<Rigidbody>();
-            if (mobBody != null)
-            {
-                mobBody.AddForce(direction * appliedForce, ForceMode.Impulse);
-            }
+            mob.ApplyImpact(direction, appliedForce, 0.35f);
 
             int damage = Mathf.Max(1, Mathf.RoundToInt(damageAmount));
             mob.TakeDamage(damage);
         }
+    }
+
+    private float GetPulseInterval()
+    {
+        return pulsesPerSecond > 0f ? 1f / pulsesPerSecond : float.MaxValue;
     }
 }

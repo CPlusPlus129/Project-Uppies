@@ -183,6 +183,9 @@ public class Mob : MonoBehaviour
     private Vector3 cachedPlayerScale = new Vector3(float.NaN, float.NaN, float.NaN);
     private float nextPlayerLayerRefreshTime;
 
+    private Vector3 knockbackVelocity;
+    private float knockbackDecaySpeed;
+
     private int currentHealth;
     private bool hasRegistered;
     private int navMeshAreaMask = NavMesh.AllAreas;
@@ -871,7 +874,7 @@ public class Mob : MonoBehaviour
 
     private void UpdateNavigation(float deltaTime)
     {
-        if (!agent.enabled)
+        if (agent == null || !agent.enabled)
         {
             return;
         }
@@ -1071,6 +1074,26 @@ public class Mob : MonoBehaviour
             desiredPlanarVelocity,
             1f - Mathf.Exp(-locomotion.velocitySmoothing * deltaTime));
 
+        if (knockbackVelocity.sqrMagnitude > 0f)
+        {
+            currentPlanarVelocity += knockbackVelocity;
+            float decay = knockbackDecaySpeed * deltaTime;
+            if (decay > 0f)
+            {
+                knockbackVelocity = Vector3.MoveTowards(knockbackVelocity, Vector3.zero, decay);
+            }
+            else
+            {
+                knockbackVelocity = Vector3.zero;
+            }
+
+            if (knockbackVelocity.sqrMagnitude <= 0.0001f)
+            {
+                knockbackVelocity = Vector3.zero;
+                knockbackDecaySpeed = 0f;
+            }
+        }
+
         if (body.isKinematic)
         {
             Vector3 displacement = currentPlanarVelocity * deltaTime;
@@ -1097,19 +1120,19 @@ public class Mob : MonoBehaviour
 
     private void UpdateFacing(float deltaTime)
     {
-        Vector3 planarVelocity = currentPlanarVelocity;
+        Vector3 facingVector = desiredPlanarVelocity;
 
-        if (planarVelocity.sqrMagnitude < 0.05f && player != null)
+        if (facingVector.sqrMagnitude < 0.05f && player != null)
         {
-            planarVelocity = Vector3.ProjectOnPlane(player.position - transform.position, Vector3.up);
+            facingVector = Vector3.ProjectOnPlane(player.position - transform.position, Vector3.up);
         }
 
-        if (planarVelocity.sqrMagnitude < 0.0001f)
+        if (facingVector.sqrMagnitude < 0.0001f)
         {
             return;
         }
 
-        Quaternion targetRotation = Quaternion.LookRotation(planarVelocity.normalized, Vector3.up);
+        Quaternion targetRotation = Quaternion.LookRotation(facingVector.normalized, Vector3.up);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, locomotion.turnRate * deltaTime);
     }
 
@@ -1326,6 +1349,28 @@ public class Mob : MonoBehaviour
     }
 
     #endregion
+
+    public void ApplyImpact(Vector3 direction, float strength, float fadeDuration = 0.35f)
+    {
+        if (!isAlive || strength <= 0f)
+        {
+            return;
+        }
+
+        Vector3 planar = Vector3.ProjectOnPlane(direction, Vector3.up);
+        if (planar.sqrMagnitude < 0.01f)
+        {
+            planar = transform.forward;
+        }
+
+        planar.Normalize();
+        Vector3 impulse = planar * strength;
+
+        knockbackVelocity += impulse;
+        float duration = Mathf.Max(fadeDuration, 0.05f);
+        float decay = impulse.magnitude / duration;
+        knockbackDecaySpeed = decay;
+    }
 
     #region Public API
 
