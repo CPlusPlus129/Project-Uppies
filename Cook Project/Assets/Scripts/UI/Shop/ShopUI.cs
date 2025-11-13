@@ -64,7 +64,16 @@ public class ShopUI : MonoBehaviour
             uiItem.gameObject.SetActive(true);
             
             // Use the enhanced setup method if upgrade data is available
-            if (itemData.upgradeData != null)
+            if (itemData.isAbilityUnlock)
+            {
+                uiItem.SetupAbilityUnlockUI(
+                    itemData.itemId,
+                    itemData.abilityUnlockData,
+                    itemData.price,
+                    itemData.stock,
+                    OnPurchaseItem);
+            }
+            else if (itemData.upgradeData != null)
             {
                 uiItem.SetupUI(
                     itemData.itemId, 

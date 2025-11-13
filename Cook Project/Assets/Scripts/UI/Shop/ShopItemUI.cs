@@ -100,6 +100,55 @@ public class ShopItemUI : MonoBehaviour
         purchaseButton.onClick.AddListener(() => onPurchase?.Invoke(itemId));
     }
 
+    public void SetupAbilityUnlockUI(string itemId, PlayerSoulAbilityManager.AbilityShopEntry abilityData, int price, int stock, System.Action<string> onPurchase)
+    {
+        this.itemId = itemId;
+
+        if (itemNameText != null)
+        {
+            itemNameText.text = string.IsNullOrWhiteSpace(abilityData.DisplayName) ? itemId : abilityData.DisplayName;
+        }
+
+        if (priceText != null)
+        {
+            priceText.text = $"$ {price}";
+        }
+
+        if (iconImage != null)
+        {
+            if (abilityData.Icon != null)
+            {
+                iconImage.sprite = abilityData.Icon;
+                iconImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                iconImage.gameObject.SetActive(false);
+            }
+        }
+
+        if (descriptionText != null)
+        {
+            descriptionText.text = string.IsNullOrWhiteSpace(abilityData.Description) ? "Unlocks a new soul ability." : abilityData.Description;
+        }
+
+        if (statEffectText != null)
+        {
+            statEffectText.text = "Unlocks Soul Ability";
+        }
+
+        if (stockText != null)
+        {
+            stockText.text = stock > 1 ? $"Stock: {stock}" : "Single Purchase";
+        }
+
+        bool canAfford = PlayerStatSystem.Instance.Money.Value >= price;
+        soldOutMask.SetActive(stock <= 0);
+        purchaseButton.interactable = stock > 0 && canAfford;
+        purchaseButton.onClick.RemoveAllListeners();
+        purchaseButton.onClick.AddListener(() => onPurchase?.Invoke(itemId));
+    }
+
     public void ResetUI()
     {
         if (itemNameText != null) itemNameText.text = "";

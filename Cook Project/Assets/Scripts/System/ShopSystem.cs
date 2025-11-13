@@ -9,6 +9,9 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
     private List<ShopItem> inStock = new List<ShopItem>();
     private Dictionary<string, int> purchaseCount = new Dictionary<string, int>();
     private StatUpgradeConfig upgradeConfig;
+    private readonly List<PlayerSoulAbilityManager.AbilityShopEntry> abilityShopBuffer = new List<PlayerSoulAbilityManager.AbilityShopEntry>();
+
+    public bool IsInitialized => upgradeConfig != null;
 
     public void Initialize(StatUpgradeConfig config)
     {
@@ -60,6 +63,7 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
             }
         }
 
+        AppendAbilityUnlocks();
         OnShopItemsUpdated.OnNext(inStock);
     }
 
@@ -84,16 +88,33 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
 
         // Deduct money
         PlayerStatSystem.Instance.Money.Value -= item.price;
-        
-        // Apply the upgrade
-        if (item.upgradeData != null)
+        bool purchaseApplied = true;
+
+        if (item.isAbilityUnlock)
         {
-            ApplyStatUpgrade(item.upgradeData);
+            purchaseApplied = TryUnlockAbility(item);
+            if (purchaseApplied)
+            {
+                inStock.Remove(item);
+            }
+        }
+        else
+        {
+            if (item.upgradeData != null)
+            {
+                ApplyStatUpgrade(item.upgradeData);
+            }
+
+            item.stock--;
+            IncrementPurchaseCount(itemId);
         }
 
-        // Update stock and purchase count
-        item.stock--;
-        IncrementPurchaseCount(itemId);
+        if (!purchaseApplied)
+        {
+            PlayerStatSystem.Instance.Money.Value += item.price;
+            Debug.LogWarning($"Failed to apply purchase for {itemId}. Refunding player.");
+            return false;
+        }
         
         Debug.Log($"Successfully purchased {itemId}");
         OnShopItemsUpdated.OnNext(inStock);
@@ -252,6 +273,51 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
         purchaseCount.Clear();
         RefreshShopItems();
     }
+
+    private bool TryUnlockAbility(ShopItem item)
+    {
+        var abilityManager = PlayerSoulAbilityManager.Instance;
+        if (abilityManager == null)
+        {
+            Debug.LogWarning("ShopSystem: Cannot unlock ability because PlayerSoulAbilityManager is missing.");
+            return false;
+        }
+
+        if (!abilityManager.TryUnlockAbility(item.itemId))
+        {
+            Debug.LogWarning($"ShopSystem: Ability '{item.itemId}' could not be unlocked (already unlocked or not found).");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void AppendAbilityUnlocks()
+    {
+        var abilityManager = PlayerSoulAbilityManager.Instance;
+        if (abilityManager == null)
+        {
+            return;
+        }
+
+        abilityManager.PopulateLockedAbilityShopEntries(abilityShopBuffer);
+        if (abilityShopBuffer.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var entry in abilityShopBuffer)
+        {
+            inStock.Add(new ShopItem
+            {
+                itemId = entry.AbilityId,
+                price = entry.UnlockCost,
+                stock = 1,
+                isAbilityUnlock = true,
+                abilityUnlockData = entry
+            });
+        }
+    }
 }
 
 public class ShopItem
@@ -260,4 +326,6 @@ public class ShopItem
     public int price;
     public int stock;
     public StatUpgradeData upgradeData;
+    public bool isAbilityUnlock;
+    public PlayerSoulAbilityManager.AbilityShopEntry abilityUnlockData;
 }

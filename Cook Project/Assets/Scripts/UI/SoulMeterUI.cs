@@ -31,6 +31,7 @@ public class SoulMeterUI : MonoBehaviour
     private readonly List<TextMeshProUGUI> abilityLabels = new();
     private bool hasLoggedMissingLabel;
     private bool hasLoggedMissingAbilityRoot;
+    private bool listeningForAbilityChanges;
 
     private void Awake()
     {
@@ -48,7 +49,14 @@ public class SoulMeterUI : MonoBehaviour
     private void OnEnable()
     {
         UpdateSoulCount();
+        ResolveAbilityManager();
+        EnsureAbilityChangeSubscription();
         RefreshAbilityList();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeFromAbilityChanges();
     }
 
     private void Start()
@@ -63,6 +71,7 @@ public class SoulMeterUI : MonoBehaviour
             ResolveAbilityManager();
             if (abilityManager != null)
             {
+                EnsureAbilityChangeSubscription();
                 RefreshAbilityList();
             }
         }
@@ -71,6 +80,7 @@ public class SoulMeterUI : MonoBehaviour
     public void RefreshAbilityList()
     {
         ResolveAbilityManager();
+        EnsureAbilityChangeSubscription();
 
         if (abilityListRoot == null)
         {
@@ -105,7 +115,7 @@ public class SoulMeterUI : MonoBehaviour
             TextMeshProUGUI label = abilityLabels[i];
             label.gameObject.SetActive(true);
             label.color = abilityTextColor;
-            label.text = string.Format(abilityLineFormat, FormatHotkey(info.ActivationKey), info.AbilityId, FormatCost(info.SoulCost));
+            label.text = string.Format(abilityLineFormat, FormatHotkey(info.ActivationKey), string.IsNullOrWhiteSpace(info.DisplayName) ? info.AbilityId : info.DisplayName, FormatCost(info.SoulCost));
         }
 
         for (int i = abilityInfos.Count; i < abilityLabels.Count; i++)
@@ -162,6 +172,32 @@ public class SoulMeterUI : MonoBehaviour
         {
             abilityLabels.Add(CreateAbilityLabel());
         }
+    }
+
+    private void EnsureAbilityChangeSubscription()
+    {
+        if (abilityManager == null || listeningForAbilityChanges)
+        {
+            return;
+        }
+
+        abilityManager.AbilitiesChanged += HandleAbilitiesChanged;
+        listeningForAbilityChanges = true;
+    }
+
+    private void UnsubscribeFromAbilityChanges()
+    {
+        if (abilityManager != null && listeningForAbilityChanges)
+        {
+            abilityManager.AbilitiesChanged -= HandleAbilitiesChanged;
+        }
+
+        listeningForAbilityChanges = false;
+    }
+
+    private void HandleAbilitiesChanged()
+    {
+        RefreshAbilityList();
     }
 
     private TextMeshProUGUI CreateAbilityLabel()

@@ -534,8 +534,14 @@ MonoBehaviour:
   startingSouls: 100
   abilities:
   - abilityId: Fridge Glow
+    displayName: Fridge Glow
     activationKey: 31
     soulCost: 25
+    unlockCost: 200
+    unlockedByDefault: 0
+    shopDescription: Unlocks the ability to pulse eligible fridges with glow.
+    shopIcon: {fileID: 0}
+    requiresTrackedIngredient: 1
     onActivated:
       m_PersistentCalls:
         m_Calls:
@@ -555,8 +561,14 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
   - abilityId: Fridge Pathing
+    displayName: Fridge Pathing
     activationKey: 32
     soulCost: 25
+    unlockCost: 300
+    unlockedByDefault: 0
+    shopDescription: Unlocks the guidance path that leads you to glowing fridges.
+    shopIcon: {fileID: 0}
+    requiresTrackedIngredient: 1
     onActivated:
       m_PersistentCalls:
         m_Calls:
