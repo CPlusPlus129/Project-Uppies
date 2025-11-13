@@ -42,6 +42,7 @@ public class PlayerFridgeGuidance : MonoBehaviour
     private bool isInitialized;
     private float retargetTimer;
     private CancellationTokenSource guidanceDurationCts;
+    private bool isGuidanceActive;
 
     private void Awake()
     {
@@ -114,6 +115,11 @@ public class PlayerFridgeGuidance : MonoBehaviour
             return;
         }
 
+        if (!isGuidanceActive)
+        {
+            return;
+        }
+
         retargetTimer += Time.deltaTime;
         if (retargetTimer >= retargetInterval)
         {
@@ -151,6 +157,11 @@ public class PlayerFridgeGuidance : MonoBehaviour
 
     private void HandleEligibleFridgesChanged(IReadOnlyCollection<FoodSource> fridges)
     {
+        if (!isGuidanceActive)
+        {
+            return;
+        }
+
         UpdateTarget(fridges);
     }
 
@@ -165,6 +176,7 @@ public class PlayerFridgeGuidance : MonoBehaviour
             return;
         }
 
+        isGuidanceActive = true;
         if (fridgeGlowManager == null)
         {
             UpdateTarget(null);
@@ -222,6 +234,7 @@ public class PlayerFridgeGuidance : MonoBehaviour
         CancelGuidanceDurationTimer();
         ClearPath();
         currentTarget = null;
+        isGuidanceActive = false;
     }
 
     private async UniTaskVoid RunGuidanceDurationAsync(float durationSeconds, CancellationToken token)
@@ -254,6 +267,11 @@ public class PlayerFridgeGuidance : MonoBehaviour
 
     private void UpdateTarget(IReadOnlyCollection<FoodSource> fridges)
     {
+        if (!isGuidanceActive)
+        {
+            return;
+        }
+
         FoodSource selected = SelectBestTarget(fridges);
 
         if (selected == null)

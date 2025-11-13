@@ -181,16 +181,13 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     public void EnableGlowOnEligible(bool activateGuidance)
     {
+        PrepareLastGlowCommand(GlowCommand.Enable, activateGuidance, 0f);
         RequestLatestSnapshot();
 
         if (enableDebugLogs)
         {
             Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligible({activateGuidance}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
         }
-
-        lastGlowCommand = GlowCommand.Enable;
-        lastGlowDurationSeconds = 0f;
-        lastGlowTriggeredGuidance = activateGuidance;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
@@ -205,16 +202,13 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     public void DisableGlowOnEligible()
     {
+        PrepareLastGlowCommand(GlowCommand.Disable, false, 0f);
         RequestLatestSnapshot();
 
         if (enableDebugLogs)
         {
             Debug.Log($"FridgeGlowEligibilityTracker: DisableGlowOnEligible [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
         }
-
-        lastGlowCommand = GlowCommand.Disable;
-        lastGlowDurationSeconds = 0f;
-        lastGlowTriggeredGuidance = false;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
@@ -229,20 +223,17 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
 
     public void EnableGlowOnEligibleForDuration(float seconds, bool activateGuidance)
     {
+        PrepareLastGlowCommand(GlowCommand.EnableForDuration, activateGuidance, seconds);
         RequestLatestSnapshot();
 
         if (enableDebugLogs)
         {
-            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligibleForDuration({seconds}, {activateGuidance}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
+            Debug.Log($"FridgeGlowEligibilityTracker: EnableGlowOnEligibleForDuration({lastGlowDurationSeconds}, {activateGuidance}) → {eligibleFridgeList.Count} fridges [{string.Join(", ", eligibleFridgeList.Select(f => f != null ? f.ItemName : "<null>"))}]");
         }
-
-        lastGlowCommand = GlowCommand.EnableForDuration;
-        lastGlowDurationSeconds = Mathf.Max(0f, seconds);
-        lastGlowTriggeredGuidance = activateGuidance;
 
         foreach (FoodSource fridge in eligibleFridgeList)
         {
-            fridge?.EnableGlowForDuration(seconds);
+            fridge?.EnableGlowForDuration(lastGlowDurationSeconds);
         }
 
         if (activateGuidance)
@@ -256,6 +247,13 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
                 TriggerGuidance(false, 0f);
             }
         }
+    }
+
+    private void PrepareLastGlowCommand(GlowCommand command, bool triggeredGuidance, float durationSeconds)
+    {
+        lastGlowCommand = command;
+        lastGlowTriggeredGuidance = triggeredGuidance;
+        lastGlowDurationSeconds = Mathf.Max(0f, durationSeconds);
     }
 
     private void RequestLatestSnapshot()
