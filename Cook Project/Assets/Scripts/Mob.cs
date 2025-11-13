@@ -190,6 +190,8 @@ public class Mob : MonoBehaviour
     private bool hasRegistered;
     private int navMeshAreaMask = NavMesh.AllAreas;
 
+    private const float KinematicCollisionSkin = 0.02f;
+
     #endregion
 
     #region Unity Lifecycle
@@ -275,6 +277,8 @@ public class Mob : MonoBehaviour
         body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         body.interpolation = RigidbodyInterpolation.Interpolate;
         body.useGravity = false;
+        body.detectCollisions = true;
+        body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         body.isKinematic = true;
     }
 
@@ -1097,6 +1101,17 @@ public class Mob : MonoBehaviour
         if (body.isKinematic)
         {
             Vector3 displacement = currentPlanarVelocity * deltaTime;
+            if (TryClampKinematicDisplacement(displacement, out Vector3 resolvedDisplacement, out RaycastHit sweepHit))
+            {
+                displacement = resolvedDisplacement;
+
+                if (sweepHit.normal.sqrMagnitude > 0.0001f)
+                {
+                    currentPlanarVelocity = Vector3.ProjectOnPlane(currentPlanarVelocity, sweepHit.normal);
+                    desiredPlanarVelocity = Vector3.ProjectOnPlane(desiredPlanarVelocity, sweepHit.normal);
+                    knockbackVelocity = Vector3.ProjectOnPlane(knockbackVelocity, sweepHit.normal);
+                }
+            }
             Vector3 candidate = transform.position + displacement;
 
             if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, locomotion.destinationSampleRadius, navMeshAreaMask))
@@ -1137,6 +1152,33 @@ public class Mob : MonoBehaviour
     }
 
     #endregion
+
+    private bool TryClampKinematicDisplacement(Vector3 displacement, out Vector3 resolvedDisplacement, out RaycastHit sweepHit)
+    {
+        resolvedDisplacement = displacement;
+        sweepHit = default;
+
+        if (body == null)
+        {
+            return false;
+        }
+
+        float distance = displacement.magnitude;
+        if (distance <= 0.0001f)
+        {
+            return false;
+        }
+
+        Vector3 direction = displacement / distance;
+        if (body.SweepTest(direction, out sweepHit, distance, QueryTriggerInteraction.Ignore))
+        {
+            float allowedDistance = Mathf.Max(0f, sweepHit.distance - KinematicCollisionSkin);
+            resolvedDisplacement = direction * allowedDistance;
+            return true;
+        }
+
+        return false;
+    }
 
     #region Combat & Damage
 
