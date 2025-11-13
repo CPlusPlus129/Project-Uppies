@@ -14,6 +14,8 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
     [Header("Offensive Field")]
     [SerializeField, Min(0f)] private float effectRadius = 6f;
     [SerializeField, Min(0f)] private float pushForce = 14f;
+    [SerializeField, Tooltip("Force multiplier vs normalized distance (0 = center, 1 = edge).")]
+    private AnimationCurve pushForceCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
     [SerializeField, Min(0f)] private float damageAmount = 22f;
     [SerializeField, Min(0.01f), Tooltip("How many push/damage pulses occur per second while the burst is active.")]
     private float pulsesPerSecond = 2f;
@@ -153,8 +155,9 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
                 direction /= distance;
             }
 
-            float distanceFactor = 1f - Mathf.Clamp01(distance / effectRadius);
-            float appliedForce = Mathf.Max(0.5f, distanceFactor) * pushForce;
+            float normalizedDistance = effectRadius <= 0.0001f ? 0f : Mathf.Clamp01(distance / effectRadius);
+            float forceMultiplier = EvaluateForceMultiplier(normalizedDistance);
+            float appliedForce = Mathf.Max(0f, forceMultiplier * pushForce);
 
             mob.ApplyImpact(direction, appliedForce, 0.35f);
 
@@ -166,5 +169,17 @@ public class PlayerSoulAbilityRadiantBurst : MonoBehaviour
     private float GetPulseInterval()
     {
         return pulsesPerSecond > 0f ? 1f / pulsesPerSecond : float.MaxValue;
+    }
+
+    private float EvaluateForceMultiplier(float normalizedDistance)
+    {
+        float fallback = 1f - normalizedDistance;
+
+        if (pushForceCurve == null || pushForceCurve.length == 0)
+        {
+            return Mathf.Max(0f, fallback);
+        }
+
+        return Mathf.Max(0f, pushForceCurve.Evaluate(normalizedDistance));
     }
 }
