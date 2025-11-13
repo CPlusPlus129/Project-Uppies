@@ -161,6 +161,7 @@ GameObject:
   - component: {fileID: 5165821146269913966}
   - component: {fileID: 7245783919487480873}
   - component: {fileID: 4730907086059992373}
+  - component: {fileID: 1100000000000000000}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -587,6 +588,58 @@ MonoBehaviour:
     onInsufficientSouls:
       m_PersistentCalls:
         m_Calls: []
+  - abilityId: Radiant Burst
+    displayName: Radiant Burst
+    activationKey: 36
+    soulCost: 40
+    unlockCost: 400
+    unlockedByDefault: 0
+    shopDescription: Emits a surge of light that blinds, damages, and shoves nearby
+      enemies.
+    shopIcon: {fileID: 21300000, guid: bd6f4cbdb53ed6b47a8d6460b0956308, type: 3}
+    requiresTrackedIngredient: 0
+    onActivated:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1100000000000000000}
+          m_TargetAssemblyTypeName: PlayerSoulAbilityRadiantBurst, Assembly-CSharp
+          m_MethodName: TriggerBurst
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+    onInsufficientSouls:
+      m_PersistentCalls:
+        m_Calls: []
+  fridgeEligibilityTracker: {fileID: 0}
+--- !u!114 &1100000000000000000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8985326193973131990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e00ea01998fd48c68cdbe58b43838b66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  burstDuration: 5
+  burstRange: 10
+  burstIntensity: 15
+  burstColor: {r: 1, g: 1, b: 1, a: 1}
+  effectRadius: 6
+  pushForce: 60
+  damageAmount: 22
+  targetLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  burstParticles: {fileID: 0}
 --- !u!1001 &695477875812888906
 PrefabInstance:
   m_ObjectHideFlags: 0
