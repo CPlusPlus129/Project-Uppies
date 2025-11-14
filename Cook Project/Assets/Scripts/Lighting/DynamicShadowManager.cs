@@ -48,11 +48,11 @@ public class DynamicShadowManager : MonoBehaviour
     // Use HashSet for O(1) lookups
     private HashSet<DynamicShadowLight> registeredLights = new HashSet<DynamicShadowLight>();
     
-    // Queue to track light registration order (for FIFO removal)
-    private Queue<DynamicShadowLight> lightQueue = new Queue<DynamicShadowLight>();
+    // Queue to track light registration order (used as fallback when we cannot score by distance)
     
-    // Pre-allocated buffer to avoid GC
-    private List<LightDistancePair> sortBuffer = new List<LightDistancePair>();
+    // Pre-allocated buffers to avoid GC
+    private readonly List<LightDistancePair> sortBuffer = new List<LightDistancePair>();
+    private int activeBudgetedLights = 0;
     
     private int frameCounter = 0;
 
@@ -128,43 +128,25 @@ public class DynamicShadowManager : MonoBehaviour
     /// </summary>
     public void RegisterLight(DynamicShadowLight light)
     {
-        // Check if we're at the light limit
-        if (enableLightLimit && lightQueue.Count >= maxTotalLights)
+        if (light == null)
         {
-            // Remove the oldest light (FIFO)
-            // Keep dequeuing until we find a valid light or queue is empty
-            DynamicShadowLight oldestLight = null;
-            while (lightQueue.Count > 0 && oldestLight == null)
-            {
-                oldestLight = lightQueue.Dequeue();
-            }
-            
-            if (oldestLight != null)
-            {
-                registeredLights.Remove(oldestLight);
-                
-                if (lightLimitMode == LightLimitMode.Destroy)
-                {
-                    // Destroy the entire explosion GameObject (traverse up to root if needed)
-                    Transform rootTransform = oldestLight.transform.root;
-                    Destroy(rootTransform.gameObject);
-                }
-                else
-                {
-                    // Just disable the light component
-                    if (oldestLight.lightComponent != null)
-                    {
-                        oldestLight.lightComponent.enabled = false;
-                    }
-                }
-            }
+            return;
         }
-        
-        // HashSet.Add is O(1) instead of List.Contains O(n)
+
+        if (!light.IsManagedByShadowSystem)
+        {
+            return;
+        }
+
+        if (enableLightLimit && activeBudgetedLights >= maxTotalLights)
+        {
+            HandleLightLimitExceeded(light);
+            return;
+        }
+
         if (registeredLights.Add(light))
         {
-            // Only add to queue if it's a new light (Add returns true)
-            lightQueue.Enqueue(light);
+            activeBudgetedLights++;
         }
     }
 
@@ -173,8 +155,17 @@ public class DynamicShadowManager : MonoBehaviour
     /// </summary>
     public void UnregisterLight(DynamicShadowLight light)
     {
-        registeredLights.Remove(light);
-        // Note: We don't remove from queue as it's FIFO and will be cleaned up naturally
+        if (light == null)
+        {
+            return;
+        }
+
+        if (registeredLights.Remove(light) && activeBudgetedLights > 0)
+        {
+            activeBudgetedLights--;
+        }
+
+        light.SetShadowsEnabled(false, useHardShadows);
     }
 
     /// <summary>
@@ -269,6 +260,7 @@ public class DynamicShadowManager : MonoBehaviour
     public void CleanupNullReferences()
     {
         registeredLights.RemoveWhere(light => light == null);
+        activeBudgetedLights = registeredLights.Count;
     }
 
     private void OnDrawGizmosSelected()
@@ -284,6 +276,30 @@ public class DynamicShadowManager : MonoBehaviour
             {
                 Gizmos.color = new Color(1f, 1f, 0f, 0.3f);
                 Gizmos.DrawWireSphere(playerTransform.position, maxShadowDistance);
+            }
+        }
+    }
+
+    private void HandleLightLimitExceeded(DynamicShadowLight light)
+    {
+        if (light == null)
+        {
+            return;
+        }
+
+        if (lightLimitMode == LightLimitMode.Destroy)
+        {
+            Transform rootTransform = light.transform.root;
+            if (rootTransform != null)
+            {
+                Destroy(rootTransform.gameObject);
+            }
+        }
+        else
+        {
+            if (light.lightComponent != null)
+            {
+                light.lightComponent.enabled = false;
             }
         }
     }

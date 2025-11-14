@@ -10,10 +10,24 @@ public class DynamicShadowLight : MonoBehaviour
     [HideInInspector]
     public Light lightComponent;
 
+    [Header("Shadow Override")]
+    [Tooltip("Optional light to use exclusively for shadow casting (e.g. a spotlight companion). Leave empty to use the attached light.")]
+    [SerializeField] private Light shadowCasterOverride;
+
     [Header("Light Priority")]
     [Tooltip("Higher priority lights are more likely to cast shadows when at equal distance")]
     [Range(0, 10)]
     public int priority = 5;
+
+    public enum LightLimitCategory
+    {
+        Unrestricted = 0,
+        PlayerExplosion = 1
+    }
+
+    [Header("Light Limit")]
+    [Tooltip("Only lights in PlayerExplosion category count toward DynamicShadowManager's light budget.")]
+    [SerializeField] private LightLimitCategory lightLimitCategory = LightLimitCategory.Unrestricted;
 
     [Header("Shadow Settings")]
     [Tooltip("Shadow strength when this light is casting shadows")]
@@ -27,15 +41,19 @@ public class DynamicShadowLight : MonoBehaviour
     public float shadowNormalBias = 0.4f;
 
     private bool currentlyCastingShadows = false;
+    private Light activeShadowLight;
+
+    public bool IsManagedByShadowSystem => lightLimitCategory == LightLimitCategory.PlayerExplosion;
 
     private void Awake()
     {
         lightComponent = GetComponent<Light>();
-        
-        // Ensure shadows are disabled by default
-        if (lightComponent != null)
+        activeShadowLight = shadowCasterOverride != null ? shadowCasterOverride : lightComponent;
+
+        DisableShadowsImmediate(lightComponent);
+        if (shadowCasterOverride != null)
         {
-            lightComponent.shadows = LightShadows.None;
+            DisableShadowsImmediate(shadowCasterOverride);
         }
     }
 
@@ -61,9 +79,10 @@ public class DynamicShadowLight : MonoBehaviour
         }
 
         // Ensure shadows are disabled when the light is disabled
-        if (lightComponent != null)
+        DisableShadowsImmediate(lightComponent);
+        if (shadowCasterOverride != null)
         {
-            lightComponent.shadows = LightShadows.None;
+            DisableShadowsImmediate(shadowCasterOverride);
         }
     }
 
@@ -72,22 +91,23 @@ public class DynamicShadowLight : MonoBehaviour
     /// </summary>
     public void SetShadowsEnabled(bool enabled, bool useHardShadows)
     {
-        if (lightComponent == null) return;
+        if (activeShadowLight == null)
+        {
+            return;
+        }
 
         currentlyCastingShadows = enabled;
 
         if (enabled)
         {
-            // Enable shadows with specified quality
-            lightComponent.shadows = useHardShadows ? LightShadows.Hard : LightShadows.Soft;
-            lightComponent.shadowStrength = shadowStrength;
-            lightComponent.shadowBias = shadowBias;
-            lightComponent.shadowNormalBias = shadowNormalBias;
+            activeShadowLight.shadows = useHardShadows ? LightShadows.Hard : LightShadows.Soft;
+            activeShadowLight.shadowStrength = shadowStrength;
+            activeShadowLight.shadowBias = shadowBias;
+            activeShadowLight.shadowNormalBias = shadowNormalBias;
         }
         else
         {
-            // Disable shadows
-            lightComponent.shadows = LightShadows.None;
+            activeShadowLight.shadows = LightShadows.None;
         }
     }
 
@@ -107,5 +127,15 @@ public class DynamicShadowLight : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, 0.3f);
         }
+    }
+
+    private static void DisableShadowsImmediate(Light light)
+    {
+        if (light == null)
+        {
+            return;
+        }
+
+        light.shadows = LightShadows.None;
     }
 }
