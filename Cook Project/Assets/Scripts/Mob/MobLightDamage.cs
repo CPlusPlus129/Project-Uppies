@@ -134,7 +134,7 @@ public class MobLightDamage : MonoBehaviour
         for (int i = 0; i < allLights.Count; i++)
         {
             Light light = allLights[i];
-            if (!light.enabled) continue;
+            if (light == null || !light.enabled) continue;
             
             float contribution = 0f;
             Vector3 toLight = light.transform.position - transform.position;
@@ -364,7 +364,7 @@ public class MobLightDamage : MonoBehaviour
             for (int i = 0; i < lights.Count; i++)
             {
                 Light light = lights[i];
-                if (!light.enabled) continue;
+                if (light == null || !light.enabled) continue;
                 float dist = Vector3.Distance(transform.position, light.transform.position);
                 if (light.type != LightType.Directional && dist <= detectionRadius)
                 {
@@ -396,7 +396,7 @@ public class MobLightDamage : MonoBehaviour
         for (int i = 0; i < lights.Count; i++)
         {
             Light light = lights[i];
-            if (!light.enabled) continue;
+            if (light == null || !light.enabled) continue;
             
             float dist = Vector3.Distance(transform.position, light.transform.position);
             
