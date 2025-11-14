@@ -56,9 +56,13 @@ public partial class Mob : MonoBehaviour
     private readonly List<Collider> cachedPlayerColliders = new List<Collider>(8);
     private Vector3 cachedPlayerScale = new Vector3(float.NaN, float.NaN, float.NaN);
     private float nextPlayerLayerRefreshTime;
-    private RaycastHit[] visibilityHits = new RaycastHit[8];
+    private RaycastHit[] visibilityHits = new RaycastHit[32];
     private bool cachedPlayerVisible;
     private int cachedVisibilityFrame = -1;
+
+    private static Collider[] s_flockingColliderBuffer = new Collider[32];
+    private static Mob[] s_flockingMobBuffer = new Mob[32];
+    private int flockingLayerMask;
 
     private Vector3 knockbackVelocity;
     private float knockbackDecaySpeed;
@@ -87,6 +91,7 @@ public partial class Mob : MonoBehaviour
         idleDuration = GetNextIdleDuration();
         previousPlayerPosition = Vector3.positiveInfinity;
         previousPlayerSampleTime = Time.time;
+        flockingLayerMask = 1 << gameObject.layer;
 
         TryAutoAssignReferences();
     }

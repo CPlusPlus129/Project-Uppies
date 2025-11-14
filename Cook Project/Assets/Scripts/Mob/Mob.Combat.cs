@@ -3,6 +3,8 @@ using UnityEngine;
 
 public partial class Mob
 {
+    private static readonly Dictionary<int, TimedObjectDestroyer> s_destroyerCache = new Dictionary<int, TimedObjectDestroyer>();
+
     #region Combat & Damage
 
     private void TryAttackPlayer(float distanceToPlayer, float deltaTime)
@@ -190,12 +192,25 @@ public partial class Mob
             return false;
         }
 
+        int instanceId = light.GetInstanceID();
+        if (s_destroyerCache.TryGetValue(instanceId, out destroyer) && destroyer != null)
+        {
+            return true;
+        }
+
+        // Search for the component (expensive part)
         if (!light.TryGetComponent(out destroyer))
         {
             destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
         }
 
-        return destroyer != null;
+        if (destroyer != null)
+        {
+            s_destroyerCache[instanceId] = destroyer;
+            return true;
+        }
+
+        return false;
     }
 
     private System.Collections.IEnumerator FlickerLight(Light light)

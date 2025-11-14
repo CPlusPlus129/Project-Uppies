@@ -130,11 +130,6 @@ public partial class Mob
 
     private Vector3 ComputeFlockingForce(Vector3 baseVelocity)
     {
-        if (ActiveMobs.Count <= 1)
-        {
-            return Vector3.zero;
-        }
-
         Vector3 separation = Vector3.zero;
         Vector3 alignment = Vector3.zero;
         Vector3 cohesion = Vector3.zero;
@@ -142,16 +137,27 @@ public partial class Mob
 
         float radius = flocking.neighborRadius;
         float radiusSqr = radius * radius;
+        Vector3 mobPosition = transform.position;
 
-        for (int i = 0; i < ActiveMobs.Count; i++)
+        // Use OverlapSphereNonAlloc for performance
+        int hitCount = Physics.OverlapSphereNonAlloc(mobPosition, radius, s_flockingColliderBuffer, flockingLayerMask, QueryTriggerInteraction.Ignore);
+
+        for (int i = 0; i < hitCount; i++)
         {
-            Mob other = ActiveMobs[i];
+            Collider col = s_flockingColliderBuffer[i];
+            if (col.transform == transform || col.transform.IsChildOf(transform))
+            {
+                continue;
+            }
+
+            Mob other = col.GetComponentInParent<Mob>();
+            
             if (other == null || other == this || !other.isAlive)
             {
                 continue;
             }
 
-            Vector3 offset = other.transform.position - transform.position;
+            Vector3 offset = other.transform.position - mobPosition;
             Vector3 planarOffset = Vector3.ProjectOnPlane(offset, Vector3.up);
             float sqrDistance = planarOffset.sqrMagnitude;
 
@@ -174,9 +180,9 @@ public partial class Mob
             return Vector3.zero;
         }
 
-        Vector3 separationAvg = separation / Mathf.Max(1, neighborCount);
-        Vector3 alignmentAvg = alignment / Mathf.Max(1, neighborCount);
-        Vector3 cohesionAvg = (cohesion / Mathf.Max(1, neighborCount)) - transform.position;
+        Vector3 separationAvg = separation / neighborCount;
+        Vector3 alignmentAvg = alignment / neighborCount;
+        Vector3 cohesionAvg = (cohesion / neighborCount) - mobPosition;
 
         separationAvg = Vector3.ProjectOnPlane(separationAvg, Vector3.up);
         alignmentAvg = Vector3.ProjectOnPlane(alignmentAvg, Vector3.up);

@@ -119,12 +119,27 @@ public class MobSpawner : MonoBehaviour
         nextSpawnTime = Time.time + spawnInterval;
     }
     
+    private void OnEnable()
+    {
+        Mob.MobDied += OnMobDied;
+    }
+
+    private void OnDisable()
+    {
+        Mob.MobDied -= OnMobDied;
+    }
+
+    private void OnMobDied(Mob mob)
+    {
+        if (mob != null && mob.gameObject != null)
+        {
+            spawnedMobs.Remove(mob.gameObject);
+        }
+    }
+
     private void Update()
     {
         if (!autoSpawn) return;
-        
-        // Clean up destroyed mobs from list
-        CleanupDestroyedMobs();
         
         // Check if it's time to spawn
         if (Time.time >= nextSpawnTime && CanSpawn)
@@ -133,7 +148,7 @@ public class MobSpawner : MonoBehaviour
             nextSpawnTime = Time.time + spawnInterval;
         }
     }
-    
+
     private void SpawnInitialMobs()
     {
         int mobsToSpawn = maxMobs;
@@ -314,17 +329,7 @@ public class MobSpawner : MonoBehaviour
         return color;
     }
     
-    private void CleanupDestroyedMobs()
-    {
-        // Remove null entries (destroyed mobs)
-        for (int i = spawnedMobs.Count - 1; i >= 0; i--)
-        {
-            if (spawnedMobs[i] == null)
-            {
-                spawnedMobs.RemoveAt(i);
-            }
-        }
-    }
+
     
     /// <summary>
     /// Force spawn a mob regardless of spawn limit.
