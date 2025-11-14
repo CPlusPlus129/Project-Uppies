@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -109,13 +110,13 @@ public class MobLightDamage : MonoBehaviour
     
     private void CalculateLightLevel()
     {
-        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+        IReadOnlyList<Light> allLights = MobLightUtility.GetLights();
         float totalIntensity = 0f;
         nearbyLightCount = 0;
         
         if (showDetailedLightInfo)
         {
-            Debug.Log($"[MobLight] Checking {allLights.Length} lights in scene...");
+            Debug.Log($"[MobLight] Checking {allLights.Count} lights in scene...");
         }
         
         // Add ambient light with reduced strength
@@ -130,8 +131,9 @@ public class MobLightDamage : MonoBehaviour
             }
         }
         
-        foreach (Light light in allLights)
+        for (int i = 0; i < allLights.Count; i++)
         {
+            Light light = allLights[i];
             if (!light.enabled) continue;
             
             float contribution = 0f;
@@ -358,9 +360,10 @@ public class MobLightDamage : MonoBehaviour
             
             // Draw rays to nearby lights
             Gizmos.color = Color.red;
-            Light[] lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-            foreach (Light light in lights)
+            IReadOnlyList<Light> lights = MobLightUtility.GetLights();
+            for (int i = 0; i < lights.Count; i++)
             {
+                Light light = lights[i];
                 if (!light.enabled) continue;
                 float dist = Vector3.Distance(transform.position, light.transform.position);
                 if (light.type != LightType.Directional && dist <= detectionRadius)
@@ -389,9 +392,10 @@ public class MobLightDamage : MonoBehaviour
         if (!Application.isPlaying) return;
         
         // Draw light contribution from each nearby light
-        Light[] lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-        foreach (Light light in lights)
+        IReadOnlyList<Light> lights = MobLightUtility.GetLights();
+        for (int i = 0; i < lights.Count; i++)
         {
+            Light light = lights[i];
             if (!light.enabled) continue;
             
             float dist = Vector3.Distance(transform.position, light.transform.position);

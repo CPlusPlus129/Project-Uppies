@@ -218,7 +218,8 @@ public class MobHealthBarController : MonoBehaviour
         canvas.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
         
         // Add canvas group for fading
-        if (canvas.GetComponent<CanvasGroup>() == null)
+        canvasGroup = canvas.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
         {
             canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
         }

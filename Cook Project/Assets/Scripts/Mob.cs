@@ -15,6 +15,8 @@ public partial class Mob : MonoBehaviour
     #region Public Accessors
 
     public Transform PlayerTransform => player;
+    public static event Action<Mob> MobDied;
+    public event Action<Mob> Died;
 
     #endregion
 
@@ -54,6 +56,9 @@ public partial class Mob : MonoBehaviour
     private readonly List<Collider> cachedPlayerColliders = new List<Collider>(8);
     private Vector3 cachedPlayerScale = new Vector3(float.NaN, float.NaN, float.NaN);
     private float nextPlayerLayerRefreshTime;
+    private RaycastHit[] visibilityHits = new RaycastHit[8];
+    private bool cachedPlayerVisible;
+    private int cachedVisibilityFrame = -1;
 
     private Vector3 knockbackVelocity;
     private float knockbackDecaySpeed;

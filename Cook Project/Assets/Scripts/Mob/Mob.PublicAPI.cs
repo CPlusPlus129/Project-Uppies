@@ -12,6 +12,24 @@ public partial class Mob
     public bool IsAlive => isAlive;
     public float HealthPercentage => health.maxHealth <= 0 ? 0f : (float)currentHealth / health.maxHealth;
 
+    public void AssignPlayer(Transform target)
+    {
+        player = target;
+        EnsurePlayerLayerMaskUpToDate(true);
+
+        if (player != null)
+        {
+            lastKnownPlayerPosition = player.position;
+            lastSeenPlayerTime = Time.time;
+        }
+        else
+        {
+            lastSeenPlayerTime = float.NegativeInfinity;
+        }
+
+        cachedVisibilityFrame = -1;
+    }
+
     public void ForceChase(Transform target = null, bool resetPath = true)
     {
         if (!isAlive)

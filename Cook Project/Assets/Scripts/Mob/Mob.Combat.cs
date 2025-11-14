@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public partial class Mob
@@ -78,6 +79,8 @@ public partial class Mob
 
         SpawnDeathParticles();
         AwardSouls();
+        Died?.Invoke(this);
+        MobDied?.Invoke(this);
         enabled = false;
 
         Destroy(gameObject, death.despawnDelay);
@@ -130,44 +133,40 @@ public partial class Mob
 
     public void DamageNearestLightSource()
     {
-        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-        if (allLights == null || allLights.Length == 0)
+        IReadOnlyList<Light> allLights = MobLightUtility.GetLights();
+        if (allLights.Count == 0)
         {
             return;
         }
 
         TimedObjectDestroyer closest = null;
         Light closestLight = null;
-        float closestDistance = float.MaxValue;
+        float closestSqrDistance = float.MaxValue;
+        float maxDistance = Mathf.Max(0.1f, lightDamage.searchRadius);
+        float maxDistanceSqr = maxDistance * maxDistance;
 
-        for (int i = 0; i < allLights.Length; i++)
+        for (int i = 0; i < allLights.Count; i++)
         {
             Light light = allLights[i];
-            if (!light.enabled)
+            if (light == null || !light.enabled)
             {
                 continue;
             }
 
-            float distance = Vector3.Distance(transform.position, light.transform.position);
-            if (distance > lightDamage.searchRadius || distance >= closestDistance)
+            Vector3 offset = light.transform.position - transform.position;
+            float sqrDistance = offset.sqrMagnitude;
+            if (sqrDistance > maxDistanceSqr || sqrDistance >= closestSqrDistance)
             {
                 continue;
             }
 
-            TimedObjectDestroyer destroyer = light.GetComponent<TimedObjectDestroyer>();
-            if (destroyer == null)
-            {
-                destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
-            }
-
-            if (destroyer == null)
+            if (!TryGetTimedDestroyer(light, out TimedObjectDestroyer destroyer))
             {
                 continue;
             }
-
             closest = destroyer;
             closestLight = light;
-            closestDistance = distance;
+            closestSqrDistance = sqrDistance;
         }
 
         if (closest == null)
@@ -181,6 +180,22 @@ public partial class Mob
         {
             StartCoroutine(FlickerLight(closestLight));
         }
+    }
+
+    private static bool TryGetTimedDestroyer(Light light, out TimedObjectDestroyer destroyer)
+    {
+        destroyer = null;
+        if (light == null)
+        {
+            return false;
+        }
+
+        if (!light.TryGetComponent(out destroyer))
+        {
+            destroyer = light.GetComponentInParent<TimedObjectDestroyer>();
+        }
+
+        return destroyer != null;
     }
 
     private System.Collections.IEnumerator FlickerLight(Light light)

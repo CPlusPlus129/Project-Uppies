@@ -8,6 +8,10 @@ using UnityEngine.AI;
 /// </summary>
 public class MobSpawner : MonoBehaviour
 {
+    private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+    private static readonly int ColorId = Shader.PropertyToID("_Color");
+    private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+
     [Header("Spawn Settings")]
     [SerializeField] private GameObject mobPrefab;
     [Tooltip("Maximum number of mobs this spawner can have alive at once")]
@@ -69,16 +73,22 @@ public class MobSpawner : MonoBehaviour
     [SerializeField] private bool showDebugInfo = true;
     [SerializeField] private bool showGizmos = true;
     [SerializeField] private Color spawnAreaColor = Color.red;
-    
+
     // Internal state
     private List<GameObject> spawnedMobs = new List<GameObject>();
     private float nextSpawnTime = 0f;
+    private MaterialPropertyBlock colorPropertyBlock;
     
     // Public properties
     public int CurrentMobCount => spawnedMobs.Count;
     public int MaxMobs => maxMobs;
     public bool CanSpawn => spawnedMobs.Count < maxMobs;
     
+    private void Awake()
+    {
+        colorPropertyBlock = new MaterialPropertyBlock();
+    }
+
     private void Start()
     {
         // Validate mobPrefab
@@ -126,8 +136,12 @@ public class MobSpawner : MonoBehaviour
     
     private void SpawnInitialMobs()
     {
-        int mobsToSpawn = Mathf.Min(maxMobs, spawnPoints != null && spawnPoints.Length > 0 ? spawnPoints.Length : 1);
-        
+        int mobsToSpawn = maxMobs;
+        if (spawnPoints != null && spawnPoints.Length > 0)
+        {
+            mobsToSpawn = Mathf.Min(maxMobs, spawnPoints.Length);
+        }
+
         for (int i = 0; i < mobsToSpawn; i++)
         {
             SpawnMob();
@@ -206,11 +220,7 @@ public class MobSpawner : MonoBehaviour
         // Auto-assign player reference if enabled
         if (autoAssignPlayer && playerTransform != null && mobComponent != null)
         {
-            var playerField = typeof(Mob).GetField("player", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (playerField != null)
-            {
-                playerField.SetValue(mobComponent, playerTransform);
-            }
+            mobComponent.AssignPlayer(playerTransform);
         }
 
         if (applyNavMeshOverrides && mobComponent != null)
@@ -245,29 +255,39 @@ public class MobSpawner : MonoBehaviour
         
         // Apply the color to all renderers on the mob
         Renderer[] renderers = mob.GetComponentsInChildren<Renderer>();
-        
+
         if (renderers.Length == 0)
         {
             Debug.LogWarning($"MobSpawner: No renderers found on mob {mob.name}. Cannot apply color.", this);
             return;
         }
-        
+
         foreach (Renderer renderer in renderers)
         {
-            // Create a new material instance to avoid affecting other instances
-            Material[] materials = renderer.materials;
-            for (int i = 0; i < materials.Length; i++)
+            if (renderer == null)
             {
-                materials[i] = new Material(materials[i]); // Clone the material
-                materials[i].color = randomColor;
-                
-                // If using Standard Shader, also set the emission color for variety
-                if (materials[i].HasProperty("_EmissionColor"))
-                {
-                    materials[i].SetColor("_EmissionColor", randomColor * 0.2f);
-                }
+                continue;
             }
-            renderer.materials = materials;
+
+            Material[] sharedMaterials = renderer.sharedMaterials;
+            int materialCount = sharedMaterials != null ? sharedMaterials.Length : 0;
+            materialCount = Mathf.Max(1, materialCount);
+
+            for (int subMesh = 0; subMesh < materialCount; subMesh++)
+            {
+                Material mat = sharedMaterials != null && subMesh < sharedMaterials.Length ? sharedMaterials[subMesh] : null;
+                colorPropertyBlock.Clear();
+                renderer.GetPropertyBlock(colorPropertyBlock, subMesh);
+                colorPropertyBlock.SetColor(ColorId, randomColor);
+                colorPropertyBlock.SetColor(BaseColorId, randomColor);
+
+                if (mat != null && mat.HasProperty(EmissionColorId))
+                {
+                    colorPropertyBlock.SetColor(EmissionColorId, randomColor * 0.2f);
+                }
+
+                renderer.SetPropertyBlock(colorPropertyBlock, subMesh);
+            }
         }
         
         if (showDebugInfo)
@@ -297,7 +317,13 @@ public class MobSpawner : MonoBehaviour
     private void CleanupDestroyedMobs()
     {
         // Remove null entries (destroyed mobs)
-        spawnedMobs.RemoveAll(mob => mob == null);
+        for (int i = spawnedMobs.Count - 1; i >= 0; i--)
+        {
+            if (spawnedMobs[i] == null)
+            {
+                spawnedMobs.RemoveAt(i);
+            }
+        }
     }
     
     /// <summary>

@@ -114,6 +114,19 @@ public partial class Mob
 
     private bool PlayerIsVisible()
     {
+        int frame = Time.frameCount;
+        if (cachedVisibilityFrame == frame)
+        {
+            return cachedPlayerVisible;
+        }
+
+        cachedPlayerVisible = ComputePlayerVisibility();
+        cachedVisibilityFrame = frame;
+        return cachedPlayerVisible;
+    }
+
+    private bool ComputePlayerVisibility()
+    {
         if (player == null)
         {
             return false;
@@ -149,18 +162,23 @@ public partial class Mob
         int obstacleMask = perception.obstacleLayer.value;
         int combinedMask = obstacleMask | targetMask;
 
-        RaycastHit[] hits = Physics.RaycastAll(origin, direction, distance, combinedMask, QueryTriggerInteraction.Ignore);
+        int hitCount = Physics.RaycastNonAlloc(origin, direction, visibilityHits, distance, combinedMask, QueryTriggerInteraction.Ignore);
+        while (hitCount == visibilityHits.Length)
+        {
+            GrowVisibilityBuffer();
+            hitCount = Physics.RaycastNonAlloc(origin, direction, visibilityHits, distance, combinedMask, QueryTriggerInteraction.Ignore);
+        }
 
-        if (hits == null || hits.Length == 0)
+        if (hitCount == 0)
         {
             return false;
         }
 
-        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        Array.Sort(visibilityHits, 0, hitCount, RaycastHitDistanceComparer.Instance);
 
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < hitCount; i++)
         {
-            Transform hitTransform = hits[i].transform;
+            Transform hitTransform = visibilityHits[i].transform;
 
             if (hitTransform == null)
             {
@@ -200,6 +218,12 @@ public partial class Mob
         }
 
         return false;
+    }
+
+    private void GrowVisibilityBuffer()
+    {
+        int newSize = Mathf.Max(visibilityHits.Length * 2, 8);
+        visibilityHits = new RaycastHit[newSize];
     }
 
     private Vector3 GetPlayerVisibilityPoint()
@@ -301,6 +325,16 @@ public partial class Mob
         }
 
         return mobComponent != this;
+    }
+
+    private sealed class RaycastHitDistanceComparer : IComparer<RaycastHit>
+    {
+        public static readonly RaycastHitDistanceComparer Instance = new RaycastHitDistanceComparer();
+
+        public int Compare(RaycastHit x, RaycastHit y)
+        {
+            return x.distance.CompareTo(y.distance);
+        }
     }
 
     #endregion
