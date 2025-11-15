@@ -123,7 +123,7 @@ public partial class SROptions
     [DisplayName("StorageRoom3 Door")]
     public void GoStorageRoom3_Door()
     {
-        SetPlayerPosition(new Vector3(-18.25f, 11.5f, -73f));
+        SetPlayerPosition(new Vector3(-18.4f, 12.8f, 71.3f));
     }
     #endregion
 
