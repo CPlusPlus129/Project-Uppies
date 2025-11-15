@@ -15,6 +15,7 @@ MonoBehaviour:
   scenarioData:
     keys:
     - Act1Dialogue
+    - Act2Dialogue
     - ExampleDialogue
     - SatanLines
     - TutorialDialogue
@@ -42,7 +43,7 @@ MonoBehaviour:
         - That's tonight's VIP. You have to serve them tonight and serve them well.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -93,7 +94,7 @@ MonoBehaviour:
           to go torture some other souls. Be good while I'm gone!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -109,7 +110,7 @@ MonoBehaviour:
         - '*act1_vip_return'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -118,7 +119,7 @@ MonoBehaviour:
         - Motherf-
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -128,7 +129,7 @@ MonoBehaviour:
           was satisfactory?
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -144,7 +145,7 @@ MonoBehaviour:
         - '*act1_vip_chase'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -154,7 +155,7 @@ MonoBehaviour:
           but this is on another level...
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -170,7 +171,7 @@ MonoBehaviour:
         - '*act1_storage_room'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -186,7 +187,7 @@ MonoBehaviour:
         - '*act1_secret_room_entry'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -196,7 +197,7 @@ MonoBehaviour:
           maybe...
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -220,7 +221,7 @@ MonoBehaviour:
         - thump thump
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -238,7 +239,7 @@ MonoBehaviour:
         - THUMP THUMP THUMP
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -253,7 +254,7 @@ MonoBehaviour:
         - '*act1_secret_room_failure'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -268,7 +269,7 @@ MonoBehaviour:
         - '*act1_secret_room_complete'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -292,7 +293,7 @@ MonoBehaviour:
         - Where did you go off to?
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -311,7 +312,7 @@ MonoBehaviour:
           omniscience.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -327,6 +328,464 @@ MonoBehaviour:
         - 
         - 
         - Just keep making food, food man. That's all you need to know, right?
+      - strings:
+        - EndScenario
+    - rows:
+      - strings:
+        - Command
+        - Arg1
+        - Arg2
+        - Arg3
+        - Arg4
+        - Arg5
+        - Arg6
+        - Text
+      - strings:
+        - '*act2_day3_intro'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "Look at you, almost halfway there. We\u2019ve got another VIP coming in
+          today, by the way! You know what they say, \u2018hasta like a vista, baby\u2019!"
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "\u2026"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_after_shift_fail_all'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "Unacceptable performance today, Theo! We have standards around here, and
+          you\u2019re not meeting them!"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_after_shift_quota_fail'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "Look, it\u2019s great you took care of the VIP and all, but we have quotas
+          to meet!"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_after_shift_success'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "Good work today. No tips for you, of course. Alright, I\u2019m heading
+          out again."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Am I at least allowed to sleep-? Aaand he\u2019s gone. Ceiling tiles it
+          is."
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_vip2_reappears'
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Mothf-\u2026 I\u2019m sorry, we\u2019re closed. How did you get in here?"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_bank_environment'
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Huh, kinda looks like Dad\u2019s bank. He thought he was such a good dad
+          when he gave me money to \u201Cinvest in my future\u201D or whatever."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Just to warn you, I\u2019m no amateur, Mr. Dealer. No matter the game,
+          I\u2019m a shark."
+      - strings:
+        - 
+        - unknown
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "You\u2019re never good enough, and ya never were!"
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Agh, it talks! But, that voice-! I remember when you said that to me,
+          dad. Is\u2026 is that you?"
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "How about you shut up and focus on what\u2019s right in front of ya! Get
+          yer head in the game!"
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Great, another person who won\u2019t listen to me! Not that you ever did
+          in life, either. So, I guess this is about right actually."
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "What, think you\u2019re some kinda clown?! You wish! At least clowns get
+          a steady paycheck!"
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Missed ya, dad.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_game_early'
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "I always wanted to beat you growing up, you know. I guess I never did,
+          in the end\u2026"
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "It\u2019s only the winners that matter in the end, son. If you\u2019re
+          not first, you\u2019re nothing."
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_game_winning'
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "I was so pissed you wouldn\u2019t give me that loan. Then you went and
+          died a week after I told you to go to Hell\u2026"
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - All you do is dig holes, Theo! And when you dig a hole, you drag the rest
+          of us in it too!
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Yeah, well\u2026 I was born in a pretty deep pit already. Risking it all
+          was my only choice."
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_game_losing'
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - What the hell are these cards?! You must be rigging this! Come out here
+          Satan, let's cut the shit!
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Have you ever tried blaming yourself for a change? You\u2019re not God,
+          kid. Not even close."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "And you! Just\u2026 Ugh. Unless you want to explode into little ghostly
+          bits, check or fold!"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_game_loss'
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - You lost Theo! YOU LOST! Hah! Once a loser, always a loser, son.
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "What the hell is the point of this? Why make me play a rigged game against
+          my father\u2019s ghost?!"
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - YOU ALWAYS LOSE, THEO! EVERYONE AND EVERYTHING YOU EVER TOUCHED, YOU BURNED
+          TO THE GROUND!
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Hey, you never said that! Even though you probably thought it! You never
+          supported me!
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "I\u2019ve tried it all with you, Theo. Any other father would\u2019ve
+          walked out and never looked back long ago."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "\u2026 Whatever. It\u2019s over, right? I lost. Congratulations, definitely
+          not my Dad. Thanks for teaching me a lesson or whatever."
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - ...
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Great. Time to go, then. Great catching up with you, dad.
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_dad_apology'
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Theo\u2026 I\u2019m sorry."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - Dad..?
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "I\u2019m sorry\u2026"
+      - strings:
+        - 
+        - Dad
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "I\u2019m sorry\u2026 It\u2019s my fault you\u2019re a bad person."
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "\u2026"
+      - strings:
+        - EndScenario
+      - strings:
+        - 
+      - strings:
+        - '*act2_challenge_complete'
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "If I knew you were so bored with this diner, I would\u2019ve added a bouncy
+          house! Or, maybe a lazy river?"
+      - strings:
+        - 
+        - Theo
+        - 
+        - None
+        - 
+        - 
+        - 
+        - "Can\u2019t you just explain things? I think I get what you\u2019re going
+          for here, y\u2019know. With the choices and the doors."
+      - strings:
+        - 
+        - Satan
+        - 
+        - charR
+        - 
+        - 
+        - 
+        - "There are a lot of places down here. Stop thinking you\u2019re so smart,
+          and just focus on the customer. Satan, out!"
       - strings:
         - EndScenario
     - rows:
@@ -614,7 +1073,7 @@ MonoBehaviour:
         - WHAT ARE YOU
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -686,7 +1145,7 @@ MonoBehaviour:
         - '*tutorial_start'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -695,7 +1154,7 @@ MonoBehaviour:
         - Ugh... my head. Where... am I? I feel like I'm burning up...
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -721,7 +1180,7 @@ MonoBehaviour:
           -- and no, not the TV show, we're currently suing them for copyright.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -740,7 +1199,7 @@ MonoBehaviour:
           it?!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -758,7 +1217,7 @@ MonoBehaviour:
         - Yep. Even in Hell, you gotta pay your dues.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -777,7 +1236,7 @@ MonoBehaviour:
           fallen angel?
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -796,7 +1255,7 @@ MonoBehaviour:
           damnation just doesn't fit into a 7-second video!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -805,7 +1264,7 @@ MonoBehaviour:
         - ...
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -824,7 +1283,7 @@ MonoBehaviour:
           from me. Time to work!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -892,7 +1351,7 @@ MonoBehaviour:
           That's Stan's order. Now you've gotta <color=yellow>gather all 3 ingredients</color>.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -929,7 +1388,7 @@ MonoBehaviour:
           is key</color> when serving the customer!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -955,7 +1414,7 @@ MonoBehaviour:
           Just press <color=red>E</color> on the fridge to take food out of it.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -995,7 +1454,7 @@ MonoBehaviour:
         - '*tutorial_third_room'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1014,7 +1473,7 @@ MonoBehaviour:
           darkness, meet your new best friend.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1038,7 +1497,7 @@ MonoBehaviour:
         - '*tutorial_third_room_damage'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1057,7 +1516,7 @@ MonoBehaviour:
           you want to keep your everything.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1076,7 +1535,7 @@ MonoBehaviour:
           as I need.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1102,7 +1561,7 @@ MonoBehaviour:
           the darkness.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1132,7 +1591,7 @@ MonoBehaviour:
           off the dark! No reload needed, it'll recharge over time automatically!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1157,7 +1616,7 @@ MonoBehaviour:
         - '*tutorial_fourth_room_gathered'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1176,7 +1635,7 @@ MonoBehaviour:
           them.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1195,7 +1654,7 @@ MonoBehaviour:
           time that could be spent on winning that lawsuit!
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1230,7 +1689,7 @@ MonoBehaviour:
           for you, capiche?
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1275,7 +1734,7 @@ MonoBehaviour:
           perfection, Theo. Perfection!'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1300,7 +1759,7 @@ MonoBehaviour:
           cool power-ups and items from the shop.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1319,7 +1778,7 @@ MonoBehaviour:
           the rest.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1339,7 +1798,7 @@ MonoBehaviour:
           it was eternal?
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1359,7 +1818,7 @@ MonoBehaviour:
           you gotta do is survive the week. 5 days, 40 hours, the American way.
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 
@@ -1384,7 +1843,7 @@ MonoBehaviour:
         - '*tutorial_choice'
       - strings:
         - 
-        - Player
+        - Theo
         - 
         - None
         - 

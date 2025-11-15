@@ -1,0 +1,75 @@
+Command,Arg1,Arg2,Arg3,Arg4,Arg5,Arg6,Text
+*act2_day3_intro
+,Satan,,charR,,,,"Look at you, almost halfway there. We’ve got another VIP coming in today, by the way! You know what they say, ‘hasta like a vista, baby’!"
+,Theo,,None,,,,"…"
+EndScenario
+
+*act2_after_shift_fail_all
+,Satan,,charR,,,,"Unacceptable performance today, Theo! We have standards around here, and you’re not meeting them!"
+EndScenario
+
+*act2_after_shift_quota_fail
+,Satan,,charR,,,,"Look, it’s great you took care of the VIP and all, but we have quotas to meet!"
+EndScenario
+
+*act2_after_shift_success
+,Satan,,charR,,,,"Good work today. No tips for you, of course. Alright, I’m heading out again."
+,Theo,,None,,,,"Am I at least allowed to sleep-? Aaand he’s gone. Ceiling tiles it is."
+EndScenario
+
+*act2_vip2_reappears
+,Theo,,None,,,,"Mothf-… I’m sorry, we’re closed. How did you get in here?"
+EndScenario
+
+*act2_bank_environment
+,Theo,,None,,,,"Huh, kinda looks like Dad’s bank. He thought he was such a good dad when he gave me money to “invest in my future” or whatever."
+,Theo,,None,,,,"Just to warn you, I’m no amateur, Mr. Dealer. No matter the game, I’m a shark."
+,unknown,,None,,,,"You’re never good enough, and ya never were!"
+,Theo,,None,,,,"Agh, it talks! But, that voice-! I remember when you said that to me, dad. Is… is that you?"
+,Dad,,None,,,,"How about you shut up and focus on what’s right in front of ya! Get yer head in the game!"
+,Theo,,None,,,,"Great, another person who won’t listen to me! Not that you ever did in life, either. So, I guess this is about right actually."
+,Dad,,None,,,,"What, think you’re some kinda clown?! You wish! At least clowns get a steady paycheck!"
+,Theo,,None,,,,"Missed ya, dad."
+EndScenario
+
+*act2_game_early
+,Theo,,None,,,,"I always wanted to beat you growing up, you know. I guess I never did, in the end…"
+,Dad,,None,,,,"It’s only the winners that matter in the end, son. If you’re not first, you’re nothing."
+EndScenario
+
+*act2_game_winning
+,Theo,,None,,,,"I was so pissed you wouldn’t give me that loan. Then you went and died a week after I told you to go to Hell…"
+,Dad,,None,,,,"All you do is dig holes, Theo! And when you dig a hole, you drag the rest of us in it too!"
+,Theo,,None,,,,"Yeah, well… I was born in a pretty deep pit already. Risking it all was my only choice."
+EndScenario
+
+*act2_game_losing
+,Theo,,None,,,,"What the hell are these cards?! You must be rigging this! Come out here Satan, let's cut the shit!"
+,Dad,,None,,,,"Have you ever tried blaming yourself for a change? You’re not God, kid. Not even close."
+,Theo,,None,,,,"And you! Just… Ugh. Unless you want to explode into little ghostly bits, check or fold!"
+EndScenario
+
+*act2_game_loss
+,Dad,,None,,,,"You lost Theo! YOU LOST! Hah! Once a loser, always a loser, son."
+,Theo,,None,,,,"What the hell is the point of this? Why make me play a rigged game against my father’s ghost?!"
+,Dad,,None,,,,"YOU ALWAYS LOSE, THEO! EVERYONE AND EVERYTHING YOU EVER TOUCHED, YOU BURNED TO THE GROUND!"
+,Theo,,None,,,,"Hey, you never said that! Even though you probably thought it! You never supported me!"
+,Dad,,None,,,,"I’ve tried it all with you, Theo. Any other father would’ve walked out and never looked back long ago."
+,Theo,,None,,,,"… Whatever. It’s over, right? I lost. Congratulations, definitely not my Dad. Thanks for teaching me a lesson or whatever."
+,Dad,,None,,,,"..."
+,Theo,,None,,,,"Great. Time to go, then. Great catching up with you, dad."
+EndScenario
+
+*act2_dad_apology
+,Dad,,None,,,,"Theo… I’m sorry."
+,Theo,,None,,,,"Dad..?"
+,Dad,,None,,,,"I’m sorry…"
+,Dad,,None,,,,"I’m sorry… It’s my fault you’re a bad person."
+,Theo,,None,,,,"…"
+EndScenario
+
+*act2_challenge_complete
+,Satan,,charR,,,,"If I knew you were so bored with this diner, I would’ve added a bouncy house! Or, maybe a lazy river?"
+,Theo,,None,,,,"Can’t you just explain things? I think I get what you’re going for here, y’know. With the choices and the doors."
+,Satan,,charR,,,,"There are a lot of places down here. Stop thinking you’re so smart, and just focus on the customer. Satan, out!"
+EndScenario
