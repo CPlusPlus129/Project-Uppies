@@ -1176,6 +1176,34 @@
             ]
         },
         {
+            "name": "Minigame",
+            "id": "71a67102-2c8f-4e90-866c-3f75ba48cb08",
+            "actions": [
+                {
+                    "name": "Esc",
+                    "type": "Button",
+                    "id": "16d6d3e4-9b78-48ef-a79b-274dd4ab6025",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "66192f7a-3600-4aca-b1d5-e30eb0891340",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "NumberGuessing",
             "id": "59fc2d92-9e2f-4712-aea8-235078991efe",
             "actions": [

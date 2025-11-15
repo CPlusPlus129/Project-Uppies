@@ -12,9 +12,6 @@ public class MinigameUI : MonoBehaviour
 
     private void OnEnable()
     {
-        // Debug message
-        Debug.Log("MinigameUI enabled");
-
         InputManager.Instance.PushActionMap("Minigame");
     }
 

@@ -7,8 +7,11 @@ using UnityEngine.UI;
 
 public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
 {
+    public RecipeInfoBlock infoBlock;
+    public ToggleGroup recipeSelectionToggleGroup;
     public RecipeItem recipeItemPrefab;
     public Button cookButton;
+    private IAssetLoader assetLoader;
     private ICookingSystem cookingSystem;
     private ObjectPool<RecipeItem> recipeItemPool;
     private List<RecipeItem> recipeItemList = new List<RecipeItem>();
@@ -16,13 +19,16 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
     public async UniTask Init()
     {
         recipeItemPrefab.gameObject.SetActive(false);
+        assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
         cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
         recipeItemPool = new ObjectPool<RecipeItem>(() =>
         {
             var item = Instantiate(recipeItemPrefab, recipeItemPrefab.transform.parent);
             item.cookingSystem = cookingSystem;
+            item.tgl.group = recipeSelectionToggleGroup;
             return item;
         });
+        await infoBlock.Init(assetLoader, cookingSystem);
         cookingSystem.currentSelectedRecipe
             .Subscribe(_ => UpdateCookButton())
             .AddTo(this);
@@ -55,7 +61,7 @@ public class RecipeSelectionPanel : MonoBehaviour, IUIInitializable
             item.gameObject.SetActive(true);
             item.Setup(recipe);
             var canCook = cookingSystem.CheckPlayerHasIngredients(recipe);
-            item.btn.interactable = canCook;
+            item.tgl.interactable = canCook;
             recipeItemList.Add(item);
         }        
     }

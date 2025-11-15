@@ -4,17 +4,17 @@ using UnityEngine.UI;
 
 public class RecipeItem : MonoBehaviour
 {
-    public Button btn;
+    public Toggle tgl;
     public TMPro.TextMeshProUGUI mealName;
-    public TMPro.TextMeshProUGUI ingredientText; // use text just for demo
     public ICookingSystem cookingSystem { get; set; }
     public Recipe recipe { get; set; }
 
     private void Awake()
     {
-        btn.OnClickAsObservable().Subscribe(_ =>
+        tgl.OnValueChangedAsObservable().Subscribe(isOn =>
         {
-            cookingSystem.currentSelectedRecipe.Value = recipe.mealName;
+            if (isOn)
+                cookingSystem.currentSelectedRecipe.Value = recipe.mealName;
         }).AddTo(this);
     }
 
@@ -22,12 +22,10 @@ public class RecipeItem : MonoBehaviour
     {
         this.recipe = recipe;
         mealName.text = recipe.mealName;
-        ingredientText.text = string.Join(" + ", recipe.ingredients);
     }
 
     public void ResetUI()
     {
         recipe = null;
-        mealName.text = ingredientText.text = "";
     }
 }

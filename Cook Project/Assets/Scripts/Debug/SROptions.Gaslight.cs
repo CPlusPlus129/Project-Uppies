@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using SRDebugger;
 using SRDebugger.Services;
@@ -23,6 +24,23 @@ public partial class SROptions
     public void Testt()
     {
         Debug.Log("Testt");
+    }
+
+    [Category("General")]
+    [DisplayName("Give Every Ingredient")]
+    public async void GiveEveryIngredient()
+    {
+        Debug.Log("GiveEveryIngredient");
+        var i_arr = Database.Instance.recipeData.datas.SelectMany(x => x.ingredients).ToArray();
+        PlayerStatSystem.Instance.InventorySize.Value = i_arr.Length;
+        var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        foreach (var itemName in i_arr)
+        {
+            var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(itemName);
+            var itemObject = itemPrefab != null ? GameObject.Instantiate(itemPrefab) : null;
+            if (itemObject != null)
+                inventorySystem.AddItem(itemObject);
+        }
     }
     #endregion
 
@@ -99,6 +117,13 @@ public partial class SROptions
     public void GoStorageRoom2_Door()
     {
         SetPlayerPosition(new Vector3(-51f, 5.4f, -4.5f));
+    }
+
+    [Category("Teleport")]
+    [DisplayName("StorageRoom3 Door")]
+    public void GoStorageRoom3_Door()
+    {
+        SetPlayerPosition(new Vector3(-18.25f, 11.5f, -73f));
     }
     #endregion
 
