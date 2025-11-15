@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
 using TMPro;
@@ -7,7 +8,7 @@ using UnityEngine;
 /// Overwhelming Kitchen UI system.
 /// Decoupled from the system via RX data streams, automatically updates all UI elements.
 /// </summary>
-public class OverwhelmingKitchenUI : MonoBehaviour
+public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
@@ -19,7 +20,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour
     [SerializeField] private Transform orderListContainer;
     [SerializeField] private GameObject orderCardPrefab;
     [SerializeField] private Transform inventoryContainer;
-    [SerializeField] private GameObject inventorySlotPrefab;
+    [SerializeField] private InventorySlotUI inventorySlotPrefab;
 
     [Header("Money Display Settings")]
     [SerializeField] private Color normalMoneyColor = Color.white;
@@ -27,9 +28,15 @@ public class OverwhelmingKitchenUI : MonoBehaviour
     [SerializeField] private Color warningMoneyColor = Color.yellow;
     [SerializeField] private int warningThreshold = 100;
 
+    private IAssetLoader assetLoader;
     private CompositeDisposable disposables = new CompositeDisposable();
     private Dictionary<Order, OverwhelmingKitchenOrderCard> orderCardMap = new Dictionary<Order, OverwhelmingKitchenOrderCard>();
-    private List<GameObject> inventorySlots = new List<GameObject>();
+    private List<InventorySlotUI> inventorySlots = new List<InventorySlotUI>();
+
+    public async UniTask Init()
+    {
+        assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
+    }
 
     private void OnEnable()
     {
@@ -198,14 +205,11 @@ public class OverwhelmingKitchenUI : MonoBehaviour
         foreach (var item in items)
         {
             var slotObject = Instantiate(inventorySlotPrefab, inventoryContainer);
+            slotObject.assetLoader = assetLoader;
             inventorySlots.Add(slotObject);
 
-            // Set item info (assuming slot has a TextMeshProUGUI child)
-            var text = slotObject.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null)
-            {
-                text.text = item != null ? item.ItemName : "Empty";
-            }
+            // Set item info
+            slotObject.SetItem(item.ItemName);
         }
 
         Debug.Log($"[OverwhelmingKitchenUI] Updated inventory display: {items.Count} items");

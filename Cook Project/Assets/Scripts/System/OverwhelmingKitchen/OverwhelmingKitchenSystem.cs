@@ -57,6 +57,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     private void Awake()
     {
         InitializeProperties();
+        ResetGame();
     }
 
     private void InitializeProperties()
@@ -302,7 +303,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     /// </summary>
     public void ResetGame()
     {
-        Debug.Log("[OverwhelmingKitchen] Resetting game...");
+        //Debug.Log("[OverwhelmingKitchen] Resetting game...");
 
         // Cancel all async operations
         drainCts?.Cancel();
@@ -335,7 +336,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
 
         CurrentState.Value = OverwhelmingKitchenState.Idle;
 
-        Debug.Log("[OverwhelmingKitchen] Game reset complete. Ready to play again.");
+        //Debug.Log("[OverwhelmingKitchen] Game reset complete. Ready to play again.");
     }
 
     private void ResetInternalState()
