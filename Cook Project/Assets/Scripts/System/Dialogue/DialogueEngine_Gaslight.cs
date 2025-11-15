@@ -60,4 +60,19 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
     {
         onEndScenario.OnNext(Unit.Default);
     }
+
+    void System.IDisposable.Dispose()
+    {
+        onEndScenario?.Dispose();
+
+        if (scenarioManager != null)
+        {
+            scenarioManager.onEndScenario -= OnEndScenario;
+        }
+
+        if (!isRuntimeReady)
+        {
+            readyTcs.TrySetCanceled();
+        }
+    }
 }

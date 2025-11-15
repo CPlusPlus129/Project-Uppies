@@ -433,4 +433,12 @@ public class ShiftSystem : IShiftSystem
         stats.Money.Value -= loss;
         WorldBroadcastSystem.Instance.Broadcast($"You lost ${loss} when you died.", 4f);
     }
+
+    public void Dispose()
+    {
+        debtCollectionCts?.Dispose();
+        playerDeathSubscription?.Dispose();
+        updateDisposible.Dispose();
+        disposables.Dispose();
+    }
 }

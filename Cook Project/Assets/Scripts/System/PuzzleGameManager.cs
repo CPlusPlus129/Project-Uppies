@@ -66,4 +66,13 @@ public class PuzzleGameManager : IPuzzleGameManager
         CurrentPuzzleQuest.Value = null;
         IsGameActive.Value = false;
     }
+
+    public void Dispose()
+    {
+        CurrentPuzzleGame?.Dispose();
+        CurrentPuzzleQuest?.Dispose();
+        IsGameActive?.Dispose();
+        OnGameStarted?.Dispose();
+        OnGameCompleted?.Dispose();
+    }
 }

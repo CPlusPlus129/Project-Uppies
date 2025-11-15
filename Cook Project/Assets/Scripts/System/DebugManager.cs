@@ -82,5 +82,14 @@ public class DebugManager : MonoBehaviour, IDebugService
         PlayerPrefs.SetInt(DEBUG_MODE_KEY, IsDebugModeEnabled ? 1 : 0);
         PlayerPrefs.Save();
     }
+
+    public void Dispose()
+    {
+        var debugAction = InputSystem.actions.FindAction("DebugKeys");
+        if (debugAction != null)
+        {
+            debugAction.performed -= OnDebugKeyClicked;
+        }
+    }
 }
 #endif

@@ -72,4 +72,12 @@ public class OrderManager : IOrderManager
 
         return Mathf.Lerp(minReward, maxReward, combinedScore);
     }
+
+    public void Dispose()
+    {
+        OnNewOrder?.Dispose();
+        OnOrderServed?.Dispose();
+        OnOrdersCleared?.Dispose();
+        _pendingOrders.Clear();
+    }
 }

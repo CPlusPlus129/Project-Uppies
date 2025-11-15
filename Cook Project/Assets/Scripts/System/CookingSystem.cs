@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System;
 using UnityEngine;
 
 public class CookingSystem : ICookingSystem
@@ -103,5 +104,17 @@ public class CookingSystem : ICookingSystem
                 return false;
         }
         return true;
+    }
+
+    public void Dispose()
+    {
+        currentSelectedRecipe?.Dispose();
+
+        // Clean up pending meal if any
+        if (pendingMealItem != null)
+        {
+            UnityEngine.Object.Destroy(pendingMealItem.gameObject);
+            pendingMealItem = null;
+        }
     }
 }

@@ -9,10 +9,10 @@ using UnityEngine.ResourceManagement.ResourceLocations;
 
 public class AssetLoader : IAssetLoader
 {
-    //Addressables.ResourceLocators ¤â°Ê±Æ§Ç ¤£µMµLªk¹ê²{¦P¸ô®|·sbundle¨ú¥NÂÂbundle
+    //Addressables.ResourceLocators ï¿½ï¿½Ê±Æ§ï¿½ ï¿½ï¿½ï¿½Mï¿½Lï¿½kï¿½ï¿½{ï¿½Pï¿½ï¿½ï¿½|ï¿½sbundleï¿½ï¿½ï¿½Nï¿½ï¿½bundle
     List<IResourceLocator> resLocators = new List<IResourceLocator>();
 
-    List<IResourceLocator> remoteLocators = new List<IResourceLocator>(); //©Ò¦³¤â°ÊAdd¶i¥hªº³¡¤À
+    List<IResourceLocator> remoteLocators = new List<IResourceLocator>(); //ï¿½Ò¦ï¿½ï¿½ï¿½ï¿½Addï¿½iï¿½hï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     Dictionary<string, IResourceLocator> remoteLocatorsByPath = new Dictionary<string, IResourceLocator>();
     bool inited = false;
 
@@ -22,7 +22,7 @@ public class AssetLoader : IAssetLoader
 
     public async UniTask Init()
     {
-        //³oªF¦è·|¦^¶Çnull ¾aªM³á1
+        //ï¿½oï¿½Fï¿½ï¿½|ï¿½^ï¿½ï¿½null ï¿½aï¿½Mï¿½ï¿½1
         await Addressables.InitializeAsync().Task;
         UpdateLocators();
         inited = true;
@@ -34,9 +34,9 @@ public class AssetLoader : IAssetLoader
         //unload old one
         UnloadCatalog(path);
 
-        //³oªF¦è·|¦^¶Çnull ¾aªM³á2
+        //ï¿½oï¿½Fï¿½ï¿½|ï¿½^ï¿½ï¿½null ï¿½aï¿½Mï¿½ï¿½2
         await Addressables.LoadContentCatalogAsync(path, true).Task;
-        //·|¸õ³o­Ó¿ù»~ try catch±µ¤£¨ì
+        //ï¿½|ï¿½ï¿½ï¿½oï¿½Ó¿ï¿½ï¿½~ try catchï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         //ArgumentNullException value cannot be null. Parameter name: _unity_self
 
         IResourceLocator newLocator = null;
@@ -83,7 +83,7 @@ public class AssetLoader : IAssetLoader
 
         foreach (var x in remoteLocators)
         {
-            resLocators.Insert(0, x); //¶V«á­±ªº¶VÀu¥ý
+            resLocators.Insert(0, x); //ï¿½Vï¿½á­±ï¿½ï¿½ï¿½Vï¿½uï¿½ï¿½
         }
 
         foreach (var x in Addressables.ResourceLocators)
@@ -217,7 +217,7 @@ public class AssetLoader : IAssetLoader
 
         if (path.StartsWith("Res:/") || path.StartsWith("Res/"))
         {
-            //±qRes3§ä¦^Res1
+            //ï¿½qRes3ï¿½ï¿½^Res1
             string basePath = path.Remove(0, 3);
             for (int i = 3; i >= 1; i--)
             {
@@ -255,5 +255,13 @@ public class AssetLoader : IAssetLoader
     public void ReleaseInstance(GameObject gameObject)
     {
         Addressables.ReleaseInstance(gameObject);
+    }
+
+    public void Dispose()
+    {
+        // Clean up all loaded resource locators
+        RemoveAllRemoteCatelogAndBundles();
+        resLocators.Clear();
+        inited = false;
     }
 }

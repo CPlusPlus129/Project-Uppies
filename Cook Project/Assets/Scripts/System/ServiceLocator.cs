@@ -29,6 +29,34 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         await UniTask.WhenAll(initTasks);
     }
 
+    public void DisposeAllServices()
+    {
+        Debug.Log("ServiceLocator: Disposing all services...");
+
+        // Dispose services in reverse order of registration
+        // This ensures dependencies are disposed after their dependents
+        var servicesList = services.ToList();
+        servicesList.Reverse();
+
+        foreach (var kvp in servicesList)
+        {
+            var serviceType = kvp.Key;
+            var service = kvp.Value;
+
+            try
+            {
+                service?.Dispose();
+                Debug.Log($"ServiceLocator: Disposed {serviceType.Name}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"ServiceLocator: Error disposing {serviceType.Name}: {ex}");
+            }
+        }
+
+        Debug.Log("ServiceLocator: All services disposed.");
+    }
+
     private void RegisterAllServices()
     {
         //Service that requires other service dependencies please add it AFTER their dependencies are registered.
@@ -132,9 +160,15 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
 
     public void Shutdown()
     {
+        // First dispose all services
+        DisposeAllServices();
+
+        // Then clear all collections
         services.Clear();
         initializationStatus.Clear();
         isGlobalInitStarted = false;
+
+        Debug.Log("ServiceLocator: Shutdown complete. Ready for re-initialization.");
     }
 
 }

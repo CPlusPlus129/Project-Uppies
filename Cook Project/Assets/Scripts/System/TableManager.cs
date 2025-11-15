@@ -39,4 +39,15 @@ public class TableManager : ITableManager
     {
         return (Table<TRow>)tables[typeof(Table<TRow>)];
     }
+
+    public void Dispose()
+    {
+        // Clear all tables
+        foreach (var table in tables.Values)
+        {
+            table?.Clear();
+        }
+        tables.Clear();
+        tableCsvPaths.Clear();
+    }
 }

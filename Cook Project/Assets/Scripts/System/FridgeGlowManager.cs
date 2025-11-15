@@ -429,4 +429,24 @@ public class FridgeGlowManager : IFridgeGlowManager
             }
         }
     }
+
+    public void Dispose()
+    {
+        // Cancel and dispose inventory monitoring
+        inventoryMonitorCts?.Cancel();
+        inventoryMonitorCts?.Dispose();
+        inventoryMonitorCts = null;
+
+        // Dispose all subscriptions
+        disposables?.Dispose();
+
+        // Clear collections
+        trackedFridges.Clear();
+        inventoryItems.Clear();
+        lastEligibleSnapshot = System.Array.Empty<FoodSource>();
+        lastSuppressedSnapshot = System.Array.Empty<FoodSource>();
+
+        // Clear event
+        EligibleFridgesChanged = null;
+    }
 }

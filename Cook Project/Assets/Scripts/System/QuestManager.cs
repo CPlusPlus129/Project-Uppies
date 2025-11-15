@@ -82,4 +82,11 @@ public class QuestManager : IQuestService
         ongoingQuests.Clear();
         completedQuests.Clear();
     }
+
+    public void Dispose()
+    {
+        OnQuestStarted?.Dispose();
+        OnQuestCompleted?.Dispose();
+        OnQuestFailed?.Dispose();
+    }
 }

@@ -211,4 +211,16 @@ public class InventorySystem : IInventorySystem
     }
 
     private readonly CompositeDisposable disposables = new CompositeDisposable();
+
+    public void Dispose()
+    {
+        disposables?.Dispose();
+        OnInventoryChanged?.Dispose();
+        SelectedIndex?.Dispose();
+        SlotCount?.Dispose();
+
+        // Clear all items from slots
+        slots.Clear();
+        itemCache.Clear();
+    }
 }

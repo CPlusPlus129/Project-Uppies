@@ -411,6 +411,9 @@ public class GameFlow : MonoSingleton<GameFlow>
         base.OnDestroy();
         CancelGameLoop();
 
+        // Dispose all services before destruction
+        ServiceLocator.Instance?.DisposeAllServices();
+
         OnStoryEventQueued.OnCompleted();
         OnStoryEventStarted.OnCompleted();
         OnStoryEventFinished.OnCompleted();
