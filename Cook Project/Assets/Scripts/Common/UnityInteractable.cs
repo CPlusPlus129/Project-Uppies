@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -6,7 +7,7 @@ using UnityEngine.Events;
 /// </summary>
 [AddComponentMenu("Gameplay/Unity Interactable")]
 [RequireComponent(typeof(Collider))]
-public class UnityInteractable : MonoBehaviour, IInteractable
+public class UnityInteractable : MonoBehaviour, IInteractable, IInteractionPromptProvider
 {
     [SerializeField]
     [Tooltip("Invoked every time the player interacts while this component is enabled.")]
@@ -36,6 +37,14 @@ public class UnityInteractable : MonoBehaviour, IInteractable
     [Tooltip("Depth to apply when auto-fitting colliders for billboard sprites.")]
     private float billboardColliderDepth = 0.2f;
 
+    [Header("Input Prompts")]
+    [SerializeField]
+    [Tooltip("Customize which inputs appear on the HUD when looking at this object.")]
+    private List<InteractionPromptDefinition> customPrompts = new List<InteractionPromptDefinition>
+    {
+        new InteractionPromptDefinition()
+    };
+
     private bool hasInteracted;
 
     private void Reset()
@@ -43,6 +52,7 @@ public class UnityInteractable : MonoBehaviour, IInteractable
         EnsureColliderReference();
         EnsureInteractableLayer();
         FitColliderIfPossible();
+        EnsurePromptDefaults();
     }
 
     private void OnValidate()
@@ -50,12 +60,14 @@ public class UnityInteractable : MonoBehaviour, IInteractable
         EnsureColliderReference();
         EnsureInteractableLayer();
         FitColliderIfPossible();
+        EnsurePromptDefaults();
     }
 
     private void Awake()
     {
         EnsureColliderReference();
         FitColliderIfPossible();
+        EnsurePromptDefaults();
     }
 
 
@@ -163,4 +175,17 @@ public class UnityInteractable : MonoBehaviour, IInteractable
             Mathf.Max(0.01f, billboardColliderDepth));
         boxCollider.isTrigger = false;
     }
+
+    private void EnsurePromptDefaults()
+    {
+        if (customPrompts == null || customPrompts.Count == 0)
+        {
+            customPrompts = new List<InteractionPromptDefinition>
+            {
+                new InteractionPromptDefinition()
+            };
+        }
+    }
+
+    public IReadOnlyList<InteractionPromptDefinition> GetPrompts() => customPrompts;
 }

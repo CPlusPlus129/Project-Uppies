@@ -26,6 +26,11 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
     [Header("Visual Feedback")]
     [SerializeField][UnityEngine.Range(0f, 1f)] private float completedSigilAlpha = 0.3f;
 
+    [Header("Scoring")]
+    [SerializeField] private float perfectCompletionSeconds = 4f;
+    [SerializeField] private float slowCompletionSeconds = 18f;
+    [SerializeField][UnityEngine.Range(0f, 1f)] private float accuracyWeight = 0.7f;
+
     // Holds all sigils in the scene
     private List<sigilType> sigilTypes;
 
@@ -39,6 +44,8 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
     private int prevSigilIndex = -1;
 
     private int currentSigilInd = 0;
+    private float minigameStartTime;
+    private int mistakeCount;
 
     // Holds references to instantiated sigil UI objects
     private List<GameObject> instantiatedSigils = new List<GameObject>();
@@ -72,6 +79,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         beatKey?.Enable();
         currentSigilPattern = GenerateNewSigilPattern(3, 5);
         DisplaySigils(currentSigilPattern);
+        ResetScoringState();
     }
 
     private void OnDisable()
@@ -127,7 +135,9 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
                 if (enableDebugLogs) Debug.Log("Pattern complete!");
 
                 // Notify the CookingSystem that the minigame is complete
-                cookingSystem.CompleteCooking();
+                var duration = Time.time - minigameStartTime;
+                var performance = BuildPerformance(duration);
+                cookingSystem.CompleteCooking(performance);
 
                 // Fire completion event for any other systems that might need it
                 OnMinigameCompleted.OnNext(R3.Unit.Default);
@@ -141,6 +151,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         }
         else
         {
+            mistakeCount++;
             if (enableDebugLogs) Debug.Log("Wrong key! Expected: " + currentSigil.sigilKey);
             // Reset progress on wrong key
             currentSigilInd = 0;
@@ -152,6 +163,12 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
             // Reset all sigils to full opacity
             ResetAllSigilsAlpha();
         }
+    }
+
+    private void ResetScoringState()
+    {
+        mistakeCount = 0;
+        minigameStartTime = Time.time;
     }
 
 
@@ -229,6 +246,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
 
         ResetAllSigilsAlpha();
         currentSigilInd = 0;
+        mistakeCount = 0;
         if (instantiatedSigils.Count > 0)
         {
             UniTask.DelayFrame(1).ContinueWith(() =>
@@ -236,6 +254,7 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
                 currentSigilHighlighter.transform.position = instantiatedSigils[0].transform.position;
             }).Forget();
         }
+        minigameStartTime = Time.time;
     }
 
     // Dim a specific sigil by index
@@ -336,5 +355,22 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
         }
 
         return instance;
+    }
+
+    private MinigamePerformance BuildPerformance(float durationSeconds)
+    {
+        var patternLength = currentSigilPattern?.Count ?? 0;
+        if (patternLength <= 0)
+        {
+            return MinigamePerformance.Default;
+        }
+
+        var accuracy = patternLength / (float)(patternLength + Mathf.Max(0, mistakeCount));
+        var clampedDuration = Mathf.Clamp(durationSeconds, perfectCompletionSeconds, slowCompletionSeconds);
+        var durationWindow = Mathf.Max(0.001f, slowCompletionSeconds - perfectCompletionSeconds);
+        var speedScore = 1f - ((clampedDuration - perfectCompletionSeconds) / durationWindow);
+        var speedWeight = 1f - accuracyWeight;
+        var qualityScore = Mathf.Clamp01((accuracy * accuracyWeight) + (speedScore * speedWeight));
+        return new MinigamePerformance(accuracy, mistakeCount, durationSeconds, qualityScore);
     }
 }

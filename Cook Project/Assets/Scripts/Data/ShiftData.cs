@@ -28,6 +28,10 @@ public class ShiftData : ScriptableObject
     [Tooltip("Multiplier applied each tick so the amount ramps up over time ( > 1 ).")]
     public float debtTickGrowthMultiplier = 1.2f;
 
+    [Header("Death Penalties")]
+    [Tooltip("Percent of current positive money lost when the player dies.")]
+    [Range(0f, 1f)] public float deathMoneyLossPercent = 0.5f;
+
     public Shift[] shifts;
     public Shift GetShiftByNumber(int number)
     {

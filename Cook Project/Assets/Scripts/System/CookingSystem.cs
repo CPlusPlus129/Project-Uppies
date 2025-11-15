@@ -8,6 +8,7 @@ public class CookingSystem : ICookingSystem
     private readonly IInventorySystem inventorySystem;
     // Store the pending meal item until minigame completion
     private ItemBase pendingMealItem = null;
+    public MinigamePerformance LastPerformance { get; private set; } = MinigamePerformance.Default;
 
     public CookingSystem(IInventorySystem inventorySystem)
     {
@@ -63,12 +64,19 @@ public class CookingSystem : ICookingSystem
     /// Adds the pending meal to the player's inventory.
     /// This is called by the MinigamePanel when the player completes the pattern.
     /// </summary>
-    public void CompleteCooking()
+    public void CompleteCooking(MinigamePerformance performance)
     {
         if (pendingMealItem == null)
         {
             Debug.LogError("CompleteCooking called but no pending meal item exists!");
             return;
+        }
+
+        LastPerformance = performance;
+
+        if (pendingMealItem.TryGetComponent<Meal>(out var mealComponent))
+        {
+            mealComponent.SetQuality(performance.QualityScore);
         }
 
         // Add the meal to inventory

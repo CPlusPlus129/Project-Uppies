@@ -8,7 +8,7 @@ public interface IOrderManager : IGameService
 	Subject<Unit> OnOrdersCleared { get; }
     IReadOnlyList<Order> pendingOrders { get; }
 	void PlaceOrder(Order order);
-	bool ServeOrder(Order servedOrder);
+	bool ServeOrder(Order servedOrder, Meal servedMeal);
 	void ClearOrders();
 	bool CustomerHasPendingOrder(string customerName);
 	Order GetPendingOrderForCustomer(string customerName);

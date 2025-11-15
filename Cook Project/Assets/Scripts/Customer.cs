@@ -59,7 +59,8 @@ public class Customer : MonoBehaviour, IInteractable
         {
             CustomerName = customerName,
             MealName = recipe.mealName,
-            Recipe = recipe
+            Recipe = recipe,
+            PlacedAtTime = Time.time
         };
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;
@@ -77,8 +78,14 @@ public class Customer : MonoBehaviour, IInteractable
 
     public void ReceiveMeal(ItemBase meal)
     {
+        if (meal is not Meal cookedMeal)
+        {
+            Debug.LogError("ReceiveMeal called with non-meal item despite CanReceiveMeal check.");
+            return;
+        }
+
         var order = new Order { CustomerName = customerName, MealName = meal.ItemName };
-        if (orderManager.ServeOrder(order))
+        if (orderManager.ServeOrder(order, cookedMeal))
         {
             inventorySystem.RemoveSelectedItem();
             state = CustomerState.WaitingForOrder;

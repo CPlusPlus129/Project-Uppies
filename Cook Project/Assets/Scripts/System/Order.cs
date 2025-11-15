@@ -5,6 +5,7 @@ public class Order
     public string CustomerName;
     public string MealName;
     public Recipe Recipe;
+    public float PlacedAtTime;
 
     public override bool Equals(object obj)
     {

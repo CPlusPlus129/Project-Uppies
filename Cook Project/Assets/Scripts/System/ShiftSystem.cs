@@ -32,6 +32,7 @@ public class ShiftSystem : IShiftSystem
     private float shiftElapsedSeconds;
     private float overtimeElapsedSeconds;
     private CancellationTokenSource debtCollectionCts;
+    private IDisposable playerDeathSubscription;
 
     public ShiftSystem(IQuestService questService, IOrderManager orderManager, IInventorySystem inventorySystem)
     {
@@ -43,6 +44,7 @@ public class ShiftSystem : IShiftSystem
     public async UniTask Init()
     {
         await UniTask.CompletedTask;
+        SubscribeToPlayerDeathAsync().Forget();
     }
 
     public void StartGame()
@@ -72,6 +74,14 @@ public class ShiftSystem : IShiftSystem
         disposables.Clear();
         debtCollectionCts?.Cancel();
         ResetWalletToStartingDebt();
+    }
+
+    private async UniTaskVoid SubscribeToPlayerDeathAsync()
+    {
+        await UniTask.WaitUntil(() => PlayerStatSystem.Instance != null);
+        playerDeathSubscription?.Dispose();
+        playerDeathSubscription = PlayerStatSystem.Instance.OnPlayerDeath
+            .Subscribe(_ => ApplyPlayerDeathPenalty());
     }
 
     public void StartNextShift()
@@ -113,7 +123,25 @@ public class ShiftSystem : IShiftSystem
     {
         var stats = PlayerStatSystem.Instance;
         var available = stats == null ? 0 : Mathf.Max(0, stats.Money.Value);
-        return DepositInternal(available);
+        if (available <= 0)
+        {
+            return DepositInternal(available);
+        }
+
+        if (quotaAmount.Value <= 0)
+        {
+            return DepositInternal(available);
+        }
+
+        var remainingToQuota = Mathf.Max(0, quotaAmount.Value - depositedAmount.Value);
+        if (remainingToQuota <= 0)
+        {
+            WorldBroadcastSystem.Instance.Broadcast("Quota already met. Clock out!", 4f);
+            return 0;
+        }
+
+        var request = Mathf.Min(available, remainingToQuota);
+        return DepositInternal(request);
     }
 
     public bool HasMetQuota()
@@ -370,5 +398,39 @@ public class ShiftSystem : IShiftSystem
     private ShiftData.Shift GetCurrentShift()
     {
         return Database.Instance.shiftData.GetShiftByNumber(shiftNumber.Value);
+    }
+
+    private void ApplyPlayerDeathPenalty()
+    {
+        inventorySystem?.ClearInventory();
+
+        var stats = PlayerStatSystem.Instance;
+        var data = Database.Instance?.shiftData;
+        if (stats == null || data == null)
+        {
+            return;
+        }
+
+        var currentMoney = stats.Money.Value;
+        if (currentMoney < 0)
+        {
+            return;
+        }
+
+        var percent = Mathf.Clamp01(data.deathMoneyLossPercent);
+        if (percent <= 0f || currentMoney == 0)
+        {
+            return;
+        }
+
+        var loss = Mathf.CeilToInt(currentMoney * percent);
+        loss = Mathf.Clamp(loss, 0, currentMoney);
+        if (loss <= 0)
+        {
+            return;
+        }
+
+        stats.Money.Value -= loss;
+        WorldBroadcastSystem.Instance.Broadcast($"You lost ${loss} when you died.", 4f);
     }
 }

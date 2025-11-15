@@ -1,23 +1,24 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class HUD : MonoBehaviour, IUIInitializable
 {
     [SerializeField] private TextMeshProUGUI aimHint;
+    [SerializeField] private string defaultActionName = "Interact";
+    [SerializeField] private string defaultControlScheme = "keyboard&mouse";
+    [SerializeField] private string defaultActionLabel = "Interact";
 
     public async UniTask Init()
     {
-        var actionName = "Interact";
-        var interactKey = InputManager.Instance.GetBindingDisplayString(actionName, "keyboard&mouse");
-        var displayString = $"[ {interactKey} ] {actionName}";
         PlayerStatSystem.Instance.CurrentInteractableTarget.Subscribe(interactable =>
         {
             if (interactable != null)
             {
-                aimHint.text = displayString;
+                aimHint.text = BuildHintText(interactable);
                 aimHint.gameObject.SetActive(true);
             }
             else
@@ -28,4 +29,59 @@ public class HUD : MonoBehaviour, IUIInitializable
         await UniTask.CompletedTask;
     }
 
+    private string BuildHintText(IInteractable interactable)
+    {
+        if (interactable is IInteractionPromptProvider promptProvider)
+        {
+            var prompts = promptProvider.GetPrompts();
+            var formatted = FormatPrompts(prompts);
+            if (!string.IsNullOrEmpty(formatted))
+            {
+                return formatted;
+            }
+        }
+
+        return BuildFallbackHint();
+    }
+
+    private string FormatPrompts(IReadOnlyList<InteractionPromptDefinition> prompts)
+    {
+        if (prompts == null || prompts.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder();
+        for (int i = 0; i < prompts.Count; i++)
+        {
+            var prompt = prompts[i];
+            var actionName = string.IsNullOrWhiteSpace(prompt.actionName) ? defaultActionName : prompt.actionName;
+            var controlScheme = string.IsNullOrWhiteSpace(prompt.controlScheme) ? defaultControlScheme : prompt.controlScheme;
+            var label = string.IsNullOrWhiteSpace(prompt.customText) ? actionName : prompt.customText;
+            var binding = InputManager.Instance.GetBindingDisplayString(actionName, controlScheme);
+            if (string.IsNullOrEmpty(binding))
+            {
+                binding = actionName;
+            }
+
+            sb.Append("[ ").Append(binding).Append(" ] ").Append(label);
+            if (i < prompts.Count - 1)
+            {
+                sb.AppendLine();
+            }
+        }
+
+        return sb.ToString();
+    }
+
+    private string BuildFallbackHint()
+    {
+        var label = string.IsNullOrWhiteSpace(defaultActionLabel) ? defaultActionName : defaultActionLabel;
+        var binding = InputManager.Instance.GetBindingDisplayString(defaultActionName, defaultControlScheme);
+        if (string.IsNullOrEmpty(binding))
+        {
+            binding = defaultActionName;
+        }
+        return $"[ {binding} ] {label}";
+    }
 }
