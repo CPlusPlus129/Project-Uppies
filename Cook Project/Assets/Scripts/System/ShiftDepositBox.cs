@@ -34,6 +34,8 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
 
     private void OnValidate()
     {
+        if (!Application.isPlaying)
+            return;
         CacheColliderReference();
         EnsureInteractableLayer();
         RefreshPrompts();

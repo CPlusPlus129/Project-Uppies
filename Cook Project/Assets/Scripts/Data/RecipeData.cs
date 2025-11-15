@@ -24,6 +24,8 @@ public class RecipeData : ScriptableObject
         int index = UnityEngine.Random.Range(0, datas.Length);
         return datas[index];
     }
+
+    public Recipe[] GetAllRecipes() => datas;
 }
 
 [Serializable]
