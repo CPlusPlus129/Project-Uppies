@@ -14,6 +14,8 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private IShiftSystem shiftSystem;
     private IQuestService questService;
+    private string cachedTimeRemaining = "--";
+    private string cachedClock = "--";
 
     public async UniTask Init()
     {
@@ -25,7 +27,10 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
         shiftSystem.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
         shiftSystem.requiredOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
+        shiftSystem.depositedAmount.Subscribe(_ => UpdateOrderText()).AddTo(this);
+        shiftSystem.quotaAmount.Subscribe(_ => UpdateOrderText()).AddTo(this);
         shiftSystem.shiftTimer.Subscribe(UpdateShiftTimer).AddTo(this);
+        shiftSystem.currentClockHour.Subscribe(UpdateClock).AddTo(this);
         questService.OnQuestStarted.Subscribe(_ => UpdateQuestText()).AddTo(this);
         questService.OnQuestCompleted.Subscribe(_ => UpdateQuestText()).AddTo(this);
         questService.OnQuestFailed.Subscribe(_ => UpdateQuestText()).AddTo(this);
@@ -39,6 +44,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         UpdateShiftState(shiftSystem.currentState.Value);
         UpdateOrderText();
         UpdateShiftTimer(shiftSystem.shiftTimer.Value);
+        UpdateClock(shiftSystem.currentClockHour.Value);
         UpdateQuestText();
     }
 
@@ -58,6 +64,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         {
             ShiftSystem.ShiftState.None => "Shift: None",
             ShiftSystem.ShiftState.InShift => "Shift: On",
+            ShiftSystem.ShiftState.Overtime => "Shift: Overtime",
             ShiftSystem.ShiftState.AfterShift => "Shift: Off",
             ShiftSystem.ShiftState.GaveOver => "Shift: Over",
             _ => "Shift: Unknown",
@@ -66,13 +73,41 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateShiftTimer(float obj)
     {
-        TimeSpan time = TimeSpan.FromSeconds(obj);
-        shiftTimerText.text = string.Format("Time Left: {0:D2}:{1:D2}", time.Minutes, time.Seconds);
+        TimeSpan time = TimeSpan.FromSeconds(Mathf.Max(0f, obj));
+        cachedTimeRemaining = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+        ApplyClockDisplay();
+    }
+
+    private void UpdateClock(float hours)
+    {
+        cachedClock = FormatClock(hours);
+        ApplyClockDisplay();
+    }
+
+    private void ApplyClockDisplay()
+    {
+        shiftTimerText.text = $"Time Left: {cachedTimeRemaining}\nClock: {cachedClock}";
     }
 
     private void UpdateOrderText()
     {
-        orderText.text = $"Orders: {shiftSystem.completedOrderCount.Value}/{shiftSystem.requiredOrderCount.Value}";
+        orderText.text = $"Quota: ${shiftSystem.depositedAmount.Value}/{shiftSystem.quotaAmount.Value}\nOrders: {shiftSystem.completedOrderCount.Value}/{shiftSystem.requiredOrderCount.Value}";
+    }
+
+    private string FormatClock(float hours)
+    {
+        if (hours < 0f)
+            hours = 0f;
+
+        var totalMinutes = Mathf.RoundToInt(hours * 60f);
+        var totalHours = Mathf.FloorToInt(hours);
+        var minutes = Mathf.Clamp(totalMinutes - totalHours * 60, 0, 59);
+        var normalizedHour = ((totalHours % 24) + 24) % 24;
+        var suffix = normalizedHour >= 12 ? "PM" : "AM";
+        var hour12 = normalizedHour % 12;
+        if (hour12 == 0)
+            hour12 = 12;
+        return $"{hour12:D2}:{minutes:D2} {suffix}";
     }
 
     private void UpdateQuestText()

@@ -99,6 +99,21 @@ public class InventorySystem : IInventorySystem
         OnInventoryChanged.OnNext(slots);
     }
 
+    public void ClearInventory()
+    {
+        if (slots.Count == 0)
+            return;
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            slots[i] = null;
+        }
+
+        UpdateItemCache(string.Empty, CollectionChangeType.RemoveAll);
+        SelectedIndex.Value = 0;
+        OnInventoryChanged.OnNext(slots);
+    }
+
     public bool IsInventoryFull()
     {
         foreach (var slot in slots)

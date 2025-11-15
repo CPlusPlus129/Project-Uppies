@@ -50,7 +50,8 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
             Get<IInventorySystem>()));
         Register<IShiftSystem>(() => new ShiftSystem(
             Get<IQuestService>(),
-            Get<IOrderManager>()));
+            Get<IOrderManager>(),
+            Get<IInventorySystem>()));
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         var debugManagerGO = new UnityEngine.GameObject("DebugManager");

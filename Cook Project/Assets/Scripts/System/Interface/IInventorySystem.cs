@@ -14,4 +14,5 @@ public interface IInventorySystem : IGameService
     void RemoveSelectedItem();
     bool IsInventoryFull();
     bool HasItem(string itemName);
+    void ClearInventory();
 }
