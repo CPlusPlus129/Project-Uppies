@@ -6,6 +6,7 @@ public interface IOrderManager : IGameService
 	Subject<Order> OnNewOrder { get; }
 	Subject<Order> OnOrderServed { get; }
 	Subject<Unit> OnOrdersCleared { get; }
+    Subject<OrderRewardResult> OnOrderRewarded { get; }
     IReadOnlyList<Order> pendingOrders { get; }
 	void PlaceOrder(Order order);
 	bool ServeOrder(Order servedOrder, Meal servedMeal);

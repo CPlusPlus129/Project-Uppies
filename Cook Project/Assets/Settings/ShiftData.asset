@@ -13,28 +13,37 @@ MonoBehaviour:
   m_Name: ShiftData
   m_EditorClassIdentifier: Assembly-CSharp::ShiftData
   shiftDuration: 300
+  workDayStartHour: 9
+  workDayEndHour: 17
+  defaultDepositChunk: 50
+  startingDebt: -66
+  maxNegativeDebt: -666
+  debtCollectionInterval: 5
+  baseDebtTickAmount: 5
+  debtTickGrowthMultiplier: 1.2
+  deathMoneyLossPercent: 0.5
   shifts:
-  - requiredOrdersCount: 1
+  - requiredOrdersCount: 0
+    quotaAmount: 100
     questId: unlock_storage_temp
-    questName: Unlock Storage Door 0
-    questDescription: Solve the puzzle on the door
-  - requiredOrdersCount: 3
+    debtPressureMultiplier: 1
+  - requiredOrdersCount: 0
+    quotaAmount: 300
     questId: 
-    questName: 
-    questDescription: 
+    debtPressureMultiplier: 1
   - requiredOrdersCount: 5
+    quotaAmount: 500
     questId: 
-    questName: 
-    questDescription: 
+    debtPressureMultiplier: 1
   - requiredOrdersCount: 5
+    quotaAmount: 500
     questId: 
-    questName: 
-    questDescription: 
+    debtPressureMultiplier: 1
   - requiredOrdersCount: 7
+    quotaAmount: 500
     questId: 
-    questName: 
-    questDescription: 
+    debtPressureMultiplier: 1
   - requiredOrdersCount: 10
+    quotaAmount: 500
     questId: 
-    questName: 
-    questDescription: 
+    debtPressureMultiplier: 1

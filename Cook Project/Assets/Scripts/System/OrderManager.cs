@@ -8,6 +8,7 @@ public class OrderManager : IOrderManager
     public Subject<Order> OnNewOrder { get; } = new Subject<Order>();
     public Subject<Order> OnOrderServed { get; } = new Subject<Order>();
     public Subject<Unit> OnOrdersCleared { get; } = new Subject<Unit>();
+    public Subject<OrderRewardResult> OnOrderRewarded { get; } = new Subject<OrderRewardResult>();
     private List<Order> _pendingOrders = new List<Order>();
     public IReadOnlyList<Order> pendingOrders => _pendingOrders;
     private const float quickServeSeconds = 60f;
@@ -33,10 +34,11 @@ public class OrderManager : IOrderManager
         var match = _pendingOrders.Find(o => o.Equals(servedOrder));
         if (match != null)
         {
-            var reward = CalculateOrderReward(match, servedMeal);
-            PlayerStatSystem.Instance.Money.Value += Mathf.RoundToInt(reward);
+            var rewardResult = CalculateOrderReward(match, servedMeal);
+            PlayerStatSystem.Instance.Money.Value += rewardResult.TotalRewardRounded;
             _pendingOrders.Remove(match);
             OnOrderServed.OnNext(match);
+            OnOrderRewarded.OnNext(rewardResult);
             return true;
         }
         return false;
@@ -58,7 +60,7 @@ public class OrderManager : IOrderManager
         return _pendingOrders.Find(o => o.CustomerName == customerName);
     }
 
-    private float CalculateOrderReward(Order order, Meal servedMeal)
+    private OrderRewardResult CalculateOrderReward(Order order, Meal servedMeal)
     {
         var placedTime = order.PlacedAtTime <= 0f ? Time.time : order.PlacedAtTime;
         var completionDuration = Mathf.Max(0f, Time.time - placedTime);
@@ -70,7 +72,36 @@ public class OrderManager : IOrderManager
         var totalWeight = Mathf.Max(0.001f, timeWeight + qualityWeight);
         var combinedScore = ((timeScore * timeWeight) + (qualityScore * qualityWeight)) / totalWeight;
 
-        return Mathf.Lerp(minReward, maxReward, combinedScore);
+        var totalReward = Mathf.Lerp(minReward, maxReward, combinedScore);
+        var normalizedTimeWeight = timeWeight / totalWeight;
+        var normalizedQualityWeight = qualityWeight / totalWeight;
+        var weightedTimeScore = Mathf.Max(0f, timeScore) * normalizedTimeWeight;
+        var weightedQualityScore = Mathf.Max(0f, qualityScore) * normalizedQualityWeight;
+        var contributionSum = Mathf.Max(0.001f, weightedTimeScore + weightedQualityScore);
+        var timeContributionRatio = weightedTimeScore / contributionSum;
+        var qualityContributionRatio = weightedQualityScore / contributionSum;
+
+        return new OrderRewardResult
+        {
+            Order = order,
+            Meal = servedMeal,
+            TotalReward = totalReward,
+            RoundedReward = Mathf.RoundToInt(totalReward),
+            CombinedScore = Mathf.Clamp01(combinedScore),
+            CompletionSeconds = completionDuration,
+            TimeScore = Mathf.Clamp01(timeScore),
+            QualityScore = Mathf.Clamp01(qualityScore),
+            TimeContribution = totalReward * timeContributionRatio,
+            QualityContribution = totalReward * qualityContributionRatio,
+            TimeContributionRatio = timeContributionRatio,
+            QualityContributionRatio = qualityContributionRatio,
+            TimeWeightNormalized = normalizedTimeWeight,
+            QualityWeightNormalized = normalizedQualityWeight,
+            QuickServeSeconds = quickServeSeconds,
+            SlowServeSeconds = slowServeSeconds,
+            MinReward = minReward,
+            MaxReward = maxReward
+        };
     }
 
     public void Dispose()
@@ -78,6 +109,7 @@ public class OrderManager : IOrderManager
         OnNewOrder?.Dispose();
         OnOrderServed?.Dispose();
         OnOrdersCleared?.Dispose();
+        OnOrderRewarded?.Dispose();
         _pendingOrders.Clear();
     }
 }
