@@ -7,12 +7,14 @@ public class InventoryBarUI : MonoBehaviour, IUIInitializable
 {
     [SerializeField] private GameObject selectedIndicator;
     [SerializeField] private InventorySlotUI slotPrefab;
+    private IAssetLoader assetLoader;
     private IInventorySystem inventorySystem;
     private List<InventorySlotUI> slots = new List<InventorySlotUI>();
 
     public async UniTask Init()
     {
         slotPrefab.gameObject.SetActive(false);
+        assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
         inventorySystem.OnInventoryChanged.Subscribe(UpdateInventory).AddTo(this);
         inventorySystem.SelectedIndex.Subscribe(OnSelectedIndexChanged).AddTo(this);
@@ -34,6 +36,7 @@ public class InventoryBarUI : MonoBehaviour, IUIInitializable
                 var newSlot = Instantiate(slotPrefab, slotPrefab.transform.parent);
                 newSlot.gameObject.SetActive(true);
                 slots.Add(newSlot);
+                newSlot.assetLoader = assetLoader;
                 newSlot.SetItem(item?.ItemName);
             }
         }
