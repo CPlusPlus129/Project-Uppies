@@ -131,6 +131,56 @@ public partial class Mob
     }
 
     [Serializable]
+    private class DeathPresentationSettings
+    {
+        [Tooltip("Enables the scripted death presentation.")]
+        public bool enabled = true;
+        [Tooltip("Optional override for the transform that gets animated on death.")]
+        public Transform rootOverride;
+        [Tooltip("Disable the animator before running the presentation so baked idle loops do not fight the visual.")]
+        public bool disableAnimator = true;
+        [Min(0.05f), Tooltip("Seconds spent animating the corpse before despawn.")]
+        public float duration = 0.95f;
+        [Tooltip("Units applied to the height curve result. Positive goes up, negative goes down.")]
+        public float heightMultiplier = 0.55f;
+        [Tooltip("Maximum horizontal drift radius applied over the lifetime (meters).")]
+        public float driftRadius = 0.25f;
+        [Tooltip("Maximum tilt (degrees) applied while wobbling into the ground.")]
+        public float tiltAngle = 10f;
+        [Min(0.1f), Tooltip("Oscillations per second for the wobble motion.")]
+        public float wobbleFrequency = 1.2f;
+        [Tooltip("Min/Max spin over the lifetime in degrees.")]
+        public Vector2 spinDegrees = new Vector2(70f, 180f);
+        [Tooltip("Controls how the body floats up then sinks down (Y axis)."), SerializeField]
+        public AnimationCurve heightCurve = new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 2f),
+            new Keyframe(0.28f, 0.11f, 0.5f, 0.5f),
+            new Keyframe(0.65f, -0.04f, -0.3f, -0.3f),
+            new Keyframe(1f, -0.18f));
+        [Tooltip("Controls the squash and stretch of the corpse over time."), SerializeField]
+        public AnimationCurve scaleCurve = new AnimationCurve(
+            new Keyframe(0f, 1f, 0f, 2f),
+            new Keyframe(0.35f, 0.98f, -0.5f, -0.5f),
+            new Keyframe(0.8f, 0.9f, -0.3f, -0.3f),
+            new Keyframe(1f, 0.5f, -2f, 0f));
+        [Tooltip("Alpha curve for fading renderers out."), SerializeField]
+        public AnimationCurve fadeCurve = new AnimationCurve(
+            new Keyframe(0f, 1f, 0f, 0f),
+            new Keyframe(0.35f, 0.98f, 0f, 0f),
+            new Keyframe(1f, 0f, -2.5f, 0f));
+        [Tooltip("Emission multiplier curve applied alongside the fade."), SerializeField]
+        public AnimationCurve emissionCurve = new AnimationCurve(
+            new Keyframe(0f, 0.9f),
+            new Keyframe(0.4f, 0.55f),
+            new Keyframe(1f, 0.15f));
+        [Header("Flash")]
+        public Color flashColor = new Color(1f, 0.8f, 0.42f, 1f);
+        [Min(0f)] public float flashIntensity = 3f;
+        [Tooltip("How long the initial flash lasts (seconds).")]
+        public float flashDuration = 0.08f;
+    }
+
+    [Serializable]
     private class LightDamageSettings
     {
         public float attackLifetimeReduction = 2f;
@@ -154,6 +204,8 @@ public partial class Mob
     [SerializeField] private HealthSettings health = new HealthSettings();
     [Header("Death")]
     [SerializeField] private DeathSettings death = new DeathSettings();
+    [Header("Death Presentation")]
+    [SerializeField] private DeathPresentationSettings deathPresentation = new DeathPresentationSettings();
     [Header("Money Rewards")]
     [SerializeField] private MoneyRewardSettings moneyReward = new MoneyRewardSettings();
     [SerializeField] private LightDamageSettings lightDamage = new LightDamageSettings();

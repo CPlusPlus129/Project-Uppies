@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -34,6 +35,7 @@ public partial class Mob : MonoBehaviour
     private static readonly List<Mob> ActiveMobs = new List<Mob>();
     private Rigidbody body;
     private NavMeshAgent agent;
+    private Animator cachedAnimator;
     private bool isAlive = true;
     private MobState state = MobState.Idle;
     private float stateTimer;
@@ -60,6 +62,15 @@ public partial class Mob : MonoBehaviour
     private bool cachedPlayerVisible;
     private int cachedVisibilityFrame = -1;
 
+    private Transform cachedPresentationRoot;
+    private Vector3 presentationBaseLocalPosition;
+    private Vector3 presentationBaseLocalScale = Vector3.one;
+    private Quaternion presentationBaseLocalRotation = Quaternion.identity;
+    private bool hasPresentationBaseline;
+    private RendererState[] presentationRenderers = Array.Empty<RendererState>();
+    private MaterialPropertyBlock deathPresentationBlock;
+    private Coroutine deathPresentationRoutine;
+
     private static Collider[] s_flockingColliderBuffer = new Collider[32];
     private static Mob[] s_flockingMobBuffer = new Mob[32];
     private int flockingLayerMask;
@@ -72,6 +83,9 @@ public partial class Mob : MonoBehaviour
     private int navMeshAreaMask = NavMesh.AllAreas;
 
     private const float KinematicCollisionSkin = 0.02f;
+    private static readonly int ShaderColorId = Shader.PropertyToID("_Color");
+    private static readonly int ShaderBaseColorId = Shader.PropertyToID("_BaseColor");
+    private static readonly int ShaderEmissionColorId = Shader.PropertyToID("_EmissionColor");
 
     #endregion
 
@@ -81,6 +95,7 @@ public partial class Mob : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
+        cachedAnimator = GetComponent<Animator>();
 
         ConfigureRigidbody();
         ConfigureAgent();
@@ -94,10 +109,12 @@ public partial class Mob : MonoBehaviour
         flockingLayerMask = 1 << gameObject.layer;
 
         TryAutoAssignReferences();
+        ResetDeathPresentationState(true);
     }
 
     private void OnEnable()
     {
+        ResetDeathPresentationState();
         if (!hasRegistered)
         {
             ActiveMobs.Add(this);
@@ -107,6 +124,7 @@ public partial class Mob : MonoBehaviour
 
     private void OnDisable()
     {
+        StopDeathPresentationRoutine();
         if (hasRegistered)
         {
             ActiveMobs.Remove(this);
@@ -202,6 +220,354 @@ public partial class Mob : MonoBehaviour
         {
             Debug.LogWarning("Mob: Unable to find player with tag 'Player'. Assign target manually.", this);
         }
+    }
+
+    #endregion
+
+    #region Death Presentation
+
+    private void ResetDeathPresentationState(bool rebuildCache = false)
+    {
+        StopDeathPresentationRoutine();
+        if (deathPresentation == null)
+        {
+            return;
+        }
+
+        RefreshPresentationCache(rebuildCache);
+
+        if (cachedPresentationRoot != null && hasPresentationBaseline)
+        {
+            cachedPresentationRoot.localPosition = presentationBaseLocalPosition;
+            cachedPresentationRoot.localRotation = presentationBaseLocalRotation;
+            cachedPresentationRoot.localScale = presentationBaseLocalScale;
+        }
+
+        ClearRendererOverrides();
+    }
+
+    private void RefreshPresentationCache(bool forceRendererRebuild)
+    {
+        if (deathPresentation == null)
+        {
+            return;
+        }
+
+        Transform desiredRoot = deathPresentation.rootOverride != null ? deathPresentation.rootOverride : cachedPresentationRoot;
+        if (desiredRoot == null)
+        {
+            desiredRoot = FindFallbackPresentationRoot();
+        }
+
+        if (desiredRoot == null)
+        {
+            desiredRoot = transform;
+        }
+
+        if (desiredRoot != cachedPresentationRoot)
+        {
+            cachedPresentationRoot = desiredRoot;
+            hasPresentationBaseline = false;
+            forceRendererRebuild = true;
+        }
+
+        if (cachedPresentationRoot != null && !hasPresentationBaseline)
+        {
+            presentationBaseLocalPosition = cachedPresentationRoot.localPosition;
+            presentationBaseLocalRotation = cachedPresentationRoot.localRotation;
+            presentationBaseLocalScale = cachedPresentationRoot.localScale;
+            hasPresentationBaseline = true;
+        }
+
+        if (forceRendererRebuild || presentationRenderers == null || presentationRenderers.Length == 0)
+        {
+            CacheRendererStates();
+        }
+    }
+
+    private Transform FindFallbackPresentationRoot()
+    {
+        if (deathPresentation != null && deathPresentation.rootOverride != null)
+        {
+            return deathPresentation.rootOverride;
+        }
+
+        Transform candidate = null;
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            if (child.GetComponentInChildren<Renderer>(true) != null)
+            {
+                candidate = child;
+                break;
+            }
+        }
+
+        if (candidate != null)
+        {
+            return candidate;
+        }
+
+        Renderer renderer = GetComponentInChildren<Renderer>(true);
+        if (renderer != null)
+        {
+            Transform current = renderer.transform;
+            while (current.parent != null && current.parent != transform)
+            {
+                current = current.parent;
+            }
+
+            if (current != null && current.parent == transform)
+            {
+                return current;
+            }
+
+            return renderer.transform;
+        }
+
+        return transform;
+    }
+
+    private void CacheRendererStates()
+    {
+        if (cachedPresentationRoot == null)
+        {
+            presentationRenderers = Array.Empty<RendererState>();
+            return;
+        }
+
+        Renderer[] renderers = cachedPresentationRoot.GetComponentsInChildren<Renderer>(true);
+        if (renderers == null || renderers.Length == 0)
+        {
+            presentationRenderers = Array.Empty<RendererState>();
+            return;
+        }
+
+        if (deathPresentationBlock == null)
+        {
+            deathPresentationBlock = new MaterialPropertyBlock();
+        }
+
+        presentationRenderers = new RendererState[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer renderer = renderers[i];
+            RendererState state = new RendererState { Renderer = renderer };
+            if (renderer != null)
+            {
+                Material sharedMaterial = renderer.sharedMaterial;
+                if (sharedMaterial != null)
+                {
+                    if (sharedMaterial.HasProperty(ShaderColorId))
+                    {
+                        state.HasColor = true;
+                        state.Color = sharedMaterial.GetColor(ShaderColorId);
+                    }
+
+                    if (sharedMaterial.HasProperty(ShaderBaseColorId))
+                    {
+                        state.HasBaseColor = true;
+                        state.BaseColor = sharedMaterial.GetColor(ShaderBaseColorId);
+                    }
+
+                    if (sharedMaterial.HasProperty(ShaderEmissionColorId))
+                    {
+                        state.HasEmission = true;
+                        state.EmissionColor = sharedMaterial.GetColor(ShaderEmissionColorId);
+                    }
+                }
+            }
+
+            presentationRenderers[i] = state;
+        }
+    }
+
+    private void ClearRendererOverrides()
+    {
+        if (presentationRenderers == null || presentationRenderers.Length == 0 || deathPresentationBlock == null)
+        {
+            return;
+        }
+
+        deathPresentationBlock.Clear();
+        for (int i = 0; i < presentationRenderers.Length; i++)
+        {
+            Renderer renderer = presentationRenderers[i].Renderer;
+            if (renderer == null)
+            {
+                continue;
+            }
+
+            renderer.SetPropertyBlock(deathPresentationBlock);
+        }
+    }
+
+    private void StopDeathPresentationRoutine()
+    {
+        if (deathPresentationRoutine != null)
+        {
+            StopCoroutine(deathPresentationRoutine);
+            deathPresentationRoutine = null;
+        }
+    }
+
+    private void TriggerDeathPresentation()
+    {
+        if (deathPresentation == null || !deathPresentation.enabled || !gameObject.activeInHierarchy)
+        {
+            enabled = false;
+            return;
+        }
+
+        RefreshPresentationCache(true);
+        StopDeathPresentationRoutine();
+        deathPresentationRoutine = StartCoroutine(DeathPresentationRoutine());
+    }
+
+    private IEnumerator DeathPresentationRoutine()
+    {
+        if (cachedPresentationRoot == null)
+        {
+            enabled = false;
+            yield break;
+        }
+
+        if (deathPresentation.disableAnimator && cachedAnimator != null)
+        {
+            cachedAnimator.enabled = false;
+        }
+
+        float duration = Mathf.Max(0.05f, deathPresentation.duration);
+        Vector2 spinRange = deathPresentation.spinDegrees;
+        float minSpin = Mathf.Min(spinRange.x, spinRange.y);
+        float maxSpin = Mathf.Max(spinRange.x, spinRange.y);
+        float totalSpin = UnityEngine.Random.Range(minSpin, maxSpin);
+        if (UnityEngine.Random.value < 0.5f)
+        {
+            totalSpin *= -1f;
+        }
+
+        Vector3 wobbleAxis = UnityEngine.Random.insideUnitSphere;
+        wobbleAxis.y = 0f;
+        if (wobbleAxis.sqrMagnitude < Mathf.Epsilon)
+        {
+            wobbleAxis = Vector3.forward;
+        }
+        wobbleAxis.Normalize();
+
+        Vector3 drift = Vector3.zero;
+        if (deathPresentation.driftRadius > 0f)
+        {
+            Vector2 driftCircle = UnityEngine.Random.insideUnitCircle * deathPresentation.driftRadius;
+            drift = new Vector3(driftCircle.x, 0f, driftCircle.y);
+        }
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+
+            ApplyDeathTransform(cachedPresentationRoot, t, totalSpin, wobbleAxis, drift);
+
+            float fade = deathPresentation.fadeCurve.Evaluate(t);
+            float emission = deathPresentation.emissionCurve.Evaluate(t);
+            float flash = deathPresentation.flashDuration <= Mathf.Epsilon
+                ? 0f
+                : Mathf.Clamp01(1f - (elapsed / deathPresentation.flashDuration));
+            ApplyRendererPresentation(fade, emission, flash);
+
+            yield return null;
+        }
+
+        ApplyRendererPresentation(0f, 0f, 0f);
+        deathPresentationRoutine = null;
+        enabled = false;
+    }
+
+    private void ApplyDeathTransform(Transform target, float normalizedTime, float totalSpin, Vector3 wobbleAxis, Vector3 drift)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        float easedTime = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(normalizedTime));
+        float heightOffset = deathPresentation.heightCurve.Evaluate(easedTime) * deathPresentation.heightMultiplier;
+        float scaleFactor = Mathf.Max(0f, deathPresentation.scaleCurve.Evaluate(easedTime));
+        float wobbleEnvelope = 1f - Mathf.Clamp01(easedTime * 0.85f);
+        float wobbleAngle = Mathf.Sin(easedTime * Mathf.PI * deathPresentation.wobbleFrequency) * deathPresentation.tiltAngle * wobbleEnvelope;
+
+        Vector3 offset = drift * easedTime;
+        offset.y += heightOffset;
+
+        target.localPosition = presentationBaseLocalPosition + offset;
+        target.localRotation = presentationBaseLocalRotation
+            * Quaternion.AngleAxis(totalSpin * easedTime, Vector3.up)
+            * Quaternion.AngleAxis(wobbleAngle, wobbleAxis);
+        target.localScale = presentationBaseLocalScale * scaleFactor;
+    }
+
+    private void ApplyRendererPresentation(float visibility, float emissionWeight, float flashWeight)
+    {
+        if (presentationRenderers == null || presentationRenderers.Length == 0 || deathPresentationBlock == null)
+        {
+            return;
+        }
+
+        float clampedVisibility = Mathf.Clamp01(visibility);
+        float baseEmission = Mathf.Max(0f, emissionWeight);
+        float flashIntensity = flashWeight <= 0f ? 0f : flashWeight * Mathf.Max(0f, deathPresentation.flashIntensity);
+
+        for (int i = 0; i < presentationRenderers.Length; i++)
+        {
+            RendererState state = presentationRenderers[i];
+            Renderer renderer = state.Renderer;
+            if (renderer == null)
+            {
+                continue;
+            }
+
+            deathPresentationBlock.Clear();
+
+            if (state.HasColor)
+            {
+                Color color = state.Color;
+                color.a *= clampedVisibility;
+                deathPresentationBlock.SetColor(ShaderColorId, color);
+            }
+
+            if (state.HasBaseColor)
+            {
+                Color baseColor = state.BaseColor;
+                baseColor.a *= clampedVisibility;
+                deathPresentationBlock.SetColor(ShaderBaseColorId, baseColor);
+            }
+
+            if (state.HasEmission)
+            {
+                Color emission = state.EmissionColor * baseEmission;
+                if (flashIntensity > 0f)
+                {
+                    emission += deathPresentation.flashColor * flashIntensity;
+                }
+
+                deathPresentationBlock.SetColor(ShaderEmissionColorId, emission);
+            }
+
+            renderer.SetPropertyBlock(deathPresentationBlock);
+        }
+    }
+
+    private struct RendererState
+    {
+        public Renderer Renderer;
+        public bool HasColor;
+        public bool HasBaseColor;
+        public bool HasEmission;
+        public Color Color;
+        public Color BaseColor;
+        public Color EmissionColor;
     }
 
     #endregion

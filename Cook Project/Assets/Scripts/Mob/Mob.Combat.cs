@@ -79,14 +79,21 @@ public partial class Mob
         body.isKinematic = true;
         agent.enabled = false;
 
+        if (hasRegistered)
+        {
+            ActiveMobs.Remove(this);
+            hasRegistered = false;
+        }
+
         SpawnDeathParticles();
         AwardSouls();
         AwardMoney();
         Died?.Invoke(this);
         MobDied?.Invoke(this);
-        enabled = false;
 
         Destroy(gameObject, death.despawnDelay);
+
+        TriggerDeathPresentation();
     }
 
     private void SpawnDeathParticles()
