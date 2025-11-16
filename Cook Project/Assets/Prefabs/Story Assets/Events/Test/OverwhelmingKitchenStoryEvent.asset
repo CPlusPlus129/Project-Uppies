@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 814edb4671a1b4e4d8a095943ffdbd84, type: 3}
+  m_Name: OverwhelmingKitchenStoryEvent
+  m_EditorClassIdentifier: Assembly-CSharp::OverwhelmingKitchenStoryEvent
+  eventId: OverwhelmingKitchenStoryEvent
+  designerNotes: Test hidden 3
+  replayable: 1
+  kitchenSystemOverride: {fileID: 0}
+  introDialogue: {fileID: 0}
+  outroDialogue: {fileID: 0}
+  gameCompleteSignalId: overwhelming_kitchen_complete
+  waitForCompletion: 1
+  autoStartGame: 1

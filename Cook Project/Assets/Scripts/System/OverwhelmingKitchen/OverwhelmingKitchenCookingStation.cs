@@ -9,19 +9,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
-
-    [Header("Settings")]
-    [SerializeField] private string currentSelectedRecipe;
-
-    /// <summary>
-    /// Set the currently selected recipe (called by UI or other systems)
-    /// </summary>
-    public void SetSelectedRecipe(string recipeName)
-    {
-        currentSelectedRecipe = recipeName;
-        Debug.Log($"[OverwhelmingKitchenCookingStation] Selected recipe: {recipeName}");
-    }
-
+    
     public void Interact()
     {
         if (kitchenSystem == null)
@@ -36,14 +24,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
             return;
         }
 
-        if (string.IsNullOrEmpty(currentSelectedRecipe))
-        {
-            Debug.LogWarning("[OverwhelmingKitchenCookingStation] No recipe selected");
-            return;
-        }
-
-        // Try to cook
-        TryCook(currentSelectedRecipe);
+        QuickCook();
     }
 
     /// <summary>
@@ -75,8 +56,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
 
         Debug.Log($"[OverwhelmingKitchenCookingStation] Successfully cooked: {recipeName}");
 
-        // Try to match with an active order
-        MatchAndCompleteOrder(recipe);
+        SpawnItem(recipe.mealName);
     }
 
     /// <summary>
@@ -98,32 +78,33 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
         return true;
     }
 
-    /// <summary>
-    /// Match and complete an order
-    /// </summary>
-    private void MatchAndCompleteOrder(Recipe cookedRecipe)
-    {
-        var activeOrders = kitchenSystem.ActiveOrders.CurrentValue;
-        if (activeOrders == null || activeOrders.Count == 0)
+    private void SpawnItem(string itemName) {
+        var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(itemName);
+        if (itemPrefab == null)
         {
-            Debug.LogWarning("[OverwhelmingKitchenCookingStation] No active orders to match");
+            Debug.LogError($"[OverwhelmingKitchenFridge] Ingredient prefab not found: {itemName}");
+            return;
+        }
+        
+        Vector3 spawnPosition = transform.position;
+
+        // Instantiate
+        var itemObject = Instantiate(itemPrefab.gameObject, spawnPosition, Quaternion.identity);
+        var item = itemObject.GetComponent<ItemBase>();
+
+        if (item == null)
+        {
+            Debug.LogError($"[OverwhelmingKitchenFridge] Spawned object does not have ItemBase component: {itemName}");
+            Destroy(itemObject);
             return;
         }
 
-        // Find matching order
-        var matchingOrder = activeOrders.FirstOrDefault(order => order.MealName == cookedRecipe.mealName);
-        if (matchingOrder != null)
-        {
-            kitchenSystem.CompleteOrder(matchingOrder);
-            WorldBroadcastSystem.Instance?.Broadcast($"Completed: {matchingOrder.MealName}!", 2f);
-            Debug.Log($"[OverwhelmingKitchenCookingStation] Completed order: {matchingOrder.MealName}");
-        }
-        else
-        {
-            Debug.LogWarning($"[OverwhelmingKitchenCookingStation] No matching order for {cookedRecipe.mealName}");
-            WorldBroadcastSystem.Instance?.Broadcast($"No one ordered {cookedRecipe.mealName}!", 2f);
-        }
+        // Add to kitchen system's fake inventory
+        kitchenSystem.AddItemToInventory(item, itemObject);
+
+        Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {itemName} at {spawnPosition}");
     }
+
 
     /// <summary>
     /// Quick cook - automatically select the first cookable order
@@ -142,8 +123,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
         {
             if (order.Recipe != null && CheckHasAllIngredients(order.Recipe))
             {
-                currentSelectedRecipe = order.Recipe.mealName;
-                TryCook(currentSelectedRecipe);
+                TryCook(order.Recipe.mealName);
                 return;
             }
         }

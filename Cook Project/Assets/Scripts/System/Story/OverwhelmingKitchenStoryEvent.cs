@@ -69,6 +69,8 @@ public class OverwhelmingKitchenStoryEvent : StoryEventAsset
         if (autoStartGame)
         {
             Debug.Log("[OverwhelmingKitchenStoryEvent] Starting kitchen game...");
+            UIRoot.Instance.GetUIComponent<HUD>()?.Close();
+            UIRoot.Instance.GetUIComponent<OverwhelmingKitchenUI>()?.Open();
             kitchenSystem.StartGame();
         }
 
@@ -99,6 +101,9 @@ public class OverwhelmingKitchenStoryEvent : StoryEventAsset
                 await dialogueService.StartDialogueAsync(outroDialogue.Label);
             }
         }
+
+        UIRoot.Instance.GetUIComponent<HUD>()?.Open();
+        UIRoot.Instance.GetUIComponent<OverwhelmingKitchenUI>()?.Close();
 
         Debug.Log("[OverwhelmingKitchenStoryEvent] Overwhelming kitchen event completed!");
         return StoryEventResult.Completed("Overwhelming kitchen game completed successfully");
