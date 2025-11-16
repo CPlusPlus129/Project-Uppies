@@ -17,7 +17,9 @@ MonoBehaviour:
   replayable: 1
   primaryDialogue: {fileID: 11400000, guid: 6661c1a37a539d9faba0bf90e29abe1a, type: 2}
   additionalDialogues: []
-  respectDialoguePlayOnce: 1
+  respectDialoguePlayOnce: 0
   broadcastHints: 0
   hintDurationSeconds: 3
   logWarnings: 1
+  restartShiftOnComplete: 1
+  restartShiftIndexOverride: -1

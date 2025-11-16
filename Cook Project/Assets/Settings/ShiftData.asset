@@ -25,25 +25,31 @@ MonoBehaviour:
   shifts:
   - requiredOrdersCount: 0
     quotaAmount: 100
-    questId: unlock_storage_temp
+    requiresVipCustomer: 0
+    questId: Shift1Complete
     debtPressureMultiplier: 1
   - requiredOrdersCount: 0
     quotaAmount: 300
+    requiresVipCustomer: 0
     questId: 
     debtPressureMultiplier: 1
   - requiredOrdersCount: 5
     quotaAmount: 500
+    requiresVipCustomer: 0
     questId: 
     debtPressureMultiplier: 1
   - requiredOrdersCount: 5
     quotaAmount: 500
+    requiresVipCustomer: 0
     questId: 
     debtPressureMultiplier: 1
   - requiredOrdersCount: 7
     quotaAmount: 500
+    requiresVipCustomer: 0
     questId: 
     debtPressureMultiplier: 1
   - requiredOrdersCount: 10
     quotaAmount: 500
+    requiresVipCustomer: 0
     questId: 
     debtPressureMultiplier: 1
