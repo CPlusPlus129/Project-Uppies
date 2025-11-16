@@ -1,39 +1,36 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using R3;
 using System;
 using Cysharp.Threading.Tasks;
 
 public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 {
+    [Header("Primary Elements")]
     public TextMeshProUGUI shiftNumberText;
     public TextMeshProUGUI shiftOnOffText;
-    public TextMeshProUGUI shiftTimerText;
-    public TextMeshProUGUI orderText;
-    public TextMeshProUGUI questText;
+    public TextMeshProUGUI clockText;
+    [Header("Supporting Elements")]
+    [SerializeField] private TextMeshProUGUI shiftSubtitleText;
+    [SerializeField] private Image statusBadgeImage;
+    [SerializeField] private Image panelBackgroundImage;
 
     private IShiftSystem shiftSystem;
-    private IQuestService questService;
-    private string cachedTimeRemaining = "--";
-    private string cachedClock = "--";
+    private readonly Color32 offDutyBadge = new(48, 47, 66, 255);
+    private readonly Color32 onDutyBadge = new(99, 214, 170, 255);
+    private readonly Color32 overtimeBadge = new(255, 169, 86, 255);
+    private readonly Color32 backgroundBase = new(255, 255, 255, 236);
+    private readonly Color32 backgroundOvertime = new(255, 234, 200, 236);
 
     public async UniTask Init()
     {
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
-        questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
         shiftSystem.OnGameStart.Subscribe(_ => UpdateActiveState());
         shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
         shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
-        shiftSystem.completedOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        shiftSystem.requiredOrderCount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        shiftSystem.depositedAmount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        shiftSystem.quotaAmount.Subscribe(_ => UpdateOrderText()).AddTo(this);
-        shiftSystem.shiftTimer.Subscribe(UpdateShiftTimer).AddTo(this);
         shiftSystem.currentClockHour.Subscribe(UpdateClock).AddTo(this);
-        questService.OnQuestStarted.Subscribe(_ => UpdateQuestText()).AddTo(this);
-        questService.OnQuestCompleted.Subscribe(_ => UpdateQuestText()).AddTo(this);
-        questService.OnQuestFailed.Subscribe(_ => UpdateQuestText()).AddTo(this);
         UpdateAll();
     }
 
@@ -42,10 +39,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         UpdateActiveState();
         UpdateShiftNumber(shiftSystem.shiftNumber.Value);
         UpdateShiftState(shiftSystem.currentState.Value);
-        UpdateOrderText();
-        UpdateShiftTimer(shiftSystem.shiftTimer.Value);
         UpdateClock(shiftSystem.currentClockHour.Value);
-        UpdateQuestText();
     }
 
     private void UpdateActiveState()
@@ -55,43 +49,13 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateShiftNumber(int number)
     {
-        shiftNumberText.text = $"Shift: {number}";
-    }
-
-    private void UpdateShiftState(ShiftSystem.ShiftState state)
-    {
-        shiftOnOffText.text = state switch
-        {
-            ShiftSystem.ShiftState.None => "Shift: None",
-            ShiftSystem.ShiftState.InShift => "Shift: On",
-            ShiftSystem.ShiftState.Overtime => "Shift: Overtime",
-            ShiftSystem.ShiftState.AfterShift => "Shift: Off",
-            ShiftSystem.ShiftState.GaveOver => "Shift: Over",
-            _ => "Shift: Unknown",
-        };
-    }
-
-    private void UpdateShiftTimer(float obj)
-    {
-        TimeSpan time = TimeSpan.FromSeconds(Mathf.Max(0f, obj));
-        cachedTimeRemaining = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
-        ApplyClockDisplay();
+        var displayIndex = Mathf.Max(0, number) + 1;
+        shiftNumberText.text = $"Shift {displayIndex:D2}";
     }
 
     private void UpdateClock(float hours)
     {
-        cachedClock = FormatClock(hours);
-        ApplyClockDisplay();
-    }
-
-    private void ApplyClockDisplay()
-    {
-        shiftTimerText.text = $"Time Left: {cachedTimeRemaining}\nClock: {cachedClock}";
-    }
-
-    private void UpdateOrderText()
-    {
-        orderText.text = $"Quota: ${shiftSystem.depositedAmount.Value}/{shiftSystem.quotaAmount.Value}\nOrders: {shiftSystem.completedOrderCount.Value}/{shiftSystem.requiredOrderCount.Value}";
+        clockText.text = FormatClock(hours);
     }
 
     private string FormatClock(float hours)
@@ -110,30 +74,65 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         return $"{hour12:D2}:{minutes:D2} {suffix}";
     }
 
-    private void UpdateQuestText()
+    private void UpdateShiftState(ShiftSystem.ShiftState state)
     {
-        var activeQuests = questService.ongoingQuestList;
+        string label;
+        string subtitle;
+        Color badgeColor;
+        Color backgroundColor;
 
-        if (activeQuests.Count == 0)
+        bool firstShiftPending = shiftSystem.shiftNumber.Value <= 0;
+        bool treatAsIdle = state == ShiftSystem.ShiftState.None ||
+                           (firstShiftPending && (state == ShiftSystem.ShiftState.AfterShift || state == ShiftSystem.ShiftState.GaveOver));
+
+        if (treatAsIdle)
         {
-            questText.text = "<size=36><b>Quest:</b></size> <color=#888888>None</color>";
-            return;
+            label = "OFF DUTY";
+            subtitle = "Clock in when you are ready.";
+            badgeColor = offDutyBadge;
+            backgroundColor = backgroundBase;
         }
-
-        var questDisplay = "<size=36><b>Active Quests:</b></size>\n\n";
-
-        for (int i = 0; i < activeQuests.Count; i++)
+        else
         {
-            var quest = activeQuests[i];
-            questDisplay += $"<size=30><b><color=#FFD700>{quest.Title}</color></b></size>\n";
-            questDisplay += $"<size=24><color=#CCCCCC>{quest.Description}</color></size>";
-
-            if (i < activeQuests.Count - 1)
+            switch (state)
             {
-                questDisplay += "\n\n";
+                case ShiftSystem.ShiftState.InShift:
+                    label = "ON DUTY";
+                    subtitle = "Keep orders moving and watch the clock.";
+                    badgeColor = onDutyBadge;
+                    backgroundColor = backgroundBase;
+                    break;
+                case ShiftSystem.ShiftState.Overtime:
+                    label = "OVERTIME";
+                    subtitle = "Push through the rush for bonus payouts.";
+                    badgeColor = overtimeBadge;
+                    backgroundColor = backgroundOvertime;
+                    break;
+                case ShiftSystem.ShiftState.AfterShift:
+                case ShiftSystem.ShiftState.GaveOver:
+                    label = "SHIFT COMPLETE";
+                    subtitle = "Catch your breath before the next gig.";
+                    badgeColor = offDutyBadge;
+                    backgroundColor = backgroundBase;
+                    break;
+                default:
+                    label = "OFF DUTY";
+                    subtitle = "Clock in when you are ready.";
+                    badgeColor = offDutyBadge;
+                    backgroundColor = backgroundBase;
+                    break;
             }
         }
 
-        questText.text = questDisplay;
+        shiftOnOffText.text = label;
+
+        if (shiftSubtitleText != null)
+            shiftSubtitleText.text = subtitle;
+
+        if (statusBadgeImage != null)
+            statusBadgeImage.color = badgeColor;
+
+        if (panelBackgroundImage != null)
+            panelBackgroundImage.color = backgroundColor;
     }
 }
