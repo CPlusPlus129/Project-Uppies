@@ -1282,6 +1282,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9025350419192829721}
+  - component: {fileID: 3979142977340590212}
   m_Layer: 5
   m_Name: aim
   m_TagString: Untagged
@@ -1310,6 +1311,22 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3979142977340590212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1172433929788944394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74da055fd51c16b4da923cf38686fea5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AimHintUI
+  hintText: {fileID: 8103017654958980822}
+  defaultActionName: Interact
+  defaultControlScheme: keyboard&mouse
+  defaultActionLabel: Interact
 --- !u!1 &1210523327125476414
 GameObject:
   m_ObjectHideFlags: 0
@@ -11308,10 +11325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 958272e327403ca41ad9b7508646859b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HUD
-  aimHint: {fileID: 8103017654958980822}
-  defaultActionName: Interact
-  defaultControlScheme: keyboard&mouse
-  defaultActionLabel: Interact
+  aimHint: {fileID: 3979142977340590212}
 --- !u!225 &1621024301298239147
 CanvasGroup:
   m_ObjectHideFlags: 0
