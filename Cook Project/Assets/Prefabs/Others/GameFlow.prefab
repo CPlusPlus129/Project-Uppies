@@ -91,6 +91,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 499c8566cb49519488463aca3506e200, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFlow
+  startingSequence: {fileID: 11400000, guid: b127ad37f1a97db8a9d2069f13c7658b, type: 2}
+  autoPlayStartingSequence: 1
+  logStoryFlow: 1
 --- !u!1001 &475305081786930181
 PrefabInstance:
   m_ObjectHideFlags: 0
