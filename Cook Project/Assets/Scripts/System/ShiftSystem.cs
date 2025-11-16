@@ -153,6 +153,38 @@ public class ShiftSystem : IShiftSystem
         afterShiftReadyForNextShift = false;
     }
 
+    public bool ForceCompleteActiveShift(bool autoCompleteActiveQuest = true)
+    {
+        if (currentState.Value != ShiftState.InShift && currentState.Value != ShiftState.Overtime)
+        {
+            return false;
+        }
+
+        var shiftData = Database.Instance?.shiftData;
+        if (shiftData == null)
+        {
+            Debug.LogWarning("[ShiftSystem] Cannot fast-forward shift because ShiftData is missing.");
+            return false;
+        }
+
+        shiftElapsedSeconds = shiftData.shiftDuration;
+        shiftTimer.Value = 0f;
+        completedOrderCount.Value = Mathf.Max(completedOrderCount.Value, requiredOrderCount.Value);
+
+        if (quotaAmount.Value > 0)
+        {
+            depositedAmount.Value = Mathf.Max(depositedAmount.Value, quotaAmount.Value);
+        }
+
+        if (autoCompleteActiveQuest && activeShift != null && !string.IsNullOrWhiteSpace(activeShift.questId))
+        {
+            questService?.CompleteQuest(activeShift.questId);
+        }
+
+        CompleteShift();
+        return true;
+    }
+
     public bool IsCurrentShiftQuestCompleted()
     {
         var s = GetCurrentShift();

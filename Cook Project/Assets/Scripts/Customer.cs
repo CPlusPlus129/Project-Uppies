@@ -18,7 +18,19 @@ public class Customer : MonoBehaviour, IInteractable
 
     private async void Awake()
     {
-        nameText.text = customerName;
+        if (nameText == null)
+        {
+            nameText = GetComponentInChildren<TMPro.TextMeshPro>();
+        }
+
+        if (nameText != null)
+        {
+            nameText.text = customerName;
+        }
+        else
+        {
+            Debug.LogWarning($"Customer {customerName} has no nameText assigned or found in children.");
+        }
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();

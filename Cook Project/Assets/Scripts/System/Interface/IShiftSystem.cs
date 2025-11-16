@@ -23,4 +23,5 @@ public interface IShiftSystem : IGameService
     void RestartShift(int shiftIndex);
     void EnterAfterShiftState(bool markShiftCompleted = false);
     void ExitAfterShiftState();
+    bool ForceCompleteActiveShift(bool autoCompleteActiveQuest = true);
 }

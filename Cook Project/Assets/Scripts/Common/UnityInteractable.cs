@@ -92,6 +92,26 @@ public class UnityInteractable : MonoBehaviour, IInteractable, IInteractionPromp
         onInteract.Invoke();
     }
 
+    public void AddOnInteractListener(UnityAction listener)
+    {
+        if (listener == null)
+        {
+            return;
+        }
+
+        onInteract.AddListener(listener);
+    }
+
+    public void AddOnFirstInteractListener(UnityAction listener)
+    {
+        if (listener == null)
+        {
+            return;
+        }
+
+        onFirstInteract.AddListener(listener);
+    }
+
     private void DisableConfiguredObjects()
     {
         if (colliderToDisable != null)

@@ -16,9 +16,14 @@ public class StorySequenceAsset : ScriptableObject
     [Tooltip("Optional story sequence automatically enqueued after this one completes.")]
     private StorySequenceAsset nextSequence;
 
+    [SerializeField]
+    [Tooltip("When enabled, GameFlow will log when each event in this sequence begins and ends.")]
+    private bool logEventLifecycle = false;
+
     public string SequenceId => string.IsNullOrWhiteSpace(sequenceId) ? name : sequenceId;
     public IReadOnlyList<StoryEventAsset> Events => events;
     public StorySequenceAsset NextSequence => nextSequence;
+    public bool LogEventLifecycle => logEventLifecycle;
 
     public IEnumerable<StoryEventAsset> EnumerateEvents()
     {

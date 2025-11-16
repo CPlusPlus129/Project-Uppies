@@ -114,6 +114,42 @@ public partial class SROptions
     {
         PlayerStatSystem.Instance.AddSouls(PlayerStatSystem.Instance.MaxSouls.CurrentValue);
     }
+
+    [Category("Cheat")]
+    [DisplayName("Skip To Shift End")]
+    public async void SkipToShiftEnd()
+    {
+        var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        if (shiftSystem == null)
+        {
+            Debug.LogWarning("[SROptions] Shift system unavailable.");
+            return;
+        }
+
+        var state = shiftSystem.currentState.Value;
+        switch (state)
+        {
+            case ShiftSystem.ShiftState.AfterShift:
+                WorldBroadcastSystem.Instance?.Broadcast("Already off the clock.", 4f);
+                return;
+            case ShiftSystem.ShiftState.None:
+            case ShiftSystem.ShiftState.GaveOver:
+                WorldBroadcastSystem.Instance?.Broadcast("No active shift to skip.", 4f);
+                return;
+        }
+
+        if (!shiftSystem.ForceCompleteActiveShift())
+        {
+            WorldBroadcastSystem.Instance?.Broadcast("Unable to fast forward this shift.", 4f);
+            return;
+        }
+
+        WorldBroadcastSystem.Instance?.Broadcast("Shift fast forwarded. Quota, quests, and timers resolved.", 4f);
+        if (SRDebug.Instance != null && SRDebug.Instance.IsDebugPanelVisible)
+        {
+            SRDebug.Instance.HideDebugPanel();
+        }
+    }
     #endregion
 
     #region Main Level

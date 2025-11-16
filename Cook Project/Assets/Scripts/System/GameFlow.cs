@@ -132,6 +132,7 @@ public class GameFlow : MonoSingleton<GameFlow>
 
             currentStoryEvent = runtime;
             runtime.SetState(StoryEventState.Running);
+            LogSequenceEvent(runtime, "BEGIN");
             OnStoryEventStarted.OnNext(runtime);
 
             var context = new GameFlowContext(this, runtime, cancellationToken);
@@ -196,6 +197,10 @@ public class GameFlow : MonoSingleton<GameFlow>
                 PauseStoryFlow($"Event requested pause: {eventId}");
             }
 
+            var resultSummary = string.IsNullOrWhiteSpace(result.Message)
+                ? result.FinalState.ToString()
+                : $"{result.FinalState}: {result.Message}";
+            LogSequenceEvent(runtime, "END", resultSummary);
             OnStoryEventFinished.OnNext((runtime, result));
             currentStoryEvent = null;
         }
@@ -506,6 +511,29 @@ public class GameFlow : MonoSingleton<GameFlow>
         {
             Debug.LogError($"[GameFlow] {message}");
         }
+    }
+
+    private void LogSequenceEvent(StoryEventRuntime runtime, string phase, string details = null)
+    {
+        var sequence = runtime?.SourceSequence;
+        if (sequence == null || !sequence.LogEventLifecycle)
+        {
+            return;
+        }
+
+        var eventId = runtime.Asset != null ? runtime.Asset.EventId : "<null>";
+        var seqId = sequence.SequenceId;
+        var total = runtime.SequenceLength > 0 ? runtime.SequenceLength : sequence.Events?.Count ?? 0;
+        var stepIndex = runtime.SequenceIndex + 1;
+        var progress = total > 0 ? $"{stepIndex}/{total}" : stepIndex.ToString();
+        var message = $"[StorySequence:{seqId}] {phase} event '{eventId}' (step {progress})";
+
+        if (!string.IsNullOrWhiteSpace(details))
+        {
+            message += $" :: {details}";
+        }
+
+        Debug.Log(message, sequence);
     }
 
     private async UniTask WaitForDialogueServiceReady()
