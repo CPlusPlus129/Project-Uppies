@@ -11,6 +11,9 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     private List<string> pendingIngredients = new List<string>();
 
     public void Interact()
@@ -47,7 +50,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         // Spawn the ingredient
         SpawnIngredient(ingredientName);
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Gave ingredient: {ingredientName}. Remaining in pool: {pendingIngredients.Count}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Gave ingredient: {ingredientName}. Remaining in pool: {pendingIngredients.Count}");
     }
 
     /// <summary>
@@ -77,7 +80,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             pendingIngredients.AddRange(recipeIngredients);
         }
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Built ingredient pool with {pendingIngredients.Count} unique ingredients");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Built ingredient pool with {pendingIngredients.Count} ingredients");
     }
 
     /// <summary>
@@ -109,7 +112,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         // Add to kitchen system's fake inventory
         kitchenSystem.AddItemToInventory(ingredientItem, ingredientObject);
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {ingredientName} at {spawnPosition}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {ingredientName} at {spawnPosition}");
     }
 
     /// <summary>

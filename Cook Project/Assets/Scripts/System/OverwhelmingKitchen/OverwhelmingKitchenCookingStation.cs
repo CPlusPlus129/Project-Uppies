@@ -9,7 +9,10 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
-    
+
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     public void Interact()
     {
         if (kitchenSystem == null)
@@ -54,7 +57,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
             kitchenSystem.RemoveIngredient(ingredient);
         }
 
-        Debug.Log($"[OverwhelmingKitchenCookingStation] Successfully cooked: {recipeName}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCookingStation] Successfully cooked: {recipeName}");
 
         SpawnItem(recipe.mealName);
     }
@@ -102,7 +105,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
         // Add to kitchen system's fake inventory
         kitchenSystem.AddItemToInventory(item, itemObject);
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {itemName} at {spawnPosition}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCookingStation] Spawned meal: {itemName} at {spawnPosition}");
     }
 
 

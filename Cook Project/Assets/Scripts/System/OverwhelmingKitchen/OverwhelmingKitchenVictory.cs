@@ -17,11 +17,14 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
     [SerializeField] private float resetDelaySeconds = 3f;
     [SerializeField] private Transform playerTeleportPosition;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     private bool canInteract = false;
 
     public void OnGameCompleted()
     {
-        Debug.Log("[OverwhelmingKitchenVictory] Game completed! Enabling victory interaction");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Game completed! Enabling victory interaction");
 
         // Enable interaction
         canInteract = true;
@@ -53,7 +56,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
             return;
         }
 
-        Debug.Log("[OverwhelmingKitchenVictory] Victory object interacted! Triggering fire...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Victory object interacted! Triggering fire...");
 
         // Trigger fire effects
         kitchenSystem.TriggerFireAndEnd();
@@ -65,7 +68,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
             if (player != null)
             {
                 UniTask.Delay(3000).ContinueWith(() => player.Teleport(playerTeleportPosition.position));
-                Debug.Log($"[OverwhelmingKitchenVictory] after 3 sec Teleport player to {playerTeleportPosition.position}");
+                if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenVictory] after 3 sec Teleport player to {playerTeleportPosition.position}");
             }
             else
             {
@@ -84,7 +87,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
         if (!string.IsNullOrEmpty(completionSignalId))
         {
             GameFlow.Instance?.Signal(completionSignalId);
-            Debug.Log($"[OverwhelmingKitchenVictory] Sent completion signal: {completionSignalId}");
+            if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenVictory] Sent completion signal: {completionSignalId}");
         }
 
         // Disable interaction to prevent multiple triggers
@@ -99,7 +102,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
 
     private void ResetGameDelayed()
     {
-        Debug.Log("[OverwhelmingKitchenVictory] Auto-resetting game...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Auto-resetting game...");
         kitchenSystem?.ResetGame();
     }
 

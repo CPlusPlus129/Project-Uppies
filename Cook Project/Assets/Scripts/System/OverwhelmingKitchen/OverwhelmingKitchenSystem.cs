@@ -34,6 +34,9 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     [SerializeField] private float minOrderSpawnInterval = 0.5f;
     [SerializeField] private float maxOrderSpawnInterval = 3f;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     // RX Data Streams
     public ReactiveProperty<int> Money { get; private set; }
     public ReactiveProperty<int> CompletedCount { get; private set; }
@@ -80,7 +83,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
-        Debug.Log("[OverwhelmingKitchen] Starting game...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchen] Starting game...");
 
         // Reset all data
         ResetInternalState();
@@ -114,7 +117,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         // Start continuous order spawning
         StartOrderSpawning();
 
-        Debug.Log($"[OverwhelmingKitchen] Game started with {activeOrders.Value.Count} orders");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Game started with {activeOrders.Value.Count} orders");
     }
 
     /// <summary>
@@ -174,7 +177,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
                 int drainAmount = Mathf.CeilToInt(baseDrainAmount * Mathf.Pow(drainGrowthRate, drainTick - 1));
                 Money.Value -= drainAmount;
 
-                Debug.Log($"[OverwhelmingKitchen] Drained ${drainAmount}. Current money: ${Money.Value}");
+                if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Drained ${drainAmount}. Current money: ${Money.Value}");
             }
         }
         catch (OperationCanceledException)
@@ -212,11 +215,11 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
                 if (activeOrders.Value.Count < maxActiveOrders)
                 {
                     GenerateOrders(1);
-                    Debug.Log($"[OverwhelmingKitchen] Spawned new order. Total active orders: {activeOrders.Value.Count}");
+                    if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Spawned new order. Total active orders: {activeOrders.Value.Count}");
                 }
                 else
                 {
-                    Debug.Log($"[OverwhelmingKitchen] Max orders reached ({maxActiveOrders}), waiting for completion...");
+                    if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Max orders reached ({maxActiveOrders}), waiting for completion...");
                 }
             }
         }
@@ -239,7 +242,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         spawnedItemObjects.Add(itemObject);
         inventory.ForceNotify();
 
-        Debug.Log($"[OverwhelmingKitchen] Added {item.ItemName} to inventory. Total items: {inventory.Value.Count}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Added {item.ItemName} to inventory. Total items: {inventory.Value.Count}");
     }
 
     /// <summary>
@@ -269,7 +272,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
             }
 
             inventory.ForceNotify();
-            Debug.Log($"[OverwhelmingKitchen] Removed {ingredientName} from inventory");
+            if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Removed {ingredientName} from inventory");
         }
     }
 
@@ -291,7 +294,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         activeOrders.Value.Remove(order);
         CompletedCount.Value++;
 
-        Debug.Log($"[OverwhelmingKitchen] Completed order: {order.MealName}. Total completed: {CompletedCount.Value}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchen] Completed order: {order.MealName}. Total completed: {CompletedCount.Value}");
 
         // Notify
         OnOrderCompleted.OnNext(order);
@@ -312,7 +315,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     /// </summary>
     private void CompleteGame()
     {
-        Debug.Log("[OverwhelmingKitchen] Game completed!");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchen] Game completed!");
 
         CurrentState.Value = OverwhelmingKitchenState.Completed;
 
@@ -338,7 +341,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     /// </summary>
     public void TriggerFireAndEnd()
     {
-        Debug.Log("[OverwhelmingKitchen] Triggering fire effects...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchen] Triggering fire effects...");
 
         // Stop order spawning when fire is triggered
         orderSpawnCts?.Cancel();
