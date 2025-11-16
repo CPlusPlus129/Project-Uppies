@@ -19,6 +19,15 @@ public class SignalDrivenStoryEvent : StoryEventAsset
     [Tooltip("Optional timeout in seconds. Leave at 0 to wait indefinitely.")]
     private float timeoutSeconds = 0f;
 
+    [Header("Optional Dialogue")]
+    [SerializeField]
+    [Tooltip("Optional DialogueStoryEventAsset that will run immediately after the signal is fulfilled.")]
+    private DialogueStoryEventAsset dialogueOnSignal;
+
+    [SerializeField]
+    [Tooltip("Log a warning if the optional dialogue cannot execute (for example, PlayOnce already consumed).")]
+    private bool logDialogueWarnings = true;
+
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
         var signalId = string.IsNullOrWhiteSpace(signalIdOverride) ? EventId : signalIdOverride;
@@ -54,6 +63,23 @@ public class SignalDrivenStoryEvent : StoryEventAsset
         }
 
         onSignalReceived?.Invoke();
-        return StoryEventResult.Completed();
+
+        if (dialogueOnSignal == null)
+        {
+            return StoryEventResult.Completed();
+        }
+
+        bool canRunDialogue = await dialogueOnSignal.CanExecuteAsync(context, cancellationToken);
+        if (!canRunDialogue)
+        {
+            if (logDialogueWarnings)
+            {
+                Debug.LogWarning($"[{nameof(SignalDrivenStoryEvent)}] Dialogue '{dialogueOnSignal.name}' cannot execute after signal '{signalId}' on {name}.");
+            }
+
+            return StoryEventResult.Completed();
+        }
+
+        return await dialogueOnSignal.ExecuteAsync(context, cancellationToken);
     }
 }
