@@ -70,25 +70,17 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         }
 
         // Collect all ingredients from all orders
-        var ingredientSet = new HashSet<string>();
-
+        var recipeIngredients = new List<string>();
         foreach (var order in activeOrders)
         {
             if (order.Recipe == null || order.Recipe.ingredients == null)
                 continue;
 
-            foreach (var ingredient in order.Recipe.ingredients)
-            {
-                if (!string.IsNullOrEmpty(ingredient))
-                {
-                    ingredientSet.Add(ingredient);
-                }
-            }
+            recipeIngredients.Clear();
+            recipeIngredients.AddRange(order.Recipe.ingredients);
+            ShuffleList(recipeIngredients);
+            pendingIngredients.AddRange(recipeIngredients);
         }
-
-        // Convert to list and shuffle
-        pendingIngredients = ingredientSet.ToList();
-        ShuffleList(pendingIngredients);
 
         Debug.Log($"[OverwhelmingKitchenFridge] Built ingredient pool with {pendingIngredients.Count} unique ingredients");
     }

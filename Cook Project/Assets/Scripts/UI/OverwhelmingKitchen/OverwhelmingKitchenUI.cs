@@ -21,6 +21,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
     [SerializeField] private GameObject orderCardPrefab;
     [SerializeField] private Transform inventoryContainer;
     [SerializeField] private InventorySlotUI inventorySlotPrefab;
+    [SerializeField] private AimHintUI aimHint;
 
     [Header("Money Display Settings")]
     [SerializeField] private Color normalMoneyColor = Color.white;
@@ -35,6 +36,8 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
 
     public async UniTask Init()
     {
+        orderCardPrefab.gameObject.SetActive(false);
+        inventorySlotPrefab.gameObject.SetActive(false);
         assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
     }
 
@@ -86,6 +89,8 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
         kitchenSystem.OnOrderCompleted
             .Subscribe(order => OnOrderCompletedAnimation(order))
             .AddTo(disposables);
+
+        PlayerStatSystem.Instance.CurrentInteractableTarget.Subscribe(aimHint.UpdateHint).AddTo(disposables);
 
         Debug.Log("[OverwhelmingKitchenUI] Subscribed to all data streams");
     }
@@ -164,6 +169,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
     private void CreateOrderCard(Order order)
     {
         var cardObject = Instantiate(orderCardPrefab, orderListContainer);
+        cardObject.gameObject.SetActive(true);
         var card = cardObject.GetComponent<OverwhelmingKitchenOrderCard>();
 
         if (card != null)
@@ -197,7 +203,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
         foreach (var slot in inventorySlots)
         {
             if (slot != null)
-                Destroy(slot);
+                Destroy(slot.gameObject);
         }
         inventorySlots.Clear();
 
@@ -205,6 +211,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
         foreach (var item in items)
         {
             var slotObject = Instantiate(inventorySlotPrefab, inventoryContainer);
+            slotObject.gameObject.SetActive(true);
             slotObject.assetLoader = assetLoader;
             inventorySlots.Add(slotObject);
 
@@ -223,6 +230,9 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
 
         Debug.Log($"[OverwhelmingKitchenUI] UI visibility: {uiRootPanel.activeSelf} (State: {state})");
     }
+
+    public void Open() => gameObject.SetActive(true);
+    public void Close() => gameObject.SetActive(false);
 
     private void OnDestroy()
     {

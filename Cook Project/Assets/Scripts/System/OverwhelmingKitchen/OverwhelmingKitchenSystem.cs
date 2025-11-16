@@ -186,6 +186,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         if (CurrentState.Value != OverwhelmingKitchenState.Running)
             return;
 
+        itemObject.SetActive(false);
         inventory.Value.Add(item);
         spawnedItemObjects.Add(itemObject);
         inventory.ForceNotify();
