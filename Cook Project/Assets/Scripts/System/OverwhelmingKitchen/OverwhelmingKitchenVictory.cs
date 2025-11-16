@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -16,27 +17,9 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
     [SerializeField] private float resetDelaySeconds = 3f;
     [SerializeField] private Transform playerTeleportPosition;
 
-    private CompositeDisposable disposables = new CompositeDisposable();
     private bool canInteract = false;
 
-    private void Start()
-    {
-        if (kitchenSystem == null)
-        {
-            Debug.LogError("[OverwhelmingKitchenVictory] Kitchen system reference is null!");
-            return;
-        }
-
-        // Subscribe to game complete event
-        kitchenSystem.OnGameComplete
-            .Subscribe(_ => OnGameCompleted())
-            .AddTo(disposables);
-
-        // Initially disable interaction
-        canInteract = false;
-    }
-
-    private void OnGameCompleted()
+    public void OnGameCompleted()
     {
         Debug.Log("[OverwhelmingKitchenVictory] Game completed! Enabling victory interaction");
 
@@ -78,12 +61,11 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
         // Teleport player to specified position
         if (playerTeleportPosition != null)
         {
-            var player = GameObject.FindGameObjectWithTag("Player");
+            var player = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
             if (player != null)
             {
-                player.transform.position = playerTeleportPosition.position;
-                player.transform.rotation = playerTeleportPosition.rotation;
-                Debug.Log($"[OverwhelmingKitchenVictory] Teleported player to {playerTeleportPosition.position}");
+                UniTask.Delay(3000).ContinueWith(() => player.Teleport(playerTeleportPosition.position));
+                Debug.Log($"[OverwhelmingKitchenVictory] after 3 sec Teleport player to {playerTeleportPosition.position}");
             }
             else
             {
@@ -119,11 +101,6 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
     {
         Debug.Log("[OverwhelmingKitchenVictory] Auto-resetting game...");
         kitchenSystem?.ResetGame();
-    }
-
-    private void OnDestroy()
-    {
-        disposables?.Dispose();
     }
 
 #if UNITY_EDITOR

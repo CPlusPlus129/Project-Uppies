@@ -323,7 +323,11 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
 
         // Show victory object
         if (victoryTriggerObject != null)
+        {
             victoryTriggerObject.SetActive(true);
+            var vObj = victoryTriggerObject.GetComponent<OverwhelmingKitchenVictory>();
+            vObj?.OnGameCompleted();
+        }
 
         // Notify
         OnGameComplete.OnNext(Unit.Default);

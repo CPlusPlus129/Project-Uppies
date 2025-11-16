@@ -11,10 +11,6 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
 
-    [Header("Settings")]
-    [SerializeField] private Transform spawnPoint;
-    [SerializeField] private float spawnOffsetY = 1f;
-
     private List<string> pendingIngredients = new List<string>();
 
     public void Interact()
@@ -97,10 +93,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             return;
         }
 
-        // Determine spawn position
-        Vector3 spawnPosition = spawnPoint != null
-            ? spawnPoint.position
-            : transform.position + Vector3.up * spawnOffsetY;
+        Vector3 spawnPosition = transform.position;
 
         // Instantiate
         var ingredientObject = Instantiate(ingredientPrefab.gameObject, spawnPosition, Quaternion.identity);
@@ -133,17 +126,4 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         }
     }
 
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        // Draw spawn point
-        Vector3 pos = spawnPoint != null
-            ? spawnPoint.position
-            : transform.position + Vector3.up * spawnOffsetY;
-
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(pos, 0.2f);
-        Gizmos.DrawLine(transform.position, pos);
-    }
-#endif
 }
