@@ -32,6 +32,11 @@ public class ShopUI : MonoBehaviour
 
     public void Open()
     {
+        if (!ShopSystem.Instance.IsStoreOpen)
+        {
+            WorldBroadcastSystem.Instance?.Broadcast("The shop is closed right now.", 4f);
+            return;
+        }
         gameObject.SetActive(true);
     }
 

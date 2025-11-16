@@ -80,47 +80,34 @@ namespace DialogueModule
             }
         }
 
-        IEnumerator PreloadAssets()
-        {
-            var usingList = new HashSet<string>();
-            var spriteFileNames = new HashSet<string>();
-            var audioFileNames = new HashSet<string>();
-            List<Coroutine> loadTasks = new();
-            foreach (var cmd in currentLabelData.commands)
-            {
-                if (cmd is not CommandCharacter character)
-                    continue;
-
-                if (!engine.dataManager.settingDataManager.characterSettings.DataDict
-                    .TryGetValue(character.characterId, out var characterSettingData))
-                {
-                    Debug.LogError($"Could not find character setting for character ID: {character.characterId}");
-                    continue;
-                }
-
-                if (!string.IsNullOrEmpty(characterSettingData.fileName))
-                {
-                    usingList.Add(characterSettingData.fileName);
-                    spriteFileNames.Add(characterSettingData.fileName);
-                }
-
-                if (!string.IsNullOrEmpty(characterSettingData.voiceFileName))
-                {
-                    usingList.Add(characterSettingData.voiceFileName);
-                    audioFileNames.Add(characterSettingData.voiceFileName);
-                }
-            }
+		IEnumerator PreloadAssets()
+		{
+			var usingList = new HashSet<string>();
+			var spriteFileNames = new HashSet<string>();
+			var audioFileNames = new HashSet<string>();
+			List<Coroutine> loadTasks = new();
+			foreach (var cmd in currentLabelData.commands)
+			{
+				if (cmd is CommandCharacter character)
+				{
+					QueueCharacterAssets(character.characterId);
+				}
+				else if (cmd is InlineDialogueCommand inlineCmd && inlineCmd.RequiresCharacterAssets)
+				{
+					QueueCharacterAssets(inlineCmd.CharacterId);
+				}
+			}
             foreach (var key in engine.assetManager.CurrentUsingAssetDict.Keys.ToArray())
             {
                 if (!usingList.Contains(key))
                     engine.assetManager.Release(key);
             }
-            foreach (var fileName in spriteFileNames)
-            {
-                if (!engine.assetManager.CurrentUsingAssetDict.ContainsKey(fileName))
-                {
-                    loadTasks.Add(StartCoroutine(engine.assetManager.LoadCoroutine<Sprite>(fileName))); //only sprite for now
-                }
+			foreach (var fileName in spriteFileNames)
+			{
+				if (!engine.assetManager.CurrentUsingAssetDict.ContainsKey(fileName))
+				{
+					loadTasks.Add(StartCoroutine(engine.assetManager.LoadCoroutine<Sprite>(fileName))); //only sprite for now
+				}
             }
             foreach (var fileName in audioFileNames)
             {
@@ -130,9 +117,34 @@ namespace DialogueModule
                 }
             }
 
-            foreach (var task in loadTasks)
-                yield return task;
-        }
+			foreach (var task in loadTasks)
+				yield return task;
+
+			void QueueCharacterAssets(string characterId)
+			{
+				if (string.IsNullOrWhiteSpace(characterId))
+					return;
+
+				if (!engine.dataManager.settingDataManager.characterSettings.DataDict
+					.TryGetValue(characterId, out var characterSettingData))
+				{
+					Debug.LogError($"Could not find character setting for character ID: {characterId}");
+					return;
+				}
+
+				if (!string.IsNullOrEmpty(characterSettingData.fileName))
+				{
+					usingList.Add(characterSettingData.fileName);
+					spriteFileNames.Add(characterSettingData.fileName);
+				}
+
+				if (!string.IsNullOrEmpty(characterSettingData.voiceFileName))
+				{
+					usingList.Add(characterSettingData.voiceFileName);
+					audioFileNames.Add(characterSettingData.voiceFileName);
+				}
+			}
+		}
 
         void OnNextLine()
         {

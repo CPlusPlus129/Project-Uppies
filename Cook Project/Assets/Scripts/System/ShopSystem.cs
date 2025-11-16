@@ -9,9 +9,11 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
     private List<ShopItem> inStock = new List<ShopItem>();
     private Dictionary<string, int> purchaseCount = new Dictionary<string, int>();
     private StatUpgradeConfig upgradeConfig;
+    private bool isStoreOpen;
     private readonly List<PlayerSoulAbilityManager.AbilityShopEntry> abilityShopBuffer = new List<PlayerSoulAbilityManager.AbilityShopEntry>();
 
     public bool IsInitialized => upgradeConfig != null;
+    public bool IsStoreOpen => isStoreOpen;
 
     public void Initialize(StatUpgradeConfig config)
     {
@@ -67,11 +69,33 @@ public class ShopSystem : SimpleSingleton<ShopSystem>
         OnShopItemsUpdated.OnNext(inStock);
     }
 
+    public void SetStoreAvailability(bool available)
+    {
+        if (isStoreOpen == available)
+        {
+            return;
+        }
+
+        isStoreOpen = available;
+
+        if (!isStoreOpen)
+        {
+            var uiRoot = UIRoot.Instance;
+            uiRoot?.GetUIComponent<ShopUI>()?.Close();
+        }
+    }
+
     /// <summary>
     /// Attempts to purchase an item from the shop and apply the upgrade
     /// </summary>
     public bool PurchaseItem(string itemId)
     {
+        if (!isStoreOpen)
+        {
+            Debug.LogWarning("Shop is closed. Cannot purchase right now.");
+            return false;
+        }
+
         var item = inStock.Find(i => i.itemId == itemId);
         if (item == null || item.stock <= 0)
         {

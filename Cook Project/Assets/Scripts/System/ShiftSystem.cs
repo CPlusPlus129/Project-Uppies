@@ -23,6 +23,7 @@ public class ShiftSystem : IShiftSystem
     public ReactiveProperty<float> currentClockHour { get; } = new ReactiveProperty<float>();
     public ReactiveProperty<ShiftState> currentState { get; } = new ReactiveProperty<ShiftState>();
     public ReplaySubject<Unit> OnGameStart { get; } = new ReplaySubject<Unit>(1);
+    public bool IsAfterShiftReadyForNextShift => afterShiftReadyForNextShift;
     private readonly IQuestService questService;
     private readonly IOrderManager orderManager;
     private readonly IInventorySystem inventorySystem;
@@ -33,6 +34,7 @@ public class ShiftSystem : IShiftSystem
     private float overtimeElapsedSeconds;
     private CancellationTokenSource debtCollectionCts;
     private IDisposable playerDeathSubscription;
+    private bool afterShiftReadyForNextShift;
 
     public ShiftSystem(IQuestService questService, IOrderManager orderManager, IInventorySystem inventorySystem)
     {
@@ -74,6 +76,8 @@ public class ShiftSystem : IShiftSystem
         disposables.Clear();
         debtCollectionCts?.Cancel();
         ResetWalletToStartingDebt();
+        ShopSystem.Instance?.SetStoreAvailability(false);
+        afterShiftReadyForNextShift = false;
     }
 
     private async UniTaskVoid SubscribeToPlayerDeathAsync()
@@ -86,7 +90,7 @@ public class ShiftSystem : IShiftSystem
 
     public void StartNextShift()
     {
-        if (currentState.Value != ShiftState.AfterShift)
+        if (currentState.Value != ShiftState.AfterShift && currentState.Value != ShiftState.None)
         {
             WorldBroadcastSystem.Instance.Broadcast("You can't start the next shift until you've clocked out.", 4f);
             return;
@@ -116,6 +120,37 @@ public class ShiftSystem : IShiftSystem
 
         var clampedIndex = Mathf.Clamp(shiftIndex, 0, shiftData.shifts.Length - 1);
         StartShift(clampedIndex);
+    }
+
+    public void EnterAfterShiftState(bool markShiftCompleted = false)
+    {
+        updateDisposible.Clear();
+        debtCollectionCts?.Cancel();
+        orderManager.ClearOrders();
+
+        if (currentState.Value == ShiftState.AfterShift)
+        {
+            ShopSystem.Instance?.SetStoreAvailability(true);
+            afterShiftReadyForNextShift = markShiftCompleted || afterShiftReadyForNextShift;
+            return;
+        }
+
+        currentState.Value = ShiftState.AfterShift;
+        ShopSystem.Instance?.SetStoreAvailability(true);
+        afterShiftReadyForNextShift = markShiftCompleted;
+    }
+
+    public void ExitAfterShiftState()
+    {
+        if (currentState.Value != ShiftState.AfterShift)
+        {
+            ShopSystem.Instance?.SetStoreAvailability(false);
+            return;
+        }
+
+        currentState.Value = ShiftState.None;
+        ShopSystem.Instance?.SetStoreAvailability(false);
+        afterShiftReadyForNextShift = false;
     }
 
     public bool IsCurrentShiftQuestCompleted()
@@ -240,6 +275,7 @@ public class ShiftSystem : IShiftSystem
         requiredOrderCount.Value = activeShift.requiredOrdersCount;
         depositedAmount.Value = 0;
         quotaAmount.Value = Mathf.Max(0, activeShift.quotaAmount);
+        afterShiftReadyForNextShift = false;
 
         if (!string.IsNullOrEmpty(activeShift.questId))
         {
@@ -247,6 +283,7 @@ public class ShiftSystem : IShiftSystem
         }
 
         ShopSystem.Instance.RefreshShopItems();
+        ShopSystem.Instance?.SetStoreAvailability(false);
 
         Observable.EveryUpdate()
             .Subscribe(_ => TickShift(Time.deltaTime))
@@ -371,10 +408,7 @@ public class ShiftSystem : IShiftSystem
 
     private void CompleteShift()
     {
-        updateDisposible.Clear();
-        debtCollectionCts?.Cancel();
-        orderManager.ClearOrders();
-        currentState.Value = ShiftState.AfterShift;
+        EnterAfterShiftState(markShiftCompleted: true);
         WorldBroadcastSystem.Instance.Broadcast("Quota met! Shift complete.", 6f);
     }
 
@@ -386,6 +420,7 @@ public class ShiftSystem : IShiftSystem
         currentState.Value = ShiftState.GaveOver;
         WorldBroadcastSystem.Instance.Broadcast("Satan collected too much. Day reset!", 6f);
         HandleDayLoss();
+        ShopSystem.Instance?.SetStoreAvailability(false);
     }
 
     private void HandleDayLoss()
@@ -398,6 +433,7 @@ public class ShiftSystem : IShiftSystem
         requiredOrderCount.Value = 0;
         shiftNumber.Value = 0;
         shiftTimer.Value = Database.Instance.shiftData.shiftDuration;
+        ShopSystem.Instance?.SetStoreAvailability(false);
 
         // restart the day automatically
         StartShift(0);
@@ -420,6 +456,7 @@ public class ShiftSystem : IShiftSystem
             debtCollectionCts?.Cancel();
             currentState.Value = ShiftState.GaveOver;
             WorldBroadcastSystem.Instance.Broadcast("All shifts complete!", 6f);
+            ShopSystem.Instance?.SetStoreAvailability(false);
             return;
         }
 

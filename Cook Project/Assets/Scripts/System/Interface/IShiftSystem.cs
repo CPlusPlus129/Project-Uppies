@@ -11,6 +11,7 @@ public interface IShiftSystem : IGameService
     ReactiveProperty<float> shiftTimer { get; }
     ReactiveProperty<float> currentClockHour { get; }
     ReactiveProperty<ShiftState> currentState { get; }
+    bool IsAfterShiftReadyForNextShift { get; }
     ReplaySubject<Unit> OnGameStart { get; }
     void StartGame();
     void StartNextShift();
@@ -20,4 +21,6 @@ public interface IShiftSystem : IGameService
     bool HasMetQuota();
     void RestartCurrentShift();
     void RestartShift(int shiftIndex);
+    void EnterAfterShiftState(bool markShiftCompleted = false);
+    void ExitAfterShiftState();
 }
