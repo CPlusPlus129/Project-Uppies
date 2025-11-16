@@ -6,6 +6,7 @@ public interface IInventorySystem : IGameService
     Subject<IReadOnlyList<ItemBase>> OnInventoryChanged { get; }
     ReactiveProperty<int> SelectedIndex { get; }
     ReactiveProperty<int> SlotCount { get; }
+    int GetUsedSlotCount { get; }
     ItemBase GetSelectedItem();
     IReadOnlyList<ItemBase> GetAllItems();
     bool AddItem(ItemBase item);
