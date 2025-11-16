@@ -81,6 +81,7 @@ public partial class Mob
 
         SpawnDeathParticles();
         AwardSouls();
+        AwardMoney();
         Died?.Invoke(this);
         MobDied?.Invoke(this);
         enabled = false;
@@ -131,6 +132,63 @@ public partial class Mob
         {
             Debug.Log($"Mob awarded {death.soulReward} souls. Player Souls: {playerStats.CurrentSouls.Value}/{playerStats.MaxSouls.Value}", this);
         }
+    }
+
+    private void AwardMoney()
+    {
+        if (moneyReward == null || !moneyReward.enabled)
+        {
+            return;
+        }
+
+        int minReward = Mathf.Max(0, Mathf.Min(moneyReward.minMoney, moneyReward.maxMoney));
+        int maxReward = Mathf.Max(minReward, Mathf.Max(moneyReward.minMoney, moneyReward.maxMoney));
+
+        if (maxReward <= 0)
+        {
+            return;
+        }
+
+        int payout = UnityEngine.Random.Range(minReward, maxReward + 1);
+        if (payout <= 0)
+        {
+            return;
+        }
+
+        PlayerStatSystem playerStats = PlayerStatSystem.Instance;
+        if (playerStats == null)
+        {
+            return;
+        }
+
+        playerStats.Money.Value += payout;
+        SpawnMoneyPopup(payout);
+
+        if (showDebug)
+        {
+            Debug.Log($"Mob awarded ${payout}. Player money: {playerStats.Money.Value}", this);
+        }
+    }
+
+    private void SpawnMoneyPopup(int payout)
+    {
+        if (moneyReward == null || !moneyReward.enabled)
+        {
+            return;
+        }
+
+        Vector3 offset = moneyReward.popupOffset;
+        float horizontal = moneyReward.popupHorizontalJitter;
+        float depth = moneyReward.popupDepthJitter;
+        float vertical = moneyReward.popupVerticalJitter;
+        Vector3 jitter = new Vector3(
+            UnityEngine.Random.Range(-horizontal, horizontal),
+            UnityEngine.Random.Range(0f, vertical),
+            UnityEngine.Random.Range(-depth, depth));
+        Vector3 spawnPos = transform.position + offset + jitter;
+
+        MoneyPopupEffect.PopupStyle style = MoneyPopupEffect.PopupStyle.FromSettings(moneyReward);
+        MoneyPopupEffect.Spawn(payout, spawnPos, style);
     }
 
     public void DamageNearestLightSource()

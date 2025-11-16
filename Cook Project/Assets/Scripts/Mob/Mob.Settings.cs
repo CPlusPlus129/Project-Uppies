@@ -89,6 +89,37 @@ public partial class Mob
     }
 
     [Serializable]
+    public class MoneyRewardSettings
+    {
+        public bool enabled = true;
+        [Min(0)] public int minMoney = 2;
+        [Min(0)] public int maxMoney = 5;
+        [Header("Popup Placement")]
+        public Vector3 popupOffset = new Vector3(0f, 1.35f, 0f);
+        [Min(0f)] public float popupHorizontalJitter = 0.35f;
+        [Min(0f)] public float popupDepthJitter = 0.15f;
+        [Min(0f)] public float popupVerticalJitter = 0.2f;
+        [Header("Popup Visual")]
+        public Sprite popupSprite;
+        public Vector2 popupSpriteSize = new Vector2(1.6f, 0.65f);
+        public Color popupSpriteTint = new Color(1f, 0.94f, 0.45f, 0.95f);
+        public Color popupTextColor = new Color(1f, 0.98f, 0.88f, 1f);
+        [Min(0.1f)] public float popupLifetime = 1.15f;
+        [Min(0f)] public float popupRiseDistance = 1.25f;
+        public float popupStartScale = 0.65f;
+        public float popupEndScale = 1.15f;
+        public float popupFontSize = 2.5f;
+        public bool popupYAxisOnly = true;
+        [Header("Animation Curves")]
+        public AnimationCurve popupScaleCurve = AnimationCurve.EaseInOut(0f, 0.4f, 1f, 1.05f);
+        public AnimationCurve popupAlphaCurve = new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 10f),
+            new Keyframe(0.12f, 1f),
+            new Keyframe(0.85f, 1f),
+            new Keyframe(1f, 0f));
+    }
+
+    [Serializable]
     private class DeathSettings
     {
         public float despawnDelay = 2f;
@@ -121,7 +152,10 @@ public partial class Mob
     [SerializeField] private PerceptionSettings perception = new PerceptionSettings();
     [SerializeField] private PatrolSettings patrol = new PatrolSettings();
     [SerializeField] private HealthSettings health = new HealthSettings();
+    [Header("Death")]
     [SerializeField] private DeathSettings death = new DeathSettings();
+    [Header("Money Rewards")]
+    [SerializeField] private MoneyRewardSettings moneyReward = new MoneyRewardSettings();
     [SerializeField] private LightDamageSettings lightDamage = new LightDamageSettings();
     [SerializeField] private FlockingSettings flocking = new FlockingSettings();
 

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Cysharp.Threading.Tasks;
+using R3;
 
 /// <summary>
 /// Spawns mobs at regular intervals or on demand.
@@ -20,6 +22,8 @@ public class MobSpawner : MonoBehaviour
     [SerializeField] private float spawnInterval = 10f;
     [SerializeField] private bool spawnOnStart = true;
     [SerializeField] private bool autoSpawn = true;
+    [Tooltip("Automatically pause spawning while the game is in After Shift state.")]
+    [SerializeField] private bool suspendDuringAfterShift = true;
     
     [Header("Spawn Area")]
     [SerializeField] private float spawnRadius = 5f;
@@ -78,11 +82,16 @@ public class MobSpawner : MonoBehaviour
     private List<GameObject> spawnedMobs = new List<GameObject>();
     private float nextSpawnTime = 0f;
     private MaterialPropertyBlock colorPropertyBlock;
-    
+    private IShiftSystem shiftSystem;
+    private System.IDisposable shiftStateSubscription;
+    private bool spawnSuspended;
+    private bool requestedShiftAwareness;
+    private bool afterShiftActive;
+
     // Public properties
     public int CurrentMobCount => spawnedMobs.Count;
     public int MaxMobs => maxMobs;
-    public bool CanSpawn => spawnedMobs.Count < maxMobs;
+    public bool CanSpawn => !spawnSuspended && spawnedMobs.Count < maxMobs;
     
     private void Awake()
     {
@@ -114,11 +123,16 @@ public class MobSpawner : MonoBehaviour
         {
             SpawnInitialMobs();
         }
-        
+
         // Set next spawn time
         nextSpawnTime = Time.time + spawnInterval;
+
+        if (suspendDuringAfterShift)
+        {
+            InitializeShiftAwarenessAsync().Forget();
+        }
     }
-    
+
     private void OnEnable()
     {
         Mob.MobDied += OnMobDied;
@@ -127,6 +141,12 @@ public class MobSpawner : MonoBehaviour
     private void OnDisable()
     {
         Mob.MobDied -= OnMobDied;
+    }
+
+    private void OnDestroy()
+    {
+        shiftStateSubscription?.Dispose();
+        shiftStateSubscription = null;
     }
 
     private void OnMobDied(Mob mob)
@@ -139,8 +159,8 @@ public class MobSpawner : MonoBehaviour
 
     private void Update()
     {
-        if (!autoSpawn) return;
-        
+        if (!autoSpawn || spawnSuspended) return;
+
         // Check if it's time to spawn
         if (Time.time >= nextSpawnTime && CanSpawn)
         {
@@ -172,7 +192,8 @@ public class MobSpawner : MonoBehaviour
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"Cannot spawn mob - at max capacity ({maxMobs})");
+                var reason = spawnSuspended ? "spawning temporarily disabled" : $"at max capacity ({maxMobs})";
+                Debug.LogWarning($"Cannot spawn mob - {reason}");
             }
             return;
         }
@@ -191,6 +212,40 @@ public class MobSpawner : MonoBehaviour
             Debug.Log($"Spawned mob at {spawnPosition}. Total mobs: {spawnedMobs.Count}/{maxMobs}");
         }
     }
+
+    private async UniTaskVoid InitializeShiftAwarenessAsync()
+    {
+        if (requestedShiftAwareness)
+            return;
+
+        requestedShiftAwareness = true;
+
+        await UniTask.WaitUntil(() => GameFlow.Instance != null && GameFlow.Instance.IsInitialized);
+
+        shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        if (shiftSystem == null)
+            return;
+
+        shiftStateSubscription?.Dispose();
+        shiftStateSubscription = shiftSystem.currentState.Subscribe(OnShiftStateChanged);
+        OnShiftStateChanged(shiftSystem.currentState.Value);
+    }
+
+    private void OnShiftStateChanged(ShiftSystem.ShiftState state)
+    {
+        if (!suspendDuringAfterShift)
+            return;
+
+        bool shouldSuspend = state == ShiftSystem.ShiftState.AfterShift;
+
+        if (shouldSuspend && !afterShiftActive)
+        {
+            DestroyAllMobs();
+        }
+
+        afterShiftActive = shouldSuspend;
+        spawnSuspended = shouldSuspend;
+    }
     
     private Vector3 GetSpawnPosition()
     {
@@ -208,7 +263,7 @@ public class MobSpawner : MonoBehaviour
             else
             {
                 // Pick random spawn point
-                spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+                spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
             }
             
             return spawnPoint.position;
@@ -220,7 +275,7 @@ public class MobSpawner : MonoBehaviour
         if (randomizePosition)
         {
             // Random position within radius
-            Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
+            Vector2 randomCircle = UnityEngine.Random.insideUnitCircle * spawnRadius;
             position += new Vector3(randomCircle.x, 0, randomCircle.y);
         }
         
@@ -260,7 +315,7 @@ public class MobSpawner : MonoBehaviour
         if (useColorPalette && colorPalette != null && colorPalette.Length > 0)
         {
             // Pick a random color from the palette
-            randomColor = colorPalette[Random.Range(0, colorPalette.Length)];
+            randomColor = colorPalette[UnityEngine.Random.Range(0, colorPalette.Length)];
         }
         else
         {
@@ -317,11 +372,11 @@ public class MobSpawner : MonoBehaviour
     private Color GenerateRandomColor()
     {
         // Generate random hue (0-1 for full color wheel)
-        float hue = Random.value;
+        float hue = UnityEngine.Random.value;
         
         // Use the brightness and saturation ranges
-        float saturation = Random.Range(minSaturation, maxSaturation);
-        float brightness = Random.Range(minBrightness, maxBrightness);
+        float saturation = UnityEngine.Random.Range(minSaturation, maxSaturation);
+        float brightness = UnityEngine.Random.Range(minBrightness, maxBrightness);
         
         // Convert HSV to RGB
         Color color = Color.HSVToRGB(hue, saturation, brightness);
@@ -336,6 +391,15 @@ public class MobSpawner : MonoBehaviour
     /// </summary>
     public void ForceSpawnMob()
     {
+        if (spawnSuspended)
+        {
+            if (showDebugInfo)
+            {
+                Debug.LogWarning("Force spawn blocked while After Shift is active.");
+            }
+            return;
+        }
+
         Vector3 spawnPosition = GetSpawnPosition();
         GameObject mob = Instantiate(mobPrefab, spawnPosition, Quaternion.identity);
         SetupMob(mob);

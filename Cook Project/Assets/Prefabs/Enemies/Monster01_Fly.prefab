@@ -202,11 +202,95 @@ MonoBehaviour:
   health:
     maxHealth: 75
   death:
-    despawnDelay: 0.5
-    deathParticles: {fileID: 6187265442713106288, guid: 9c895f8ed3e20cb4cbe176b7916713da, type: 3}
-    particleOffset: {x: 0, y: 1, z: 0}
+    despawnDelay: 1
+    deathParticles: {fileID: 0}
+    particleOffset: {x: 0, y: 0, z: 0}
     autoDestroyParticles: 1
     soulReward: 5
+  moneyReward:
+    enabled: 1
+    minMoney: 2
+    maxMoney: 12
+    popupOffset: {x: 0, y: 1.5, z: 0}
+    popupHorizontalJitter: 0.35
+    popupDepthJitter: 0.15
+    popupVerticalJitter: 0.2
+    popupSprite: {fileID: 0}
+    popupSpriteSize: {x: 1.6, y: 0.65}
+    popupSpriteTint: {r: 1, g: 0.94, b: 0.45, a: 0.95}
+    popupTextColor: {r: 1, g: 0.98, b: 0.88, a: 1}
+    popupLifetime: 1.5
+    popupRiseDistance: 0.5
+    popupStartScale: 0.65
+    popupEndScale: 1.15
+    popupFontSize: 2.5
+    popupYAxisOnly: 1
+    popupScaleCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0.4
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1.05
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    popupAlphaCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 10
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.12
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 0.85
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
   lightDamage:
     attackLifetimeReduction: 1
     searchRadius: 15
