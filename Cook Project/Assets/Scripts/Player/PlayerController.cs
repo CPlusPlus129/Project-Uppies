@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private InputAction interactAction;
     private IInventorySystem inventorySystem;
     private CompositeDisposable disposables = new CompositeDisposable();
+    public Vector3 SpawnPosition { get; set; }
 
     private async void Awake()
     {
@@ -43,6 +44,22 @@ public class PlayerController : MonoBehaviour
 
         var moveValue = moveAction.ReadValue<Vector2>();
         motor.ProcessMove(moveValue);
+    }
+
+    public void RespawnPosition()
+    {
+        Teleport(SpawnPosition);
+    }
+
+    public void Teleport(Vector3 position)
+    {
+        var cc = GetComponent<CharacterController>();
+        if (cc == null)
+            return;
+
+        cc.enabled = false;
+        cc.transform.position = position;
+        cc.enabled = true;
     }
 
     private void SubscribeEvents()

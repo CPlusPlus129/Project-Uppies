@@ -13,17 +13,20 @@ MonoBehaviour:
   m_Name: RecipeData
   m_EditorClassIdentifier: Assembly-CSharp::RecipeData
   datas:
-  - mealName: BloodBurger
+  - mealDisplayName: BloodBurger
+    mealName: bloodburger
     ingredients:
     - blood
     - burger
     - soul
-  - mealName: SoulShake
+  - mealDisplayName: SoulShake
+    mealName: soulshake
     ingredients:
     - milk
     - icecream
     - soul
-  - mealName: RatRamen
+  - mealDisplayName: RatRamen
+    mealName: ratramen
     ingredients:
     - rat
     - ramen

@@ -44,10 +44,9 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             return;
         }
 
-        // Get one random ingredient
-        int randomIndex = Random.Range(0, pendingIngredients.Count);
-        string ingredientName = pendingIngredients[randomIndex];
-        pendingIngredients.RemoveAt(randomIndex);
+        // Get first ingredient
+        string ingredientName = pendingIngredients[0];
+        pendingIngredients.RemoveAt(0);
 
         // Spawn the ingredient
         SpawnIngredient(ingredientName);

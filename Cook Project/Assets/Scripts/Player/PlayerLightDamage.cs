@@ -31,9 +31,7 @@ public class PlayerLightDamage : MonoBehaviour
     private float lastDamageTime = 0f;
     private float accumulatedDamage = 0f; // Fix: Accumulate fractional damage
     
-    // Respawn system
-    private Vector3 spawnPosition;
-    private CharacterController characterController;
+    private PlayerController playerController;
     
     // Public properties
     public bool IsInSafeZone => safeZoneCount > 0;
@@ -71,17 +69,17 @@ public class PlayerLightDamage : MonoBehaviour
         }
         
         // Store initial spawn position and get CharacterController
-        spawnPosition = transform.position;
-        characterController = GetComponent<CharacterController>();
+        playerController = GetComponent<PlayerController>();
+        playerController.SpawnPosition = transform.position;
         
-        if (characterController == null)
+        if (playerController == null)
         {
-            Debug.LogWarning("PlayerLightDamage: No CharacterController found. Respawn may not work properly.", this);
+            Debug.LogWarning("PlayerLightDamage: No PlayerController found. Respawn may not work properly.", this);
         }
         
         if (showDebugInfo)
         {
-            Debug.Log($"PlayerLightDamage: Spawn position set to {spawnPosition}");
+            Debug.Log($"PlayerLightDamage: Spawn position set to {playerController.SpawnPosition}");
         }
     }
     
@@ -223,17 +221,9 @@ public class PlayerLightDamage : MonoBehaviour
         healthSystem.CurrentHP.Value = healthSystem.MaxHP.Value;
         
         // Teleport player to spawn position
-        // CharacterController requires special handling for teleportation
-        if (characterController != null)
+        if (playerController != null)
         {
-            characterController.enabled = false;
-            transform.position = spawnPosition;
-            characterController.enabled = true;
-        }
-        else
-        {
-            // Fallback if no CharacterController
-            transform.position = spawnPosition;
+            playerController.RespawnPosition();
         }
         
         // Reset internal damage state
@@ -246,7 +236,7 @@ public class PlayerLightDamage : MonoBehaviour
         
         if (showDebugInfo)
         {
-            Debug.Log($"Player respawned at {spawnPosition} with {healthSystem.CurrentHP.Value} HP");
+            Debug.Log($"Player respawned at {playerController.SpawnPosition} with {healthSystem.CurrentHP.Value} HP");
         }
     }
     

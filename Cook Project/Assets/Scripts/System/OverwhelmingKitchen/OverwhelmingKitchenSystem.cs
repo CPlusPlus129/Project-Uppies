@@ -30,7 +30,9 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     [SerializeField] private int baseDrainAmount = 10;
     [SerializeField] private float drainGrowthRate = 1.1f;
     [SerializeField] private int requiredCompletions = 10;
-    [SerializeField] private int initialOrderCount = 10;
+    [SerializeField] private int maxActiveOrders = 15;
+    [SerializeField] private float minOrderSpawnInterval = 0.5f;
+    [SerializeField] private float maxOrderSpawnInterval = 3f;
 
     // RX Data Streams
     public ReactiveProperty<int> Money { get; private set; }
@@ -50,6 +52,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     private readonly CompositeDisposable disposables = new CompositeDisposable();
 
     private CancellationTokenSource drainCts;
+    private CancellationTokenSource orderSpawnCts;
     private int drainTick = 0;
 
     public int RequiredCompletions => requiredCompletions;
@@ -87,8 +90,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         CompletedCount.Value = 0;
         drainTick = 0;
 
-        // Generate initial orders
-        GenerateOrders(initialOrderCount);
+        // Don't generate initial orders - start with 0
 
         // Set state
         CurrentState.Value = OverwhelmingKitchenState.Running;
@@ -108,6 +110,9 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
 
         // Start money drain
         StartMoneyDrain();
+
+        // Start continuous order spawning
+        StartOrderSpawning();
 
         Debug.Log($"[OverwhelmingKitchen] Game started with {activeOrders.Value.Count} orders");
     }
@@ -170,6 +175,49 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
                 Money.Value -= drainAmount;
 
                 Debug.Log($"[OverwhelmingKitchen] Drained ${drainAmount}. Current money: ${Money.Value}");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected when cancelling
+        }
+    }
+
+    /// <summary>
+    /// Start continuous order spawning
+    /// </summary>
+    private void StartOrderSpawning()
+    {
+        orderSpawnCts?.Cancel();
+        orderSpawnCts?.Dispose();
+        orderSpawnCts = new CancellationTokenSource();
+
+        OrderSpawnLoop(orderSpawnCts.Token).Forget();
+    }
+
+    private async UniTaskVoid OrderSpawnLoop(CancellationToken ct)
+    {
+        try
+        {
+            while (!ct.IsCancellationRequested && CurrentState.Value == OverwhelmingKitchenState.Running)
+            {
+                // Wait for random interval
+                float randomInterval = UnityEngine.Random.Range(minOrderSpawnInterval, maxOrderSpawnInterval);
+                await UniTask.Delay(TimeSpan.FromSeconds(randomInterval), cancellationToken: ct);
+
+                if (ct.IsCancellationRequested)
+                    break;
+
+                // Only spawn if we haven't reached the max
+                if (activeOrders.Value.Count < maxActiveOrders)
+                {
+                    GenerateOrders(1);
+                    Debug.Log($"[OverwhelmingKitchen] Spawned new order. Total active orders: {activeOrders.Value.Count}");
+                }
+                else
+                {
+                    Debug.Log($"[OverwhelmingKitchen] Max orders reached ({maxActiveOrders}), waiting for completion...");
+                }
             }
         }
         catch (OperationCanceledException)
@@ -248,11 +296,7 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         // Notify
         OnOrderCompleted.OnNext(order);
 
-        // Add new order to replace completed one
-        if (CompletedCount.Value < requiredCompletions)
-        {
-            GenerateOrders(1);
-        }
+        // Don't add new orders here - continuous spawning handles it
 
         activeOrders.ForceNotify();
 
@@ -272,8 +316,10 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
 
         CurrentState.Value = OverwhelmingKitchenState.Completed;
 
-        // Stop money drain
+        // Stop money drain but keep order spawning running
         drainCts?.Cancel();
+
+        // Note: We don't stop order spawning - game continues until player interacts with fire
 
         // Show victory object
         if (victoryTriggerObject != null)
@@ -289,6 +335,9 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
     public void TriggerFireAndEnd()
     {
         Debug.Log("[OverwhelmingKitchen] Triggering fire effects...");
+
+        // Stop order spawning when fire is triggered
+        orderSpawnCts?.Cancel();
 
         foreach (var fire in fireEffects)
         {
@@ -310,6 +359,10 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         drainCts?.Cancel();
         drainCts?.Dispose();
         drainCts = null;
+
+        orderSpawnCts?.Cancel();
+        orderSpawnCts?.Dispose();
+        orderSpawnCts = null;
 
         // Destroy all spawned items
         foreach (var obj in spawnedItemObjects)
@@ -356,6 +409,9 @@ public class OverwhelmingKitchenSystem : MonoBehaviour
         // Clean up all resources
         drainCts?.Cancel();
         drainCts?.Dispose();
+
+        orderSpawnCts?.Cancel();
+        orderSpawnCts?.Dispose();
 
         foreach (var obj in spawnedItemObjects)
         {

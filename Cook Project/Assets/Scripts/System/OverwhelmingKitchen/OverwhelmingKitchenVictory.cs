@@ -14,6 +14,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
     [SerializeField] private string completionSignalId = "overwhelming_kitchen_complete";
     [SerializeField] private bool autoResetAfterCompletion = true;
     [SerializeField] private float resetDelaySeconds = 3f;
+    [SerializeField] private Transform playerTeleportPosition;
 
     private CompositeDisposable disposables = new CompositeDisposable();
     private bool canInteract = false;
@@ -74,8 +75,28 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
         // Trigger fire effects
         kitchenSystem.TriggerFireAndEnd();
 
+        // Teleport player to specified position
+        if (playerTeleportPosition != null)
+        {
+            var player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                player.transform.position = playerTeleportPosition.position;
+                player.transform.rotation = playerTeleportPosition.rotation;
+                Debug.Log($"[OverwhelmingKitchenVictory] Teleported player to {playerTeleportPosition.position}");
+            }
+            else
+            {
+                Debug.LogWarning("[OverwhelmingKitchenVictory] Player object not found!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[OverwhelmingKitchenVictory] Player teleport position not set!");
+        }
+
         // Broadcast dramatic message
-        WorldBroadcastSystem.Instance?.Broadcast("FIRE! EVERYONE OUT!", 3f);
+        WorldBroadcastSystem.Instance?.Broadcast("FIRE!", 3f);
 
         // Send signal for StoryEvent
         if (!string.IsNullOrEmpty(completionSignalId))
