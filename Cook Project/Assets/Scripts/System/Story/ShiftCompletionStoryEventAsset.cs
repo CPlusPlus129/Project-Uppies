@@ -157,7 +157,14 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
                 }
             }
 
-            return StoryEventResult.Completed($"Shift outcome resolved: {outcome}");
+            var outcomeMessage = $"Shift outcome resolved: {outcome}";
+            if (outcome == ShiftOutcome.Success)
+            {
+                return StoryEventResult.Completed(outcomeMessage);
+            }
+
+            // Let the flow know we failed so GameFlow will not auto-chain the success sequence.
+            return StoryEventResult.Failed(outcomeMessage);
         }
         finally
         {
