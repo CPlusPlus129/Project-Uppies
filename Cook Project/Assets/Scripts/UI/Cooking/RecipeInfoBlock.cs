@@ -54,7 +54,7 @@ public class RecipeInfoBlock : MonoBehaviour
             return;
         }
 
-        mealNameText.text = recipeName;
+        mealNameText.text = r.mealDisplayName;
 
         //meal
         loadCts?.Cancel();
