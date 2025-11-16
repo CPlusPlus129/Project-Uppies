@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -14,30 +15,16 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
     [SerializeField] private string completionSignalId = "overwhelming_kitchen_complete";
     [SerializeField] private bool autoResetAfterCompletion = true;
     [SerializeField] private float resetDelaySeconds = 3f;
+    [SerializeField] private Transform playerTeleportPosition;
 
-    private CompositeDisposable disposables = new CompositeDisposable();
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     private bool canInteract = false;
 
-    private void Start()
+    public void OnGameCompleted()
     {
-        if (kitchenSystem == null)
-        {
-            Debug.LogError("[OverwhelmingKitchenVictory] Kitchen system reference is null!");
-            return;
-        }
-
-        // Subscribe to game complete event
-        kitchenSystem.OnGameComplete
-            .Subscribe(_ => OnGameCompleted())
-            .AddTo(disposables);
-
-        // Initially disable interaction
-        canInteract = false;
-    }
-
-    private void OnGameCompleted()
-    {
-        Debug.Log("[OverwhelmingKitchenVictory] Game completed! Enabling victory interaction");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Game completed! Enabling victory interaction");
 
         // Enable interaction
         canInteract = true;
@@ -69,19 +56,38 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
             return;
         }
 
-        Debug.Log("[OverwhelmingKitchenVictory] Victory object interacted! Triggering fire...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Victory object interacted! Triggering fire...");
 
         // Trigger fire effects
         kitchenSystem.TriggerFireAndEnd();
 
+        // Teleport player to specified position
+        if (playerTeleportPosition != null)
+        {
+            var player = UnityEngine.Object.FindFirstObjectByType<PlayerController>();
+            if (player != null)
+            {
+                UniTask.Delay(3000).ContinueWith(() => player.Teleport(playerTeleportPosition.position));
+                if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenVictory] after 3 sec Teleport player to {playerTeleportPosition.position}");
+            }
+            else
+            {
+                Debug.LogWarning("[OverwhelmingKitchenVictory] Player object not found!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[OverwhelmingKitchenVictory] Player teleport position not set!");
+        }
+
         // Broadcast dramatic message
-        WorldBroadcastSystem.Instance?.Broadcast("FIRE! EVERYONE OUT!", 3f);
+        WorldBroadcastSystem.Instance?.Broadcast("FIRE!", 3f);
 
         // Send signal for StoryEvent
         if (!string.IsNullOrEmpty(completionSignalId))
         {
             GameFlow.Instance?.Signal(completionSignalId);
-            Debug.Log($"[OverwhelmingKitchenVictory] Sent completion signal: {completionSignalId}");
+            if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenVictory] Sent completion signal: {completionSignalId}");
         }
 
         // Disable interaction to prevent multiple triggers
@@ -96,13 +102,8 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
 
     private void ResetGameDelayed()
     {
-        Debug.Log("[OverwhelmingKitchenVictory] Auto-resetting game...");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenVictory] Auto-resetting game...");
         kitchenSystem?.ResetGame();
-    }
-
-    private void OnDestroy()
-    {
-        disposables?.Dispose();
     }
 
 #if UNITY_EDITOR

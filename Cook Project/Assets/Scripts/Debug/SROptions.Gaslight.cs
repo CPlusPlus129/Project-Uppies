@@ -133,13 +133,7 @@ public partial class SROptions
         if (player == null)
             return;
 
-        var cc = player.GetComponent<CharacterController>();
-        if (cc == null)
-            return;
-
-        cc.enabled = false;
-        cc.transform.position = position;
-        cc.enabled = true;
+        player.Teleport(position);
     }
 
     private PlayerController GetPlayer()

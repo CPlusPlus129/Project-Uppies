@@ -29,6 +29,9 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
     [SerializeField] private Color warningMoneyColor = Color.yellow;
     [SerializeField] private int warningThreshold = 100;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     private IAssetLoader assetLoader;
     private CompositeDisposable disposables = new CompositeDisposable();
     private Dictionary<Order, OverwhelmingKitchenOrderCard> orderCardMap = new Dictionary<Order, OverwhelmingKitchenOrderCard>();
@@ -92,13 +95,13 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
 
         PlayerStatSystem.Instance.CurrentInteractableTarget.Subscribe(aimHint.UpdateHint).AddTo(disposables);
 
-        Debug.Log("[OverwhelmingKitchenUI] Subscribed to all data streams");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenUI] Subscribed to all data streams");
     }
 
     private void UnsubscribeFromDataStreams()
     {
         disposables.Clear();
-        Debug.Log("[OverwhelmingKitchenUI] Unsubscribed from all data streams");
+        if (showDebugInfo) Debug.Log("[OverwhelmingKitchenUI] Unsubscribed from all data streams");
     }
 
     private void UpdateMoneyDisplay(int money)
@@ -163,7 +166,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
             }
         }
 
-        Debug.Log($"[OverwhelmingKitchenUI] Updated order list: {orders.Count} orders");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenUI] Updated order list: {orders.Count} orders");
     }
 
     private void CreateOrderCard(Order order)
@@ -219,7 +222,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
             slotObject.SetItem(item.ItemName);
         }
 
-        Debug.Log($"[OverwhelmingKitchenUI] Updated inventory display: {items.Count} items");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenUI] Updated inventory display: {items.Count} items");
     }
 
     private void UpdateUIVisibility(OverwhelmingKitchenState state)
@@ -228,7 +231,7 @@ public class OverwhelmingKitchenUI : MonoBehaviour, IUIInitializable
 
         uiRootPanel.SetActive(state == OverwhelmingKitchenState.Running || state == OverwhelmingKitchenState.Completed);
 
-        Debug.Log($"[OverwhelmingKitchenUI] UI visibility: {uiRootPanel.activeSelf} (State: {state})");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenUI] UI visibility: {uiRootPanel.activeSelf} (State: {state})");
     }
 
     public void Open() => gameObject.SetActive(true);

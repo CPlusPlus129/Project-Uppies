@@ -13,13 +13,16 @@ public class OverwhelmingKitchenCustomer : MonoBehaviour, IInteractable
     [Header("Customer Order")]
     [SerializeField] private Order assignedOrder;
 
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
+
     /// <summary>
     /// Assign an order to this customer (called by spawning/management system)
     /// </summary>
     public void AssignOrder(Order order)
     {
         assignedOrder = order;
-        Debug.Log($"[OverwhelmingKitchenCustomer] Assigned order: {order?.MealName}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCustomer] Assigned order: {order?.MealName}");
     }
 
     public void Interact()
@@ -69,7 +72,7 @@ public class OverwhelmingKitchenCustomer : MonoBehaviour, IInteractable
         // Complete the order
         kitchenSystem.CompleteOrder(assignedOrder);
         WorldBroadcastSystem.Instance?.Broadcast($"Completed: {assignedOrder.MealName}!", 2f);
-        Debug.Log($"[OverwhelmingKitchenCustomer] Delivered {requiredMealName} and completed order");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCustomer] Delivered {requiredMealName} and completed order");
 
         // Destroy this customer object (or disable/pool it)
         Destroy(gameObject);
@@ -108,7 +111,7 @@ public class OverwhelmingKitchenCustomer : MonoBehaviour, IInteractable
                 // Complete the order
                 kitchenSystem.CompleteOrder(matchingOrder);
                 WorldBroadcastSystem.Instance?.Broadcast($"Completed: {matchingOrder.MealName}!", 2f);
-                Debug.Log($"[OverwhelmingKitchenCustomer] Quick completed order: {matchingOrder.MealName}");
+                if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCustomer] Quick completed order: {matchingOrder.MealName}");
                 return;
             }
         }

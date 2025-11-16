@@ -31,6 +31,7 @@ public class RecipeData : ScriptableObject
 [Serializable]
 public class Recipe
 {
+    public string mealDisplayName;
     public string mealName;
     public string[] ingredients;
 }

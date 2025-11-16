@@ -11,9 +11,8 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
 
-    [Header("Settings")]
-    [SerializeField] private Transform spawnPoint;
-    [SerializeField] private float spawnOffsetY = 1f;
+    [Header("Debug")]
+    [SerializeField] private bool showDebugInfo = false;
 
     private List<string> pendingIngredients = new List<string>();
 
@@ -44,15 +43,14 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             return;
         }
 
-        // Get one random ingredient
-        int randomIndex = Random.Range(0, pendingIngredients.Count);
-        string ingredientName = pendingIngredients[randomIndex];
-        pendingIngredients.RemoveAt(randomIndex);
+        // Get first ingredient
+        string ingredientName = pendingIngredients[0];
+        pendingIngredients.RemoveAt(0);
 
         // Spawn the ingredient
         SpawnIngredient(ingredientName);
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Gave ingredient: {ingredientName}. Remaining in pool: {pendingIngredients.Count}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Gave ingredient: {ingredientName}. Remaining in pool: {pendingIngredients.Count}");
     }
 
     /// <summary>
@@ -82,7 +80,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             pendingIngredients.AddRange(recipeIngredients);
         }
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Built ingredient pool with {pendingIngredients.Count} unique ingredients");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Built ingredient pool with {pendingIngredients.Count} ingredients");
     }
 
     /// <summary>
@@ -98,10 +96,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
             return;
         }
 
-        // Determine spawn position
-        Vector3 spawnPosition = spawnPoint != null
-            ? spawnPoint.position
-            : transform.position + Vector3.up * spawnOffsetY;
+        Vector3 spawnPosition = transform.position;
 
         // Instantiate
         var ingredientObject = Instantiate(ingredientPrefab.gameObject, spawnPosition, Quaternion.identity);
@@ -117,7 +112,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         // Add to kitchen system's fake inventory
         kitchenSystem.AddItemToInventory(ingredientItem, ingredientObject);
 
-        Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {ingredientName} at {spawnPosition}");
+        if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenFridge] Spawned ingredient: {ingredientName} at {spawnPosition}");
     }
 
     /// <summary>
@@ -134,17 +129,4 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
         }
     }
 
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        // Draw spawn point
-        Vector3 pos = spawnPoint != null
-            ? spawnPoint.position
-            : transform.position + Vector3.up * spawnOffsetY;
-
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(pos, 0.2f);
-        Gizmos.DrawLine(transform.position, pos);
-    }
-#endif
 }

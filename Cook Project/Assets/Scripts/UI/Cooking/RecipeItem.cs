@@ -21,7 +21,7 @@ public class RecipeItem : MonoBehaviour
     public void Setup(Recipe recipe)
     {
         this.recipe = recipe;
-        mealName.text = recipe.mealName;
+        mealName.text = recipe.mealDisplayName;
     }
 
     public void ResetUI()
