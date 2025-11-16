@@ -12,8 +12,13 @@ public class StorySequenceAsset : ScriptableObject
     [Tooltip("Ordered list of story events that compose this sequence.")]
     private List<StoryEventAsset> events = new List<StoryEventAsset>();
 
+    [SerializeField]
+    [Tooltip("Optional story sequence automatically enqueued after this one completes.")]
+    private StorySequenceAsset nextSequence;
+
     public string SequenceId => string.IsNullOrWhiteSpace(sequenceId) ? name : sequenceId;
     public IReadOnlyList<StoryEventAsset> Events => events;
+    public StorySequenceAsset NextSequence => nextSequence;
 
     public IEnumerable<StoryEventAsset> EnumerateEvents()
     {

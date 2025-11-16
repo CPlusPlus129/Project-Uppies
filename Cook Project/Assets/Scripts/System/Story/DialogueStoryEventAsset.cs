@@ -35,6 +35,15 @@ public class DialogueStoryEventAsset : StoryEventAsset
     [Tooltip("Log warnings when a dialogue asset is missing or skipped.")]
     private bool logWarnings = true;
 
+    [Header("Flow Control")]
+    [SerializeField]
+    [Tooltip("Automatically restart the current shift (or a specific one) once all dialogues in this event have played.")]
+    private bool restartShiftOnComplete = false;
+
+    [SerializeField]
+    [Tooltip("Optional shift index override used when Restart Shift On Complete is enabled. Leave at -1 to restart the current shift.")]
+    private int restartShiftIndexOverride = -1;
+
     private static readonly HashSet<int> playedDialogueInstanceIds = new HashSet<int>();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -113,6 +122,28 @@ public class DialogueStoryEventAsset : StoryEventAsset
         if (!anyPlayed)
         {
             return StoryEventResult.Skipped("All dialogue assets were skipped (PlayOnce).");
+        }
+
+        if (restartShiftOnComplete)
+        {
+            var shiftSystem = await context.GetServiceAsync<IShiftSystem>();
+            if (shiftSystem != null)
+            {
+                if (restartShiftIndexOverride >= 0)
+                {
+                    shiftSystem.RestartShift(restartShiftIndexOverride);
+                }
+                else
+                {
+                    shiftSystem.RestartCurrentShift();
+                }
+            }
+
+            var sequence = context.Runtime?.SourceSequence;
+            if (sequence != null)
+            {
+                context.Flow.RestartSequence(sequence, insertAtFront: true);
+            }
         }
 
         var message = lastPlayed != null ? lastPlayed.Label : null;

@@ -24,6 +24,17 @@ public static class DialogueServiceExtensions
             throw new InvalidOperationException("DialogueEventAsset does not contain a valid label.");
         }
 
-        return service.StartDialogueAsync(dialogueEventAsset.Label);
+        var label = dialogueEventAsset.Label;
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            throw new InvalidOperationException("DialogueEventAsset does not contain a valid label.");
+        }
+
+        if (!label.StartsWith("*"))
+        {
+            label = "*" + label;
+        }
+
+        return service.StartDialogueAsync(label);
     }
 }

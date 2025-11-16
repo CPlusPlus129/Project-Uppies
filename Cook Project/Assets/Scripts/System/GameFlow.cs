@@ -180,9 +180,15 @@ public class GameFlow : MonoSingleton<GameFlow>
                 lastResultByEventId[eventId] = result;
             }
 
-            if (result.NextSequence != null)
+            var sequenceToChain = result.NextSequence;
+            if (sequenceToChain == null && ShouldAutoChainToNextSequence(runtime, result))
             {
-                EnqueueSequence(result.NextSequence);
+                sequenceToChain = runtime.SourceSequence.NextSequence;
+            }
+
+            if (sequenceToChain != null)
+            {
+                EnqueueSequence(sequenceToChain);
             }
 
             if (result.PauseFlow)
@@ -206,6 +212,21 @@ public class GameFlow : MonoSingleton<GameFlow>
         }
 
         return await runtime.Asset.CanExecuteAsync(context, cancellationToken);
+    }
+
+    private bool ShouldAutoChainToNextSequence(StoryEventRuntime runtime, StoryEventResult result)
+    {
+        if (runtime?.SourceSequence == null || runtime.SourceSequence.NextSequence == null)
+        {
+            return false;
+        }
+
+        if (!runtime.IsLastEventInSequence)
+        {
+            return false;
+        }
+
+        return result.FinalState == StoryEventState.Completed || result.FinalState == StoryEventState.Skipped;
     }
 
     private bool TryDequeueNextEvent(out StoryEventRuntime runtime)
@@ -237,23 +258,26 @@ public class GameFlow : MonoSingleton<GameFlow>
             return Array.Empty<StoryEventRuntime>();
         }
 
-        var created = new List<StoryEventRuntime>();
-        int index = 0;
+        var validEvents = new List<StoryEventAsset>();
         foreach (var storyEvent in sequence.EnumerateEvents())
         {
-            if (storyEvent == null)
+            if (storyEvent != null)
             {
-                continue;
+                validEvents.Add(storyEvent);
             }
-
-            var runtime = new StoryEventRuntime(storyEvent, sequence, index++);
-            created.Add(runtime);
         }
 
-        if (created.Count == 0)
+        if (validEvents.Count == 0)
         {
             Log($"Sequence '{sequence.SequenceId}' has no valid events to enqueue.");
-            return created;
+            return Array.Empty<StoryEventRuntime>();
+        }
+
+        var created = new List<StoryEventRuntime>(validEvents.Count);
+        for (int i = 0; i < validEvents.Count; i++)
+        {
+            var runtime = new StoryEventRuntime(validEvents[i], sequence, i, validEvents.Count);
+            created.Add(runtime);
         }
 
         if (insertAtFront)
@@ -279,6 +303,28 @@ public class GameFlow : MonoSingleton<GameFlow>
         return created;
     }
 
+    public void RestartSequence(StorySequenceAsset sequence, bool insertAtFront = true)
+    {
+        if (sequence == null)
+        {
+            return;
+        }
+
+        var node = storyQueue.First;
+        while (node != null)
+        {
+            var next = node.Next;
+            if (node.Value != null && node.Value.SourceSequence == sequence)
+            {
+                storyQueue.Remove(node);
+            }
+            node = next;
+        }
+
+        EnqueueSequence(sequence, insertAtFront);
+        Log($"Restarted sequence '{sequence.SequenceId}'.");
+    }
+
     public StoryEventRuntime EnqueueEvent(StoryEventAsset asset, bool insertAtFront = false, StorySequenceAsset sourceSequence = null)
     {
         if (asset == null)
@@ -286,7 +332,7 @@ public class GameFlow : MonoSingleton<GameFlow>
             return null;
         }
 
-        var runtime = new StoryEventRuntime(asset, sourceSequence, 0);
+        var runtime = new StoryEventRuntime(asset, sourceSequence, 0, sourceSequence != null ? 1 : 0);
 
         if (insertAtFront)
         {

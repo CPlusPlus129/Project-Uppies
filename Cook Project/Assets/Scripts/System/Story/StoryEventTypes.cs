@@ -48,15 +48,18 @@ public sealed class StoryEventRuntime
     public StoryEventAsset Asset { get; }
     public StorySequenceAsset SourceSequence { get; }
     public int SequenceIndex { get; }
+    public int SequenceLength { get; }
+    public bool IsLastEventInSequence => SequenceLength > 0 && SequenceIndex == SequenceLength - 1;
     public StoryEventState State { get; private set; }
     public DateTimeOffset EnqueuedAt { get; }
     public StoryEventResult? LastResult { get; private set; }
 
-    internal StoryEventRuntime(StoryEventAsset asset, StorySequenceAsset sourceSequence, int sequenceIndex)
+    internal StoryEventRuntime(StoryEventAsset asset, StorySequenceAsset sourceSequence, int sequenceIndex, int sequenceLength = 0)
     {
         Asset = asset;
         SourceSequence = sourceSequence;
         SequenceIndex = sequenceIndex;
+        SequenceLength = sequenceLength;
         State = StoryEventState.Pending;
         EnqueuedAt = DateTimeOffset.UtcNow;
     }

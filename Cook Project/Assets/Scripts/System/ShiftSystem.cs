@@ -100,6 +100,24 @@ public class ShiftSystem : IShiftSystem
         StartShift(shiftNumber.Value + 1);
     }
 
+    public void RestartCurrentShift()
+    {
+        RestartShift(shiftNumber.Value);
+    }
+
+    public void RestartShift(int shiftIndex)
+    {
+        var shiftData = Database.Instance?.shiftData;
+        if (shiftData == null || shiftData.shifts == null || shiftData.shifts.Length == 0)
+        {
+            Debug.LogWarning("[ShiftSystem] Cannot restart shift because shift data is missing.");
+            return;
+        }
+
+        var clampedIndex = Mathf.Clamp(shiftIndex, 0, shiftData.shifts.Length - 1);
+        StartShift(clampedIndex);
+    }
+
     public bool IsCurrentShiftQuestCompleted()
     {
         var s = GetCurrentShift();
@@ -168,15 +186,27 @@ public class ShiftSystem : IShiftSystem
         }
 
         var depositAmount = Mathf.Clamp(requestedAmount, 1, available);
+        if (quotaAmount.Value > 0)
+        {
+            var remainingToQuota = Mathf.Max(0, quotaAmount.Value - depositedAmount.Value);
+            if (remainingToQuota <= 0)
+            {
+                WorldBroadcastSystem.Instance.Broadcast("Quota already met. Clock out!", 4f);
+                return 0;
+            }
+
+            depositAmount = Mathf.Min(depositAmount, remainingToQuota);
+        }
+
+        if (depositAmount <= 0)
+        {
+            return 0;
+        }
+
         stats.Money.Value -= depositAmount;
         depositedAmount.Value += depositAmount;
 
         WorldBroadcastSystem.Instance.Broadcast($"Deposited ${depositAmount}. ({depositedAmount.Value}/{quotaAmount.Value})", 4f);
-
-        if (HasMetQuota())
-        {
-            CompleteShift();
-        }
 
         return depositAmount;
     }
@@ -237,15 +267,16 @@ public class ShiftSystem : IShiftSystem
             var remain = Mathf.Max(0f, Database.Instance.shiftData.shiftDuration - shiftElapsedSeconds);
             shiftTimer.Value = remain;
 
-            if (HasMetQuota())
-            {
-                CompleteShift();
-                return;
-            }
-
             if (remain <= 0f)
             {
-                EnterOvertime();
+                if (HasMetQuota())
+                {
+                    CompleteShift();
+                }
+                else
+                {
+                    EnterOvertime();
+                }
                 return;
             }
         }
