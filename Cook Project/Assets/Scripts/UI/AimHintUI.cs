@@ -15,11 +15,11 @@ public class AimHintUI : MonoBehaviour
         if (interactable != null)
         {
             hintText.text = BuildHintText(interactable);
-            gameObject.SetActive(true);
+            hintText.gameObject.SetActive(true);
         }
         else
         {
-            gameObject.SetActive(false);
+            hintText.gameObject.SetActive(false);
         }
     }
 

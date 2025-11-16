@@ -42,6 +42,25 @@ public partial class SROptions
                 inventorySystem.AddItem(itemObject);
         }
     }
+
+    [Category("General")]
+    [DisplayName("Give Every Meal")]
+    public async void GiveEveryMeal()
+    {
+        Debug.Log("GiveEveryMeal");
+        var i_arr = Database.Instance.recipeData.datas.Select(x => x.mealName).ToArray();
+        var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        var needToExpandCount = inventorySystem.GetUsedSlotCount + i_arr.Length - inventorySystem.SlotCount.CurrentValue;
+        if (needToExpandCount > 0)
+            PlayerStatSystem.Instance.InventorySize.Value += needToExpandCount;
+        foreach (var itemName in i_arr)
+        {
+            var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(itemName);
+            var itemObject = itemPrefab != null ? GameObject.Instantiate(itemPrefab) : null;
+            if (itemObject != null)
+                inventorySystem.AddItem(itemObject);
+        }
+    }
     #endregion
 
     #region Cheat

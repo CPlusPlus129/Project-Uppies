@@ -25,6 +25,7 @@ public class OrderUI : MonoBehaviour, IUIInitializable
         var item = Instantiate(orderListItemPrefab, listRoot);
         item.gameObject.SetActive(true);
         item.SetupUI(order);
+        item.Enter();
         itemList.Add(item);
     }
 
@@ -34,7 +35,8 @@ public class OrderUI : MonoBehaviour, IUIInitializable
         if (item != null)
         {
             itemList.Remove(item);
-            Destroy(item.gameObject);
+            item.Exit();
+            Destroy(item.gameObject, 1f);
         }
     }
 

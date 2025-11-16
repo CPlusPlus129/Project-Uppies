@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class InventorySystem : IInventorySystem
@@ -11,6 +12,7 @@ public class InventorySystem : IInventorySystem
     private readonly List<ItemBase> slots = new List<ItemBase>();
     private readonly Dictionary<string, int> itemCache = new Dictionary<string, int>();
     public ItemBase GetSelectedItem() => slots.Count == 0 ? null : slots[Mathf.Clamp(SelectedIndex.Value, 0, slots.Count - 1)];
+    public int GetUsedSlotCount => slots.Count(x => x != null);
     public IReadOnlyList<ItemBase> GetAllItems() => slots;
 
     public async UniTask Init()
