@@ -9,14 +9,12 @@ public class UIAnimationController : MonoBehaviour
     public Subject<Unit> OnOpenComplete { get; } = new Subject<Unit>();
     public Subject<Unit> OnCloseComplete { get; } = new Subject<Unit>();
     private Animator animator;
-    private CanvasGroup canvasGroup;
     private int currentOperationId = 0;
     private CancellationTokenSource cancellationTokenSource;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
-        canvasGroup = GetComponent<CanvasGroup>();
     }
 
     public void Open()
@@ -36,8 +34,6 @@ public class UIAnimationController : MonoBehaviour
 
         int operationId = ++currentOperationId;
         gameObject.SetActive(true);
-        if (canvasGroup != null)
-            canvasGroup.interactable = false;
 
         animator.SetTrigger("enter");
 
@@ -51,9 +47,6 @@ public class UIAnimationController : MonoBehaviour
 
             if (operationId == currentOperationId)
             {
-                if (canvasGroup != null)
-                    canvasGroup.interactable = true;
-
                 OnOpenComplete.OnNext(Unit.Default);
             }
         }
@@ -63,8 +56,6 @@ public class UIAnimationController : MonoBehaviour
     private async UniTask CloseAsync()
     {
         int operationId = ++currentOperationId;
-        if (canvasGroup != null)
-            canvasGroup.interactable = false;
         animator.SetTrigger("exit");
 
         try
@@ -79,8 +70,6 @@ public class UIAnimationController : MonoBehaviour
             // check if there is a new open call
             if (operationId == currentOperationId)
             {
-                if (canvasGroup != null)
-                    canvasGroup.interactable = true;
                 gameObject.SetActive(false);
 
                 OnCloseComplete.OnNext(Unit.Default);
