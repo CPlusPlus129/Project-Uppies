@@ -102,6 +102,16 @@ public class UnityInteractable : MonoBehaviour, IInteractable, IInteractionPromp
         onInteract.AddListener(listener);
     }
 
+    public void RemoveOnInteractListener(UnityAction listener)
+    {
+        if (listener == null)
+        {
+            return;
+        }
+
+        onInteract.RemoveListener(listener);
+    }
+
     public void AddOnFirstInteractListener(UnityAction listener)
     {
         if (listener == null)

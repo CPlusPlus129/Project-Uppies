@@ -24,6 +24,7 @@ MonoBehaviour:
   overrideVipScale: 1
   vipLocalScale: {x: 0.02, y: 0.02, z: 0.02}
   forcedMealName: 
+  vipHasOrder: 1
   destroyVipOnExit: 1
   requireSpecificShift: 1
   targetShiftIndex: 1
@@ -40,6 +41,7 @@ MonoBehaviour:
   signalOnSpawn: 
   signalOnOrderTaken: 
   signalOnOrderCompleted: 
+  destroyVipSignalId: 
   spawnBroadcastMessage: VIP arrival detected.
   completionBroadcastMessage: VIP satisfied. Nice work.
   broadcastDurationSeconds: 5

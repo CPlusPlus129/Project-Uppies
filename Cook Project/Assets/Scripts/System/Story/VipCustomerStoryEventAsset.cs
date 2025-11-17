@@ -47,6 +47,10 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
     private string forcedMealName;
 
     [SerializeField]
+    [Tooltip("If disabled, the VIP spawns as a passive prop and never places an order.")]
+    private bool vipHasOrder = true;
+
+    [SerializeField]
     [Tooltip("Destroy the spawned VIP once their order is fulfilled or the event fails.")]
     private bool destroyVipOnExit = true;
 
@@ -103,6 +107,10 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
 
     [SerializeField]
     private string signalOnOrderCompleted;
+
+    [SerializeField]
+    [Tooltip("Optional signal that immediately destroys the spawned VIP when received.")]
+    private string destroyVipSignalId;
 
     [SerializeField]
     [Tooltip("Optional HUD broadcast shown when the VIP spawns.")]
@@ -180,7 +188,9 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
         ConfigureVipOrder(vipInstance);
         var vipName = vipInstance.customerName;
 
-        if (autoStartQuestOnSpawn && !string.IsNullOrWhiteSpace(questIdToComplete))
+        ListenForDestroySignal(context, vipInstance, cancellationToken);
+
+        if (vipHasOrder && autoStartQuestOnSpawn && !string.IsNullOrWhiteSpace(questIdToComplete))
         {
             questService?.StartQuest(questIdToComplete);
         }
@@ -200,14 +210,22 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             await dialogueService.PlayDialogueAsync(spawnDialogue).AttachExternalCancellation(cancellationToken);
         }
 
-        var result = await WaitForVipOrderAsync(
-            context,
-            vipName,
-            orderManager,
-            shiftSystem,
-            dialogueService,
-            questService,
-            cancellationToken);
+        StoryEventResult result;
+        if (vipHasOrder)
+        {
+            result = await WaitForVipOrderAsync(
+                context,
+                vipName,
+                orderManager,
+                shiftSystem,
+                dialogueService,
+                questService,
+                cancellationToken);
+        }
+        else
+        {
+            result = StoryEventResult.Completed($"VIP '{vipName}' spawned without placing an order.");
+        }
 
         if (destroyVipOnExit && vipInstance != null)
         {
@@ -247,7 +265,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
                 }
             }
 
-            EnsureVipIsInteractable(customer);
+            EnsureVipIsInteractable(customer, vipHasOrder);
             customer.gameObject.name = $"VIP_{customer.customerName}";
             return customer;
         }
@@ -349,13 +367,45 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             return;
         }
 
+        if (!vipHasOrder)
+        {
+            vip.specifiedNextOrderName = null;
+            return;
+        }
+
         if (!string.IsNullOrWhiteSpace(forcedMealName))
         {
             vip.specifiedNextOrderName = forcedMealName;
         }
     }
 
-    private static void EnsureVipIsInteractable(Customer customer)
+    private void ListenForDestroySignal(GameFlowContext context, Customer vip, CancellationToken token)
+    {
+        if (vip == null || string.IsNullOrWhiteSpace(destroyVipSignalId))
+        {
+            return;
+        }
+
+        WaitForDestroySignalAsync(context, vip, token).Forget();
+    }
+
+    private async UniTaskVoid WaitForDestroySignalAsync(GameFlowContext context, Customer vip, CancellationToken token)
+    {
+        try
+        {
+            await context.WaitForSignalAsync(destroyVipSignalId, token);
+            if (vip != null)
+            {
+                UnityEngine.Object.Destroy(vip.gameObject);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Story flow cancelled before the destroy signal fired.
+        }
+    }
+
+    private static void EnsureVipIsInteractable(Customer customer, bool enableInteraction)
     {
         if (customer == null)
         {
@@ -363,6 +413,15 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
         }
 
         var interactable = customer.GetComponent<UnityInteractable>();
+        if (!enableInteraction)
+        {
+            if (interactable != null)
+            {
+                interactable.enabled = false;
+            }
+            return;
+        }
+
         if (interactable == null)
         {
             interactable = customer.gameObject.AddComponent<UnityInteractable>();

@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 498545f78dad1f16c8f5e88bb65641a5, type: 3}
+  m_Name: VIP1Aftershift
+  m_EditorClassIdentifier: Assembly-CSharp::AftershiftVipStoryEventAsset
+  eventId: VIP1Aftershift
+  designerNotes: 
+  replayable: 1
+  vipCustomerPrefab: {fileID: 2687769478995045696, guid: 2413b5dd60f5e9b4b9adfb039628f121, type: 3}
+  vipDisplayName: 
+  freezeVipOnSpawn: 1
+  disableVipAnimatorOnSpawn: 1
+  overrideVipRotation: 1
+  vipRotationEuler: {x: 0, y: -90, z: -90}
+  overrideVipScale: 1
+  vipLocalScale: {x: 0.02, y: 0.02, z: 0.02}
+  preferredAnchorIds:
+  - Customer1
+  - Customer2
+  - Customer3
+  fallbackToAnyAnchor: 1
+  parentVipToAnchor: 1
+  signalOnSpawn: 
+  signalOnInteract: 
+  spawnDialogue: {fileID: 11400000, guid: 6fb8d88f31fd9504fac25195e8a6c639, type: 2}
+  interactDialogue: {fileID: 0}
+  spawnBroadcastMessage: Someone's arrived.
+  interactBroadcastMessage: 
+  broadcastDurationSeconds: 4
+  waitForPlayerInteraction: 1
+  allowMultipleInteractions: 0
+  disableInteractableAfterUse: 1
+  onFirstInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  triggerFadeOnInteract: 1
+  addFadeComponentIfMissing: 1
+  waitForFadeCompletion: 1
+  fadeWaitTimeoutSeconds: 5
