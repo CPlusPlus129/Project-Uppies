@@ -20,6 +20,8 @@ public class TutorialContext
 
     public GameObject satanLight;
     public GameObject backArrow;
+    public GameObject firstRoomWallDoor;
+    public GameObject firstRoomBlockingWall;
 
     public string OrderName;
     
