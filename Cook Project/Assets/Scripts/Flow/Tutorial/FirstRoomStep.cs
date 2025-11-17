@@ -48,7 +48,6 @@ class FirstRoomStep : ITutorialStep
                 Debug.Log("[OneRoomStep] Trigger zone activated!");
                 firstRoomWallDoor.SetActive(false);
                 firstRoomBlockingWall.SetActive(true);
-                disposables.Clear();
             })
             .AddTo(disposables);
 
