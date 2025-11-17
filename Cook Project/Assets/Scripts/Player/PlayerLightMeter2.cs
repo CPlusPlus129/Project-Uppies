@@ -66,6 +66,11 @@ public class PlayerLightMeter2 : MonoBehaviour
         for (int i = 0; i < allLights.Count; i++)
         {
             Light light = allLights[i];
+            if (light == null || light.Equals(null))
+            {
+                continue;
+            }
+
             if (!light.enabled) continue;
             
             float contribution = 0f;
