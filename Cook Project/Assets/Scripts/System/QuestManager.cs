@@ -46,13 +46,22 @@ public class QuestManager : IQuestService
     public void CompleteQuest(string questId)
     {
         var quest = ongoingQuests.FirstOrDefault(q => q.Id == questId);
-        if (quest != null && quest.CanComplete())
+        if (quest == null)
         {
-            quest.CompleteQuest();
-            ongoingQuests.Remove(quest);
-            completedQuests.Add(quest);
-            OnQuestCompleted.OnNext(quest);
+            return;
         }
+
+        // Non-puzzle quest lines (like VIP orders) never toggle IsSolved via a minigame,
+        // so treat the completion request itself as the signal that requirements are met.
+        if (!quest.CanComplete())
+        {
+            quest.IsSolved = true;
+        }
+
+        quest.CompleteQuest();
+        ongoingQuests.Remove(quest);
+        completedQuests.Add(quest);
+        OnQuestCompleted.OnNext(quest);
     }
 
     public void FailQuest(string questId)
