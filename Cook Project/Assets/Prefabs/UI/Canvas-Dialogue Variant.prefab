@@ -114,15 +114,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3334556274623748196, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_Color.b
-      value: 0.11503205
+      value: 0.0028479954
       objectReference: {fileID: 0}
     - target: {fileID: 3334556274623748196, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_Color.g
-      value: 0.11503205
+      value: 0.0028479954
       objectReference: {fileID: 0}
     - target: {fileID: 3334556274623748196, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_Color.r
-      value: 0.4433962
+      value: 0.6037736
       objectReference: {fileID: 0}
     - target: {fileID: 3461725630164161992, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_margin.w
@@ -176,6 +176,10 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 0.6320754
       objectReference: {fileID: 0}
+    - target: {fileID: 7857495084136493939, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
+      propertyPath: nameCardBackground
+      value: 
+      objectReference: {fileID: 4017620012708306598}
     - target: {fileID: 7997591830359410399, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -190,7 +194,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7997591830359410399, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -720
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3003950088471932810, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
@@ -203,6 +207,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8313279412587103833, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1748489384853696586}
+    - targetCorrespondingSourceObject: {fileID: 8313279412587103833, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4017620012708306598}
   m_SourcePrefab: {fileID: 100100000, guid: 21a579304b78fd8429ebd771d6bc39f7, type: 3}
 --- !u!114 &513755184416175508 stripped
 MonoBehaviour:
@@ -232,6 +239,20 @@ GameObject:
   m_PrefabInstance: {fileID: 5069086632980794182}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &1748489384853696586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3821217405214051615}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70633be54cfc44bd8da43551990e3ef2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueModule.DialogueNameCardImage
+  targetImage: {fileID: 7502920205702517538}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &4017620012708306598
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

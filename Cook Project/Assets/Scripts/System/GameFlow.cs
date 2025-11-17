@@ -460,6 +460,10 @@ public class GameFlow : MonoSingleton<GameFlow>
     public override void OnDestroy()
     {
         base.OnDestroy();
+        if (Instance != this)
+        {
+            return;
+        }
         CancelGameLoop();
 
         // Dispose all services before destruction
