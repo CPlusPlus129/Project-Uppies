@@ -29,21 +29,21 @@ public class UIAnimationController : MonoBehaviour
 
     private async UniTask OpenAsync()
     {
-        cancellationTokenSource?.Cancel();
-        cancellationTokenSource = new CancellationTokenSource();
+        var animatorInstance = EnsureAnimator();
+        if (animatorInstance == null)
+        {
+            return;
+        }
 
+        var token = ResetCancellationToken();
         int operationId = ++currentOperationId;
         gameObject.SetActive(true);
 
-        animator.SetTrigger("enter");
+        animatorInstance.SetTrigger("enter");
 
         try
         {
-            await UniTask.WaitUntil(
-                () => animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f &&
-                      !animator.IsInTransition(0),
-                cancellationToken: cancellationTokenSource.Token
-            );
+            await WaitForAnimationAsync(animatorInstance, token);
 
             if (operationId == currentOperationId)
             {
@@ -55,17 +55,20 @@ public class UIAnimationController : MonoBehaviour
 
     private async UniTask CloseAsync()
     {
+        var animatorInstance = EnsureAnimator();
+        if (animatorInstance == null)
+        {
+            return;
+        }
+
+        var token = ResetCancellationToken();
         int operationId = ++currentOperationId;
-        animator.SetTrigger("exit");
+        animatorInstance.SetTrigger("exit");
 
         try
         {
             // wait until exit animation is complete
-            await UniTask.WaitUntil(
-                () => animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f &&
-                      !animator.IsInTransition(0),
-                cancellationToken: cancellationTokenSource.Token
-            );
+            await WaitForAnimationAsync(animatorInstance, token);
 
             // check if there is a new open call
             if (operationId == currentOperationId)
@@ -76,5 +79,59 @@ public class UIAnimationController : MonoBehaviour
             }
         }
         catch (OperationCanceledException) { }
+    }
+
+    private Animator EnsureAnimator()
+    {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                Debug.LogWarning($"[{nameof(UIAnimationController)}] Animator component missing on '{name}'.");
+            }
+        }
+
+        return animator;
+    }
+
+    private CancellationToken ResetCancellationToken()
+    {
+        cancellationTokenSource?.Cancel();
+        cancellationTokenSource?.Dispose();
+        cancellationTokenSource = new CancellationTokenSource();
+        return cancellationTokenSource.Token;
+    }
+
+    private static bool IsAnimatorPlayable(Animator animatorInstance)
+    {
+        return animatorInstance != null && animatorInstance.isActiveAndEnabled && animatorInstance.runtimeAnimatorController != null;
+    }
+
+    private async UniTask WaitForAnimationAsync(Animator animatorInstance, CancellationToken token)
+    {
+        if (!IsAnimatorPlayable(animatorInstance))
+        {
+            return;
+        }
+
+        await UniTask.WaitUntil(
+            () =>
+            {
+                if (!IsAnimatorPlayable(animatorInstance))
+                {
+                    return true;
+                }
+
+                var state = animatorInstance.GetCurrentAnimatorStateInfo(0);
+                return state.normalizedTime >= 1f && !animatorInstance.IsInTransition(0);
+            },
+            cancellationToken: token);
+    }
+
+    private void OnDestroy()
+    {
+        cancellationTokenSource?.Cancel();
+        cancellationTokenSource?.Dispose();
     }
 }

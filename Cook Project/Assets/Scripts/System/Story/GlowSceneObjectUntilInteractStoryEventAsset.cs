@@ -96,14 +96,7 @@ public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsse
         IQuestService questService = null;
         if (requiresQuestService)
         {
-            try
-            {
-                questService = await context.GetServiceAsync<IQuestService>();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Failed to access IQuestService: {ex.Message}");
-            }
+            questService = await ResolveQuestServiceAsync(context);
         }
 
         if (startQuestOnActivate)
@@ -369,5 +362,27 @@ public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsse
         {
             Traverse(transform.GetChild(i).gameObject, desiredName, comparison, buffer);
         }
+    }
+
+    private static async UniTask<IQuestService> ResolveQuestServiceAsync(GameFlowContext context)
+    {
+        try
+        {
+            if (context != null && context.IsServiceReady<IQuestService>())
+            {
+                return await context.GetServiceAsync<IQuestService>();
+            }
+
+            if (ServiceLocator.Instance != null && ServiceLocator.Instance.IsServiceReady<IQuestService>())
+            {
+                return await ServiceLocator.Instance.GetAsync<IQuestService>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Failed to resolve IQuestService: {ex.Message}");
+        }
+
+        return null;
     }
 }
