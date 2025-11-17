@@ -213,10 +213,7 @@ public class FridgeGlowController : MonoBehaviour
             }
         }
 
-        glowMaterialInstance.SetColor(ColorPropertyID, glowColor);
-        glowMaterialInstance.SetFloat(IntensityPropertyID, glowIntensity);
-        glowMaterialInstance.SetFloat(FresnelPowerPropertyID, fresnelPower);
-        glowMaterialInstance.SetFloat(PulseIntensityPropertyID, pulseIntensityVariation);
+        ApplyMaterialOverrides();
         glowRenderer.material = glowMaterialInstance;
     }
 
@@ -238,6 +235,47 @@ public class FridgeGlowController : MonoBehaviour
 
         float scalePulse = Mathf.Lerp(glowScale * 0.98f, glowScale * 1.02f, pulse);
         glowObject.transform.localScale = Vector3.one * scalePulse;
+    }
+
+    public void ConfigureGlow(
+        Color? color = null,
+        float? intensity = null,
+        float? newPulseSpeed = null,
+        float? newScale = null,
+        float? newFresnelPower = null,
+        float? newPulseVariation = null)
+    {
+        if (color.HasValue)
+        {
+            glowColor = color.Value;
+        }
+
+        if (intensity.HasValue)
+        {
+            glowIntensity = Mathf.Max(0f, intensity.Value);
+        }
+
+        if (newPulseSpeed.HasValue)
+        {
+            pulseSpeed = Mathf.Max(0f, newPulseSpeed.Value);
+        }
+
+        if (newScale.HasValue)
+        {
+            glowScale = Mathf.Max(0.01f, newScale.Value);
+        }
+
+        if (newFresnelPower.HasValue)
+        {
+            fresnelPower = Mathf.Max(0.01f, newFresnelPower.Value);
+        }
+
+        if (newPulseVariation.HasValue)
+        {
+            pulseIntensityVariation = Mathf.Max(0f, newPulseVariation.Value);
+        }
+
+        ApplyMaterialOverrides();
     }
 
     public void StartGlowing()
@@ -322,11 +360,22 @@ public class FridgeGlowController : MonoBehaviour
 
     private void OnValidate()
     {
+        ApplyMaterialOverrides();
+    }
+
+    private void ApplyMaterialOverrides()
+    {
         if (glowMaterialInstance != null)
         {
             glowMaterialInstance.SetColor(ColorPropertyID, glowColor);
             glowMaterialInstance.SetFloat(IntensityPropertyID, glowIntensity);
             glowMaterialInstance.SetFloat(FresnelPowerPropertyID, fresnelPower);
+            glowMaterialInstance.SetFloat(PulseIntensityPropertyID, pulseIntensityVariation);
+        }
+
+        if (glowObject != null)
+        {
+            glowObject.transform.localScale = Vector3.one * glowScale;
         }
     }
 }

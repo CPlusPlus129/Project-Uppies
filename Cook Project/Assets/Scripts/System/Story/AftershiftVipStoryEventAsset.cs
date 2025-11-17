@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "AftershiftVipStoryEvent", menuName = "Game Flow/Story Events/Aftershift VIP")]
+[CreateAssetMenu(fileName = "AftershiftVipStoryEvent", menuName = "Game Flow/VIP Events/Aftershift VIP")]
 public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
 {
     [Header("VIP Setup")]
@@ -92,6 +92,10 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
     private bool disableInteractableAfterUse = true;
 
     [SerializeField]
+    [Tooltip("Disable the base Customer interact behaviour so only this story event handles interaction logic.")]
+    private bool disableCustomerInteraction = true;
+
+    [SerializeField]
     private UnityEvent onFirstInteract = new UnityEvent();
 
     [SerializeField]
@@ -134,6 +138,8 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
             return StoryEventResult.Failed("VIP instantiation failed.");
         }
 
+        var vipRootObject = vipInstance.gameObject;
+
         if (!string.IsNullOrWhiteSpace(signalOnSpawn))
         {
             context.SendSignal(signalOnSpawn);
@@ -154,6 +160,11 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
         {
             Debug.LogError($"[{nameof(AftershiftVipStoryEventAsset)}] VIP prefab is missing a {nameof(UnityInteractable)}.");
             return StoryEventResult.Failed("VIP interactable missing.");
+        }
+
+        if (disableCustomerInteraction)
+        {
+            DisableCustomerInteraction(vipInstance, interactable);
         }
 
         var interactionTcs = waitForPlayerInteraction ? new UniTaskCompletionSource<bool>() : null;
@@ -198,7 +209,7 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
 
             if (triggerFadeOnInteract)
             {
-                TriggerFade(vipInstance.gameObject, fadeTcs, cancellationToken);
+                TriggerFade(vipRootObject, fadeTcs, cancellationToken);
             }
 
             interactionTcs?.TrySetResult(true);
@@ -366,6 +377,28 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
 
         interactable.enabled = true;
         return interactable;
+    }
+
+    private void DisableCustomerInteraction(Customer customer, UnityInteractable interactable)
+    {
+        if (customer == null)
+        {
+            return;
+        }
+
+        if (interactable != null)
+        {
+            interactable.RemoveOnInteractListener(customer.Interact);
+        }
+
+        if (Application.isPlaying)
+        {
+            UnityEngine.Object.Destroy(customer);
+        }
+        else
+        {
+            UnityEngine.Object.DestroyImmediate(customer);
+        }
     }
 
     private void TriggerFade(GameObject target, UniTaskCompletionSource<bool> fadeTcs, CancellationToken token)

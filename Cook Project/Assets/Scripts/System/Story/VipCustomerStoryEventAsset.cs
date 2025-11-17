@@ -8,7 +8,7 @@ using R3;
 using UnityEngine;
 using UnityEngine.AI;
 
-[CreateAssetMenu(fileName = "VipCustomerStoryEvent", menuName = "Game Flow/Story Events/VIP Customer")]
+[CreateAssetMenu(fileName = "VipCustomerStoryEvent", menuName = "Game Flow/VIP Events/VIP Customer")]
 public sealed class VipCustomerStoryEventAsset : StoryEventAsset
 {
     private static readonly StringComparer NameComparer = StringComparer.OrdinalIgnoreCase;

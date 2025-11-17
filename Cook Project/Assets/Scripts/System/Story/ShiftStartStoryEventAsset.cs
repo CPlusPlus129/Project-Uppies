@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ShiftStartStoryEvent", menuName = "Game Flow/Story Events/Shift Start Event")]
+[CreateAssetMenu(fileName = "ShiftStartStoryEvent", menuName = "Game Flow/Shift Events/Shift Start Event")]
 public class ShiftStartStoryEventAsset : StoryEventAsset
 {
     private enum ShiftSelectionMode

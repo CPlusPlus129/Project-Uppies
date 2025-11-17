@@ -8,7 +8,7 @@ using UnityEngine;
 /// StoryEvent for the Overwhelming Kitchen minigame.
 /// Starts the minigame, optional intro/outro dialogues, and waits for game completion.
 /// </summary>
-[CreateAssetMenu(fileName = "OverwhelmingKitchenStoryEvent", menuName = "Game Flow/Story Events/Overwhelming Kitchen")]
+[CreateAssetMenu(fileName = "OverwhelmingKitchenStoryEvent", menuName = "Game Flow/Environment Events/Overwhelming Kitchen")]
 public class OverwhelmingKitchenStoryEvent : StoryEventAsset
 {
     [Header("Game Reference")]

@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "storageRoomPuzzle1", menuName = "Game Flow/Story Events/Storage Room Puzzle 1")]
+[CreateAssetMenu(fileName = "storageRoomPuzzle1", menuName = "Game Flow/Puzzle Events/Storage Room Puzzle 1")]
 public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
 {
     private const string LogPrefix = "[StorageRoomPuzzle1]";

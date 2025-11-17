@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
-[CreateAssetMenu(fileName = "GlowSceneObjectUntilInteract", menuName = "Game Flow/Story Events/Glow Scene Object")]
+[CreateAssetMenu(fileName = "GlowSceneObjectUntilInteract", menuName = "Game Flow/Environment Events/Glow Scene Object")]
 public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsset
 {
     [Header("Target")]
@@ -35,6 +36,22 @@ public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsse
     [SerializeField]
     private bool addGlowComponentIfMissing = true;
 
+    [SerializeField]
+    [Tooltip("Use the FridgeGlowController so the glow renders through walls.")]
+    private bool useFridgeGlow = false;
+
+    [SerializeField]
+    [Tooltip("Only used when Fridge Glow is enabled.")]
+    private float fridgeGlowScale = 1.15f;
+
+    [SerializeField]
+    [Tooltip("Only used when Fridge Glow is enabled.")]
+    private float fridgeGlowFresnelPower = 3f;
+
+    [SerializeField]
+    [Tooltip("Only used when Fridge Glow is enabled. Represents how much the intensity pulses around the base value.")]
+    private float fridgeGlowPulseVariation = 0.35f;
+
     [Header("Interaction")]
     [SerializeField]
     private bool waitForInteraction = true;
@@ -44,6 +61,23 @@ public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsse
 
     [SerializeField]
     private string signalOnInteract;
+
+    [Header("Quest Hooks")]
+    [SerializeField]
+    [Tooltip("Automatically start this quest when the glow becomes active.")]
+    private bool startQuestOnActivate = false;
+
+    [SerializeField]
+    [Tooltip("Automatically complete this quest when the glow interaction succeeds.")]
+    private bool completeQuestOnInteract = false;
+
+    [SerializeField]
+    [Tooltip("Quest identifier used for auto start/complete.")]
+    private string questId;
+
+    [SerializeField]
+    [Tooltip("Wait for the specified quest to complete before finishing this event (useful when the target already has its own interaction logic).")]
+    private bool waitForQuestCompletion = false;
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
@@ -58,63 +92,219 @@ public sealed class GlowSceneObjectUntilInteractStoryEventAsset : StoryEventAsse
             return StoryEventResult.Failed($"No object named '{targetObjectName}' was found in the loaded scenes.");
         }
 
+        var requiresQuestService = startQuestOnActivate || completeQuestOnInteract || waitForQuestCompletion;
+        IQuestService questService = null;
+        if (requiresQuestService)
+        {
+            try
+            {
+                questService = await context.GetServiceAsync<IQuestService>();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Failed to access IQuestService: {ex.Message}");
+            }
+        }
+
+        if (startQuestOnActivate)
+        {
+            TryStartQuest(questService);
+        }
+
         var waitList = new List<UniTask>();
+        var disableGlowActions = new List<Action>();
+        IDisposable questCompletionSubscription = null;
 
-        foreach (var target in targets)
+        try
         {
-            if (target == null)
+            foreach (var target in targets)
             {
-                continue;
-            }
-
-            var interactable = target.GetComponent<UnityInteractable>() ?? target.AddComponent<UnityInteractable>();
-            var glow = target.GetComponent<SceneObjectGlowController>();
-            if (glow == null && addGlowComponentIfMissing)
-            {
-                glow = target.AddComponent<SceneObjectGlowController>();
-            }
-
-            if (glow == null)
-            {
-                Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Target '{target.name}' lacks {nameof(SceneObjectGlowController)} and could not add one.");
-                continue;
-            }
-
-            glow.Configure(glowColor, glowIntensity, pulse, pulseSpeed);
-            glow.EnableGlow();
-
-            if (waitForInteraction)
-            {
-                var tcs = new UniTaskCompletionSource<bool>();
-                UnityAction handler = null;
-                handler = () =>
+                if (target == null)
                 {
-                    glow.DisableGlow();
-                    interactable.RemoveOnInteractListener(handler);
-                    if (disableInteractableAfterUse)
+                    continue;
+                }
+
+                var interactable = target.GetComponent<UnityInteractable>() ?? target.AddComponent<UnityInteractable>();
+                Action disableGlow;
+                if (!TryEnableGlow(target, out disableGlow))
+                {
+                    continue;
+                }
+
+                if (disableGlow != null)
+                {
+                    disableGlowActions.Add(disableGlow);
+                }
+
+                if (waitForInteraction)
+                {
+                    var tcs = new UniTaskCompletionSource<bool>();
+                    UnityAction handler = null;
+                    handler = () =>
                     {
-                        interactable.enabled = false;
-                    }
+                        disableGlow?.Invoke();
+                        disableGlowActions.Remove(disableGlow);
+                        interactable.RemoveOnInteractListener(handler);
+                        if (disableInteractableAfterUse)
+                        {
+                            interactable.enabled = false;
+                        }
 
-                    if (!string.IsNullOrWhiteSpace(signalOnInteract))
-                    {
-                        context.SendSignal(signalOnInteract);
-                    }
+                        if (!string.IsNullOrWhiteSpace(signalOnInteract))
+                        {
+                            context.SendSignal(signalOnInteract);
+                        }
 
-                    tcs.TrySetResult(true);
-                };
+                        if (completeQuestOnInteract)
+                        {
+                            TryCompleteQuest(questService);
+                        }
 
-                interactable.AddOnInteractListener(handler);
-                waitList.Add(tcs.Task);
+                        tcs.TrySetResult(true);
+                    };
+
+                    interactable.AddOnInteractListener(handler);
+                    waitList.Add(tcs.Task);
+                }
             }
-        }
 
-        if (waitForInteraction && waitList.Count > 0)
+            if (waitForQuestCompletion && questService != null && !string.IsNullOrWhiteSpace(questId))
+            {
+                if (questService.GetQuestStatus(questId) == QuestStatus.Completed)
+                {
+                    DisableAllGlows(disableGlowActions);
+                }
+                else
+                {
+                    var questCompletionTcs = new UniTaskCompletionSource<bool>();
+                    questCompletionSubscription = questService.OnQuestCompleted
+                        .Where(q => q != null && string.Equals(q.Id, questId, StringComparison.OrdinalIgnoreCase))
+                        .Take(1)
+                        .Subscribe(_ =>
+                        {
+                            DisableAllGlows(disableGlowActions);
+                            questCompletionTcs.TrySetResult(true);
+                        });
+                    waitList.Add(questCompletionTcs.Task);
+                }
+            }
+
+            if (waitList.Count > 0)
+            {
+                await UniTask.WhenAll(waitList).AttachExternalCancellation(cancellationToken);
+            }
+
+            return StoryEventResult.Completed(waitForInteraction ? "Glow object interacted." : "Glow applied to targets.");
+        }
+        finally
         {
-            await UniTask.WhenAll(waitList).AttachExternalCancellation(cancellationToken);
+            questCompletionSubscription?.Dispose();
+        }
+    }
+
+    private void DisableAllGlows(List<Action> disableActions)
+    {
+        if (disableActions == null)
+        {
+            return;
         }
 
-        return StoryEventResult.Completed(waitForInteraction ? "Glow object interacted." : "Glow applied to targets.");
+        foreach (var action in disableActions)
+        {
+            action?.Invoke();
+        }
+
+        disableActions.Clear();
+    }
+
+    private void TryStartQuest(IQuestService questService)
+    {
+        if (questService == null)
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Cannot auto-start quest because IQuestService is unavailable.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(questId))
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] startQuestOnActivate enabled but questId is empty.");
+            return;
+        }
+
+        questService.StartQuest(questId);
+    }
+
+    private void TryCompleteQuest(IQuestService questService)
+    {
+        if (questService == null)
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Cannot auto-complete quest because IQuestService is unavailable.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(questId))
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] completeQuestOnInteract enabled but questId is empty.");
+            return;
+        }
+
+        questService.CompleteQuest(questId);
+    }
+
+    private bool TryEnableGlow(GameObject target, out Action disableGlow)
+    {
+        disableGlow = null;
+        if (target == null)
+        {
+            return false;
+        }
+
+        if (useFridgeGlow)
+        {
+            var fridgeGlow = target.GetComponent<FridgeGlowController>();
+            if (fridgeGlow == null && addGlowComponentIfMissing)
+            {
+                fridgeGlow = target.AddComponent<FridgeGlowController>();
+            }
+
+            if (fridgeGlow == null)
+            {
+                Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Target '{target.name}' lacks {nameof(FridgeGlowController)} and could not add one.");
+                return false;
+            }
+
+            var configuredPulseVariation = pulse ? Mathf.Max(0f, fridgeGlowPulseVariation) : 0f;
+            var configuredPulseSpeed = pulse ? Mathf.Max(0f, pulseSpeed) : 0f;
+
+            fridgeGlow.ConfigureGlow(
+                color: glowColor,
+                intensity: glowIntensity,
+                newPulseSpeed: configuredPulseSpeed,
+                newScale: fridgeGlowScale,
+                newFresnelPower: fridgeGlowFresnelPower,
+                newPulseVariation: configuredPulseVariation);
+
+            fridgeGlow.EnableGlow();
+            disableGlow = fridgeGlow.DisableGlow;
+            return true;
+        }
+
+        var glow = target.GetComponent<SceneObjectGlowController>();
+        if (glow == null && addGlowComponentIfMissing)
+        {
+            glow = target.AddComponent<SceneObjectGlowController>();
+        }
+
+        if (glow == null)
+        {
+            Debug.LogWarning($"[{nameof(GlowSceneObjectUntilInteractStoryEventAsset)}] Target '{target.name}' lacks {nameof(SceneObjectGlowController)} and could not add one.");
+            return false;
+        }
+
+        glow.Configure(glowColor, glowIntensity, pulse, pulseSpeed);
+        glow.EnableGlow();
+        disableGlow = glow.DisableGlow;
+        return true;
     }
 
     private List<GameObject> FindTargets(string desiredName)

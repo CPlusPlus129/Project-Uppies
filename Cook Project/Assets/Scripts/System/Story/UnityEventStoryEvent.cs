@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "UnityEventStoryEvent", menuName = "Game Flow/Story Events/Unity Event")]
+[CreateAssetMenu(fileName = "UnityEventStoryEvent", menuName = "Game Flow/Utility/Unity Event")]
 public class UnityEventStoryEvent : StoryEventAsset
 {
     [SerializeField]

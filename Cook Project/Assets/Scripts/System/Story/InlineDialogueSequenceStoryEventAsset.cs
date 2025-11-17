@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-[CreateAssetMenu(fileName = "InlineDialogueSequence", menuName = "Game Flow/Story Events/Inline Dialogue Sequence")]
+[CreateAssetMenu(fileName = "InlineDialogueSequence", menuName = "Game Flow/Dialogue Events/Inline Dialogue Sequence")]
 public sealed class InlineDialogueSequenceStoryEventAsset : StoryEventAsset
 {
     [SerializeField]

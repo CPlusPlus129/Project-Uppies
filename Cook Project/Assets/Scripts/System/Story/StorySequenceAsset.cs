@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StorySequence", menuName = "Game Flow/Story Sequence")]
+[CreateAssetMenu(fileName = "StorySequence", menuName = "Game Flow/Sequences/Story Sequence")]
 public class StorySequenceAsset : ScriptableObject
 {
     [SerializeField]

@@ -2,7 +2,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StartAfterShiftState", menuName = "Game Flow/Story Events/Shift/Start After Shift State")]
+[CreateAssetMenu(fileName = "StartAfterShiftState", menuName = "Game Flow/Shift Events/Start After Shift State")]
 public sealed class StartAfterShiftStateStoryEventAsset : StoryEventAsset
 {
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)

@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 using DialogueModule;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DialogueStoryEvent", menuName = "Game Flow/Story Events/Dialogue Event")]
+[CreateAssetMenu(fileName = "DialogueStoryEvent", menuName = "Game Flow/Dialogue Events/Dialogue Event")]
 public class DialogueStoryEventAsset : StoryEventAsset
 {
     [Header("Dialogue")]

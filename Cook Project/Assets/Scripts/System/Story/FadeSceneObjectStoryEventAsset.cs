@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-[CreateAssetMenu(fileName = "FadeSceneObjectStoryEvent", menuName = "Game Flow/Story Events/Fade Scene Object")]
+[CreateAssetMenu(fileName = "FadeSceneObjectStoryEvent", menuName = "Game Flow/Environment Events/Fade Scene Object")]
 public sealed class FadeSceneObjectStoryEventAsset : StoryEventAsset
 {
     [Header("Target Resolution")]

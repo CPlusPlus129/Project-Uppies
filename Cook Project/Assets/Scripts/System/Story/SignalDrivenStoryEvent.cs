@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-[CreateAssetMenu(fileName = "SignalDrivenStoryEvent", menuName = "Game Flow/Story Events/Signal Driven")]
+[CreateAssetMenu(fileName = "SignalDrivenStoryEvent", menuName = "Game Flow/Utility/Signal Driven")]
 public class SignalDrivenStoryEvent : StoryEventAsset
 {
     [SerializeField]

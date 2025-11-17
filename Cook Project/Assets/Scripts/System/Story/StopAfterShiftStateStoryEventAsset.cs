@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "StopAfterShiftState", menuName = "Game Flow/Story Events/Shift/Stop After Shift State")]
+[CreateAssetMenu(fileName = "StopAfterShiftState", menuName = "Game Flow/Shift Events/Stop After Shift State")]
 public sealed class StopAfterShiftStateStoryEventAsset : StoryEventAsset
 {
     private const string DefaultDoorSignalId = "after_shift_exit";

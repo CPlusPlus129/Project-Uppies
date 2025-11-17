@@ -23,6 +23,14 @@ MonoBehaviour:
   pulse: 1
   pulseSpeed: 2
   addGlowComponentIfMissing: 1
-  waitForInteraction: 1
+  useFridgeGlow: 1
+  fridgeGlowScale: 1.2
+  fridgeGlowFresnelPower: 3
+  fridgeGlowPulseVariation: 0.4
+  waitForInteraction: 0
   disableInteractableAfterUse: 1
   signalOnInteract: 
+  startQuestOnActivate: 1
+  completeQuestOnInteract: 0
+  questId: unlock_storage_temp
+  waitForQuestCompletion: 1

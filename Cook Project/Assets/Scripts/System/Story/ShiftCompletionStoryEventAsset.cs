@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "ShiftCompletionStoryEvent", menuName = "Game Flow/Story Events/Shift Completion Event")]
+[CreateAssetMenu(fileName = "ShiftCompletionStoryEvent", menuName = "Game Flow/Shift Events/Shift Completion Event")]
 public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
 {
     private enum ShiftOutcome

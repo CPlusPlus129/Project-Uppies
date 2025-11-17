@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "OrderCompletionGate", menuName = "Game Flow/Story Events/Order Completion Gate")]
+[CreateAssetMenu(fileName = "OrderCompletionGate", menuName = "Game Flow/Shift Events/Order Completion Gate")]
 public class OrderCompletionGateStoryEvent : StoryEventAsset
 {
     [SerializeField]
