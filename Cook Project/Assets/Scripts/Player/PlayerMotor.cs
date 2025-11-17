@@ -34,7 +34,7 @@ public class PlayerMotor : MonoBehaviour
         }
 
         var playerStats = PlayerStatSystem.Instance;
-        if (isSprinting)
+        if (isSprinting && input != Vector2.zero)
         {
             playerStats.ConsumeStamina(sprintStaminaCost * Time.deltaTime);
 
