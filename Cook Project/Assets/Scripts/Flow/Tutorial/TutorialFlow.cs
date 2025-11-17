@@ -21,7 +21,7 @@ public class TutorialFlow : MonoBehaviour
 
     [SerializeField] private GameObject satanLight;
 
-    private string orderName = "SoulShake";
+    private string orderName = "soulshake";
     private List<TriggerZone> zones;
 
     private void Start()

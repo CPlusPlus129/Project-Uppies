@@ -41,6 +41,7 @@ public class SoulMeterUI : MonoBehaviour
         {
             playerStats.CurrentSouls.Subscribe(_ => UpdateSoulCount()).AddTo(this);
             playerStats.MaxSouls.Subscribe(_ => UpdateSoulCount()).AddTo(this);
+            playerStats.CanUseWeapon.Subscribe(can => gameObject.SetActive(can)).AddTo(this);
         }
 
         UpdateSoulCount();
