@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using R3;
 
 public class MinigameUI : MonoBehaviour
 {
@@ -8,24 +9,23 @@ public class MinigameUI : MonoBehaviour
     {
         var actions = InputSystem.actions;
         actions.FindAction("Esc").performed += ctx => Close();
-    }
-
-    private void OnEnable()
-    {
-        InputManager.Instance.PushActionMap("Minigame");
-    }
-
-    private void OnDisable()
-    {
-        InputManager.Instance.PopActionMap("Minigame");
+        minigamePanel.OnCloseComplete.Subscribe(_ => OnPanelCloseComplete()).AddTo(this);
     }
 
     public void Open()
     {
         gameObject.SetActive(true);
+        minigamePanel.Open();
+        InputManager.Instance.PushActionMap("Minigame");
     }
 
     public void Close()
+    {
+        minigamePanel.Close();
+        InputManager.Instance.PopActionMap("Minigame");
+    }
+
+    private void OnPanelCloseComplete()
     {
         gameObject.SetActive(false);
     }
