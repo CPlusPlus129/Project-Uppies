@@ -1,33 +1,26 @@
+using Cysharp.Threading.Tasks;
 using R3;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-public class ShopUI : MonoBehaviour
+public class ShopUI : MonoBehaviour, IUIInitializable
 {
     [SerializeField] private Button closeButton;
     [SerializeField] private Transform itemsContainer;
     [SerializeField] private ShopItemUI itemPrefab;
+    [SerializeField] private UIAnimationController uiAnim;
     private List<ShopItemUI> itemList = new List<ShopItemUI>();
 
-    private void Awake()
+    public async UniTask Init()
     {
         itemPrefab.gameObject.SetActive(false);
         closeButton.OnClickAsObservable().Subscribe(_ => Close()).AddTo(this);
         ShopSystem.Instance.OnShopItemsUpdated.Subscribe(_ => RefreshShopItems()).AddTo(this);
         InputSystem.actions.FindActionMap("Shop").FindAction("Esc").performed += ctx => Close();
-    }
-
-    public void OnEnable()
-    {
-        RefreshShopItems();
-        InputManager.Instance.PushActionMap("Shop");
-    }
-
-    public void OnDisable()
-    {
-        InputManager.Instance.PopActionMap("Shop");
+        uiAnim.OnCloseComplete.Subscribe(_ => OnPanelCloseComplete()).AddTo(this);
+        await UniTask.CompletedTask;
     }
 
     public void Open()
@@ -38,9 +31,18 @@ public class ShopUI : MonoBehaviour
             return;
         }
         gameObject.SetActive(true);
+        uiAnim.Open();
+        RefreshShopItems();
+        InputManager.Instance.PushActionMap("Shop");
     }
 
     public void Close()
+    {
+        uiAnim.Close();
+        InputManager.Instance.PopActionMap("Shop");
+    }
+
+    private void OnPanelCloseComplete()
     {
         gameObject.SetActive(false);
     }

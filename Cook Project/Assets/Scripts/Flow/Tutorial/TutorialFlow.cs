@@ -6,6 +6,7 @@ using UnityEngine;
 public class TutorialFlow : MonoBehaviour
 {
     [SerializeField] private TriggerZone zeroRoomTriggerZone;
+    [SerializeField] private TriggerZone oneRoomTriggerZone;
     [SerializeField] private TriggerZone secondRoomTriggerZone;
     [SerializeField] private TriggerZone thirdRoomTriggerZone;
     [SerializeField] private TriggerZone fourthRoomTriggerZone;
@@ -15,6 +16,8 @@ public class TutorialFlow : MonoBehaviour
     [SerializeField] private FoodSource[] foods;
     [SerializeField] private EmissionIndicator[] doorArrows;
     [SerializeField] private GameObject backToFirstRoomArrow;
+    [SerializeField] private GameObject firstRoomWallDoor;
+    [SerializeField] private GameObject firstRoomBlockingWall;
 
     [SerializeField] private FlamePillarEffect satanTeleportEffect;
     [SerializeField] private FlamePillarEffect stanTeleportEffect;
@@ -73,11 +76,14 @@ public class TutorialFlow : MonoBehaviour
             doorArrow.SetIsOn(false);
         }
         backToFirstRoomArrow.SetActive(false);
+        firstRoomWallDoor.SetActive(true);
+        firstRoomBlockingWall.SetActive(false);
         PlayerStatSystem.Instance.CanUseWeapon.Value = false;
         WorldBroadcastSystem.Instance.TutorialHint(false, "");
         zones = new List<TriggerZone>
         {
             zeroRoomTriggerZone,
+            oneRoomTriggerZone,
             secondRoomTriggerZone,
             thirdRoomTriggerZone,
             fourthRoomTriggerZone,
@@ -135,6 +141,8 @@ public class TutorialFlow : MonoBehaviour
             stanTeleportEffect = stanTeleportEffect,
             satanLight = satanLight,
             backArrow = backToFirstRoomArrow,
+            firstRoomWallDoor = firstRoomWallDoor,
+            firstRoomBlockingWall = firstRoomBlockingWall,
 
             OrderName = orderName
         };

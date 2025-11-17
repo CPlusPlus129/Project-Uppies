@@ -10,10 +10,12 @@ public class TitleUI : MonoBehaviour, IUIInitializable
     public Button exitButton;
 
     private ISceneManagementService sceneManagementService;
+    private IMessageBoxManager messageBoxManager;
 
     public async UniTask Init()
     {
         sceneManagementService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
+        messageBoxManager = await ServiceLocator.Instance.GetAsync<IMessageBoxManager>();
 
         startButton?.OnClickAsObservable().Subscribe(OnStartButtonClicked).AddTo(this);
         exitButton?.OnClickAsObservable().Subscribe(OnExitButtonClicked).AddTo(this);
@@ -29,9 +31,16 @@ public class TitleUI : MonoBehaviour, IUIInitializable
         InputManager.Instance.PopActionMap("Title");
     }
 
-    private void OnStartButtonClicked(Unit _)
+    private async void OnStartButtonClicked(Unit _)
     {
-        LoadIntroScene().Forget();
+        var result = await messageBoxManager.ShowYesNoAsync("Do you want to skip tutorial?");
+        if (result.HasValue)
+        {
+            if (result.Value)
+                LoadMainScene().Forget();
+            else
+                LoadIntroScene().Forget();
+        }
     }
 
     private void OnExitButtonClicked(Unit _)
@@ -44,6 +53,22 @@ public class TitleUI : MonoBehaviour, IUIInitializable
         if (sceneManagementService != null)
         {
             var nextSceneName = sceneManagementService.GetNextSceneName();
+            if (!string.IsNullOrEmpty(nextSceneName))
+                await sceneManagementService.LoadSceneAsync(nextSceneName, null, SceneTransitionType.Fade);
+            else
+                Debug.LogError("[TitleUI] title scene is the last scene, cannot determine next scene name");
+        }
+        else
+        {
+            Debug.LogError("[TitleUI] SceneManagementService is not available!");
+        }
+    }
+
+    private async UniTaskVoid LoadMainScene()
+    {
+        if (sceneManagementService != null)
+        {
+            var nextSceneName = "WhiteBox02";
             if (!string.IsNullOrEmpty(nextSceneName))
                 await sceneManagementService.LoadSceneAsync(nextSceneName, null, SceneTransitionType.Fade);
             else

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using R3;
 
 public class Customer : MonoBehaviour, IInteractable
 {
@@ -9,7 +10,7 @@ public class Customer : MonoBehaviour, IInteractable
     public enum CustomerState
     {
         WaitingForOrder,
-        OrderPlaced, WaitingForMeal
+        WaitingForMeal
     }
     private CustomerState state = CustomerState.WaitingForOrder;
     private IOrderManager orderManager;
@@ -34,6 +35,7 @@ public class Customer : MonoBehaviour, IInteractable
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+        orderManager.OnOrdersCleared.Subscribe(_ => state = CustomerState.WaitingForOrder).AddTo(this);
     }
 
     public void Interact()
@@ -77,7 +79,6 @@ public class Customer : MonoBehaviour, IInteractable
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;
         Debug.Log($"{customerName} placed order: {order.MealName}");
-        //WorldBroadcastSystem.Instance.Broadcast($"Check recipes in the pot. Find ingredients on the map to cook them.", 60f);
     }
 
     public bool CanReceiveMeal(ItemBase item)

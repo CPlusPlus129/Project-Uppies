@@ -14,25 +14,17 @@ public class CookingUI : MonoBehaviour
         selectionPanel.OnCloseComplete.Subscribe(_ => OnPanelCloseComplete()).AddTo(this);
     }
 
-    private void OnEnable()
-    {
-        InputManager.Instance.PushActionMap("Cooking");
-    }
-
-    private void OnDisable()
-    {
-        InputManager.Instance.PopActionMap("Cooking");
-    }
-
     public void Open()
     {
         gameObject.SetActive(true);
         selectionPanel.Open();
+        InputManager.Instance.PushActionMap("Cooking");
     }
 
     public void Close()
     {
         selectionPanel.Close();
+        InputManager.Instance.PopActionMap("Cooking");
     }
 
     private void OnPanelCloseComplete()

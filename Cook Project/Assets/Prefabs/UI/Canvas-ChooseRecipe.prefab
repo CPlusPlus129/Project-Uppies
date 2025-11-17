@@ -1744,7 +1744,6 @@ GameObject:
   - component: {fileID: 6814235814337657461}
   - component: {fileID: 2936133544744952789}
   - component: {fileID: 355490472862477164}
-  - component: {fileID: 6548789640831955812}
   - component: {fileID: 9167392670954971970}
   - component: {fileID: 3050347872820939096}
   m_Layer: 0
@@ -1833,18 +1832,6 @@ MonoBehaviour:
   recipeItemPrefab: {fileID: 4427924027005625494}
   cookButton: {fileID: 6096868923081141922}
   uiAnim: {fileID: 3050347872820939096}
---- !u!225 &6548789640831955812
-CanvasGroup:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7129375945674652832}
-  m_Enabled: 1
-  m_Alpha: 1
-  m_Interactable: 1
-  m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
 --- !u!95 &9167392670954971970
 Animator:
   serializedVersion: 7

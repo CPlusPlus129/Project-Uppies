@@ -14,12 +14,14 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
 
     // Event fired when the minigame pattern is successfully completed
     public Subject<R3.Unit> OnMinigameCompleted = new Subject<R3.Unit>();
-
+    public Subject<Unit> OnOpenComplete { get; } = new Subject<Unit>();
+    public Subject<Unit> OnCloseComplete { get; } = new Subject<Unit>();
     // UI element for displaying the sigil pattern
     public UnityEngine.UI.LayoutGroup sigilDisplayArea;
 
     public Image currentSigilHighlighter;
 
+    [SerializeField] private UIAnimationController uiAnim;
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
@@ -94,6 +96,16 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
             beatKey.performed -= OnBeatPerformed;
             beatKey.Dispose();
         }
+    }
+
+    public void Open()
+    {
+        uiAnim.Open();
+    }
+
+    public void Close()
+    {
+        uiAnim.Close();
     }
 
     private void OnBeatPerformed(InputAction.CallbackContext ctx)
@@ -176,8 +188,8 @@ public class MinigamePanel : MonoBehaviour, IUIInitializable
     public async UniTask Init()
     {
         sigilTypes = GetComponentsInChildren<sigilType>(true).ToList();
-        // Start capturing input for minigame
-        //Debug.Log(sigilTypes.Count);
+        uiAnim.OnOpenComplete.Subscribe(OnOpenComplete.OnNext).AddTo(this);
+        uiAnim.OnCloseComplete.Subscribe(OnCloseComplete.OnNext).AddTo(this);
         cookingSystem = await ServiceLocator.Instance.GetAsync<ICookingSystem>();
     }
 

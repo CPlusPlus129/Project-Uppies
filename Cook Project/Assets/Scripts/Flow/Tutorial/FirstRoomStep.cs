@@ -11,6 +11,9 @@ class FirstRoomStep : ITutorialStep
     private readonly Customer customer;
     private readonly SimpleDoor door;
     private readonly EmissionIndicator doorArrow;
+    private readonly TriggerZone triggerZone;
+    private readonly GameObject firstRoomWallDoor;
+    private readonly GameObject firstRoomBlockingWall;
 
     //private readonly string enterDialogueName = "tutorial_first_room_entering";
     private readonly string stanDialogueName = "tutorial_first_room_orders";
@@ -30,12 +33,23 @@ class FirstRoomStep : ITutorialStep
         this.orderName = context.OrderName;
         this.hintText = context.TutorialHints.Dequeue();
         this.stanTeleportEffect = context.stanTeleportEffect;
+        this.triggerZone = context.TriggerZones.Dequeue();
+        this.firstRoomWallDoor = context.firstRoomWallDoor;
+        this.firstRoomBlockingWall = context.firstRoomBlockingWall;
     }
 
     public async UniTask ExecuteAsync()
     {
-        // await UniTask.WaitForSeconds(2);
-        // await dialogueService.StartDialogueAsync(enterDilaogueName);
+        triggerZone.gameObject.SetActive(true);
+        triggerZone.OnPlayerEnter
+            .Take(1)
+            .Subscribe(_ =>
+            {
+                Debug.Log("[OneRoomStep] Trigger zone activated!");
+                firstRoomWallDoor.SetActive(false);
+                firstRoomBlockingWall.SetActive(true);
+            })
+            .AddTo(disposables);
 
         customer.specifiedNextOrderName = orderName;
         WorldBroadcastSystem.Instance.TutorialHint(true, hintText);
