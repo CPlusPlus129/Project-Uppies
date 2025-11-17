@@ -1,48 +1,61 @@
-﻿<Project>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Generated file, do not modify, your changes will be overwritten (use AssetPostprocessor.OnGeneratedCSProject) -->
   <PropertyGroup>
-    <BaseIntermediateOutputPath>Temp\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-    <OutputPath>Temp\bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-  <ItemGroup>
-    <ProjectCapability Include="Unity" />
-  </ItemGroup>
-  <PropertyGroup>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.20506</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
+    <ProjectGuid>{E86607A4-CC7B-275F-0734-3E534EAD8225}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <NoWarn>0169;USG0001</NoWarn>
-    <DefineConstants>UNITY_6000_2_9;UNITY_6000_2;UNITY_6000;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2021_2_OR_NEWER;UNITY_2021_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_2_OR_NEWER;UNITY_2022_3_OR_NEWER;UNITY_2023_1_OR_NEWER;UNITY_2023_2_OR_NEWER;UNITY_2023_3_OR_NEWER;UNITY_6000_0_OR_NEWER;UNITY_6000_1_OR_NEWER;UNITY_6000_2_OR_NEWER;UNITY_INCLUDE_TESTS;ENABLE_AUDIO;ENABLE_CLOTH;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_UNITY_CONSENT;ENABLE_UNITY_CLOUD_IDENTIFIERS;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_EDITOR_GAME_SERVICES;ENABLE_UNITY_GAME_SERVICES_ANALYTICS_SUPPORT;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_GENERATE_NATIVE_PLUGINS_FOR_ASSEMBLIES_API;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_ENGINE_CODE_STRIPPING;ENABLE_ONSCREEN_KEYBOARD;ENABLE_MANAGED_UNITYTLS;RENDER_SOFTWARE_CURSOR;ENABLE_MARSHALLING_TESTS;ENABLE_VIDEO;ENABLE_NAVIGATION_OFFMESHLINK_TO_NAVMESHLINK;ENABLE_ACCELERATOR_CLIENT_DEBUGGING;TEXTCORE_1_0_OR_NEWER;EDITOR_ONLY_NAVMESH_BUILDER_DEPRECATED;PLATFORM_WEBGL;UNITY_WEBGL;UNITY_WEBGL_API;UNITY_DISABLE_WEB_VERIFICATION;UNITY_GFX_USE_PLATFORM_VSYNC;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_SPATIALTRACKING;ENABLE_MONO;NET_STANDARD_2_0;NET_STANDARD;NET_STANDARD_2_1;NETSTANDARD;NETSTANDARD2_1;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_INPUT_SYSTEM;TEXTCORE_FONT_ENGINE_1_5_OR_NEWER;TEXTCORE_TEXT_ENGINE_1_5_OR_NEWER;DOTWEEN;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER</DefineConstants>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <DefineConstants>UNITY_6000_2_9;UNITY_6000_2;UNITY_6000;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_2021_1_OR_NEWER;UNITY_2021_2_OR_NEWER;UNITY_2021_3_OR_NEWER;UNITY_2022_1_OR_NEWER;UNITY_2022_2_OR_NEWER;UNITY_2022_3_OR_NEWER;UNITY_2023_1_OR_NEWER;UNITY_2023_2_OR_NEWER;UNITY_2023_3_OR_NEWER;UNITY_6000_0_OR_NEWER;UNITY_6000_1_OR_NEWER;UNITY_6000_2_OR_NEWER;PLATFORM_ARCH_64;UNITY_64;UNITY_INCLUDE_TESTS;ENABLE_AR;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_EVENT_QUEUE;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_VIRTUALTEXTURING;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_UNITY_CONSENT;ENABLE_UNITY_CLOUD_IDENTIFIERS;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_NATIVE_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_EDITOR_GAME_SERVICES;ENABLE_UNITY_GAME_SERVICES_ANALYTICS_SUPPORT;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_GENERATE_NATIVE_PLUGINS_FOR_ASSEMBLIES_API;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_MANAGED_UNITYTLS;INCLUDE_DYNAMIC_GI;ENABLE_SCRIPTING_GC_WBARRIERS;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;ENABLE_MARSHALLING_TESTS;ENABLE_VIDEO;ENABLE_NAVIGATION_OFFMESHLINK_TO_NAVMESHLINK;ENABLE_ACCELERATOR_CLIENT_DEBUGGING;TEXTCORE_1_0_OR_NEWER;EDITOR_ONLY_NAVMESH_BUILDER_DEPRECATED;PLATFORM_STANDALONE_WIN;PLATFORM_STANDALONE;UNITY_STANDALONE_WIN;UNITY_STANDALONE;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_NVIDIA;ENABLE_AMD;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_CLOUD_SERVICES_ENGINE_DIAGNOSTICS;ENABLE_OUT_OF_PROCESS_CRASH_HANDLER;ENABLE_CLUSTER_SYNC;ENABLE_CLUSTERINPUT;PLATFORM_UPDATES_TIME_OUTSIDE_OF_PLAYER_LOOP;GFXDEVICE_WAITFOREVENT_MESSAGEPUMP;PLATFORM_USES_EXPLICIT_MEMORY_MANAGER_INITIALIZER;PLATFORM_SUPPORTS_WAIT_FOR_PRESENTATION;PLATFORM_SUPPORTS_SPLIT_GRAPHICS_JOBS;ENABLE_MONO;NET_STANDARD_2_0;NET_STANDARD;NET_STANDARD_2_1;NETSTANDARD;NETSTANDARD2_1;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_INPUT_SYSTEM;TEXTCORE_FONT_ENGINE_1_5_OR_NEWER;TEXTCORE_TEXT_ENGINE_1_5_OR_NEWER;DOTWEEN;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER</DefineConstants>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Temp\bin\Debug\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Temp\bin\Release\</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <NoStandardLibraries>true</NoStandardLibraries>
-    <NoStdLib>true</NoStdLib>
     <NoConfig>true</NoConfig>
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
-    <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
+    <NoStdLib>true</NoStdLib>
+    <AddAdditionalExplicitAssemblyReferences>false</AddAdditionalExplicitAssemblyReferences>
+    <ImplicitlyExpandNETStandardFacades>false</ImplicitlyExpandNETStandardFacades>
+    <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <PropertyGroup>
+    <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <UnityProjectGenerator>Package</UnityProjectGenerator>
     <UnityProjectGeneratorVersion>2.0.25</UnityProjectGeneratorVersion>
-    <UnityProjectGeneratorStyle>SDK</UnityProjectGeneratorStyle>
+    <UnityProjectGeneratorStyle>Legacy</UnityProjectGeneratorStyle>
     <UnityProjectType>Game:1</UnityProjectType>
-    <UnityBuildTarget>WebGL:20</UnityBuildTarget>
+    <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>6000.2.9f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\chris\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.3\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -57,6 +70,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\Logic\UIAdapter\CharacterAdapter.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\ServeMealStep.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleSprite.cs" />
+    <Compile Include="Assets\Scripts\UI\OverwhelmingKitchen\OverwhelmingKitchenOrderCard.cs" />
     <Compile Include="Assets\Scripts\System\Story\DialogueStoryEventAsset.cs" />
     <Compile Include="Assets\Scripts\Module\BlackJack\GameEnums.cs" />
     <Compile Include="Assets\Scripts\TrapRespawn.cs" />
@@ -74,6 +88,7 @@
     <Compile Include="Assets\Scripts\UI\KeyPad\SecretWall.cs" />
     <Compile Include="Assets\Scripts\Common\Pattern\SimpleSingleton.cs" />
     <Compile Include="Assets\Scripts\CookingStation.cs" />
+    <Compile Include="Assets\Scripts\System\Story\SceneObjectFadeAway.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\FourthRoomStep.cs" />
     <Compile Include="Assets\Scripts\Common\RandomHelper.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IQuestService.cs" />
@@ -83,26 +98,34 @@
     <Compile Include="Assets\Scripts\Flow\Tutorial\ThirdRoomStep.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleUnityVersion.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\ScenarioData.cs" />
-    <Compile Include="Assets\Scripts\MobHealthBarController.cs" />
+    <Compile Include="Assets\Scripts\Lighting\ShiftFogController.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandText.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerSoulAbilityRadiantBurst.cs" />
     <Compile Include="Assets\Scripts\Mob.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\ClickHandler.cs" />
     <Compile Include="Assets\Scripts\SpawnPointList.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Patrol.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Logic\UIAdapter\MessageData.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Perception.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandCharacter.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\StringGrid\StringGridDictionary.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Sample\MouseRotator.cs" />
     <Compile Include="Assets\Scripts\System\EnhancedLightSource.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\ITutorialStep.cs" />
+    <Compile Include="Assets\Scripts\System\ShiftDepositBox.cs" />
     <Compile Include="Assets\Shaders\PxlDev\Sprite Blending Layers\Scripts\SpriteBlendingMode.cs" />
     <Compile Include="Assets\Scripts\UI\InventorySlotUI.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.StateMachine.cs" />
     <Compile Include="Assets\Scripts\Flow\YesNoRoom\YesNoRoomFlow.cs" />
     <Compile Include="Assets\Scripts\System\LightRecoverySystem.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Navigation.cs" />
+    <Compile Include="Assets\Scripts\System\Story\ShiftStartStoryEventAsset.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerFridgeGuidance.cs" />
     <Compile Include="Assets\Scripts\System\FridgeGlowEligibilityTracker.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DialogueTagReplacement\CharacterNameHandler.cs" />
     <Compile Include="Assets\Scripts\UI\MinigameUI.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleEPOOutline.cs" />
+    <Compile Include="Assets\StompyRobot\SROptions\SROptions.Attributes.cs" />
     <Compile Include="Assets\Scripts\System\Story\OrderCompletionGateStoryEvent.cs" />
     <Compile Include="Assets\Scripts\Rendering\FlamePillarEffect.cs" />
     <Compile Include="Assets\Scripts\Flow\Title\HeartbeatLight.cs" />
@@ -120,13 +143,17 @@
     <Compile Include="Assets\Scripts\SpawnPoint.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Sample\FirstPersonCharacter.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\ScenarioImporter\IScenarioFileReader.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Combat.cs" />
     <Compile Include="Assets\Scripts\UI\HUD.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IDialogueService.cs" />
     <Compile Include="Assets\Scripts\UI\DamagedIndicator.cs" />
     <Compile Include="Assets\Scripts\System\Order.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Debug.cs" />
     <Compile Include="Assets\Scripts\UI\KeyPad\KeyPadGameUI.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\TutorialContext.cs" />
+    <Compile Include="Assets\Scripts\System\OverwhelmingKitchen\OverwhelmingKitchenSystem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DataManager.cs" />
+    <Compile Include="Assets\Scripts\Mob\MobMovementAudio.cs" />
     <Compile Include="Assets\Scripts\Module\BlackJack\Deck.cs" />
     <Compile Include="Assets\Scripts\UI\Shop\ShopUI.cs" />
     <Compile Include="Assets\Scripts\UI\Minigame\sigilType.cs" />
@@ -135,9 +162,13 @@
     <Compile Include="Assets\Scripts\Common\Pattern\MonoSingleton.cs" />
     <Compile Include="Assets\Scripts\UI\OrderUI.cs" />
     <Compile Include="Assets\Scripts\ItemBase.cs" />
+    <Compile Include="Assets\Scripts\System\Story\InlineDialogueSequenceStoryEventAsset.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Explosion.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\DialogueNameCardImage.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DialogueTagReplacement\ITagHandler.cs" />
+    <Compile Include="Assets\Scripts\System\Story\AftershiftVipStoryEventAsset.cs" />
+    <Compile Include="Assets\Scripts\UI\UIAnimationController.cs" />
+    <Compile Include="Assets\Scripts\System\Story\VipCustomerSpawnAnchor.cs" />
     <Compile Include="Assets\Scripts\UI\LightBarItem.cs" />
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueEventPlayer.cs" />
     <Compile Include="Assets\Scripts\UI\Minigame\MinigamePanel.cs" />
@@ -146,6 +177,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandSelectionEnd.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\Selection\SelectionManager.cs" />
     <Compile Include="Assets\Scripts\Data\StatUpgradeData.cs" />
+    <Compile Include="Assets\Scripts\UI\OrderRewardPopupUI.cs" />
     <Compile Include="Assets\Scripts\UI\KeyPad\ClickTheButton.cs" />
     <Compile Include="Assets\Scripts\System\ServiceLocator.cs" />
     <Compile Include="Assets\Scripts\UI\SoulMeterUI.cs" />
@@ -156,6 +188,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\SettingData\LayerSettings.cs" />
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueTriggerAuthoring.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleUI.cs" />
+    <Compile Include="Assets\StompyRobot\SROptions\SROptions.Test.cs" />
     <Compile Include="Assets\Scripts\System\Interface\ITableManager.cs" />
     <Compile Include="Assets\Scripts\UI\LightAmmoUI.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\ScenarioImporter\ScenarioFileReaderCsv.cs" />
@@ -171,11 +204,12 @@
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\DialogueTagReplacement\DialogueTagParser.cs" />
     <Compile Include="Assets\Scripts\UI\WorldBroadcastUI.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\CommandFactory.cs" />
+    <Compile Include="Assets\Scripts\System\Story\OverwhelmingKitchenStoryEvent.cs" />
     <Compile Include="Assets\Scripts\Meal.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\TutorialDialogueStepUtility.cs" />
     <Compile Include="Assets\Scripts\UI\Cooking\CookingUI.cs" />
+    <Compile Include="Assets\Scripts\Mob\MobLightDamage.cs" />
     <Compile Include="Assets\Scripts\System\OrderManager.cs" />
-    <Compile Include="Assets\Scripts\MobSpawner.cs" />
     <Compile Include="Assets\Scripts\Rendering\BillboardFireEffect.cs" />
     <Compile Include="Assets\Scripts\LightgunInteractable.cs" />
     <Compile Include="Assets\Scripts\UI\KeyPad\DigitalDisplay.cs" />
@@ -183,8 +217,10 @@
     <Compile Include="Assets\Scripts\Module\NumberGuessingGame.cs" />
     <Compile Include="Assets\Scripts\IInteractable.cs" />
     <Compile Include="Assets\Scripts\UI\CardSwipeGame\CardReader.cs" />
+    <Compile Include="Assets\Scripts\RoomoAudioZone.cs" />
     <Compile Include="Assets\Scripts\Dooropensound.cs" />
     <Compile Include="Assets\Scripts\Lighting\DynamicShadowLight.cs" />
+    <Compile Include="Assets\Scripts\System\ShiftPhaseToggle.cs" />
     <Compile Include="Assets\Scripts\UI\BarItem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Scenario\ScenarioManager.cs" />
     <Compile Include="Assets\Scripts\UI\SceneUIController.cs" />
@@ -193,23 +229,26 @@
     <Compile Include="Assets\DialogueModule\Scripts\UI\Layer\LayerManager.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Data\DialogueEventCollection.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandSelection.cs" />
+    <Compile Include="Assets\Scripts\GambleTable.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Settings\DialogueSettings.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Sample\FirstPersonHeadBob.cs" />
-    <Compile Include="Assets\Scripts\MobMovementAudio.cs" />
     <Compile Include="Assets\Scripts\System\ShiftSystem.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\SlowMotion.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IInventorySystem.cs" />
     <Compile Include="Assets\Scripts\StartGameTrigger.cs" />
     <Compile Include="Assets\Scripts\Rendering\BillboardSprite.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerLightDamage.cs" />
+    <Compile Include="Assets\Scripts\System\OverwhelmingKitchen\OverwhelmingKitchenCookingStation.cs" />
     <Compile Include="Assets\Scripts\System\Story\StorySignalEmitter.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\StringGrid\StringGridRow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\DialogueUIManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Easy Camera Shake\Vibration.cs" />
+    <Compile Include="Assets\Scripts\UI\AimHintUI.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IOrderManager.cs" />
     <Compile Include="Assets\Scripts\System\Story\StorageRoomPuzzle1StoryEventAsset.cs" />
+    <Compile Include="Assets\StompyRobot\SROptions\SROptions.cs" />
     <Compile Include="Assets\Scripts\System\ShopManager.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Easy Camera Shake\Demo\VibrationDemo.cs" />
     <Compile Include="Assets\Scripts\ShopInteractable.cs" />
@@ -219,6 +258,7 @@
     <Compile Include="Assets\Scripts\UI\KeyPad\KeyPadGameTrigger.cs" />
     <Compile Include="Assets\Scripts\System\ExplosionLifetimeBarController.cs" />
     <Compile Include="Assets\Scripts\LightDetector.cs" />
+    <Compile Include="Assets\Scripts\System\OverwhelmingKitchen\OverwhelmingKitchenCustomer.cs" />
     <Compile Include="Assets\Scripts\Common\Csv\Attributes\CsvIgnoreAttribute.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\CookingStep.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerStatUI.cs" />
@@ -236,6 +276,7 @@
     <Compile Include="Assets\Scripts\Data\RecipeData.cs" />
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueEngine_Gaslight.cs" />
     <Compile Include="Assets\Scripts\Lighting\DynamicShadowDebugger.cs" />
+    <Compile Include="Assets\Scripts\System\Story\FadeSceneObjectStoryEventAsset.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IPuzzleGameManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerInteract.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Data\SettingsBook.cs" />
@@ -245,18 +286,25 @@
     <Compile Include="Assets\Scripts\System\Database.cs" />
     <Compile Include="Assets\Scripts\System\PlayerStatSystem.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IGameService.cs" />
+    <Compile Include="Assets\Scripts\Mob\MobHealthBarController.cs" />
     <Compile Include="Assets\Scripts\System\ShopSystem.cs" />
     <Compile Include="Assets\Scripts\Data\ShiftData.cs" />
     <Compile Include="Assets\Scripts\System\LightRadiusIndicator.cs" />
     <Compile Include="Assets\Scripts\Rendering\FridgeGlowRenderPass.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Logic\UIAdapter\ScenarioUIAdapter.cs" />
     <Compile Include="Assets\Scripts\System\FridgeGlowManager.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StartAfterShiftStateStoryEventAsset.cs" />
+    <Compile Include="Assets\Scripts\System\MinigamePerformance.cs" />
     <Compile Include="Assets\Scripts\System\Story\BossChaseController.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IAssetLoader.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventTypes.cs" />
+    <Compile Include="Assets\Scripts\System\Story\StopAfterShiftStateStoryEventAsset.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Settings.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\SecondRoomStep.cs" />
+    <Compile Include="Assets\Scripts\System\OrderRewardResult.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Projectile.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandJump.cs" />
+    <Compile Include="Assets\Scripts\System\Story\VipCustomerStoryEventAsset.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\BulletHole.cs" />
     <Compile Include="Assets\Scripts\Data\StatUpgradeConfig.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\SettingData\CharacterSettings.cs" />
@@ -266,12 +314,16 @@
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleAudio.cs" />
     <Compile Include="Assets\Scripts\FogZoneController.cs" />
     <Compile Include="Assets\Scripts\System\IcosphereGenerator.cs" />
+    <Compile Include="Assets\Scripts\UI\OverwhelmingKitchen\OverwhelmingKitchenUI.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\TutorialFlow.cs" />
+    <Compile Include="Assets\Scripts\System\Story\SceneObjectGlowController.cs" />
     <Compile Include="Assets\Scripts\Data\Table\Row\QuestRow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\Layer\CharacterObject.cs" />
     <Compile Include="Assets\Scripts\Data\Table\ITable.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\ZeroRoomStep.cs" />
     <Compile Include="Assets\Scripts\System\InventorySystem.cs" />
+    <Compile Include="Assets\Scripts\UI\Cooking\RecipeInfoBlock.cs" />
+    <Compile Include="Assets\Scripts\Common\InteractionPrompt.cs" />
     <Compile Include="Assets\Scripts\System\AssetLoader.cs" />
     <Compile Include="Assets\Scripts\Data\Table\Table.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\TimedObjectDestroyer.cs" />
@@ -279,6 +331,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\AssetManagement\IDialogueAssetManager.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\UI\DialogueWindow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\StringGrid\GridInfo.cs" />
+    <Compile Include="Assets\Scripts\System\ShiftStateManager.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerActionController.cs" />
     <Compile Include="Assets\Scripts\System\SceneManagementService.cs" />
     <Compile Include="Assets\Scripts\FridgeSpawnList.cs" />
@@ -289,36 +342,44 @@
     <Compile Include="Assets\Scripts\Ingredient.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Extension\EnumNameExtension.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Data\ColumnName.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.Utility.cs" />
+    <Compile Include="Assets\Scripts\VFX\MoneyPopupEffect.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Graphic\CommandCharacterOff.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IBlackjackSystem.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\GameLib\Observable\ObservableValue.cs" />
     <Compile Include="Assets\Scripts\System\Story\SignalDrivenStoryEvent.cs" />
+    <Compile Include="Assets\Scripts\Mob\MobSpawner.cs" />
     <Compile Include="Assets\Scripts\PuzzleDoor.cs" />
     <Compile Include="Assets\Scripts\System\Story\StoryEventTriggerAuthoring.cs" />
     <Compile Include="Assets\DOTween_1_2_785\DOTween\Modules\DOTweenModuleUtils.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IDebugService.cs" />
     <Compile Include="Assets\Scripts\Common\UnityInteractable.cs" />
-    <Compile Include="Assets\Scripts\MobLightDamage.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Spawner.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerSoulAbilityManager.cs" />
     <Compile Include="Assets\Scripts\UI\HPBarItem.cs" />
     <Compile Include="Assets\Scripts\UI\Blackjack\CardDisplay.cs" />
+    <Compile Include="Assets\Scripts\Debug\SROptions.Gaslight.cs" />
     <Compile Include="Assets\Scripts\UI\CardSwipeGame\DraggableCard.cs" />
     <Compile Include="Assets\Scripts\Module\BlackJack\Card.cs" />
     <Compile Include="Assets\Scripts\System\GameFlow.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\SettingDataManager.cs" />
+    <Compile Include="Assets\Scripts\Mob\MobLightUtility.cs" />
+    <Compile Include="Assets\Scripts\System\Story\ShiftCompletionStoryEventAsset.cs" />
     <Compile Include="Assets\Scripts\System\Story\StorySequenceActivator.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IShiftSystem.cs" />
     <Compile Include="Assets\Scripts\Common\EaseUtility.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\ScenarioImporter\CsvParser.cs" />
     <Compile Include="Assets\Scripts\System\Interface\IFridgeGlowManager.cs" />
+    <Compile Include="Assets\Scripts\System\OverwhelmingKitchen\OverwhelmingKitchenFridge.cs" />
     <Compile Include="Assets\Easy Weapons\Scripts\Weapon.cs" />
     <Compile Include="Assets\Scripts\UI\DebugUI.cs" />
     <Compile Include="Assets\Scripts\Common\VolumeVisibilityMask.cs" />
     <Compile Include="Assets\Scripts\UI\WorldPosFollowUI.cs" />
+    <Compile Include="Assets\Scripts\System\OverwhelmingKitchen\OverwhelmingKitchenVictory.cs" />
     <Compile Include="Assets\Scripts\Flow\Tutorial\EmissionIndicator.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerLightMeter2.cs" />
     <Compile Include="Assets\Scripts\System\InputManager.cs" />
+    <Compile Include="Assets\Scripts\Mob\Mob.PublicAPI.cs" />
     <Compile Include="Assets\DialogueModule\Scripts\Command\Logic\CommandEndScenario.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerLook.cs" />
     <Compile Include="Assets\Scripts\System\TableManager.cs" />
@@ -329,6 +390,7 @@
     <Compile Include="Assets\DialogueModule\Scripts\RuntimeData\ExposedData\CharacterSettingData.cs" />
     <Compile Include="Assets\Scripts\UI\InventoryBarUI.cs" />
     <Compile Include="Assets\Scripts\System\Dialogue\DialogueAssetManager.cs" />
+    <Compile Include="Assets\Scripts\System\Story\GlowSceneObjectUntilInteractStoryEventAsset.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -403,6 +465,10 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.AIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.ARModule">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.ARModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.AccessibilityModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.AccessibilityModule.dll</HintPath>
       <Private>False</Private>
@@ -425,6 +491,14 @@
     </Reference>
     <Reference Include="UnityEngine.ClothModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.ClothModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterInputModule">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.ClusterInputModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterRendererModule">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.ClusterRendererModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ContentLoadModule">
@@ -493,6 +567,10 @@
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InsightsModule">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.InsightsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
@@ -667,8 +745,8 @@
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.VideoModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.WebGLModule">
-      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\PlaybackEngines\WebGLSupport\Managed\UnityEngine.WebGLModule.dll</HintPath>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.9f1\Editor\Data\Managed\UnityEngine\UnityEngine.VirtualTexturingModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.WindModule">
@@ -1407,12 +1485,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Meryuhi.Effects.Fog.Editor">
-      <HintPath>Library\ScriptAssemblies\Meryuhi.Effects.Fog.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.2D.Sprite.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.2D.Sprite.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Meryuhi.Effects.Fog.Editor">
+      <HintPath>Library\ScriptAssemblies\Meryuhi.Effects.Fog.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
@@ -1689,16 +1767,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="StompyRobot.SRDebugger.Editor.csproj">
+      <Project>{58EC0CF6-815D-A95C-9603-591DFDF40563}</Project>
+      <Name>StompyRobot.SRDebugger.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="StompyRobot.SRF.Editor.csproj">
+      <Project>{CD583369-78DD-D896-8910-941BF721D8C3}</Project>
+      <Name>StompyRobot.SRF.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="StompyRobot.SRF.csproj">
+      <Project>{2393D069-3014-95C8-A0E7-28543A4CB6E2}</Project>
+      <Name>StompyRobot.SRF</Name>
+    </ProjectReference>
+    <ProjectReference Include="StompyRobot.SRDebugger.csproj">
+      <Project>{C0F90752-A14D-5775-FEB1-890421055B00}</Project>
+      <Name>StompyRobot.SRDebugger</Name>
+    </ProjectReference>
   </ItemGroup>
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-  <ItemGroup>
-    <ProjectCapability Remove="LaunchProfiles" />
-    <ProjectCapability Remove="SharedProjectReferences" />
-    <ProjectCapability Remove="ReferenceManagerSharedProjects" />
-    <ProjectCapability Remove="ReferenceManagerProjects" />
-    <ProjectCapability Remove="COMReferences" />
-    <ProjectCapability Remove="ReferenceManagerCOM" />
-    <ProjectCapability Remove="AssemblyReferences" />
-    <ProjectCapability Remove="ReferenceManagerAssemblies" />
-  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="GenerateTargetFrameworkMonikerAttribute" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
 </Project>
