@@ -169,6 +169,8 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         isGlobalInitStarted = false;
 
         Debug.Log("ServiceLocator: Shutdown complete. Ready for re-initialization.");
+
+        SimpleSingleton<ServiceLocator>.ResetInstance();
     }
 
 }

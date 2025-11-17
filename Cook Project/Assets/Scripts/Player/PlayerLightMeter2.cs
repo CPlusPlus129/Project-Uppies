@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerLightMeter2 : MonoBehaviour
@@ -21,6 +22,7 @@ public class PlayerLightMeter2 : MonoBehaviour
     private float currentLightLevel = 0f;
     private Color currentLightColor = Color.black;
     private float nextUpdateTime = 0f;
+    private int lastSampledLightCount = 0;
     
     // Public properties
     public float LightLevel => currentLightLevel;
@@ -48,7 +50,8 @@ public class PlayerLightMeter2 : MonoBehaviour
     
     private void CalculateLightLevel()
     {
-        Light[] allLights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+        IReadOnlyList<Light> allLights = MobLightUtility.GetLights();
+        lastSampledLightCount = allLights.Count;
         float totalIntensity = 0f;
         Color totalLight = Color.black;
         
@@ -60,8 +63,9 @@ public class PlayerLightMeter2 : MonoBehaviour
             totalIntensity += ambientContribution;
         }
         
-        foreach (Light light in allLights)
+        for (int i = 0; i < allLights.Count; i++)
         {
+            Light light = allLights[i];
             if (!light.enabled) continue;
             
             float contribution = 0f;
@@ -149,7 +153,7 @@ public class PlayerLightMeter2 : MonoBehaviour
         string status = IsInDarkness ? "DARK" : IsInBrightLight ? "BRIGHT" : "MEDIUM";
 
         // Show detailed debug info
-        int lightCount = FindObjectsByType<Light>(FindObjectsSortMode.None).Length;
+        int lightCount = lastSampledLightCount;
         
         // Debug.Log($"[{Time.frameCount}] Light Level: {currentLightLevel:F3} ({status}) | " +
         //           $"Color: RGBA({currentLightColor.r:F3}, {currentLightColor.g:F3}, {currentLightColor.b:F3}, {currentLightColor.a:F3}) | " +

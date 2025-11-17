@@ -29,16 +29,14 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
     {
         CacheColliderReference();
         EnsureInteractableLayer();
-        RefreshPrompts();
+        RefreshPrompts(allowSingletonCreation: false);
     }
 
     private void OnValidate()
     {
-        if (!Application.isPlaying)
-            return;
         CacheColliderReference();
         EnsureInteractableLayer();
-        RefreshPrompts();
+        RefreshPrompts(allowSingletonCreation: false);
     }
 
     private async void Awake()
@@ -115,20 +113,6 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
         return false;
     }
 
-    private int DetermineDepositAmount()
-    {
-        if (manualDepositAmount > 0)
-        {
-            return manualDepositAmount;
-        }
-
-        var data = Database.Instance?.shiftData;
-        if (data == null)
-            return fallbackDepositChunk;
-
-        return Mathf.Max(1, data.defaultDepositChunk);
-    }
-
     private void WarnPlayer()
     {
         WorldBroadcastSystem.Instance.Broadcast("No cash to drop off or deposit is locked right now.", 4f);
@@ -158,10 +142,10 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
         }
     }
 
-    private void RefreshPrompts()
+    private void RefreshPrompts(bool allowSingletonCreation = true)
     {
         promptCache.Clear();
-        var chunkAmount = GetDisplayDepositAmount();
+        var chunkAmount = GetDisplayDepositAmount(allowSingletonCreation);
         var chunkLabel = string.IsNullOrWhiteSpace(chunkPromptTemplate)
             ? $"Deposit ${chunkAmount}"
             : string.Format(chunkPromptTemplate, chunkAmount);
@@ -181,10 +165,35 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
         });
     }
 
-    private int GetDisplayDepositAmount()
+    private int GetDisplayDepositAmount(bool allowSingletonCreation = true)
     {
-        return DetermineDepositAmount();
+        return DetermineDepositAmount(allowSingletonCreation);
     }
 
     public IReadOnlyList<InteractionPromptDefinition> GetPrompts() => promptCache;
+
+    private int DetermineDepositAmount(bool allowSingletonCreation = true)
+    {
+        if (manualDepositAmount > 0)
+        {
+            return manualDepositAmount;
+        }
+
+        ShiftData data = null;
+        if (allowSingletonCreation)
+        {
+            data = Database.Instance?.shiftData;
+        }
+        else if (Application.isPlaying && Database.TryGetInstance(out var database))
+        {
+            data = database.shiftData;
+        }
+
+        if (data == null)
+        {
+            return fallbackDepositChunk;
+        }
+
+        return Mathf.Max(1, data.defaultDepositChunk);
+    }
 }

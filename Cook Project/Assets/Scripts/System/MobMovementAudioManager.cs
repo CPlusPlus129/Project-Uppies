@@ -47,6 +47,12 @@ public class MobMovementAudioManager : MonoBehaviour
 
     private void Awake()
     {
+        if (transform.parent != null)
+        {
+            Debug.LogWarning("[MobMovementAudioManager] Instance parented under '" + transform.parent.name + "'. Reparenting to root so DontDestroyOnLoad can succeed.");
+            transform.SetParent(null, true);
+        }
+
         if (instance != null && instance != this)
         {
             Destroy(gameObject);
