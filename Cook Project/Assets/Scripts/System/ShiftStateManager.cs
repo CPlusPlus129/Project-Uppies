@@ -19,6 +19,8 @@ public class ShiftStateManager : MonoBehaviour
     [Header("Disable During Shift")]
     [SerializeField] private List<Behaviour> behavioursDisabledDuringShift = new();
     [SerializeField] private List<GameObject> objectsDisabledDuringShift = new();
+    [SerializeField] private bool disableDarknessDamageDuringAfterShift = false;
+    [SerializeField] private PlayerLightDamage playerLightDamage;
     [SerializeField] private bool dontDestroyOnLoad = true;
     [SerializeField] private bool logTransitions = false;
 
@@ -87,6 +89,7 @@ public class ShiftStateManager : MonoBehaviour
         bool inAfterShift = state == ShiftSystem.ShiftState.AfterShift;
 
         ApplyInspectorToggles(inAfterShift);
+        ApplyDarknessDamageToggle(inAfterShift);
 
         if (logTransitions)
         {
@@ -132,6 +135,22 @@ public class ShiftStateManager : MonoBehaviour
                 obj.SetActive(!shiftActive);
             }
         }
+    }
+
+    private void ApplyDarknessDamageToggle(bool afterShift)
+    {
+        if (!disableDarknessDamageDuringAfterShift)
+        {
+            return;
+        }
+
+        var lightDamage = ResolvePlayerLightDamage();
+        if (lightDamage == null)
+        {
+            return;
+        }
+
+        lightDamage.SetDamageDisabled(afterShift);
     }
 
     public void RegisterBehaviourDisableDuringAfterShift(Behaviour behaviour, bool applyImmediately = true)
@@ -199,5 +218,26 @@ public class ShiftStateManager : MonoBehaviour
         if (listener == null)
             return;
         OnAfterShiftChanged -= listener;
+    }
+
+    private PlayerLightDamage ResolvePlayerLightDamage()
+    {
+        if (playerLightDamage != null)
+        {
+            return playerLightDamage;
+        }
+
+        playerLightDamage = FindFirstObjectByType<PlayerLightDamage>(FindObjectsInactive.Include);
+        if (playerLightDamage == null)
+        {
+            playerLightDamage = FindObjectOfType<PlayerLightDamage>();
+        }
+
+        if (playerLightDamage == null && logTransitions)
+        {
+            Debug.LogWarning("[ShiftStateManager] PlayerLightDamage not found; cannot toggle darkness damage state.", this);
+        }
+
+        return playerLightDamage;
     }
 }
