@@ -12,6 +12,8 @@ public class TrapRespawn : MonoBehaviour
             Debug.Log("not player object");
             return;
         }
+
+        /*
         Debug.Log("is player object");
         Transform t = other.transform;
         Vector3 targetPos = respawnPoint.position;
@@ -27,5 +29,17 @@ public class TrapRespawn : MonoBehaviour
         {
             t.SetPositionAndRotation(targetPos, t.rotation);
         }
+        */
+
+        Debug.Log("is player object");
+        var healthSystem = PlayerStatSystem.Instance;
+        if (healthSystem == null)
+        {
+            Debug.LogError("PlayerLightDamage: PlayerStatSystem.Instance is NULL! Make sure PlayerStatSystem exists in the scene.", this);
+            enabled = false;
+            return;
+        }
+        int currentHP = healthSystem.CurrentHP.CurrentValue;
+        healthSystem.Damage(currentHP);
     }
 }
