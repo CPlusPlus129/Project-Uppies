@@ -28,10 +28,6 @@ public class Customer : MonoBehaviour, IInteractable
         {
             nameText.text = customerName;
         }
-        else
-        {
-            Debug.LogWarning($"Customer {customerName} has no nameText assigned or found in children.");
-        }
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         orderManager = await ServiceLocator.Instance.GetAsync<IOrderManager>();
         inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();

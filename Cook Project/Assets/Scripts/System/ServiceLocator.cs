@@ -46,7 +46,7 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
             try
             {
                 service?.Dispose();
-                Debug.Log($"ServiceLocator: Disposed {serviceType.Name}");
+                //Debug.Log($"ServiceLocator: Disposed {serviceType.Name}");
             }
             catch (Exception ex)
             {
