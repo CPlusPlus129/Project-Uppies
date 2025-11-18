@@ -9,7 +9,7 @@ namespace DialogueModule
         [SerializeField]
         private List<MonoBehaviour> bindableSources = new List<MonoBehaviour>();
         [SerializeField]
-        private DialogueEngine engine;
+        protected DialogueEngine engine;
         [SerializeField]
         private List<CanvasGroup> layersToDim = new List<CanvasGroup>();
         [SerializeField, Range(0f, 1f)]
