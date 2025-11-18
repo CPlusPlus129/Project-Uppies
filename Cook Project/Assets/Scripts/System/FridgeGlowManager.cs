@@ -30,7 +30,8 @@ public class FridgeGlowManager : IFridgeGlowManager
     {
         this.orderManager = orderManager;
         this.inventorySystem = inventorySystem;
-        enableDebugLogs = Debug.isDebugBuild;
+        //enableDebugLogs = Debug.isDebugBuild;
+        enableDebugLogs = false;
     }
 
     public int EligibilityVersion => eligibilityVersion;
