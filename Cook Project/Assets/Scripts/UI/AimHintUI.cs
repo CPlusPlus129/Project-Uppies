@@ -1,74 +1,68 @@
 using System.Collections.Generic;
-using System.Text;
-using TMPro;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 
 public class AimHintUI : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI hintText;
+    [SerializeField] private HintItem hintItemPrefab;
+    [SerializeField] private Transform hintContainer;
     [SerializeField] private string defaultActionName = "Interact";
     [SerializeField] private string defaultControlScheme = "keyboard&mouse";
     [SerializeField] private string defaultActionLabel = "Interact";
 
+    private List<HintItem> activeHintItems = new List<HintItem>();
+    private List<HintItem> hintItemPool = new List<HintItem>();
+
+    private void Awake()
+    {
+        hintItemPrefab.gameObject.SetActive(false);
+    }
+
     public void UpdateHint(IInteractable interactable)
     {
+        ClearHintItems();
+
         if (interactable != null)
         {
-            hintText.text = BuildHintText(interactable);
-            hintText.gameObject.SetActive(true);
-        }
-        else
-        {
-            hintText.gameObject.SetActive(false);
+            ShowHints(interactable);
         }
     }
 
-    private string BuildHintText(IInteractable interactable)
+    private void ShowHints(IInteractable interactable)
     {
         if (interactable is IInteractionPromptProvider promptProvider)
         {
             var prompts = promptProvider.GetPrompts();
-            var formatted = FormatPrompts(prompts);
-            if (!string.IsNullOrEmpty(formatted))
+            if (prompts != null && prompts.Count > 0)
             {
-                return formatted;
+                ShowPromptItems(prompts);
+                return;
             }
         }
 
-        return BuildFallbackHint();
+        // Fallback to default hint
+        ShowDefaultHint();
     }
 
-    private string FormatPrompts(IReadOnlyList<InteractionPromptDefinition> prompts)
+    private void ShowPromptItems(IReadOnlyList<InteractionPromptDefinition> prompts)
     {
-        if (prompts == null || prompts.Count == 0)
+        foreach (var prompt in prompts)
         {
-            return string.Empty;
-        }
-
-        var sb = new StringBuilder();
-        for (int i = 0; i < prompts.Count; i++)
-        {
-            var prompt = prompts[i];
             var actionName = string.IsNullOrWhiteSpace(prompt.actionName) ? defaultActionName : prompt.actionName;
             var controlScheme = string.IsNullOrWhiteSpace(prompt.controlScheme) ? defaultControlScheme : prompt.controlScheme;
             var label = string.IsNullOrWhiteSpace(prompt.customText) ? actionName : prompt.customText;
+
             var binding = InputManager.Instance.GetBindingDisplayString(actionName, controlScheme);
             if (string.IsNullOrEmpty(binding))
             {
                 binding = actionName;
             }
 
-            sb.Append("[ ").Append(binding).Append(" ] ").Append(label);
-            if (i < prompts.Count - 1)
-            {
-                sb.AppendLine();
-            }
+            CreateHintItem(binding, label);
         }
-
-        return sb.ToString();
     }
 
-    private string BuildFallbackHint()
+    private void ShowDefaultHint()
     {
         var label = string.IsNullOrWhiteSpace(defaultActionLabel) ? defaultActionName : defaultActionLabel;
         var binding = InputManager.Instance.GetBindingDisplayString(defaultActionName, defaultControlScheme);
@@ -76,6 +70,43 @@ public class AimHintUI : MonoBehaviour
         {
             binding = defaultActionName;
         }
-        return $"[ {binding} ] {label}";
+
+        CreateHintItem(binding, label);
+    }
+
+    private void CreateHintItem(string key, string hint)
+    {
+        HintItem item = GetOrCreateHintItem();
+        item.transform.SetAsLastSibling();
+        item.SetHint(key, hint);
+        item.Show();
+        activeHintItems.Add(item);
+    }
+
+    private HintItem GetOrCreateHintItem()
+    {
+        // try to get from pool
+        if (hintItemPool.Count > 0)
+        {
+            var item = hintItemPool[hintItemPool.Count - 1];
+            hintItemPool.RemoveAt(hintItemPool.Count - 1);
+            return item;
+        }
+
+        // create new item if pool is empty
+        var newItem = Instantiate(hintItemPrefab, hintContainer);
+        newItem.gameObject.SetActive(true);
+        return newItem;
+    }
+
+    private void ClearHintItems()
+    {
+        // put all active item back to pool
+        foreach (var item in activeHintItems)
+        {
+            item.Hide();
+            hintItemPool.Add(item);
+        }
+        activeHintItems.Clear();
     }
 }
