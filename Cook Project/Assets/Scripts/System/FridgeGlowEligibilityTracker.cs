@@ -382,11 +382,7 @@ public class FridgeGlowEligibilityTracker : MonoBehaviour
             return fridgeGuidance;
         }
 
-#if UNITY_2023_1_OR_NEWER
         fridgeGuidance = FindFirstObjectByType<PlayerFridgeGuidance>(FindObjectsInactive.Exclude);
-#else
-        fridgeGuidance = FindObjectOfType<PlayerFridgeGuidance>();
-#endif
 
         if (fridgeGuidance == null && !hasLoggedMissingGuidance)
         {

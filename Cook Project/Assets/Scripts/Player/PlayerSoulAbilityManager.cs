@@ -421,11 +421,7 @@ public class PlayerSoulAbilityManager : MonoBehaviour
             return fridgeEligibilityTracker;
         }
 
-#if UNITY_2023_1_OR_NEWER
         fridgeEligibilityTracker = FindFirstObjectByType<FridgeGlowEligibilityTracker>(FindObjectsInactive.Exclude);
-#else
-        fridgeEligibilityTracker = FindObjectOfType<FridgeGlowEligibilityTracker>();
-#endif
         return fridgeEligibilityTracker;
     }
 

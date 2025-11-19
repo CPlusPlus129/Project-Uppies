@@ -230,7 +230,7 @@ public class ShiftStateManager : MonoBehaviour
         playerLightDamage = FindFirstObjectByType<PlayerLightDamage>(FindObjectsInactive.Include);
         if (playerLightDamage == null)
         {
-            playerLightDamage = FindObjectOfType<PlayerLightDamage>();
+            playerLightDamage = FindFirstObjectByType<PlayerLightDamage>();
         }
 
         if (playerLightDamage == null && logTransitions)

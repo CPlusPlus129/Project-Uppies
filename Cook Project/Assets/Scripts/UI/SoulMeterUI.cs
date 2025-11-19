@@ -271,10 +271,6 @@ public class SoulMeterUI : MonoBehaviour
             return;
         }
 
-#if UNITY_2023_1_OR_NEWER
         abilityManager = FindFirstObjectByType<PlayerSoulAbilityManager>(FindObjectsInactive.Exclude);
-#else
-        abilityManager = FindObjectOfType<PlayerSoulAbilityManager>();
-#endif
     }
 }

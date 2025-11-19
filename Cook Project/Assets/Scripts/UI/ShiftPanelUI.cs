@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using R3;
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 public class ShiftPanelUI : MonoBehaviour, IUIInitializable
@@ -31,6 +32,13 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
         shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
         shiftSystem.currentClockHour.Subscribe(UpdateClock).AddTo(this);
+
+        // Subscribe to TaskManager updates
+        if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.Tasks.Subscribe(_ => UpdateShiftState(shiftSystem.currentState.Value)).AddTo(this);
+        }
+
         UpdateAll();
     }
 
@@ -124,10 +132,27 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
             }
         }
 
+        // Override subtitle with tasks if any exist
+        if (TaskManager.Instance != null && TaskManager.Instance.Tasks.Value.Count > 0)
+        {
+            var tasks = TaskManager.Instance.Tasks.Value;
+            var taskListString = "";
+            foreach (var task in tasks)
+            {
+                if (taskListString.Length > 0) taskListString += "\n";
+                var checkbox = task.IsCompleted ? "[X]" : "[ ]";
+                taskListString += $"{checkbox} {task.Description}";
+            }
+            subtitle = taskListString;
+        }
+
         shiftOnOffText.text = label;
 
         if (shiftSubtitleText != null)
+        {
             shiftSubtitleText.text = subtitle;
+            shiftSubtitleText.gameObject.SetActive(true);
+        }
 
         if (statusBadgeImage != null)
             statusBadgeImage.color = badgeColor;
