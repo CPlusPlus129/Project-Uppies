@@ -104,8 +104,11 @@ public class BossChaseController : MonoBehaviour
             transform.SetPositionAndRotation(initialPosition, initialRotation);
             if (cachedRigidbody != null)
             {
-                cachedRigidbody.linearVelocity = Vector3.zero;
-                cachedRigidbody.angularVelocity = Vector3.zero;
+                if (!cachedRigidbody.isKinematic)
+                {
+                    cachedRigidbody.linearVelocity = Vector3.zero;
+                    cachedRigidbody.angularVelocity = Vector3.zero;
+                }
                 cachedRigidbody.isKinematic = true;
             }
             bossMob.enabled = false;

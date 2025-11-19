@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Cysharp.Threading.Tasks;
 
 [DisallowMultipleComponent]
 [AddComponentMenu("Story/Story Event Trigger")]
@@ -120,10 +121,16 @@ public class StoryEventTriggerAuthoring : MonoBehaviour
 
         if (!flow.IsInitialized)
         {
-            warning = "GameFlow is not initialized yet.";
-            return false;
+            EnqueueWhenReady(flow).Forget();
+            return true;
         }
 
+        return EnqueueNow(flow, out warning);
+    }
+
+    private bool EnqueueNow(GameFlow flow, out string warning)
+    {
+        warning = null;
         if (storySequence != null)
         {
             var runtimes = flow.EnqueueSequence(storySequence, insertAtFront);
@@ -144,6 +151,18 @@ public class StoryEventTriggerAuthoring : MonoBehaviour
         }
 
         return true;
+    }
+
+    private async UniTaskVoid EnqueueWhenReady(GameFlow flow)
+    {
+        await UniTask.WaitUntil(() => flow.IsInitialized);
+        if (!EnqueueNow(flow, out var warning))
+        {
+            if (!string.IsNullOrEmpty(warning))
+            {
+                Debug.LogWarning($"[StoryEventTrigger] Deferred enqueue failed: {warning}", this);
+            }
+        }
     }
 
     private void EnsureCollider()

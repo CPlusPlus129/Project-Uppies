@@ -18,15 +18,12 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
         RegisterAllServices();
 
         // Initialize services in order
-        var initTasks = new List<UniTask>();
         foreach (var kvp in services)
         {
             var serviceType = kvp.Key;
             var service = kvp.Value;
-            initTasks.Add(InitializeService(serviceType, service));
+            await InitializeService(serviceType, service);
         }
-
-        await UniTask.WhenAll(initTasks);
     }
 
     public void DisposeAllServices()
@@ -124,17 +121,26 @@ public class ServiceLocator : SimpleSingleton<ServiceLocator>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public async UniTask<T> GetAsync<T>() where T : IGameService
+    public UniTask<T> GetAsync<T>() where T : IGameService
     {
         var serviceType = typeof(T);
         if (!services.TryGetValue(serviceType, out var service))
         {
             Debug.LogError($"Service {serviceType.Name} not registered");
-            return default;
+            return UniTask.FromResult(default(T));
         }
 
-        await UniTask.WaitUntil(() => initializationStatus.GetValueOrDefault(serviceType, false));
+        if (initializationStatus.GetValueOrDefault(serviceType, false))
+        {
+            return UniTask.FromResult((T)service);
+        }
 
+        return GetAsyncInternal<T>(serviceType, service);
+    }
+
+    private async UniTask<T> GetAsyncInternal<T>(Type serviceType, IGameService service) where T : IGameService
+    {
+        await UniTask.WaitUntil(() => initializationStatus.GetValueOrDefault(serviceType, false));
         return (T)service;
     }
 

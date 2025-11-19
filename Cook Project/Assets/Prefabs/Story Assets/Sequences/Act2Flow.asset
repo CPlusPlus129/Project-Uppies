@@ -13,5 +13,12 @@ MonoBehaviour:
   m_Name: Act2Flow
   m_EditorClassIdentifier: Assembly-CSharp::StorySequenceAsset
   sequenceId: 2
-  events: []
+  events:
+  - {fileID: 11400000, guid: 23f60e156ad292794bba0360876ea9c4, type: 2}
+  - {fileID: 11400000, guid: 3f531ef6a87d64135b8bb67b02f0dea6, type: 2}
+  - {fileID: 11400000, guid: 610c2175ba4987cb3b9ad8c52caea3e4, type: 2}
+  - {fileID: 11400000, guid: 545df58425f42de579d974d51812d4a0, type: 2}
+  - {fileID: 11400000, guid: e1a005b722819673e8b24a097928c99c, type: 2}
+  - {fileID: 11400000, guid: 249a4dc9f3547163cb508de0412e8175, type: 2}
   nextSequence: {fileID: 0}
+  logEventLifecycle: 1

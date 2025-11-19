@@ -55,6 +55,12 @@ public class InputManager : MonoSingleton<InputManager>
     /// </summary>
     public void PopActionMap(string mapName)
     {
+        if (!activeMapStack.Contains(mapName))
+        {
+            Debug.LogWarning($"[InputManager] Cannot pop '{mapName}': it is not in the stack.");
+            return;
+        }
+
         if (activeMapStack.Count <= 1)
         {
             Debug.LogWarning($"Cannot pop '{mapName}': stack only contains base map '{activeMapStack.Peek()}'");
@@ -65,7 +71,7 @@ public class InputManager : MonoSingleton<InputManager>
 
         if (topMap != mapName)
         {
-            Debug.LogError($"[InputManager] Pop mismatch! Expected '{mapName}' but top is '{topMap}'. Stack: {string.Join(" > ", activeMapStack.Reverse())}");
+            Debug.LogWarning($"[InputManager] Pop mismatch! Expected '{mapName}' but top is '{topMap}'. Stack: {string.Join(" > ", activeMapStack.Reverse())}");
 
             // Attempt to fix: remove the map from stack if it exists
             if (activeMapStack.Contains(mapName))

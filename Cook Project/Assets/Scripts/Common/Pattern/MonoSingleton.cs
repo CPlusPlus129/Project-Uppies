@@ -116,7 +116,7 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 
         if (Application.isPlaying)
         {
-            Debug.LogWarning($"[MonoSingleton] {typeof(T).Name} was parented under '{target.parent.name}'. Reparenting to root so DontDestroyOnLoad succeeds.");
+            Debug.Log($"[MonoSingleton] {typeof(T).Name} was parented under '{target.parent.name}'. Reparenting to root so DontDestroyOnLoad succeeds.");
             target.SetParent(null, true);
         }
         else

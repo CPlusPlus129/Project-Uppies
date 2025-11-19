@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ee4d174414d2bf96ae98eaa63596515, type: 3}
+  m_Name: VIP2
+  m_EditorClassIdentifier: Assembly-CSharp::VipCustomerStoryEventAsset
+  eventId: VIP2
+  designerNotes: 
+  replayable: 1
+  vipCustomerPrefab: {fileID: 919132149155446097, guid: 0898d66b2b47bc842abc625dfa5e2d87, type: 3}
+  vipDisplayName: MoneyMan
+  freezeVipOnSpawn: 1
+  disableVipAnimatorOnSpawn: 1
+  overrideVipRotation: 1
+  vipRotationEuler: {x: 0, y: -90, z: -90}
+  overrideVipScale: 1
+  vipLocalScale: {x: 1, y: 1, z: 1}
+  forcedMealName: 
+  vipHasOrder: 1
+  destroyVipOnExit: 1
+  requireSpecificShift: 1
+  targetShiftIndex: 1
+  spawnHourWindow: {x: 10, y: 12}
+  clampSpawnWindowToWorkday: 1
+  spawnIfWindowAlreadyPassed: 1
+  preferredAnchorIds:
+  - VIP1
+  fallbackToAnyAnchor: 1
+  parentVipToAnchor: 1
+  spawnDialogue: {fileID: 0}
+  orderTakenDialogue: {fileID: 0}
+  orderCompletedDialogue: {fileID: 0}
+  signalOnSpawn: 
+  signalOnOrderTaken: 
+  signalOnOrderCompleted: 
+  destroyVipSignalId: 
+  spawnBroadcastMessage: VIP arrival detected.
+  completionBroadcastMessage: VIP satisfied. Nice work.
+  broadcastDurationSeconds: 5
+  questIdToComplete: VIP1Complete
+  autoStartQuestOnSpawn: 1

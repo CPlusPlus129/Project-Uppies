@@ -360,6 +360,12 @@ public class GameFlow : MonoSingleton<GameFlow>
         Log("Cleared all pending story events.");
     }
 
+    public void ClearHistory()
+    {
+        lastResultByEventId.Clear();
+        Log("Cleared story event history.");
+    }
+
     public bool TryGetStoryEventResult(string eventId, out StoryEventResult result)
     {
         if (string.IsNullOrWhiteSpace(eventId))
@@ -459,9 +465,9 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     public override void OnDestroy()
     {
-        base.OnDestroy();
         if (Instance != this)
         {
+            base.OnDestroy();
             return;
         }
         CancelGameLoop();
@@ -474,6 +480,8 @@ public class GameFlow : MonoSingleton<GameFlow>
         OnStoryEventFinished.OnCompleted();
         OnStoryEventFailed.OnCompleted();
         OnSequenceQueued.OnCompleted();
+
+        base.OnDestroy();
     }
 
     private void CancelGameLoop()
