@@ -23,6 +23,7 @@ Shader "Custom/FridgeGlow_AlwaysOnTop"
         Pass
         {
             Name "FridgeGlowPass"
+            Tags { "LightMode" = "FridgeGlowPass" }
             
             // Render settings for see-through effect
             ZWrite Off

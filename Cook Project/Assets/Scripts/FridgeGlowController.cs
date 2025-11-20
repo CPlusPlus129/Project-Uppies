@@ -69,22 +69,23 @@ public class FridgeGlowController : MonoBehaviour
             return true;
         }
 
+        MeshFilter bestMatch = null;
+        float bestScore = -1f;
+
+        // Check self first
         if (TryGetComponent(out MeshFilter selfMeshFilter) && HasValidMesh(selfMeshFilter) && !IsTextMeshFilter(selfMeshFilter))
         {
-            targetMesh = selfMeshFilter;
-            if (enableDebugLogs)
-            {
-                Debug.Log($"FridgeGlowController: Auto-assigned MeshFilter '{selfMeshFilter.name}' on '{gameObject.name}'");
-            }
-            return true;
+            bestMatch = selfMeshFilter;
+            bestScore = GetMeshWeight(selfMeshFilter);
         }
 
-        MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>(true);
-        MeshFilter bestMatch = null;
-        float bestScore = float.MinValue;
-
-        foreach (MeshFilter meshFilter in meshFilters)
+        // Check children and see if we find something better
+        MeshFilter[] childMeshFilters = GetComponentsInChildren<MeshFilter>(true);
+        foreach (MeshFilter meshFilter in childMeshFilters)
         {
+            // Skip self if we already checked it (GetComponentsInChildren includes self)
+            if (meshFilter == selfMeshFilter) continue;
+
             if (!HasValidMesh(meshFilter) || IsTextMeshFilter(meshFilter))
             {
                 continue;
@@ -103,13 +104,13 @@ public class FridgeGlowController : MonoBehaviour
             targetMesh = bestMatch;
             if (enableDebugLogs)
             {
-                Debug.Log($"FridgeGlowController: Auto-assigned child MeshFilter '{bestMatch.name}' on '{gameObject.name}'");
+                Debug.Log($"FridgeGlowController: Auto-assigned MeshFilter '{bestMatch.name}' on '{gameObject.name}' with score {bestScore}");
             }
             return true;
         }
 
         // Fall back to any available MeshFilter so legacy behaviour still works if only text meshes are present.
-        foreach (MeshFilter meshFilter in meshFilters)
+        foreach (MeshFilter meshFilter in childMeshFilters)
         {
             if (!HasValidMesh(meshFilter))
             {
@@ -177,6 +178,10 @@ public class FridgeGlowController : MonoBehaviour
         MeshFilter glowMeshFilter = glowObject.AddComponent<MeshFilter>();
         glowMeshFilter.mesh = meshFilter.mesh;
         glowRenderer = glowObject.AddComponent<MeshRenderer>();
+        // Fix: Disable occlusion culling so it renders through walls even if the occlusion system thinks it's hidden.
+        glowRenderer.allowOcclusionWhenDynamic = false; 
+        glowRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        glowRenderer.receiveShadows = false;
 
         CreateGlowMaterial();
         propertyBlock = new MaterialPropertyBlock();
@@ -276,6 +281,34 @@ public class FridgeGlowController : MonoBehaviour
         }
 
         ApplyMaterialOverrides();
+    }
+
+    public void SetTargetMesh(MeshFilter newMesh)
+    {
+        if (newMesh == null) return;
+        
+        targetMesh = newMesh;
+        
+        if (glowObject != null)
+        {
+            if (Application.isPlaying) Destroy(glowObject);
+            else DestroyImmediate(glowObject);
+            glowObject = null;
+        }
+
+        if (glowMaterialInstance != null)
+        {
+            if (Application.isPlaying) Destroy(glowMaterialInstance);
+            else DestroyImmediate(glowMaterialInstance);
+            glowMaterialInstance = null;
+        }
+
+        CreateGlowObject();
+        
+        if (isGlowing && glowObject != null)
+        {
+            glowObject.SetActive(true);
+        }
     }
 
     public void StartGlowing()

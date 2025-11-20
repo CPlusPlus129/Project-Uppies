@@ -15,7 +15,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     private async void Awake()
     {
         // Auto-assign task ID for the specific door mentioned
-        if (string.IsNullOrEmpty(requiredTaskId) && gameObject.name == "StorageRoom1_DoorButton 1")
+        if (string.IsNullOrEmpty(requiredTaskId) && gameObject.name == "StorageRoom1_DoorButton")
         {
             requiredTaskId = "StorageRoom1Task";
         }
