@@ -5,7 +5,7 @@ using UnityEngine;
 /// Overwhelming Kitchen dedicated cooking station.
 /// Uses the minigame's fake inventory to cook dishes and complete orders.
 /// </summary>
-public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
+public class OverwhelmingKitchenCookingStation : InteractableBase
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
@@ -13,7 +13,7 @@ public class OverwhelmingKitchenCookingStation : MonoBehaviour, IInteractable
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = false;
 
-    public void Interact()
+    public override void Interact()
     {
         if (kitchenSystem == null)
         {

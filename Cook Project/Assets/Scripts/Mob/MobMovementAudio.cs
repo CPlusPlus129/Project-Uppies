@@ -68,10 +68,8 @@ public class MobMovementAudio : MonoBehaviour
 
     private void OnDisable()
     {
-        if (MobMovementAudioManager.TryGetInstance(out var manager))
-        {
-            manager.Unregister(this);
-        }
+        var manager = MobMovementAudioManager.Instance;
+        manager?.Unregister(this);
 
         if (audioSource != null)
         {

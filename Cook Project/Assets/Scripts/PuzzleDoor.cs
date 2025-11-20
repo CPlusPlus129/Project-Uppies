@@ -3,7 +3,7 @@ using R3;
 using System.Linq;
 using UnityEngine;
 
-public class PuzzleDoor : MonoBehaviour, IInteractable
+public class PuzzleDoor : InteractableBase
 {
     [SerializeField] private string requiredTaskId;
     [SerializeField] private PuzzleGameType puzzleType = PuzzleGameType.CardSwipe;
@@ -12,7 +12,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
     private IPuzzle gameInstance;
     private bool doorOpen;
 
-    private async void Awake()
+    protected async override void Awake()
     {
         // Auto-assign task ID for the specific door mentioned
         if (string.IsNullOrEmpty(requiredTaskId) && gameObject.name == "StorageRoom1_DoorButton")
@@ -24,7 +24,7 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
     }
 
-    public void Interact()
+    public override void Interact()
     {
         if (string.IsNullOrEmpty(requiredTaskId))
         {

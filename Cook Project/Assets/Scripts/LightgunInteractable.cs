@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LightgunInteractable : MonoBehaviour, IInteractable
+public class LightgunInteractable : InteractableBase
 {
     public Renderer rend;
     [ColorUsage(true, true)]  public Color emissionBaseColor = new Color(1f, 1f, 0.3f);
@@ -10,14 +10,15 @@ public class LightgunInteractable : MonoBehaviour, IInteractable
     private Material _mat;
     private float _time;
 
-    public void Interact()
+    public override void Interact()
     {
         PlayerStatSystem.Instance.CanUseWeapon.Value = true;
         gameObject.SetActive(false);
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _mat = rend.material;
         _mat.EnableKeyword("_EMISSION");
     }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9120388742190124231}
   - component: {fileID: 826481385016518123}
   - component: {fileID: 4077356297811697362}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,6 +158,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f99ea52c0604d14697f6536991edaf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopInteractable
+  useOutline: 1
+  targetRenderers: []
 --- !u!114 &944679999906293559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,7 +185,7 @@ GameObject:
   - component: {fileID: 4399741786774322853}
   - component: {fileID: 6991183152554436596}
   - component: {fileID: 781104189356099830}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Text (TMP) (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

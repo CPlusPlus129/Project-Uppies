@@ -26,6 +26,8 @@ public class PlayerInteract : MonoBehaviour
             return;
         }
 
+        currentInteractableTarget.Value?.ToggleOutline(false);
+        nextTarget?.ToggleOutline(true);
         currentInteractableTarget.Value = nextTarget;
     }
 

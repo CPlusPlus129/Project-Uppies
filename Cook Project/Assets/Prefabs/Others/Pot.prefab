@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4629839839856887562}
   - component: {fileID: 7439333892223719478}
   - component: {fileID: 4067163455453626574}
-  - component: {fileID: 2621636451694658980}
   - component: {fileID: 5334400002048636151}
+  - component: {fileID: 5588095889694752182}
   m_Layer: 6
   m_Name: Pot
   m_TagString: Untagged
@@ -91,8 +91,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &2621636451694658980
-BoxCollider:
+--- !u!114 &5334400002048636151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5722025754787328800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002f5754fb233a4a81dae2927f336ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CookingStation
+  useOutline: 1
+  targetRenderers: []
+--- !u!135 &5588095889694752182
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -110,17 +124,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5334400002048636151
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5722025754787328800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f002f5754fb233a4a81dae2927f336ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CookingStation
+  m_Radius: 1.53
+  m_Center: {x: 0, y: -0.16, z: 0}

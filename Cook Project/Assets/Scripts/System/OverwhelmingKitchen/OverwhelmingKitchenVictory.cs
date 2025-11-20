@@ -6,7 +6,7 @@ using UnityEngine;
 /// Overwhelming Kitchen victory object.
 /// Enabled when target order count is reached, triggers fire effects and ends game upon player interaction.
 /// </summary>
-public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
+public class OverwhelmingKitchenVictory : InteractableBase
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
@@ -36,7 +36,7 @@ public class OverwhelmingKitchenVictory : MonoBehaviour, IInteractable
         WorldBroadcastSystem.Instance?.Broadcast("You've completed all orders! Interact with the object to escape!", 5f);
     }
 
-    public void Interact()
+    public override void Interact()
     {
         if (!canInteract)
         {

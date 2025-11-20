@@ -4,9 +4,9 @@ using R3;
 using System.Linq;
 using UnityEngine;
 
-public class GambleTable : MonoBehaviour, IInteractable
+public class GambleTable : InteractableBase
 {
-    public void Interact()
+    public override void Interact()
     {
         UIRoot.Instance.GetUIComponent<BlackjackUI>().Open();
     }

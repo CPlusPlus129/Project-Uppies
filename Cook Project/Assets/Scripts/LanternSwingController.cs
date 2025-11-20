@@ -1,82 +1,83 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class LanternSwingController : MonoBehaviour
 {
     [Header("References")]
-    public Rigidbody lanternRb;    // Lantern Rigidbody
-    public Transform player;       // Player transform
-    public HingeJoint hinge;       // Hinge connecting lantern to stick
+    public Rigidbody stickParentRb;        // The RB moved by the player
+    public CharacterJoint cj;              // The CharacterJoint
+    public Rigidbody lanternRb;            // The lantern RB
 
-    [Header("Swing Settings")]
-    public Vector3 hingeAxis = Vector3.right;   // Local hinge axis
-    public float swingForceMultiplier = 20f;    // Player movement torque
-    public float rotationForceMultiplier = 10f; // Player rotation torque
-    public float spring = 50f;                  // Hinge spring
-    public float damper = 5f;                   // Hinge damper
-    public float maxSwingAngle = 60f;           // Maximum swing angle (degrees)
+    [Header("Swing Behavior")]
+    public float torqueStrength = 4f;      // How strongly motion adds swing
+    public float maxSwingAngle = 45f;      // Should match joint swing limit
+    public float returnSpring = 2f;        // How strongly the lantern returns to down
+    public float airDamping = 0.2f;        // Additional drag applied manually
 
-    private Vector3 lastPlayerPos;
-    private Quaternion lastPlayerRot;
+    Vector3 lastStickVelocity;
 
     void Start()
     {
-        if (player == null || lanternRb == null || hinge == null)
-        {
-            Debug.LogError("Assign all references in LanternSwingController.");
-            enabled = false;
-            return;
-        }
+        if (stickParentRb == null)
+            Debug.LogError("StickParent RB missing!");
 
-        lastPlayerPos = player.position;
-        lastPlayerRot = player.rotation;
+        if (lanternRb == null)
+            Debug.LogError("Lantern RB missing!");
 
-        // Setup Hinge Joint spring
-        JointSpring js = hinge.spring;
-        js.spring = spring;
-        js.damper = damper;
-        js.targetPosition = 0f;
-        hinge.spring = js;
-        hinge.useSpring = true;
-
-        // Limit swing
-        JointLimits limits = hinge.limits;
-        limits.min = -maxSwingAngle;
-        limits.max = maxSwingAngle;
-        hinge.limits = limits;
-        hinge.useLimits = true;
+        if (cj == null)
+            Debug.LogError("CharacterJoint missing!");
     }
 
     void FixedUpdate()
     {
-        Vector3 hingeDir = lanternRb.transform.TransformDirection(hingeAxis);
+        // Get stick velocity
+        Vector3 stickVel = stickParentRb.linearVelocity;
+        Vector3 accel = (stickVel - lastStickVelocity) / Time.fixedDeltaTime;
+        lastStickVelocity = stickVel;
 
-        // --- 1. Player movement torque ---
-        Vector3 playerDelta = (player.position - lastPlayerPos) / Time.fixedDeltaTime;
+        // No motion = no swing force added
+        if (accel.sqrMagnitude > 0.0001f)
+        {
+            AddSwingForce(accel);
+        }
 
-        // Project player movement onto plane perpendicular to hinge axis
-        Vector3 swingPlaneDelta = playerDelta - Vector3.Project(playerDelta, hingeDir);
+        ApplyReturnToRest();
+        ApplyDamping();
+    }
 
-        // Convert swing direction to scalar along hinge
-        Vector3 crossDir = Vector3.Cross(hingeDir, Vector3.up).normalized; // perpendicular direction
-        float torqueAlongHinge = Vector3.Dot(swingPlaneDelta, crossDir);
+    void AddSwingForce(Vector3 accel)
+    {
+        // Torque direction should be perpendicular to acceleration
+        // so lantern sways naturally in 3D.
+        Vector3 torqueDir = Vector3.Cross(accel, Vector3.up).normalized;
 
-        // Scale torque based on proximity to swing limit
-        float currentAngle = hinge.angle;
-        float limitRatio = 1f - Mathf.Clamp01(Mathf.Abs(currentAngle) / maxSwingAngle);
-        lanternRb.AddTorque(hingeDir * torqueAlongHinge * swingForceMultiplier * limitRatio, ForceMode.Force);
+        // Compute current swing angle relative to "down"
+        float angle = Vector3.Angle(transform.up, Vector3.up); // 0� = straight down
 
-        // --- 2. Player rotation torque ---
-        Quaternion deltaRot = player.rotation * Quaternion.Inverse(lastPlayerRot);
-        deltaRot.ToAngleAxis(out float angle, out Vector3 axis);
-        if (angle > 180f) angle -= 360f;
-        Vector3 rotVel = axis * angle * Mathf.Deg2Rad / Time.fixedDeltaTime;
-        float rotAlongHinge = Vector3.Dot(rotVel, hingeDir);
+        // Scale torque so it weakens near the swing limit
+        float limitRatio = 1f - Mathf.Clamp01(angle / maxSwingAngle);
 
-        // Scale rotational torque by proximity to limit
-        lanternRb.AddTorque(hingeDir * rotAlongHinge * rotationForceMultiplier * limitRatio, ForceMode.Force);
+        lanternRb.AddTorque(torqueDir * torqueStrength * limitRatio, ForceMode.Acceleration);
+    }
 
-        lastPlayerPos = player.position;
-        lastPlayerRot = player.rotation;
+    void ApplyReturnToRest()
+    {
+        // Calculate offset from straight down
+        Vector3 down = Vector3.up; // Up in world = lantern down direction
+        Vector3 lanternUp = transform.up;
+
+        float angle = Vector3.Angle(lanternUp, down);
+
+        if (angle < 1f) return;
+
+        // Direction to rotate lantern back down
+        Vector3 correctionAxis = Vector3.Cross(lanternUp, down).normalized;
+
+        lanternRb.AddTorque(correctionAxis * returnSpring, ForceMode.Acceleration);
+    }
+
+    void ApplyDamping()
+    {
+        // CharacterJoint has weak damping, so we add our own
+        lanternRb.angularVelocity *= (1f - airDamping * Time.fixedDeltaTime);
     }
 }

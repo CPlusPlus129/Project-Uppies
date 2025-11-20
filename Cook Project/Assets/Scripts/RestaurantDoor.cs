@@ -1,20 +1,26 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class RestaurantDoor : MonoBehaviour, IInteractable
+public class RestaurantDoor : InteractableBase
 {
     private IShiftSystem shiftSystem;
     [SerializeField]
     [Tooltip("Signal emitted when the player chooses to exit AfterShift via this door.")]
     private string afterShiftExitSignalId = "after_shift_exit";
 
-    private async void Awake()
+    protected override void Awake()
+    {
+        base.Awake();
+        InitializeAsync().Forget();
+    }
+
+    private async UniTaskVoid InitializeAsync()
     {
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>(); 
     }
 
-    public void Interact()
+    public override void Interact()
     {
         var state = shiftSystem.currentState.Value;
         if(state != ShiftSystem.ShiftState.AfterShift && state != ShiftSystem.ShiftState.None)

@@ -12,4 +12,10 @@ public class Meal : ItemBase, IInteractable
     public void Interact()
     {
     }
+
+    public void ToggleOutline(bool isOn)
+    {
+        // Meal items don't need outline functionality
+        // as they're picked up rather than interacted with in place
+    }
 }
