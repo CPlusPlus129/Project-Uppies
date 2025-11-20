@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// This singleton calls DontDestroyOnLoad by default if it is a root object.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T _instance;
@@ -12,8 +16,8 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
         {
             _instance = this as T;
             applicationIsQuitting = false;
-            EnsureRooted(transform);
-            DontDestroyOnLoad(gameObject);
+            if (transform.parent == null)
+                DontDestroyOnLoad(_instance);
         }
         else if (_instance != this)
         {
@@ -42,8 +46,8 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
                     _instance = FindFirstObjectByType<T>();
                     if (_instance != null)
                     {
-                        EnsureRooted(_instance.transform);
-                        DontDestroyOnLoad(_instance);
+                        if (_instance.transform.parent == null)
+                            DontDestroyOnLoad(_instance);
                     }
                     if (FindObjectsByType<T>(FindObjectsSortMode.None).Length > 1)
                     {
@@ -69,8 +73,6 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
                         Debug.Log("[Singleton] An instance of " + typeof(T) +
                                   " is needed in the scene, so '" + singleton +
                                   "' was created with DontDestroyOnLoad.");
-                        EnsureRooted(_instance.transform);
-                        DontDestroyOnLoad(_instance.gameObject);
                     }
                 }
 
@@ -99,30 +101,6 @@ public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
         }
 
         return false;
-    }
-
-    private static void EnsureRooted(Transform target)
-    {
-        if (target == null)
-        {
-            return;
-        }
-
-
-        if (target.parent == null)
-        {
-            return;
-        }
-
-        if (Application.isPlaying)
-        {
-            Debug.Log($"[MonoSingleton] {typeof(T).Name} was parented under '{target.parent.name}'. Reparenting to root so DontDestroyOnLoad succeeds.");
-            target.SetParent(null, true);
-        }
-        else
-        {
-            Debug.LogWarning($"[MonoSingleton] {typeof(T).Name} is parented under '{target.parent.name}' while editing. Move it to the scene root.");
-        }
     }
 
     private static bool applicationIsQuitting = false;

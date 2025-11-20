@@ -5,10 +5,8 @@ using UnityEngine;
 /// Centralized mixer that limits the number of active mob movement loops and balances their volume.
 /// Ensures only the highest priority emitters stay audible to prevent clutter when large groups spawn.
 /// </summary>
-public class MobMovementAudioManager : MonoBehaviour
+public class MobMovementAudioManager : SceneSingleton<MobMovementAudioManager>
 {
-    private static MobMovementAudioManager instance;
-
     [Header("Mix Limits")]
     [SerializeField, Range(1, 32)] private int maxSimultaneousVoices = 6;
     [SerializeField, Range(0f, 1.5f)] private float globalMixVolume = 0.9f;
@@ -20,47 +18,11 @@ public class MobMovementAudioManager : MonoBehaviour
     private readonly List<MobMovementAudio> emitters = new List<MobMovementAudio>(64);
     private readonly List<MobMovementAudio> candidates = new List<MobMovementAudio>(64);
 
-    public static MobMovementAudioManager Instance
+    protected override void Awake()
     {
-        get
-        {
-            if (instance == null)
-            {
-                instance = FindFirstObjectByType<MobMovementAudioManager>();
-                if (instance == null)
-                {
-                    GameObject go = new GameObject("MobMovementAudioManager");
-                    instance = go.AddComponent<MobMovementAudioManager>();
-                    DontDestroyOnLoad(go);
-                }
-            }
-
-            return instance;
-        }
-    }
-
-    public static bool TryGetInstance(out MobMovementAudioManager manager)
-    {
-        manager = instance;
-        return manager != null;
-    }
-
-    private void Awake()
-    {
-        if (transform.parent != null)
-        {
-            Debug.LogWarning("[MobMovementAudioManager] Instance parented under '" + transform.parent.name + "'. Reparenting to root so DontDestroyOnLoad can succeed.");
-            transform.SetParent(null, true);
-        }
-
-        if (instance != null && instance != this)
-        {
-            Destroy(gameObject);
+        base.Awake();
+        if (this != Instance)
             return;
-        }
-
-        instance = this;
-        DontDestroyOnLoad(gameObject);
 
         if (stackingCurve == null || stackingCurve.length == 0)
         {
