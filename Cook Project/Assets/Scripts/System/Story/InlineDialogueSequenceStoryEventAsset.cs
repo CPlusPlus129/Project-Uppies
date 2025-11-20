@@ -26,47 +26,47 @@ public sealed class InlineDialogueSequenceStoryEventAsset : StoryEventAsset
 
     public IReadOnlyList<DialogueLine> Lines => lines;
 
-    public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
-    {
-        if (lines == null || lines.Count == 0)
+        public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
         {
-            return StoryEventResult.Skipped("No dialogue lines configured.");
-        }
+            if (lines == null || lines.Count == 0)
+            {
+                return StoryEventResult.Skipped("No dialogue lines configured.");
+            }
 
-        var dialogueService = await context.GetServiceAsync<IDialogueService>();
-        if (dialogueService == null)
-        {
-            Debug.LogError("[InlineDialogueSequence] Unable to resolve IDialogueService.");
-            return StoryEventResult.Failed("Dialogue service unavailable.");
-        }
+            var dialogueService = await context.GetServiceAsync<IDialogueService>();
+            if (dialogueService == null)
+            {
+                Debug.LogError("[InlineDialogueSequence] Unable to resolve IDialogueService.");
+                return StoryEventResult.Failed("Dialogue service unavailable.");
+            }
 
-        if (dialogueService is not DialogueEngine_Gaslight gaslightEngine)
-        {
-            Debug.LogError("[InlineDialogueSequence] Active dialogue service does not support inline sequences (expects DialogueEngine_Gaslight).");
-            return StoryEventResult.Failed("Dialogue engine incompatible.");
-        }
+            if (dialogueService is not DialogueEngine_Gaslight gaslightEngine)
+            {
+                Debug.LogError("[InlineDialogueSequence] Active dialogue service does not support inline sequences (expects DialogueEngine_Gaslight).");
+                return StoryEventResult.Failed("Dialogue engine incompatible.");
+            }
 
-        var commands = BuildCommands();
-        if (commands.Count == 0)
-        {
-            return StoryEventResult.Skipped("All dialogue lines were empty.");
-        }
+            var commands = BuildCommands();
+            if (commands.Count == 0)
+            {
+                return StoryEventResult.Skipped("All dialogue lines were empty.");
+            }
 
-        var labelId = GenerateRuntimeLabelId();
-        var labelData = new LabelData(labelId, commands);
-        gaslightEngine.dataManager.RegisterRuntimeLabel(labelData);
+            var labelId = GenerateRuntimeLabelId();
+            var labelData = new LabelData(labelId, commands);
+            gaslightEngine.dataManager.RegisterRuntimeLabel(labelData);
 
-        try
-        {
-            await gaslightEngine.StartDialogueAsync(labelId).AttachExternalCancellation(cancellationToken);
-        }
-        finally
-        {
-            gaslightEngine.dataManager.UnregisterRuntimeLabel(labelId);
-        }
+            try
+            {
+                await gaslightEngine.StartDialogueAsync(labelId).AttachExternalCancellation(cancellationToken);
+            }
+            finally
+            {
+                gaslightEngine.dataManager.UnregisterRuntimeLabel(labelId);
+            }
 
-        return StoryEventResult.Completed();
-    }
+            return StoryEventResult.Completed();
+        }
 
     private List<CommandBase> BuildCommands()
     {
@@ -198,7 +198,8 @@ namespace DialogueModule
             if (!engine.dataManager.settingDataManager.characterSettings.DataDict
                 .TryGetValue(line.CharacterId, out var characterSettingData))
             {
-                Debug.LogError($"[InlineDialogueCommand] Character '{line.CharacterId}' is missing from Character.csv.");
+                Debug.LogError($"[InlineDialogueCommand] Character '{line.CharacterId}' is missing from Character.csv. Falling back to narration.");
+                PlayNarration(engine);
                 return;
             }
 

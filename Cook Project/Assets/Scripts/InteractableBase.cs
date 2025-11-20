@@ -53,10 +53,20 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
             return;
 
         if (isOn)
+        {
             foreach (var r in targetRenderers)
-                r.renderingLayerMask |= OUTLINE_LAYER_MASK;
+            {
+                if (r != null)
+                    r.renderingLayerMask |= OUTLINE_LAYER_MASK;
+            }
+        }
         else
+        {
             foreach (var r in targetRenderers)
-                r.renderingLayerMask &= ~OUTLINE_LAYER_MASK;
+            {
+                if (r != null)
+                    r.renderingLayerMask &= ~OUTLINE_LAYER_MASK;
+            }
+        }
     }
 }

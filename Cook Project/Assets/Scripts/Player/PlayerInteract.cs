@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerInteract : MonoBehaviour
 {
@@ -37,41 +38,55 @@ public class PlayerInteract : MonoBehaviour
         if (currentInteractableTarget.Value == null)
             return;
 
-        IInteractable interactable = currentInteractableTarget.Value;
-        interactable.Interact();
+        // Handle multiple interactables on the same object (e.g. Story Event triggers + Normal interaction)
+        var targetInteractable = currentInteractableTarget.Value;
+        IEnumerable<IInteractable> interactablesToTrigger;
 
-        if (interactable is ItemBase item)
+        if (targetInteractable is Component component)
         {
-            if (inventorySystem.AddItem(item))
-                item.gameObject.SetActive(false);
+            interactablesToTrigger = component.GetComponents<IInteractable>();
+        }
+        else
+        {
+            interactablesToTrigger = new[] { targetInteractable };
         }
 
-        if (interactable is Customer customer)
+        foreach (var interactable in interactablesToTrigger)
         {
-            var heldItem = inventorySystem.GetSelectedItem();
-            if (heldItem != null && customer.CanReceiveMeal(heldItem))
+            interactable.Interact();
+
+            if (interactable is ItemBase item)
             {
-                customer.ReceiveMeal(heldItem);
+                if (inventorySystem.AddItem(item))
+                    item.gameObject.SetActive(false);
             }
-        }
 
-        if (interactable is FoodSource foodSource && !inventorySystem.IsInventoryFull())
-        {
-            var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
-            var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
-            if (foodObj != null)
+            if (interactable is Customer customer)
             {
-                var wasAdded = inventorySystem.AddItem(foodObj);
-                if (wasAdded)
+                var heldItem = inventorySystem.GetSelectedItem();
+                if (heldItem != null && customer.CanReceiveMeal(heldItem))
                 {
-                    foodObj.gameObject.SetActive(false);
-                }
-                else
-                {
-                    Destroy(foodObj.gameObject);
+                    customer.ReceiveMeal(heldItem);
                 }
             }
-        }
 
+            if (interactable is FoodSource foodSource && !inventorySystem.IsInventoryFull())
+            {
+                var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
+                var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
+                if (foodObj != null)
+                {
+                    var wasAdded = inventorySystem.AddItem(foodObj);
+                    if (wasAdded)
+                    {
+                        foodObj.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        Destroy(foodObj.gameObject);
+                    }
+                }
+            }
+        }
     }
 }
