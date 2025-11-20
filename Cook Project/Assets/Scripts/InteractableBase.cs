@@ -19,6 +19,12 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     {
         if (useOutline)
         {
+            if (targetRenderers == null)
+            {
+                targetRenderers = new List<Renderer>();
+            }
+
+            if (targetRenderers.Count == 0)
             if (targetRenderers.Count == 0)
             {
                 var rArr = GetComponentsInChildren<Renderer>();
