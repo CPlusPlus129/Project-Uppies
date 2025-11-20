@@ -102,6 +102,14 @@ public class TaskManager : MonoSingleton<TaskManager>
         UpdateTasksList();
     }
 
+    public void RemoveFromHistory(string id)
+    {
+        if (_completedTaskHistory.Remove(id))
+        {
+            Debug.Log($"[TaskManager] Removed task from history: {id}");
+        }
+    }
+
     private void UpdateTasksList()
     {
         // Create a copy to trigger updates

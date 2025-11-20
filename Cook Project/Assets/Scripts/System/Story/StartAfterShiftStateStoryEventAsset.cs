@@ -22,6 +22,7 @@ public sealed class StartAfterShiftStateStoryEventAsset : StoryEventAsset
 
         if (!string.IsNullOrWhiteSpace(taskDescription))
         {
+            TaskManager.Instance.RemoveFromHistory("AfterShiftTask");
             TaskManager.Instance.AddTask("AfterShiftTask", taskDescription);
         }
 

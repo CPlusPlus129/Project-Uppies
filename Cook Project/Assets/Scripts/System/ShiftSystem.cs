@@ -135,9 +135,14 @@ public class ShiftSystem : IShiftSystem
         orderManager.ClearOrders();
 
         // Remove quota task if it wasn't completed (if it was completed, it will remove itself after delay)
-        if (TaskManager.Instance != null && !HasMetQuota())
+        if (TaskManager.Instance != null)
         {
-            TaskManager.Instance.RemoveTask("QuotaTask");
+            if (!HasMetQuota())
+            {
+                TaskManager.Instance.RemoveTask("QuotaTask");
+            }
+            // Clear completed tasks from UI so they don't persist on the After Shift screen
+            TaskManager.Instance.ClearCompletedTasks();
         }
 
         if (currentState.Value == ShiftState.AfterShift)
@@ -333,6 +338,8 @@ public class ShiftSystem : IShiftSystem
         if (TaskManager.Instance != null)
         {
             TaskManager.Instance.ClearCompletedTasks();
+            // Ensure QuotaTask history is cleared so it doesn't auto-complete in the new shift
+            TaskManager.Instance.RemoveFromHistory("QuotaTask");
         }
 
         shiftElapsedSeconds = 0f;
