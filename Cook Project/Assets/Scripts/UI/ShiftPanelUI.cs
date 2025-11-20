@@ -117,11 +117,16 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
                     backgroundColor = backgroundOvertime;
                     break;
                 case ShiftSystem.ShiftState.AfterShift:
-                case ShiftSystem.ShiftState.GaveOver:
                     label = "SHIFT COMPLETE";
                     subtitle = "Catch your breath before the next gig.";
                     badgeColor = offDutyBadge;
                     backgroundColor = backgroundBase;
+                    break;
+                case ShiftSystem.ShiftState.GaveOver:
+                    label = "BANKRUPT";
+                    subtitle = "You lost everything. Restarting...";
+                    badgeColor = new Color32(200, 50, 50, 255); // Red for failure
+                    backgroundColor = new Color32(255, 200, 200, 236); // Light red background
                     break;
                 default:
                     label = "OFF DUTY";

@@ -5,7 +5,7 @@ using R3;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "ShiftCompletionStoryEvent", menuName = "Game Flow/Shift Events/Shift Completion Event")]
-public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
+public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset, IBackgroundStoryEvent
 {
     private enum ShiftOutcome
     {
@@ -71,6 +71,16 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
     [Tooltip("Insert follow-up content at the front of the story queue.")]
     private bool insertFollowUpAtFront = true;
 
+    [SerializeField]
+    [Tooltip("Process this event without blocking the story queue while it waits for shift completion.")]
+    private bool runInBackground = true;
+    public bool RunInBackground => runInBackground;
+    public bool BlockSourceSequence => true;
+
+    [SerializeField]
+    [Tooltip("Log shift state transitions for debugging.")]
+    private bool debugLogging = false;
+
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
         var shiftSystem = await context.GetServiceAsync<IShiftSystem>();
@@ -94,9 +104,12 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
 
         var terminalStateTcs = new UniTaskCompletionSource<ShiftSystem.ShiftState>();
         var initialState = shiftSystem.currentState.Value;
-        if (IsTerminalState(initialState))
+        var sawStateChange = false;
+        var sawActiveShift = initialState == ShiftSystem.ShiftState.InShift || initialState == ShiftSystem.ShiftState.Overtime;
+        var sawNonTerminal = !IsTerminalState(initialState);
+        if (debugLogging)
         {
-            terminalStateTcs.TrySetResult(initialState);
+            Debug.Log($"[{nameof(ShiftCompletionStoryEventAsset)}] subscribed. initialState={initialState}, sawActiveShift={sawActiveShift}, sawNonTerminal={sawNonTerminal}", this);
         }
 
         shiftSystem.currentState
@@ -107,7 +120,27 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset
                     overtimeDetected = true;
                 }
 
-                if (IsTerminalState(state))
+                if (state != initialState)
+                {
+                    sawStateChange = true;
+                }
+
+                if (state == ShiftSystem.ShiftState.InShift || state == ShiftSystem.ShiftState.Overtime)
+                {
+                    sawActiveShift = true;
+                }
+
+                if (!IsTerminalState(state))
+                {
+                    sawNonTerminal = true;
+                }
+
+                if (debugLogging)
+                {
+                    Debug.Log($"[{nameof(ShiftCompletionStoryEventAsset)}] state={state}, sawChange={sawStateChange}, sawActive={sawActiveShift}, sawNonTerminal={sawNonTerminal}", this);
+                }
+
+                if (sawActiveShift && sawNonTerminal && sawStateChange && IsTerminalState(state))
                 {
                     terminalStateTcs.TrySetResult(state);
                 }

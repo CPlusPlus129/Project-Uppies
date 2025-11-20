@@ -33,6 +33,7 @@ public class GameFlow : MonoSingleton<GameFlow>
     private readonly LinkedList<StoryEventRuntime> storyQueue = new LinkedList<StoryEventRuntime>();
     private readonly Dictionary<string, StoryEventResult> lastResultByEventId = new Dictionary<string, StoryEventResult>();
     private readonly Dictionary<string, UniTaskCompletionSource<bool>> signalWaiters = new Dictionary<string, UniTaskCompletionSource<bool>>();
+    private readonly HashSet<StorySequenceAsset> blockedSequences = new HashSet<StorySequenceAsset>();
 
     private CancellationTokenSource gameLoopCts;
     private StoryEventRuntime currentStoryEvent;
@@ -130,79 +131,113 @@ public class GameFlow : MonoSingleton<GameFlow>
                 continue;
             }
 
+            var isBackground = runtime.Asset is IBackgroundStoryEvent bg && bg.RunInBackground;
+            if (isBackground)
+            {
+                if (runtime.Asset is IBackgroundStoryEvent bgBlock && bgBlock.BlockSourceSequence && runtime.SourceSequence != null)
+                {
+                    blockedSequences.Add(runtime.SourceSequence);
+                }
+                ProcessStoryEventAsync(runtime, cancellationToken, true).Forget();
+                continue;
+            }
+
+            await ProcessStoryEventAsync(runtime, cancellationToken, false);
+        }
+    }
+
+    private async UniTask ProcessStoryEventAsync(StoryEventRuntime runtime, CancellationToken cancellationToken, bool isBackground)
+    {
+        if (!isBackground)
+        {
             currentStoryEvent = runtime;
-            runtime.SetState(StoryEventState.Running);
-            LogSequenceEvent(runtime, "BEGIN");
-            OnStoryEventStarted.OnNext(runtime);
+        }
 
-            var context = new GameFlowContext(this, runtime, cancellationToken);
-            StoryEventResult result;
-            Exception failureException = null;
+        runtime.SetState(StoryEventState.Running);
+        LogSequenceEvent(runtime, "BEGIN");
+        OnStoryEventStarted.OnNext(runtime);
 
-            try
+        var context = new GameFlowContext(this, runtime, cancellationToken);
+        StoryEventResult result;
+        Exception failureException = null;
+
+        try
+        {
+            var canExecute = await ShouldRunEventAsync(runtime, context, cancellationToken);
+            if (!canExecute)
             {
-                var canExecute = await ShouldRunEventAsync(runtime, context, cancellationToken);
-                if (!canExecute)
-                {
-                    result = StoryEventResult.Skipped($"Preconditions failed or event is not replayable: {runtime.Asset.EventId}");
-                }
-                else
-                {
-                    result = await runtime.Asset.ExecuteAsync(context, cancellationToken);
-                }
+                result = StoryEventResult.Skipped($"Preconditions failed or event is not replayable: {runtime.Asset.EventId}");
             }
-            catch (OperationCanceledException)
+            else
             {
-                result = StoryEventResult.Cancelled($"Story event cancelled: {runtime.Asset.EventId}");
+                result = await runtime.Asset.ExecuteAsync(context, cancellationToken);
             }
-            catch (Exception ex)
-            {
-                failureException = ex;
-                result = StoryEventResult.Failed(ex.Message);
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            result = StoryEventResult.Cancelled($"Story event cancelled: {runtime.Asset.EventId}");
+        }
+        catch (Exception ex)
+        {
+            failureException = ex;
+            result = StoryEventResult.Failed(ex.Message);
+        }
 
-            if (failureException != null)
-            {
-                runtime.SetState(StoryEventState.Failed);
-                OnStoryEventFailed.OnNext((runtime, failureException));
-                LogError($"Story event '{runtime.Asset.EventId}' threw an exception: {failureException}");
-            }
+        FinalizeStoryEvent(runtime, result, failureException, isBackground);
+    }
 
-            if (result.FinalState == StoryEventState.Pending)
-            {
-                result = StoryEventResult.Completed(result.Message, result.NextSequence);
-            }
+    private void FinalizeStoryEvent(StoryEventRuntime runtime, StoryEventResult result, Exception failureException, bool isBackground)
+    {
+        if (failureException != null)
+        {
+            runtime.SetState(StoryEventState.Failed);
+            OnStoryEventFailed.OnNext((runtime, failureException));
+            LogError($"Story event '{runtime.Asset.EventId}' threw an exception: {failureException}");
+        }
 
-            runtime.SetState(result.FinalState, result);
+        if (result.FinalState == StoryEventState.Pending)
+        {
+            result = StoryEventResult.Completed(result.Message, result.NextSequence);
+        }
 
-            var eventId = runtime.Asset.EventId;
-            if (!string.IsNullOrWhiteSpace(eventId))
-            {
-                lastResultByEventId[eventId] = result;
-            }
+        runtime.SetState(result.FinalState, result);
 
-            var sequenceToChain = result.NextSequence;
-            if (sequenceToChain == null && ShouldAutoChainToNextSequence(runtime, result))
-            {
-                sequenceToChain = runtime.SourceSequence.NextSequence;
-            }
+        var eventId = runtime.Asset.EventId;
+        if (!string.IsNullOrWhiteSpace(eventId))
+        {
+            lastResultByEventId[eventId] = result;
+        }
 
-            if (sequenceToChain != null)
-            {
-                EnqueueSequence(sequenceToChain);
-            }
+        var sequenceToChain = result.NextSequence;
+        if (sequenceToChain == null && ShouldAutoChainToNextSequence(runtime, result))
+        {
+            sequenceToChain = runtime.SourceSequence.NextSequence;
+        }
 
-            if (result.PauseFlow)
-            {
-                PauseStoryFlow($"Event requested pause: {eventId}");
-            }
+        if (sequenceToChain != null)
+        {
+            EnqueueSequence(sequenceToChain);
+        }
 
-            var resultSummary = string.IsNullOrWhiteSpace(result.Message)
-                ? result.FinalState.ToString()
-                : $"{result.FinalState}: {result.Message}";
-            LogSequenceEvent(runtime, "END", resultSummary);
-            OnStoryEventFinished.OnNext((runtime, result));
+        if (result.PauseFlow)
+        {
+            PauseStoryFlow($"Event requested pause: {eventId}");
+        }
+
+        var resultSummary = string.IsNullOrWhiteSpace(result.Message)
+            ? result.FinalState.ToString()
+            : $"{result.FinalState}: {result.Message}";
+        LogSequenceEvent(runtime, "END", resultSummary);
+        OnStoryEventFinished.OnNext((runtime, result));
+
+        if (!isBackground)
+        {
             currentStoryEvent = null;
+        }
+
+        if (runtime.SourceSequence != null && blockedSequences.Contains(runtime.SourceSequence))
+        {
+            blockedSequences.Remove(runtime.SourceSequence);
         }
     }
 
@@ -238,9 +273,20 @@ public class GameFlow : MonoSingleton<GameFlow>
     {
         if (storyQueue.First != null)
         {
-            runtime = storyQueue.First.Value;
-            storyQueue.RemoveFirst();
-            return true;
+            var node = storyQueue.First;
+            while (node != null)
+            {
+                var candidate = node.Value;
+                if (candidate.SourceSequence != null && blockedSequences.Contains(candidate.SourceSequence))
+                {
+                    node = node.Next;
+                    continue;
+                }
+
+                runtime = candidate;
+                storyQueue.Remove(node);
+                return true;
+            }
         }
 
         runtime = null;
@@ -350,6 +396,15 @@ public class GameFlow : MonoSingleton<GameFlow>
 
         OnStoryEventQueued.OnNext(runtime);
         Log($"Enqueued story event '{asset.EventId}'" + (insertAtFront ? " at the front of the queue." : "."));
+
+        if (currentStoryEvent != null)
+        {
+            Log($"[Diagnostics] Queue is currently processing event: {currentStoryEvent.Asset.name} (ID: {currentStoryEvent.Asset.EventId}). New event will wait.");
+        }
+        else
+        {
+            Log($"[Diagnostics] Queue is idle. New event should start immediately.");
+        }
 
         return runtime;
     }

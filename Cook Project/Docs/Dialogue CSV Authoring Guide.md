@@ -35,7 +35,7 @@ Use this guide to author the dialogue CSVs that feed the Dialogue Module and to 
 The importer first tries HTML-style hex strings, then looks for space/semicolon/pipe-separated numeric components. Mixing commas here will create unintended columns.
 
 ## 3. Unity Import Workflow
-1. **Open the project in Unity 6000.2.9f1.** Ensure the Dialogue Module components are compiled (enter Play Mode once if needed).
+1. **Open the project in Unity 6000.2.12f1.** Ensure the Dialogue Module components are compiled (enter Play Mode once if needed).
 2. **Configure the importer (first-time only):**
    - Menu: **Tools ▸ Create Dialogue Settings**. This creates `Assets/DialogueModule/Settings/DialogueSettings.asset`.
    - In the inspector, set `CSV Folder Paths` to include `Res_Local/Global/Tables`. Use paths relative to `Assets/` (e.g. `Res_Local/Global/Tables`).

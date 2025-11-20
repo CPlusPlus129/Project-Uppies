@@ -71,6 +71,7 @@ Best Practices
 
 Extending the System
 --------------------
+- **Standard Library**: Check `Assets/Scripts/System/Story/` for existing events (`Wait`, `SignalDriven`, `ShiftStart`, etc.) before writing new ones.
 - **Branching**: Return different `StoryEventResult.NextSequence` assets based on runtime conditions to branch storylines.
 - **Dynamic Enqueue**: Systems can call `GameFlow.EnqueueSequence` or `EnqueueEvent` with `insertAtFront: true` for high-priority beats.
 - **Interoperability**: Use `StoryEventResult.PauseFlow` to hand control to other managers (dialogue, minigames) and emit a signal when they finish.
@@ -89,10 +90,30 @@ Use the helper methods on `GameFlow` to control what comes next in the story que
 
 - `EnqueueSequence(sequenceAsset, insertAtFront: false)` — Adds every event in the sequence to the back of the queue. Ideal for scheduling the next chapter while the current one is running.
 - `EnqueueSequence(sequenceAsset, insertAtFront: true)` — Inserts the sequence so its first event is processed immediately after the current one finishes (or even before if the queue is empty). Great for interrupts or high-priority beats.
+- `RestartSequence(sequenceAsset, insertAtFront: true)` — Clears any pending events from the same sequence and re-enqueues it fresh. Useful for "Retry" mechanics.
 - `EnqueueEvent(eventAsset, insertAtFront: false)` — Pushes a single event without authoring a full sequence. Use this for ad-hoc triggers or dynamic one-offs.
 - `EnqueueEvent(eventAsset, insertAtFront: true)` — Forces the event to run next. Useful when a player action demands instant feedback.
 - `StoryEventResult.Completed(message, nextSequence)` — Returned from an event’s `ExecuteAsync`. When `nextSequence` is non-null, `GameFlow` enqueues it automatically, enabling branching without extra glue code.
 - `StoryEventResult.Pause(...)` — Pauses the queue after the current event; call `GameFlow.ResumeStoryFlow()` once your external system (e.g., gameplay moment) is ready to continue.
+
+Standard Event Library
+----------------------
+The system comes with a suite of built-in `StoryEventAsset` subclasses to handle common game logic without writing new code:
+
+### Flow Control & Utility
+- **WaitStoryEventAsset**: Pauses execution for a set duration (scaled or unscaled time).
+- **UnityEventStoryEvent**: Invokes a serialized `UnityEvent`. Can optionally wait for a signal or a delay before completing.
+- **SignalDrivenStoryEvent**: Waits for a specific signal (with optional timeout) before running an optional inner event. Useful for synchronizing with gameplay (e.g., "Wait for Player to enter zone").
+- **AddTaskEvent** / **RemoveTaskEvent**: Adds or removes entries from the `TaskManager` (HUD to-do list).
+
+### Shift & Game Loop
+- **ShiftStartStoryEventAsset**: Starts the next shift, restarts the current one, or jumps to a specific index.
+- **StartAfterShiftStateStoryEventAsset**: Transitions the game state to "After Shift" (free roam/results).
+- **OrderCompletionGateStoryEvent**: Pauses the story flow until the player serves a specific number of orders.
+- **AftershiftVipStoryEventAsset**: Spawns a VIP customer (like BabyBoss) during the after-shift phase, handling spawn logic, dialogue hooks, and quest integration.
+
+### Dialogue
+- **DialogueStoryEventAsset**: Plays a `DialogueEventAsset` via the `IDialogueService`. Can chain additional dialogues, restart the shift on completion, or broadcast messages.
 
 Tips:
 - Prefer sequences for designer-authored flows; they document the intended order and are easier to reuse.

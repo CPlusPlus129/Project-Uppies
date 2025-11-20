@@ -5,48 +5,59 @@ using UnityEngine;
 
 public class PuzzleDoor : MonoBehaviour, IInteractable
 {
-    [SerializeField] private string questTargetId;
+    [SerializeField] private string requiredTaskId;
+    [SerializeField] private PuzzleGameType puzzleType = PuzzleGameType.CardSwipe;
     [SerializeField] private Animator anim;
     private IPuzzleGameManager puzzleGameManager;
-    private IQuestService questService;
     private IPuzzle gameInstance;
     private bool doorOpen;
 
     private async void Awake()
     {
-        if (string.IsNullOrEmpty(questTargetId))
+        // Auto-assign task ID for the specific door mentioned
+        if (string.IsNullOrEmpty(requiredTaskId) && gameObject.name == "StorageRoom1_DoorButton 1")
         {
-            questTargetId = $"door_{GetInstanceID()}";
+            requiredTaskId = "StorageRoom1Task";
         }
+
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
-        questService = await ServiceLocator.Instance.GetAsync<IQuestService>();
     }
 
     public void Interact()
     {
-        var quest = GetActiveQuestForSelf();
-        if (quest == null)
+        if (string.IsNullOrEmpty(requiredTaskId))
         {
-            Debug.Log($"No ongoing quest for Door {questTargetId}.");
+            Debug.LogWarning($"PuzzleDoor: No requiredTaskId set for {gameObject.name}.");
             return;
         }
 
-        switch (quest.PuzzleType)
+        // Check if task exists in the active tasks list
+        var taskExists = TaskManager.Instance.Tasks.Value.Any(t => t.Id == requiredTaskId);
+        
+        if (!taskExists)
+        {
+            Debug.Log($"PuzzleDoor: Task '{requiredTaskId}' not found/active. Door remains locked.");
+            return;
+        }
+
+        switch (puzzleType)
         {
             case PuzzleGameType.CardSwipe:
-                OpenCardSwipeGame(quest);
+                OpenCardSwipeGame();
                 break;
             default:
-                Debug.LogWarning($"Unsupported puzzle type: {quest.PuzzleType}");
+                Debug.LogWarning($"Unsupported puzzle type: {puzzleType}");
                 break;
         }
     }
 
-    private void OpenCardSwipeGame(Quest quest)
+    private void OpenCardSwipeGame()
     {
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
-        gameInstance ??= puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, quest);
+        // Pass null for quest as we are using task-based unlocking
+        gameInstance ??= puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, null);
+        
         puzzleGameManager.OnGameCompleted
             .Where(x => x == gameInstance)
             .Take(1)
@@ -58,15 +69,9 @@ public class PuzzleDoor : MonoBehaviour, IInteractable
             .AddTo(this);
     }
 
-
     private void PlayDoorAnimation()
     {
         doorOpen = !doorOpen;
         anim.SetBool("IsOpen", doorOpen);
-    }
-
-    private Quest GetActiveQuestForSelf()
-    {
-        return questService.ongoingQuestList.FirstOrDefault(q => q.TargetId == questTargetId);
     }
 }

@@ -9,15 +9,11 @@ public class RemoveTaskEvent : StoryEventAsset
     [Tooltip("The Event ID of the task to remove.")]
     private string targetEventId;
 
-    [SerializeField]
-    [Tooltip("Time in seconds to show the task as completed before removing it.")]
-    private float completionDelay = 2.0f;
-
     public override UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(targetEventId))
         {
-            TaskManager.Instance.CompleteTask(targetEventId, completionDelay);
+            TaskManager.Instance.CompleteTask(targetEventId);
         }
 
         return UniTask.FromResult(StoryEventResult.Completed());

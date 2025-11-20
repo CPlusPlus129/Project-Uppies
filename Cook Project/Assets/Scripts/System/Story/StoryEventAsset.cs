@@ -7,6 +7,20 @@ using System.Collections.Generic;
 using System.Text;
 #endif
 
+public interface IBackgroundStoryEvent
+{
+    /// <summary>
+    /// If true, the GameFlow queue will not block while this event executes; it will run concurrently.
+    /// </summary>
+    bool RunInBackground { get; }
+
+    /// <summary>
+    /// If true, and RunInBackground is true, this event will prevent other events from the SAME source sequence
+    /// from running until this event completes. Events from other sequences (or dynamic events) can still run.
+    /// </summary>
+    bool BlockSourceSequence { get; }
+}
+
 public abstract class StoryEventAsset : ScriptableObject
 {
     [SerializeField]

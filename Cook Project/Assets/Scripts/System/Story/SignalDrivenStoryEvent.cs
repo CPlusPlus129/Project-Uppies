@@ -19,14 +19,14 @@ public class SignalDrivenStoryEvent : StoryEventAsset
     [Tooltip("Optional timeout in seconds. Leave at 0 to wait indefinitely.")]
     private float timeoutSeconds = 0f;
 
-    [Header("Optional Dialogue")]
+    [Header("Optional Event")]
     [SerializeField]
-    [Tooltip("Optional DialogueStoryEventAsset that will run immediately after the signal is fulfilled.")]
-    private DialogueStoryEventAsset dialogueOnSignal;
+    [Tooltip("Optional StoryEventAsset that will run immediately after the signal is fulfilled.")]
+    private StoryEventAsset storyEventOnSignal;
 
     [SerializeField]
-    [Tooltip("Log a warning if the optional dialogue cannot execute (for example, PlayOnce already consumed).")]
-    private bool logDialogueWarnings = true;
+    [Tooltip("Log a warning if the optional event cannot execute (for example, PlayOnce already consumed).")]
+    private bool logEventWarnings = true;
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
@@ -49,7 +49,10 @@ public class SignalDrivenStoryEvent : StoryEventAsset
                 var completed = await UniTask.WhenAny(waitTask, timeoutTask);
                 if (completed == 1)
                 {
-                    Debug.LogWarning($"[{nameof(SignalDrivenStoryEvent)}] Timed out waiting for signal '{signalId}' on {name}. Completing anyway.");
+                    if (logEventWarnings)
+                    {
+                        Debug.LogWarning($"[{nameof(SignalDrivenStoryEvent)}] Timed out waiting for signal '{signalId}' on {name}. Completing anyway.");
+                    }
                 }
             }
             else
@@ -64,22 +67,22 @@ public class SignalDrivenStoryEvent : StoryEventAsset
 
         onSignalReceived?.Invoke();
 
-        if (dialogueOnSignal == null)
+        if (storyEventOnSignal == null)
         {
             return StoryEventResult.Completed();
         }
 
-        bool canRunDialogue = await dialogueOnSignal.CanExecuteAsync(context, cancellationToken);
-        if (!canRunDialogue)
+        bool canRunEvent = await storyEventOnSignal.CanExecuteAsync(context, cancellationToken);
+        if (!canRunEvent)
         {
-            if (logDialogueWarnings)
+            if (logEventWarnings)
             {
-                Debug.LogWarning($"[{nameof(SignalDrivenStoryEvent)}] Dialogue '{dialogueOnSignal.name}' cannot execute after signal '{signalId}' on {name}.");
+                Debug.LogWarning($"[{nameof(SignalDrivenStoryEvent)}] Event '{storyEventOnSignal.name}' cannot execute after signal '{signalId}' on {name}.");
             }
 
             return StoryEventResult.Completed();
         }
 
-        return await dialogueOnSignal.ExecuteAsync(context, cancellationToken);
+        return await storyEventOnSignal.ExecuteAsync(context, cancellationToken);
     }
 }

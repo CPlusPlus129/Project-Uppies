@@ -78,6 +78,12 @@ public class ShiftSystem : IShiftSystem
         ResetWalletToStartingDebt();
         ShopSystem.Instance?.SetStoreAvailability(false);
         afterShiftReadyForNextShift = false;
+
+        if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.RemoveTask("QuotaTask");
+            TaskManager.Instance.ClearTasks();
+        }
     }
 
     private async UniTaskVoid SubscribeToPlayerDeathAsync()
@@ -127,6 +133,12 @@ public class ShiftSystem : IShiftSystem
         updateDisposible.Clear();
         debtCollectionCts?.Cancel();
         orderManager.ClearOrders();
+
+        // Remove quota task if it wasn't completed (if it was completed, it will remove itself after delay)
+        if (TaskManager.Instance != null && !HasMetQuota())
+        {
+            TaskManager.Instance.RemoveTask("QuotaTask");
+        }
 
         if (currentState.Value == ShiftState.AfterShift)
         {
@@ -297,6 +309,11 @@ public class ShiftSystem : IShiftSystem
         updateDisposible.Clear();
         debtCollectionCts?.Cancel();
 
+        if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.ClearCompletedTasks();
+        }
+
         shiftElapsedSeconds = 0f;
         overtimeElapsedSeconds = 0f;
         shiftNumber.Value = num;
@@ -322,6 +339,29 @@ public class ShiftSystem : IShiftSystem
             .AddTo(updateDisposible);
 
         WorldBroadcastSystem.Instance.Broadcast("Clock in! Serve orders and deposit cash to hit quota.", 6f);
+
+        // Track Quota Task
+        depositedAmount.Subscribe(_ => UpdateQuotaTask()).AddTo(updateDisposible);
+        quotaAmount.Subscribe(_ => UpdateQuotaTask()).AddTo(updateDisposible);
+    }
+
+    private void UpdateQuotaTask()
+    {
+        if (TaskManager.Instance == null) return;
+
+        if (quotaAmount.Value <= 0)
+        {
+            TaskManager.Instance.RemoveTask("QuotaTask");
+            return;
+        }
+
+        // Always update the description first so it shows the correct amount
+        TaskManager.Instance.AddTask("QuotaTask", $"Quota: ${depositedAmount.Value}/{quotaAmount.Value}");
+
+        if (HasMetQuota())
+        {
+            TaskManager.Instance.CompleteTask("QuotaTask");
+        }
     }
 
     private void TickShift(float deltaTime)
@@ -451,7 +491,12 @@ public class ShiftSystem : IShiftSystem
         orderManager.ClearOrders();
         currentState.Value = ShiftState.GaveOver;
         WorldBroadcastSystem.Instance.Broadcast("Satan collected too much. Day reset!", 6f);
-        HandleDayLoss();
+
+        // Wait for the message to be read before resetting
+        UniTask.Delay(TimeSpan.FromSeconds(6f))
+            .ContinueWith(HandleDayLoss)
+            .Forget();
+
         ShopSystem.Instance?.SetStoreAvailability(false);
     }
 
