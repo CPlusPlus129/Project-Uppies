@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
+using R3.Triggers;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -36,7 +37,7 @@ public class PlayerController : MonoBehaviour
         UnsubscribeEvents();
     }
 
-    void Update()
+    private void OnUpdate()
     {
         var lookValue = lookAction.ReadValue<Vector2>();
         camlook.ProcessLook(lookValue);
@@ -78,11 +79,32 @@ public class PlayerController : MonoBehaviour
         sprintAction.canceled += motor.StopSprint;
 
         var playerStat = PlayerStatSystem.Instance;
-        playerStat.CanUseWeapon.Subscribe(can =>
-        {
-            lightGun.gameObject.SetActive(can);
-        }).AddTo(disposables);
-        playerStat.OnPlayerDeath.Subscribe(_ => HandleOnDeath()).AddTo(disposables);
+        //whenever this object is destroyed or playerstatsystem is destroyed, this signal will fire.
+        var terminationSignal = Observable.Merge(
+            this.gameObject.OnDestroyAsObservable(),
+            playerStat.OnDestroyed
+        );
+        Observable.EveryUpdate()
+            .TakeUntil(terminationSignal)
+            .Where(_ => isActiveAndEnabled)
+            .Subscribe(_ => OnUpdate())
+            .AddTo(disposables);
+
+        playerStat.CanUseWeapon
+            .TakeUntil(terminationSignal)
+            .Where(_ => isActiveAndEnabled)
+            .Subscribe(can =>
+            {
+                lightGun.gameObject.SetActive(can);
+            })
+            .AddTo(disposables);
+
+        playerStat.OnPlayerDeath
+            .TakeUntil(terminationSignal)
+            .Where(_ => isActiveAndEnabled)
+            .Subscribe(_ => HandleOnDeath())
+            .AddTo(disposables);
+
     }
 
     private void UnsubscribeEvents()
@@ -100,7 +122,7 @@ public class PlayerController : MonoBehaviour
         sprintAction.performed -= motor.TrySprint;
         sprintAction.canceled -= motor.StopSprint;
 
-        disposables.Clear();
+        disposables.Dispose();
     }
 
     private void OnInteractKey(InputAction.CallbackContext ctx)

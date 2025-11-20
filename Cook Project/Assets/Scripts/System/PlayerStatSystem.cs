@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using R3;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
@@ -30,6 +29,8 @@ public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
 
     public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
+
+    public Subject<Unit> OnDestroyed { get; private set; } = new Subject<Unit>();
 
     #region Unity gameobject lifecycle
     protected override async void Awake()
@@ -67,8 +68,14 @@ public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
 
     public override void OnDestroy()
     {
+        if (Instance != this)
+        {
+            base.OnDestroy();
+            return;
+        }
+        OnDestroyed.OnNext(Unit.Default);
+        OnDestroyed.OnCompleted();
         base.OnDestroy();
-        if (Instance != this) return;
     }
     #endregion
 

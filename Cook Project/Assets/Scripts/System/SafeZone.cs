@@ -1,5 +1,8 @@
-using UnityEngine;
+using R3;
+using R3.Triggers;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Defines a 3D area where the player is protected from light damage and can heal over time.
@@ -94,9 +97,21 @@ public class SafeZone : MonoBehaviour
         {
             Debug.LogError("SafeZone: No collider found! Please add a collider component.", this);
         }
+
+        var playerStat = PlayerStatSystem.Instance;
+        //whenever this object is destroyed or playerstatsystem is destroyed, this signal will fire.
+        var terminationSignal = Observable.Merge(
+            this.gameObject.OnDestroyAsObservable(),
+            playerStat.OnDestroyed
+        );
+        Observable.EveryUpdate()
+            .TakeUntil(terminationSignal)
+            .Where(_ => isActiveAndEnabled)
+            .Subscribe(_ => OnUpdate())
+            .AddTo(this);
     }
     
-    private void Update()
+    private void OnUpdate()
     {
         // Apply healing if player is in zone
         if (playerInZone && enableHealing)
