@@ -7,7 +7,7 @@ using UnityEngine.Events;
 /// </summary>
 [AddComponentMenu("Gameplay/Unity Interactable")]
 [RequireComponent(typeof(Collider))]
-public class UnityInteractable : MonoBehaviour, IInteractable, IInteractionPromptProvider
+public class UnityInteractable : InteractableBase, IInteractionPromptProvider
 {
     [SerializeField]
     [Tooltip("Invoked every time the player interacts while this component is enabled.")]
@@ -63,15 +63,16 @@ public class UnityInteractable : MonoBehaviour, IInteractable, IInteractionPromp
         EnsurePromptDefaults();
     }
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         EnsureColliderReference();
         FitColliderIfPossible();
         EnsurePromptDefaults();
     }
 
 
-    public void Interact()
+    public override void Interact()
     {
         if (interactOnce && hasInteracted)
         {

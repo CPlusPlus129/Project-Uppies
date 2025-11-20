@@ -354,6 +354,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3b00fc6294f91d49b9861bf2b32a40b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodSource
+  useOutline: 1
+  targetRenderers: []
   ItemName: blood
   ItemNameText: {fileID: 8267235580932293132}
 --- !u!65 &7654696861010887868
@@ -428,6 +430,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3d710ae85d372b047a5e63737a4e25ef, type: 3}
       propertyPath: m_Name
       value: Fridge
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3d710ae85d372b047a5e63737a4e25ef, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -1,13 +1,13 @@
 using UnityEngine;
 
-public class KeyPadGameTrigger : MonoBehaviour, IInteractable
+public class KeyPadGameTrigger : InteractableBase
 {
     [SerializeField]
     private SecretWall wall;
 
     private bool isActive;
 
-    public void Interact()
+    public override void Interact()
     {
         if (isActive) return;
         var keyPadUI = UIRoot.Instance.GetUIComponent<KeyPadGameUI>();

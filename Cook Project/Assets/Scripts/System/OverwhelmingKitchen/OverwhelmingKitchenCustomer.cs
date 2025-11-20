@@ -5,7 +5,7 @@ using UnityEngine;
 /// Overwhelming Kitchen customer object.
 /// Player interacts with this to deliver meals from inventory and complete orders.
 /// </summary>
-public class OverwhelmingKitchenCustomer : MonoBehaviour, IInteractable
+public class OverwhelmingKitchenCustomer : InteractableBase
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
@@ -25,7 +25,7 @@ public class OverwhelmingKitchenCustomer : MonoBehaviour, IInteractable
         if (showDebugInfo) Debug.Log($"[OverwhelmingKitchenCustomer] Assigned order: {order?.MealName}");
     }
 
-    public void Interact()
+    public override void Interact()
     {
         if (kitchenSystem == null)
         {

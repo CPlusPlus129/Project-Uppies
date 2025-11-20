@@ -3,21 +3,21 @@ using UnityEngine;
 
 namespace BlackjackGame
 {
-    public class BlackjackNPC : MonoBehaviour, IInteractable
+    public class BlackjackNPC : InteractableBase
     {
         [SerializeField] private string npcName;
         [SerializeField] private TextMeshPro nameText;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
             if (nameText != null)
                 nameText.text = npcName;
         }
 
-        public void Interact()
+        public override void Interact()
         {
             UIRoot.Instance.GetUIComponent<BlackjackUI>().Open();
         }
-
     }
 }

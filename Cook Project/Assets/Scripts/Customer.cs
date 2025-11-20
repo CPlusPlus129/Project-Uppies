@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using R3;
 
-public class Customer : MonoBehaviour, IInteractable
+public class Customer : InteractableBase
 {
     public string customerName;
     public TMPro.TextMeshPro nameText;
@@ -17,7 +17,13 @@ public class Customer : MonoBehaviour, IInteractable
     private IInventorySystem inventorySystem;
     public string specifiedNextOrderName { get; set; }
 
-    private async void Awake()
+    protected override void Awake()
+    {
+        base.Awake();
+        InitializeAsync().Forget();
+    }
+
+    private async UniTaskVoid InitializeAsync()
     {
         if (nameText == null)
         {
@@ -34,7 +40,7 @@ public class Customer : MonoBehaviour, IInteractable
         orderManager.OnOrdersCleared.Subscribe(_ => state = CustomerState.WaitingForOrder).AddTo(this);
     }
 
-    public void Interact()
+    public override void Interact()
     {
         switch (state)
         {

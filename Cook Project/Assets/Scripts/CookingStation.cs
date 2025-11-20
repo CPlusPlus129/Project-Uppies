@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class CookingStation : MonoBehaviour, IInteractable
+public class CookingStation : InteractableBase
 {
-    public void Interact()
+    public override void Interact()
     {
         UIRoot.Instance.GetUIComponent<CookingUI>().Open();
     }

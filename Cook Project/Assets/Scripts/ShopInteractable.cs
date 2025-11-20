@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class ShopInteractable : MonoBehaviour, IInteractable
+public class ShopInteractable : InteractableBase
 {
-    public void Interact()
+    public override void Interact()
     {
         if (!ShopSystem.Instance.IsStoreOpen)
         {

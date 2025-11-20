@@ -6,7 +6,7 @@ using UnityEngine;
 /// Overwhelming Kitchen dedicated fridge.
 /// Intelligently provides ingredients required by current orders.
 /// </summary>
-public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
+public class OverwhelmingKitchenFridge : InteractableBase
 {
     [Header("References")]
     [SerializeField] private OverwhelmingKitchenSystem kitchenSystem;
@@ -16,7 +16,7 @@ public class OverwhelmingKitchenFridge : MonoBehaviour, IInteractable
 
     private List<string> pendingIngredients = new List<string>();
 
-    public void Interact()
+    public override void Interact()
     {
         if (kitchenSystem == null)
         {

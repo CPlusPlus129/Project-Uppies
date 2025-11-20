@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Collider))]
 [AddComponentMenu("Gameplay/Shift Deposit Box")]
-public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptProvider
+public class ShiftDepositBox : InteractableBase, IInteractionPromptProvider
 {
     [SerializeField][Min(1)] private int manualDepositAmount = 50;
     [SerializeField][Tooltip("Seconds the interact button must be held to trigger a full deposit.")]
@@ -39,16 +39,22 @@ public class ShiftDepositBox : MonoBehaviour, IInteractable, IInteractionPromptP
         RefreshPrompts(allowSingletonCreation: false);
     }
 
-    private async void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         CacheColliderReference();
         EnsureInteractableLayer();
         RefreshPrompts();
+        InitializeAsync().Forget();
+    }
+
+    private async UniTaskVoid InitializeAsync()
+    {
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
     }
 
-    public void Interact()
+    public override void Interact()
     {
         if (shiftSystem == null || isProcessing)
             return;

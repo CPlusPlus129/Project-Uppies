@@ -64,7 +64,8 @@ MonoBehaviour:
   - {fileID: 7833122117494664109}
   - {fileID: -8306525201853219985}
   - {fileID: -1037998859212874123}
-  m_RendererFeatureMap: ad6b866f10d7b46c6f7bb5b9564bb98c751e5b7f894998f1
+  - {fileID: 828051918687529920}
+  m_RendererFeatureMap: ad6b866f10d7b46c6f7bb5b9564bb98c751e5b7f894998f1c06bf334d5d47d0b
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -93,6 +94,38 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &828051918687529920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbd6e526a1bb489a8df34cbfcfca6bfc, type: 3}
+  m_Name: OutlineRenderFeature
+  m_EditorClassIdentifier: Assembly-CSharp::Xenon.OutlineRenderFeature
+  m_Active: 1
+  FeatureSettings:
+    RenderPassEvent: 600
+    LayerMask:
+      serializedVersion: 2
+      m_Bits: 64
+    RenderingLayerMask:
+      serializedVersion: 0
+      m_Bits: 256
+    OverrideMaterial: {fileID: -876546973899608171, guid: 4f3bc6b888d3080448e0c3bb6fc9deb0, type: 3}
+    BlitMaterial: {fileID: -876546973899608171, guid: 6c897a44b62e6d84e9b0f6d5238a158e, type: 3}
+    ClearDepth: 0
+  MaterialSettings:
+    OutlineScale: 1
+    RobertsCrossMultiplier: 100
+    DepthThreshold: 10
+    NormalThreshold: 0.4
+    SteepAngleThreshold: 0.2
+    SteepAngleMultiplier: 25
+    OutlineColor: {r: 0.950042, g: 1, b: 0.1273585, a: 1}
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public class FoodSource : MonoBehaviour, IInteractable
+public class FoodSource : InteractableBase
 {
     public string ItemName;
     public TMPro.TMP_Text ItemNameText;
@@ -9,7 +9,13 @@ public class FoodSource : MonoBehaviour, IInteractable
     private FridgeGlowController glowController;
     private IFridgeGlowManager glowManager;
 
-    private async void Awake()
+    protected override void Awake()
+    {
+        base.Awake();
+        InitializeAsync().Forget();
+    }
+
+    private async UniTaskVoid InitializeAsync()
     {
         if (ItemNameText != null && !string.IsNullOrEmpty(ItemName))
         {
@@ -51,7 +57,7 @@ public class FoodSource : MonoBehaviour, IInteractable
         }
     }
 
-    public void Interact()
+    public override void Interact()
     {
         // Interaction logic here
     }
