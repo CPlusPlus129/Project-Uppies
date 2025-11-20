@@ -19,7 +19,6 @@ public class ShiftStateManager : SceneSingleton<ShiftStateManager>
     [SerializeField] private List<GameObject> objectsDisabledDuringShift = new();
     [SerializeField] private bool disableDarknessDamageDuringAfterShift = false;
     [SerializeField] private PlayerLightDamage playerLightDamage;
-    [SerializeField] private bool dontDestroyOnLoad = true;
     [SerializeField] private bool logTransitions = false;
 
     public ShiftSystem.ShiftState CurrentState { get; private set; } = ShiftSystem.ShiftState.None;
