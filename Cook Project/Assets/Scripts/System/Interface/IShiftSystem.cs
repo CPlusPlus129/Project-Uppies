@@ -24,4 +24,5 @@ public interface IShiftSystem : IGameService
     void EnterAfterShiftState(bool markShiftCompleted = false);
     void ExitAfterShiftState();
     bool ForceCompleteActiveShift(bool autoCompleteActiveQuest = true);
+    bool ForceFastForwardTimer();
 }

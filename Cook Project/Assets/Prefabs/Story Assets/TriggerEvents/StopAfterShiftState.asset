@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: StopAfterShiftState
   m_EditorClassIdentifier: Assembly-CSharp::StopAfterShiftStateStoryEventAsset
   eventId: StopAfterShiftState
-  designerNotes: 
+  designerNotes: Wait until door signals
   replayable: 1
   doorSignalId: after_shift_exit
+  taskRemovalDelay: 2

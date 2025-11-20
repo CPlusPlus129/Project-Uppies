@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using R3;
 
 /// <summary>
 /// Damages the player when they are in darkness (low light), unless they're in a safe zone.
@@ -62,21 +64,13 @@ public class PlayerLightDamage : MonoBehaviour
         }
         else
         {
+            healthSystem.OnPlayerDeath.Subscribe(_ => OnPlayerDeath()).AddTo(this);
             if (showDebugInfo)
             {
                 Debug.Log($"PlayerLightDamage: Successfully found PlayerStatSystem. Current HP: {healthSystem.CurrentHP.Value}/{healthSystem.MaxHP.Value}");
             }
         }
-        
-        // Store initial spawn position and get CharacterController
-        playerController = GetComponent<PlayerController>();
-        playerController.SpawnPosition = transform.position;
-        
-        if (playerController == null)
-        {
-            Debug.LogWarning("PlayerLightDamage: No PlayerController found. Respawn may not work properly.", this);
-        }
-        
+                
         if (showDebugInfo)
         {
             Debug.Log($"PlayerLightDamage: Spawn position set to {playerController.SpawnPosition}");
@@ -178,54 +172,24 @@ public class PlayerLightDamage : MonoBehaviour
             {
                 Debug.Log($"[DAMAGE] Applying {damageToApply} damage (accumulated: {accumulatedDamage:F2}). HP: {currentHP} -> {newHP}");
             }
-            
+
             healthSystem.Damage(damageToApply);
             
             // Log damage periodically
             if (Time.time - lastDamageTime >= 1f)
             {
-                if (showWarningMessages)
+                if (showDebugInfo)
                 {
-                    Debug.LogWarning($"Darkness damage! HP: {newHP}/{healthSystem.MaxHP.Value}");
+                    Debug.Log($"Darkness damage! HP: {newHP}/{healthSystem.MaxHP.Value}");
                 }
                 lastDamageTime = Time.time;
             }
             
-            // Check for death
-            if (newHP <= 0)
-            {
-                OnPlayerDeath();
-            }
         }
     }
     
     private void OnPlayerDeath()
     {
-        Debug.LogWarning("Player died from darkness exposure! Respawning...");
-        RespawnPlayer();
-    }
-    
-    /// <summary>
-    /// Respawns the player at their initial spawn position with full health.
-    /// </summary>
-    private void RespawnPlayer()
-    {
-        var healthSystem = PlayerStatSystem.Instance;
-        if (healthSystem == null)
-        {
-            Debug.LogError("Cannot respawn: PlayerStatSystem.Instance is NULL!");
-            return;
-        }
-        
-        // Reset HP to maximum
-        healthSystem.CurrentHP.Value = healthSystem.MaxHP.Value;
-        
-        // Teleport player to spawn position
-        if (playerController != null)
-        {
-            playerController.RespawnPosition();
-        }
-        
         // Reset internal damage state
         timeInDarkness = 0f;
         isTakingDamage = false;
@@ -233,10 +197,10 @@ public class PlayerLightDamage : MonoBehaviour
         
         // Re-enable the component if it was disabled
         enabled = true;
-        
+
         if (showDebugInfo)
         {
-            Debug.Log($"Player respawned at {playerController.SpawnPosition} with {healthSystem.CurrentHP.Value} HP");
+            Debug.Log($"Player died, reset darkness damage state.");
         }
     }
     

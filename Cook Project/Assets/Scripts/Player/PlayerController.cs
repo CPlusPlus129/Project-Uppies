@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     {
         //UIRoot.Instance.SetVisible(false);        
 
+        SpawnPosition = transform.position;
         SubscribeEvents();
 
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
@@ -44,11 +45,6 @@ public class PlayerController : MonoBehaviour
 
         var moveValue = moveAction.ReadValue<Vector2>();
         motor.ProcessMove(moveValue);
-    }
-
-    public void RespawnPosition()
-    {
-        Teleport(SpawnPosition);
     }
 
     public void Teleport(Vector3 position)
@@ -81,10 +77,12 @@ public class PlayerController : MonoBehaviour
         sprintAction.performed += motor.TrySprint;
         sprintAction.canceled += motor.StopSprint;
 
-        PlayerStatSystem.Instance.CanUseWeapon.Subscribe(can =>
+        var playerStat = PlayerStatSystem.Instance;
+        playerStat.CanUseWeapon.Subscribe(can =>
         {
             lightGun.gameObject.SetActive(can);
         }).AddTo(disposables);
+        playerStat.OnPlayerDeath.Subscribe(_ => HandleOnDeath()).AddTo(disposables);
     }
 
     private void UnsubscribeEvents()
@@ -108,5 +106,16 @@ public class PlayerController : MonoBehaviour
     private void OnInteractKey(InputAction.CallbackContext ctx)
     {
         interact.Interact(camlook.cam);
+    }
+
+    private async void HandleOnDeath()
+    {
+        UIRoot.Instance.GetUIComponent<DeathUI>().Open();
+        //if you don't wait on this, resurrect will set currentHP and the newest event from that will not fire, it's recommended to wait at least a frame.
+        await UniTask.Delay(1000);
+        UIRoot.Instance.GetUIComponent<DeathUI>().Close();
+        PlayerStatSystem.Instance.Resurrect();
+        //Respawn at position
+        Teleport(SpawnPosition);
     }
 }

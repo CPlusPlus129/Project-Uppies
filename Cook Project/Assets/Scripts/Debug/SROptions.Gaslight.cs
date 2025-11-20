@@ -150,6 +150,42 @@ public partial class SROptions
             SRDebug.Instance.HideDebugPanel();
         }
     }
+
+    [Category("Cheat")]
+    [DisplayName("Skip To Shift Remain 3 sec")]
+    public async void SkipToShiftTimer()
+    {
+        var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        if (shiftSystem == null)
+        {
+            Debug.LogWarning("[SROptions] Shift system unavailable.");
+            return;
+        }
+
+        var state = shiftSystem.currentState.Value;
+        switch (state)
+        {
+            case ShiftSystem.ShiftState.AfterShift:
+                WorldBroadcastSystem.Instance?.Broadcast("Already off the clock.", 4f);
+                return;
+            case ShiftSystem.ShiftState.None:
+            case ShiftSystem.ShiftState.GaveOver:
+                WorldBroadcastSystem.Instance?.Broadcast("No active shift to skip.", 4f);
+                return;
+        }
+
+        if (!shiftSystem.ForceFastForwardTimer())
+        {
+            WorldBroadcastSystem.Instance?.Broadcast("Unable to fast forward this shift.", 4f);
+            return;
+        }
+
+        WorldBroadcastSystem.Instance?.Broadcast("Shift fast forwarded to remain 3 sec.", 3f);
+        if (SRDebug.Instance != null && SRDebug.Instance.IsDebugPanelVisible)
+        {
+            SRDebug.Instance.HideDebugPanel();
+        }
+    }
     #endregion
 
     #region Main Level
