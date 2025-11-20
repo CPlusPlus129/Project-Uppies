@@ -185,6 +185,27 @@ public class ShiftSystem : IShiftSystem
         return true;
     }
 
+    public bool ForceFastForwardTimer()
+    {
+        var targetRemainTime = 3f;
+        if (currentState.Value != ShiftState.InShift && currentState.Value != ShiftState.Overtime)
+        {
+            return false;
+        }
+
+        var shiftData = Database.Instance?.shiftData;
+        if (shiftData == null)
+        {
+            Debug.LogWarning("[ShiftSystem] Cannot fast-forward shift because ShiftData is missing.");
+            return false;
+        }
+
+        shiftElapsedSeconds = Mathf.Max(0, shiftData.shiftDuration - targetRemainTime);
+        shiftTimer.Value = Mathf.Min(targetRemainTime, shiftData.shiftDuration);
+
+        return true;
+    }
+
     public bool IsCurrentShiftQuestCompleted()
     {
         var s = GetCurrentShift();
