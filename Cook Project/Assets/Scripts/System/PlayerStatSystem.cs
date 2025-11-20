@@ -1,35 +1,15 @@
+using Cysharp.Threading.Tasks;
 using R3;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
+public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
 {
-    public PlayerStatSystem()
-    {
-        CurrentHP
-            .Pairwise()
-            .Subscribe(hpValues =>
-            {
-                OnHPChanged.OnNext((hpValues.Previous, hpValues.Current));
-                if (hpValues.Current <= 0 && hpValues.Previous > 0)
-                {
-                    OnPlayerDeath.OnNext(Unit.Default);
-                }
-            })
-            .AddTo(disposables);
-
-        CurrentSouls
-            .Pairwise()
-            .Subscribe(soulValues =>
-            {
-                OnSoulsChanged.OnNext((soulValues.Previous, soulValues.Current));
-            })
-            .AddTo(disposables);
-    }
-
     public ReactiveProperty<int> CurrentHP { get; private set; } = new ReactiveProperty<int>(100);
     public ReactiveProperty<int> MaxHP { get; private set; } = new ReactiveProperty<int>(100);
     public Subject<(int oldValue, int newValue)> OnHPChanged { get; private set; } = new Subject<(int, int)>();
     public Subject<Unit> OnPlayerDeath { get; private set; } = new Subject<Unit>();
+
     public ReactiveProperty<float> CurrentStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> MaxStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
@@ -51,7 +31,46 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
 
-    private CompositeDisposable disposables = new CompositeDisposable();
+    #region Unity gameobject lifecycle
+    protected override async void Awake()
+    {
+        base.Awake();
+        if (Instance != this) return;
+
+        CurrentHP
+            .Pairwise()
+            .Subscribe(hpValues =>
+            {
+                OnHPChanged.OnNext((hpValues.Previous, hpValues.Current));
+                if (hpValues.Current <= 0 && hpValues.Previous > 0)
+                {
+                    OnPlayerDeath.OnNext(Unit.Default);
+                }
+            })
+            .AddTo(this);
+
+        CurrentSouls
+            .Pairwise()
+            .Subscribe(soulValues =>
+            {
+                OnSoulsChanged.OnNext((soulValues.Previous, soulValues.Current));
+            })
+            .AddTo(this);
+
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
+        var shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
+        shiftSystem.currentState.Subscribe(state =>
+        {
+            CanUseWeapon.Value = state is ShiftSystem.ShiftState.InShift or ShiftSystem.ShiftState.Overtime;
+        }).AddTo(this);
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        if (Instance != this) return;
+    }
+    #endregion
 
     public void Resurrect()
     {

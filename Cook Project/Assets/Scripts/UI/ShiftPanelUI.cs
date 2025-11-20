@@ -26,7 +26,6 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     public async UniTask Init()
     {
-        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         shiftSystem.OnGameStart.Subscribe(_ => UpdateActiveState());
         shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);

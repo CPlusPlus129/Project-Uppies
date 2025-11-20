@@ -5,10 +5,8 @@ using System.Collections.Generic;
 /// OPTIMIZED VERSION - Manages which dynamic lights cast shadows based on distance to player.
 /// Performance improvements: No LINQ, sqrMagnitude, spatial culling, pre-allocated buffers.
 /// </summary>
-public class DynamicShadowManager : MonoBehaviour
+public class DynamicShadowManager : SceneSingleton<DynamicShadowManager>
 {
-    public static DynamicShadowManager Instance { get; private set; }
-
     [Header("Shadow Budget")]
     [Tooltip("Maximum number of dynamic lights that can cast shadows simultaneously")]
     [Range(1, 8)]
@@ -86,15 +84,11 @@ public class DynamicShadowManager : MonoBehaviour
     }
     private static readonly DistanceComparer distanceComparer = new DistanceComparer();
 
-    private void Awake()
+    protected override void Awake()
     {
-        // Singleton pattern
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
+        base.Awake();
+        if (Instance != this)
             return;
-        }
-        Instance = this;
 
         // Auto-find player if not set
         if (playerTransform == null)

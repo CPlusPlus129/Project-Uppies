@@ -8,10 +8,8 @@ using UnityEngine;
 /// Centralizes reactions to ShiftSystem state changes so designers can toggle
 /// behaviours and objects between Shift and AfterShift without wiring each script.
 /// </summary>
-public class ShiftStateManager : MonoBehaviour
+public class ShiftStateManager : SceneSingleton<ShiftStateManager>
 {
-    public static ShiftStateManager Instance { get; private set; }
-
     [Header("Disable During After Shift")]
     [SerializeField] private List<Behaviour> behavioursDisabledDuringAfterShift = new();
     [SerializeField] private List<GameObject> objectsDisabledDuringAfterShift = new();
@@ -34,30 +32,20 @@ public class ShiftStateManager : MonoBehaviour
     private IDisposable shiftStateSubscription;
     private bool initializationStarted;
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
+        base.Awake();
+        if (Instance != this)
             return;
-        }
-
-        Instance = this;
-        if (dontDestroyOnLoad && Application.isPlaying)
-        {
-            transform.SetParent(null);
-            DontDestroyOnLoad(gameObject);
-        }
 
         InitializeAsync().Forget();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
+        base.OnDestroy();
+        if (Instance != this)
+            return;
 
         shiftStateSubscription?.Dispose();
         shiftStateSubscription = null;

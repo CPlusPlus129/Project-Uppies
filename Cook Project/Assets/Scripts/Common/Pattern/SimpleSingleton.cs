@@ -1,3 +1,7 @@
+/// <summary>
+/// Please be careful this singleton will not be destroyed after play mode and preserve through edit mode. ResetInstance when it should be deleted.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class SimpleSingleton<T> where T : class, new()
 {
     private static T _instance;

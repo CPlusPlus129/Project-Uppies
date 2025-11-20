@@ -28,7 +28,6 @@ internal static class PlayModeCleanup
         locator?.Shutdown();
 
         SimpleSingleton<WorldBroadcastSystem>.ResetInstance();
-        SimpleSingleton<PlayerStatSystem>.ResetInstance();
         SimpleSingleton<ShopSystem>.ResetInstance();
 
         var singletonRoot = GameObject.Find("Singleton");
