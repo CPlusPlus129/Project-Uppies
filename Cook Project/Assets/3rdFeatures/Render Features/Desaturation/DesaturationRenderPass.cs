@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+#pragma warning disable CS0672, CS0618 // ignore obsolete warning
 namespace RenderFeatures
 {
     public class DesaturationRenderPass : ScriptableRenderPass
@@ -151,3 +152,4 @@ namespace RenderFeatures
         }
     }
 }
+#pragma warning restore CS0672, CS0618 // ignore obsolete warning
