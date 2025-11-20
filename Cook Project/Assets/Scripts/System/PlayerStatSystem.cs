@@ -10,7 +10,7 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
             .Subscribe(hpValues =>
             {
                 OnHPChanged.OnNext((hpValues.Previous, hpValues.Current));
-                if (hpValues.Current <= 0)
+                if (hpValues.Current <= 0 && hpValues.Previous > 0)
                 {
                     OnPlayerDeath.OnNext(Unit.Default);
                 }
@@ -28,15 +28,15 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
 
     public ReactiveProperty<int> CurrentHP { get; private set; } = new ReactiveProperty<int>(100);
     public ReactiveProperty<int> MaxHP { get; private set; } = new ReactiveProperty<int>(100);
-    public Subject<(int oldValue, int newValue)> OnHPChanged = new Subject<(int, int)>();
-    public Subject<Unit> OnPlayerDeath = new Subject<Unit>();
+    public Subject<(int oldValue, int newValue)> OnHPChanged { get; private set; } = new Subject<(int, int)>();
+    public Subject<Unit> OnPlayerDeath { get; private set; } = new Subject<Unit>();
     public ReactiveProperty<float> CurrentStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> MaxStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> StaminaRecoverySpeed { get; private set; } = new ReactiveProperty<float>(10f);
 
     public ReactiveProperty<int> CurrentSouls { get; private set; } = new ReactiveProperty<int>(0);
     public ReactiveProperty<int> MaxSouls { get; private set; } = new ReactiveProperty<int>(100);
-    public Subject<(int oldValue, int newValue)> OnSoulsChanged = new Subject<(int, int)>();
+    public Subject<(int oldValue, int newValue)> OnSoulsChanged { get; private set; } = new Subject<(int, int)>();
 
     // Light System Properties
     public ReactiveProperty<float> CurrentLight { get; private set; } = new ReactiveProperty<float>(100f);
@@ -52,6 +52,11 @@ public class PlayerStatSystem : SimpleSingleton<PlayerStatSystem>
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
 
     private CompositeDisposable disposables = new CompositeDisposable();
+
+    public void Resurrect()
+    {
+        CurrentHP.Value = MaxHP.CurrentValue;
+    }
 
     public void Heal(int value, bool canOverheal = false)
     {
