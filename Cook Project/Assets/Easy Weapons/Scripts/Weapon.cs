@@ -58,16 +58,22 @@ public class Weapon : MonoBehaviour
     [Header("References")]
     [Tooltip("Visual model of the weapon")]
     public GameObject weaponModel;
-    
+
+    [Tooltip("Player camera for accurate aiming (required for projectile weapons)")]
+    public Camera playerCamera;
+
+    [Tooltip("This determines the aim target during shooting")]
+    private LayerMask layerMask = (1 << 0) | (1 << 6) | (1 << 12); //LayerMask.NameToLayer("Default") | LayerMask.NameToLayer("Interactable") | LayerMask.NameToLayer("NavmeshSurface");
+
     [Tooltip("Start position for raycasts and beams")]
     public Transform raycastOrigin;
-    
+
     [Tooltip("Spawn point for projectiles")]
     public Transform projectileSpawnPoint;
-    
+
     [Tooltip("Position for muzzle effects")]
     public Transform muzzleEffectPoint;
-    
+
     [Tooltip("Position where shells are ejected")]
     public Transform shellEjectPoint;
     #endregion
@@ -646,7 +652,10 @@ public class Weapon : MonoBehaviour
     private Vector3 CalculateAccurateDirection()
     {
         float spread = (100f - currentAccuracy) / 1000f;
-        Vector3 direction = raycastOrigin.forward;
+
+        // Use camera direction for accurate aiming, fallback to raycast origin
+        Vector3 direction = playerCamera != null ? playerCamera.transform.forward : raycastOrigin.forward;
+
         direction.x += Random.Range(-spread, spread);
         direction.y += Random.Range(-spread, spread);
         direction.z += Random.Range(-spread, spread);
@@ -687,13 +696,64 @@ public class Weapon : MonoBehaviour
         
         float warmupMultiplier = enableWarmup ? (warmupCharge / maxWarmupTime) : 1f;
         warmupCharge = 0f;
-        
+
+        // Calculate aim point from camera center for accurate aiming
+        Vector3 targetPoint;
+        if (playerCamera != null)
+        {
+            Ray aimRay = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+            if (Physics.Raycast(aimRay, out RaycastHit hit, 1000f, layerMask, QueryTriggerInteraction.Ignore))
+            {
+                targetPoint = hit.point;
+                //Debug.Log($"hit something {hit.collider.gameObject.name}, layer {LayerMask.LayerToName(hit.collider.gameObject.layer)}");
+            }
+            else
+            {
+                targetPoint = aimRay.GetPoint(1000f);
+            }
+        }
+        else
+        {
+            // Fallback if camera not assigned - use spawn point forward
+            Debug.LogWarning("[Weapon] playerCamera is not assigned! Projectiles will use weapon's forward direction. Please assign the camera in the Inspector.", this);
+            targetPoint = projectileSpawnPoint.position + projectileSpawnPoint.forward * 1000f;
+        }
+
+        // Store debug data for gizmo visualization
+        if (showDebugGizmos)
+        {
+            debugCameraPosition = playerCamera != null ? playerCamera.transform.position : projectileSpawnPoint.position;
+            debugTargetPoint = targetPoint;
+            debugProjectileDirections.Clear();
+            hasDebugData = true;
+        }
+
+        // Calculate spread based on accuracy system
+        float spread = (100f - currentAccuracy) / 1000f;
+
         for (int i = 0; i < pelletsPerShot; i++)
         {
             if (projectilePrefab != null)
             {
-                GameObject proj = Instantiate(projectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
-                
+                // Calculate direction from spawn point to camera's aim point
+                Vector3 directionToTarget = (targetPoint - projectileSpawnPoint.position).normalized;
+
+                // Apply accuracy spread to each pellet
+                directionToTarget.x += Random.Range(-spread, spread);
+                directionToTarget.y += Random.Range(-spread, spread);
+                directionToTarget.z += Random.Range(-spread, spread);
+                directionToTarget = directionToTarget.normalized;
+
+                // Spawn projectile at firespot position WITH CORRECT ROTATION
+                // This ensures the rotation is set BEFORE Awake() runs, avoiding timing issues
+                GameObject proj = Instantiate(projectilePrefab, projectileSpawnPoint.position, Quaternion.LookRotation(directionToTarget));
+
+                // Store projectile direction for debug visualization
+                if (showDebugGizmos)
+                {
+                    debugProjectileDirections.Add(directionToTarget);
+                }
+
                 if (enableWarmup)
                 {
                     if (warmupAffectsDamage)
@@ -999,5 +1059,54 @@ public class Weapon : MonoBehaviour
     public int GetMaxAmmo() => magazineCapacity;
     public float GetBeamHeat() => beamHeat;
     public float GetMaxBeamHeat() => maxBeamDuration;
+    #endregion
+
+    #region Debug Visualization
+    [Header("Debug Visualization")]
+    [Tooltip("Show gizmos for camera raycast and projectile directions in Scene view")]
+    public bool showDebugGizmos = false;
+
+    // Debug data for gizmo drawing
+    private Vector3 debugCameraPosition;
+    private Vector3 debugTargetPoint;
+    private List<Vector3> debugProjectileDirections = new List<Vector3>();
+    private bool hasDebugData = false;
+
+    private void OnDrawGizmos()
+    {
+        if (!showDebugGizmos || !hasDebugData)
+            return;
+
+        // Draw camera raycast (green line)
+        Gizmos.color = Color.darkCyan;
+        Gizmos.DrawLine(debugCameraPosition, debugTargetPoint);
+
+        // Draw target point (yellow sphere)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(debugTargetPoint, 0.2f);
+
+        // Draw projectile directions (red lines)
+        if (projectileSpawnPoint != null)
+        {
+            Gizmos.color = Color.red;
+            foreach (var direction in debugProjectileDirections)
+            {
+                Vector3 endPoint = projectileSpawnPoint.position + direction * 10f;
+                Gizmos.DrawLine(projectileSpawnPoint.position, endPoint);
+                // Draw arrow head
+                Gizmos.DrawWireSphere(endPoint, 0.1f);
+            }
+        }
+
+        // Draw labels
+        #if UNITY_EDITOR
+        UnityEditor.Handles.Label(debugTargetPoint + Vector3.up * 0.3f, "Target Point");
+        if (projectileSpawnPoint != null)
+        {
+            UnityEditor.Handles.Label(projectileSpawnPoint.position + Vector3.up * 0.5f,
+                $"Firespot ({debugProjectileDirections.Count} projectiles)");
+        }
+        #endif
+    }
     #endregion
 }

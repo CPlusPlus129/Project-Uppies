@@ -42,6 +42,7 @@ public class WeaponEditor : Editor
         if (showReferences)
         {
             EditorGUI.indentLevel++;
+            weapon.playerCamera = (Camera)EditorGUILayout.ObjectField("Player Camera", weapon.playerCamera, typeof(Camera), true);
             weapon.weaponModel = (GameObject)EditorGUILayout.ObjectField("Weapon Model", weapon.weaponModel, typeof(GameObject), true);
             
             if (weapon.weaponType == WeaponType.Raycast || weapon.weaponType == WeaponType.Beam)
