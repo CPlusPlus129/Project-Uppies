@@ -8,6 +8,7 @@ public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
     public ReactiveProperty<int> MaxHP { get; private set; } = new ReactiveProperty<int>(100);
     public Subject<(int oldValue, int newValue)> OnHPChanged { get; private set; } = new Subject<(int, int)>();
     public Subject<Unit> OnPlayerDeath { get; private set; } = new Subject<Unit>();
+    public ReactiveProperty<Vector3> RespawnPosition { get; private set; } = new ReactiveProperty<Vector3>(Vector3.zero);
 
     public ReactiveProperty<float> CurrentStamina { get; private set; } = new ReactiveProperty<float>(100);
     public ReactiveProperty<float> MaxStamina { get; private set; } = new ReactiveProperty<float>(100);
@@ -173,5 +174,10 @@ public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
     {
         amount = Mathf.Clamp(amount, 0, MaxSouls.Value);
         CurrentSouls.Value = amount;
+    }
+
+    public void SetRespawnPosition(Vector3 v3)
+    {
+        RespawnPosition.Value = v3;
     }
 }
