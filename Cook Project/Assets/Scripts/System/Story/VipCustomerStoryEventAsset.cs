@@ -432,8 +432,6 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             Debug.LogWarning($"[{nameof(VipCustomerStoryEventAsset)}] Failed to attach UnityInteractable to VIP {customer.customerName}.", customer);
             return;
         }
-
-        interactable.AddOnInteractListener(customer.Interact);
     }
 
     private VipCustomerSpawnAnchor ResolveAnchor()
