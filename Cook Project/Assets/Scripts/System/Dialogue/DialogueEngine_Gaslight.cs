@@ -49,6 +49,8 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
     async UniTaskVoid InitGaslightRelatedService()
     {
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
+        await UniTask.WaitUntil(() => uiHasInit);
+        
         var assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
         assetManager = new DialogueAssetManager(assetLoader);
         

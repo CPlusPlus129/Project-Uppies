@@ -4,13 +4,16 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "StopAfterShiftState", menuName = "Game Flow/Shift Events/Stop After Shift State")]
-public sealed class StopAfterShiftStateStoryEventAsset : StoryEventAsset
+public sealed class StopAfterShiftStateStoryEventAsset : StoryEventAsset, IBackgroundStoryEvent
 {
     private const string DefaultDoorSignalId = "after_shift_exit";
 
     [SerializeField]
     [Tooltip("Signal emitted by RestaurantDoor when the player chooses to leave AfterShift.")]
     private string doorSignalId = DefaultDoorSignalId;
+
+    public bool RunInBackground => true;
+    public bool BlockSourceSequence => true;
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {

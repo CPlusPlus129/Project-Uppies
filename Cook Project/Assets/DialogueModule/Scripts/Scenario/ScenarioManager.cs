@@ -20,6 +20,9 @@ namespace DialogueModule
             if (labelData == null)
             {
                 Debug.LogError($"can't find labelData for label {label}!");
+                // Ensure we notify listeners that the scenario ended (failed to start), 
+                // otherwise async waiters will hang forever.
+                EndScenario();
                 return;
             }
             onBeginScenario?.Invoke();

@@ -47,6 +47,7 @@ namespace DialogueModule
             if (labelData.commands.Count == 0)
             {
                 Debug.Log($"No command found in labelData {labelData.name}, will skip start scenario");
+                engine.scenarioManager.EndScenario();
                 return;
             }
             StartCoroutine(StartScenarioAsync(labelData));
@@ -57,16 +58,23 @@ namespace DialogueModule
             StartPlaying();
             yield return new WaitUntil(() => !engine.isLoading);
             currentLabelData = labelData;
-            do
+
+            try
             {
-                yield return PreloadAssets();
-                yield return StartLabelData();
+                do
+                {
+                    yield return PreloadAssets();
+                    yield return StartLabelData();
 
-                currentLabelData = nextLabel;
-                nextLabel = null;
-            } while (currentLabelData != null);
+                    currentLabelData = nextLabel;
+                    nextLabel = null;
+                } while (currentLabelData != null);
+            }
 
-            EndPlaying();
+            finally
+            {
+                EndPlaying();
+            }
         }
 
         IEnumerator StartLabelData()
