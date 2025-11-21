@@ -153,6 +153,9 @@ public class PlayerController : MonoBehaviour
         playerStat.Resurrect();
         playerStat.CanMove.Value = true;
         //Respawn at position
-        Teleport(SpawnPosition);
+        if(playerStat.RespawnPosition.Value != Vector3.zero)
+            Teleport(playerStat.RespawnPosition.Value);
+        else
+            Teleport(SpawnPosition);
     }
 }

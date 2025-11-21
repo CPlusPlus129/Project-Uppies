@@ -9,6 +9,7 @@ public class TriggerZone : MonoBehaviour
 {
     [SerializeField] private bool triggerOnce = true;
     [SerializeField] private string playerTag = "Player";
+    [SerializeField] private GameObject respawnPoint;
 
     private Subject<Unit> onPlayerEnter = new Subject<Unit>();
     private bool hasTriggered = false;
@@ -32,6 +33,10 @@ public class TriggerZone : MonoBehaviour
         {
             Debug.Log("[TriggerZone] Player entered! Firing event.");
             hasTriggered = true;
+            var playerStat = PlayerStatSystem.Instance;
+            if (playerStat != null && respawnPoint != null) {
+                playerStat.SetRespawnPosition(respawnPoint.transform.position);
+            }
             onPlayerEnter.OnNext(Unit.Default);
         }
         else
