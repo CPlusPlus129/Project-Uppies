@@ -34,7 +34,7 @@ public partial class Mob : MonoBehaviour
 
     private static readonly List<Mob> ActiveMobs = new List<Mob>();
     private Rigidbody body;
-    private NavMeshAgent agent;
+    [SerializeField] private NavMeshAgent agent;
     private Animator cachedAnimator;
     private bool isAlive = true;
     private MobState state = MobState.Idle;
@@ -94,7 +94,7 @@ public partial class Mob : MonoBehaviour
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
-        agent = GetComponent<NavMeshAgent>();
+        EnsureAgentReference();
         cachedAnimator = GetComponent<Animator>();
 
         ConfigureRigidbody();
@@ -110,6 +110,11 @@ public partial class Mob : MonoBehaviour
 
         TryAutoAssignReferences();
         ResetDeathPresentationState(true);
+    }
+
+    private void OnValidate()
+    {
+        EnsureAgentReference();
     }
 
     private void OnEnable()
@@ -184,6 +189,11 @@ public partial class Mob : MonoBehaviour
 
     private void ConfigureAgent()
     {
+        if (agent == null)
+        {
+            return;
+        }
+
         agent.updatePosition = false;
         agent.updateRotation = false;
         agent.speed = locomotion.baseSpeed;
@@ -193,6 +203,18 @@ public partial class Mob : MonoBehaviour
         agent.autoRepath = true;
         agent.angularSpeed = locomotion.turnRate;
         agent.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+    }
+
+    private void EnsureAgentReference()
+    {
+        if (agent == null)
+        {
+            agent = GetComponent<NavMeshAgent>();
+            if (agent == null)
+            {
+                agent = gameObject.AddComponent<NavMeshAgent>();
+            }
+        }
     }
 
     private void TryAutoAssignReferences()

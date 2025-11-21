@@ -12,6 +12,16 @@ public partial class Mob
         bool destinationChanged = (worldPoint - destinationRequest).sqrMagnitude > locomotion.maxDestinationDrift * locomotion.maxDestinationDrift;
         bool intervalExpired = time >= nextPathRefreshTime;
 
+        if (agent == null || !agent.enabled)
+        {
+            return;
+        }
+
+        if (!EnsureAgentOnNavMesh())
+        {
+            return;
+        }
+
         if (!destinationChanged && !intervalExpired && agent.hasPath)
         {
             return;
@@ -29,9 +39,35 @@ public partial class Mob
         nextPathRefreshTime = time + refreshInterval;
     }
 
+    /// <summary>
+    /// Ensures the NavMeshAgent is on a NavMesh before issuing nav calls.
+    /// Attempts a small sample + warp to recover if slightly off mesh.
+    /// </summary>
+    /// <returns>true if the agent is on a NavMesh after this call.</returns>
+    private bool EnsureAgentOnNavMesh()
+    {
+        if (agent == null || !agent.enabled)
+        {
+            return false;
+        }
+
+        if (agent.isOnNavMesh)
+        {
+            return true;
+        }
+
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.5f, navMeshAreaMask))
+        {
+            agent.Warp(hit.position);
+            return agent.isOnNavMesh;
+        }
+
+        return false;
+    }
+
     private void ClearPath()
     {
-        if (agent != null)
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
         {
             agent.ResetPath();
         }
@@ -57,7 +93,7 @@ public partial class Mob
 
     private void UpdateNavigation(float deltaTime)
     {
-        if (agent == null || !agent.enabled)
+        if (agent == null || !agent.enabled || !EnsureAgentOnNavMesh())
         {
             return;
         }

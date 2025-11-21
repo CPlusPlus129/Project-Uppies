@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// Helper component that exposes UnityEvent-friendly entry points for starting or stopping a boss chase.
@@ -24,6 +25,7 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Freeze the boss in place until BeginChase is invoked.")]
     private bool holdPositionUntilChase = true;
 
+    private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
     private Vector3 initialPosition;
     private Quaternion initialRotation;
@@ -35,6 +37,11 @@ public class BossChaseController : MonoBehaviour
         if (bossMob == null)
         {
             bossMob = GetComponent<Mob>();
+        }
+
+        if (bossMob != null)
+        {
+            cachedAgent = bossMob.GetComponent<NavMeshAgent>();
         }
 
         if (bossMob != null)
@@ -70,15 +77,18 @@ public class BossChaseController : MonoBehaviour
     /// </summary>
     public void BeginChase()
     {
-        if (bossMob == null)
+        if (!EnsureMobActive())
         {
-            Debug.LogWarning($"{nameof(BossChaseController)} on {name} has no Mob reference assigned.", this);
             return;
         }
 
         if (holdPositionUntilChase)
         {
             ApplyHoldPositionState(false);
+        }
+        else
+        {
+            EnsureAgentReady();
         }
 
         if (pulseEffect != null)
@@ -136,6 +146,7 @@ public class BossChaseController : MonoBehaviour
         else
         {
             bossMob.enabled = true;
+            EnsureAgentReady();
             if (cachedRigidbody != null)
             {
                 if (hasCachedRigidbodyState)
@@ -148,5 +159,60 @@ public class BossChaseController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void EnsureAgentReady()
+    {
+        if (cachedAgent == null && bossMob != null)
+        {
+            cachedAgent = bossMob.GetComponent<NavMeshAgent>();
+        }
+
+        if (cachedAgent == null)
+        {
+            return;
+        }
+
+        if (!cachedAgent.enabled)
+        {
+            cachedAgent.enabled = true;
+        }
+
+        if (!cachedAgent.isOnNavMesh)
+        {
+            // Try to warp onto nearest navmesh within a small radius
+            if (NavMesh.SamplePosition(cachedAgent.transform.position, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+            {
+                cachedAgent.Warp(hit.position);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Makes sure the mob/agent are enabled before a chase is started. This is
+    /// primarily to handle scenes where the Mob component was left disabled in
+    /// the inspector while waiting for an interactable trigger.
+    /// </summary>
+    private bool EnsureMobActive()
+    {
+        if (bossMob == null)
+        {
+            Debug.LogWarning($"{nameof(BossChaseController)} on {name} has no Mob reference assigned.", this);
+            return false;
+        }
+
+        if (!bossMob.enabled)
+        {
+            bossMob.enabled = true;
+        }
+
+        EnsureAgentReady();
+
+        if (cachedAgent != null && !cachedAgent.enabled)
+        {
+            cachedAgent.enabled = true;
+        }
+
+        return true;
     }
 }
