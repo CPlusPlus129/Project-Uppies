@@ -9,9 +9,21 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [CreateAssetMenu(fileName = "VipCustomerStoryEvent", menuName = "Game Flow/VIP Events/VIP Customer")]
-public sealed class VipCustomerStoryEventAsset : StoryEventAsset
+public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundStoryEvent
 {
     private static readonly StringComparer NameComparer = StringComparer.OrdinalIgnoreCase;
+
+    [Header("Execution Flow")]
+    [SerializeField]
+    [Tooltip("If true, this event runs in the background and doesn't block the main story queue.")]
+    private bool runInBackground = true;
+
+    [SerializeField]
+    [Tooltip("If running in background, should we block subsequent events in THIS specific sequence?")]
+    private bool blockSourceSequence = true;
+
+    public bool RunInBackground => runInBackground;
+    public bool BlockSourceSequence => blockSourceSequence;
 
     [Header("VIP Setup")]
     [SerializeField]
