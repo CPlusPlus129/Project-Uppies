@@ -124,14 +124,18 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
     [Tooltip("World broadcast duration in seconds.")]
     private float broadcastDurationSeconds = 5f;
 
-    [Header("Quest Hooks")]
+    [Header("Task Hooks")]
     [SerializeField]
-    [Tooltip("Quest id to mark complete once the VIP's order is served.")]
-    private string questIdToComplete;
+    [Tooltip("Task id to mark complete once the VIP's order is served.")]
+    private string taskIdToComplete;
 
     [SerializeField]
-    [Tooltip("Automatically (re)start the quest when the VIP spawns.")]
-    private bool autoStartQuestOnSpawn = true;
+    [Tooltip("Task description to add when the VIP spawns.")]
+    private string taskDescription = "Serve the VIP customer";
+
+    [SerializeField]
+    [Tooltip("Automatically add the task when the VIP spawns.")]
+    private bool autoAddTaskOnSpawn = true;
 
     public override async UniTask<bool> CanExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
@@ -153,7 +157,6 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
 
         var shiftSystem = await context.GetServiceAsync<IShiftSystem>();
         var orderManager = await context.GetServiceAsync<IOrderManager>();
-        var questService = context.IsServiceReady<IQuestService>() ? await context.GetServiceAsync<IQuestService>() : null;
         var dialogueService = context.IsServiceReady<IDialogueService>() ? await context.GetServiceAsync<IDialogueService>() : null;
 
         var isShiftValid = await EnsureTargetShiftAsync(shiftSystem, cancellationToken);
@@ -190,9 +193,9 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
 
         ListenForDestroySignal(context, vipInstance, cancellationToken);
 
-        if (vipHasOrder && autoStartQuestOnSpawn && !string.IsNullOrWhiteSpace(questIdToComplete))
+        if (vipHasOrder && autoAddTaskOnSpawn && !string.IsNullOrWhiteSpace(taskIdToComplete))
         {
-            questService?.StartQuest(questIdToComplete);
+            TaskManager.Instance.AddTask(taskIdToComplete, taskDescription);
         }
 
         if (!string.IsNullOrWhiteSpace(signalOnSpawn))
@@ -219,7 +222,6 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
                 orderManager,
                 shiftSystem,
                 dialogueService,
-                questService,
                 cancellationToken);
         }
         else
@@ -636,7 +638,6 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
         IOrderManager orderManager,
         IShiftSystem shiftSystem,
         IDialogueService dialogueService,
-        IQuestService questService,
         CancellationToken token)
     {
         var vipServedTcs = new UniTaskCompletionSource<bool>();
@@ -703,9 +704,9 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
                     dialogueService.PlayDialogueAsync(orderCompletedDialogue).Forget();
                 }
 
-                if (!string.IsNullOrWhiteSpace(questIdToComplete))
+                if (!string.IsNullOrWhiteSpace(taskIdToComplete))
                 {
-                    questService?.CompleteQuest(questIdToComplete);
+                    TaskManager.Instance.CompleteTask(taskIdToComplete);
                 }
 
                 return StoryEventResult.Completed($"VIP order '{vipName}' served.");

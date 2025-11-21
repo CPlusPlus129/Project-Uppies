@@ -45,5 +45,6 @@ MonoBehaviour:
   spawnBroadcastMessage: VIP arrival detected.
   completionBroadcastMessage: VIP satisfied. Nice work.
   broadcastDurationSeconds: 5
-  questIdToComplete: VIP1Complete
-  autoStartQuestOnSpawn: 1
+  taskIdToComplete: 
+  taskDescription: Serve the VIP customer
+  autoAddTaskOnSpawn: 1
