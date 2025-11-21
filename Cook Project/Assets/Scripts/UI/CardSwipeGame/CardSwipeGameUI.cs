@@ -3,8 +3,9 @@ using UnityEngine.UI;
 using TMPro;
 using R3;
 using UnityEngine.InputSystem;
+using Cysharp.Threading.Tasks;
 
-public class CardSwipeGameUI : MonoBehaviour
+public class CardSwipeGameUI : MonoBehaviour, IUIInitializable
 {
     [Header("Game Components")]
     [SerializeField] private DraggableCard draggableCard;
@@ -22,8 +23,9 @@ public class CardSwipeGameUI : MonoBehaviour
     IPuzzleGameManager puzzleGameManager;
     private CardSwipeGame currentGame;
     private float swipeDistance;
+    private DraggableCard animationCard;
 
-    private async void Awake()
+    public async UniTask Init()
     {
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
         puzzleGameManager.OnGameStarted
@@ -52,8 +54,13 @@ public class CardSwipeGameUI : MonoBehaviour
 
     private void SetupCardEvents()
     {
-        draggableCard.OnSwipeStart.Subscribe(_ => OnSwipeStart());
-        draggableCard.OnSwipeComplete.Subscribe(tuple => OnSwipeComplete(tuple.Item1, tuple.Item2));
+        draggableCard.OnSwipeStart.Subscribe(_ => OnSwipeStart()).AddTo(this);
+        draggableCard.OnSwipeComplete.Subscribe(tuple => OnSwipeComplete(tuple.Item1, tuple.Item2)).AddTo(this);
+
+        animationCard = Instantiate(draggableCard, draggableCard.transform.parent);
+        animationCard.transform.SetAsLastSibling();
+        animationCard.gameObject.SetActive(false);
+        animationCard.ShouldShowHintAnimation.Subscribe(animationCard.DoHintAnimation).AddTo(this);
     }
 
     private void OnEnable()

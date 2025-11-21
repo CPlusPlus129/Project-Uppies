@@ -12,6 +12,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public Subject<(float, bool)> OnSwipeComplete = new Subject<(float, bool)>();
     public Subject<Unit> OnSwipeStart = new Subject<Unit>();
+    public ReactiveProperty<bool> ShouldShowHintAnimation = new ReactiveProperty<bool>();
 
     private Vector2 startPosition;
     private Vector2 endPosition;
@@ -31,6 +32,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (!canDrag) return;
+        ShouldShowHintAnimation.Value = false;
         isDragging = true;
         startTime = Time.time;
         canvasGroup.alpha = 0.8f;
@@ -81,10 +83,35 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup.alpha = 1f;
         canDrag = true;
         isDragging = false;
+        ShouldShowHintAnimation.Value = true;
     }
 
     public void SetCardEnabled(bool enabled)
     {
         cardImage.raycastTarget = enabled;
+    }
+
+    /// <summary>
+    /// For animation card to use
+    /// </summary>
+    /// <param name="isOn"></param>
+    public void DoHintAnimation(bool isOn)
+    {
+        DOTween.Kill(cardRectTransform);
+        if (isOn)
+        {
+            gameObject.SetActive(true);
+            canvasGroup.alpha = 0.5f;
+            var midPoint = Vector2.Lerp(startPosition, endPosition, 0.5f);
+            cardRectTransform.anchoredPosition = startPosition;
+            var seq = DOTween.Sequence();
+            seq.Append(cardRectTransform.DOAnchorPos(midPoint, 0.5f).SetEase(Ease.OutQuad));
+            seq.Append(canvasGroup.DOFade(0, 0.5f).SetEase(Ease.OutQuad));
+            seq.OnComplete(() => ResetPosition());
+        }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 }
