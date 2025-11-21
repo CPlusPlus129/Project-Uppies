@@ -25,7 +25,6 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
             }
 
             if (targetRenderers.Count == 0)
-            if (targetRenderers.Count == 0)
             {
                 var rArr = GetComponentsInChildren<Renderer>();
                 targetRenderers.AddRange(rArr);
