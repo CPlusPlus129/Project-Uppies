@@ -37,13 +37,16 @@ public class PlayerController : MonoBehaviour
         UnsubscribeEvents();
     }
 
-    private void OnUpdate()
+    private void OnUpdate_General()
     {
         var lookValue = lookAction.ReadValue<Vector2>();
         camlook.ProcessLook(lookValue);
 
         interact.UpdateCurrentInteractableTarget(camlook.cam);
+    }
 
+    private void OnUpdate_Move()
+    {
         var moveValue = moveAction.ReadValue<Vector2>();
         motor.ProcessMove(moveValue);
     }
@@ -84,10 +87,17 @@ public class PlayerController : MonoBehaviour
             this.gameObject.OnDestroyAsObservable(),
             playerStat.OnDestroyed
         );
+        // update that is not related to moving
         Observable.EveryUpdate()
             .TakeUntil(terminationSignal)
             .Where(_ => isActiveAndEnabled)
-            .Subscribe(_ => OnUpdate())
+            .Subscribe(_ => OnUpdate_General())
+            .AddTo(disposables);
+        // update moving
+        Observable.EveryUpdate()
+            .TakeUntil(terminationSignal)
+            .Where(_ => isActiveAndEnabled && playerStat.CanMove.CurrentValue)
+            .Subscribe(_ => OnUpdate_Move())
             .AddTo(disposables);
 
         playerStat.CanUseWeapon
@@ -98,7 +108,7 @@ public class PlayerController : MonoBehaviour
                 lightGun.gameObject.SetActive(can);
             })
             .AddTo(disposables);
-
+        
         playerStat.OnPlayerDeath
             .TakeUntil(terminationSignal)
             .Where(_ => isActiveAndEnabled)
@@ -132,11 +142,16 @@ public class PlayerController : MonoBehaviour
 
     private async void HandleOnDeath()
     {
-        UIRoot.Instance.GetUIComponent<DeathUI>().Open();
+        var playerStat = PlayerStatSystem.Instance;
+        UIRoot.Instance.GetUIComponent<DeathUI>()?.Open();
+        playerStat.CanMove.Value = false;
         //if you don't wait on this, resurrect will set currentHP and the newest event from that will not fire, it's recommended to wait at least a frame.
-        await UniTask.Delay(1000);
-        UIRoot.Instance.GetUIComponent<DeathUI>().Close();
-        PlayerStatSystem.Instance.Resurrect();
+        await UniTask.Delay(2000);
+        if (playerStat == null)
+            return;
+        UIRoot.Instance.GetUIComponent<DeathUI>()?.Close();
+        playerStat.Resurrect();
+        playerStat.CanMove.Value = true;
         //Respawn at position
         Teleport(SpawnPosition);
     }

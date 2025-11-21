@@ -28,6 +28,7 @@ public class PlayerStatSystem : MonoSingleton<PlayerStatSystem>
 
 
     public ReactiveProperty<bool> CanUseWeapon { get; private set; } = new ReactiveProperty<bool>(true);
+    public ReactiveProperty<bool> CanMove { get; private set; } = new ReactiveProperty<bool>(true);
     public ReactiveProperty<IInteractable> CurrentInteractableTarget { get; private set; } = new ReactiveProperty<IInteractable>(null);
 
     public Subject<Unit> OnDestroyed { get; private set; } = new Subject<Unit>();
