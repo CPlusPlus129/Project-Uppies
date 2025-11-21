@@ -5,7 +5,7 @@ using UnityEngine;
 /// Centralized mixer that limits the number of active mob movement loops and balances their volume.
 /// Ensures only the highest priority emitters stay audible to prevent clutter when large groups spawn.
 /// </summary>
-public class MobMovementAudioManager : SceneSingleton<MobMovementAudioManager>
+public class MobMovementAudioManager : MonoSingleton<MobMovementAudioManager>
 {
     [Header("Mix Limits")]
     [SerializeField, Range(1, 32)] private int maxSimultaneousVoices = 6;
