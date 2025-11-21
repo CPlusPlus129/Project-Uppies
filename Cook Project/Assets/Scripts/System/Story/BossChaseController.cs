@@ -14,6 +14,11 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Optional explicit player target. If left empty the mob's assigned target or a tagged Player will be used.")]
     private Transform playerOverride;
 
+    [Header("Visual Effects")]
+    [SerializeField]
+    [Tooltip("Optional pulse effect to enable only during the chase.")]
+    private UniversalPulseController pulseEffect;
+
     [Header("Behaviour")]
     [SerializeField]
     [Tooltip("Freeze the boss in place until BeginChase is invoked.")]
@@ -47,6 +52,11 @@ public class BossChaseController : MonoBehaviour
             CacheStartingTransform();
             ApplyHoldPositionState(true);
         }
+
+        if (pulseEffect != null)
+        {
+            pulseEffect.enabled = false;
+        }
     }
 
     private void CacheStartingTransform()
@@ -71,6 +81,11 @@ public class BossChaseController : MonoBehaviour
             ApplyHoldPositionState(false);
         }
 
+        if (pulseEffect != null)
+        {
+            pulseEffect.enabled = true;
+        }
+
         bossMob.ForceChase(playerOverride);
     }
 
@@ -85,6 +100,11 @@ public class BossChaseController : MonoBehaviour
         }
 
         bossMob.StopChase();
+
+        if (pulseEffect != null)
+        {
+            pulseEffect.enabled = false;
+        }
 
         if (holdPositionUntilChase)
         {
