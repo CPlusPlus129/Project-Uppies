@@ -326,9 +326,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 100112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1103823788087042525}
-    - targetCorrespondingSourceObject: {fileID: 100112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6903173040242274227}
     - targetCorrespondingSourceObject: {fileID: 100112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
       insertIndex: -1
@@ -348,21 +345,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 100112, guid: c63fb13f21ecd09468bf39f5cf9c30f2, type: 3}
   m_PrefabInstance: {fileID: 2687769478995077712}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1103823788087042525
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2687769478995045696}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14b6c756ca9d7d44f8a6b3f0e60d9940, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossChaseController
-  bossMob: {fileID: 3849731123308360310}
-  playerOverride: {fileID: 0}
-  holdPositionUntilChase: 1
 --- !u!54 &6903173040242274227
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -397,7 +379,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2687769478995045696}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00d20c59d0fc0f34a8eaf5cdce93666b, type: 3}
   m_Name: 
@@ -745,6 +727,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72f7b711f0814614ab0d656997551897, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Customer
+  useOutline: 1
+  targetRenderers: []
   customerName: VIP1
   nameText: {fileID: 0}
 --- !u!65 &4240283286917968634

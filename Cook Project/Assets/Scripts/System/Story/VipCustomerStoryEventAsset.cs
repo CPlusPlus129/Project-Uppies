@@ -29,7 +29,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
     private bool disableVipAnimatorOnSpawn = true;
 
     [SerializeField]
-    [Tooltip("Override the VIP's world rotation after it snaps to the anchor.")]
+    [Tooltip("Override the VIP's local rotation relative to the anchor.")]
     private bool overrideVipRotation;
 
     [SerializeField]
@@ -244,9 +244,14 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             var rotation = pivot != null ? pivot.rotation : Quaternion.identity;
             var parent = parentVipToAnchor && pivot != null ? pivot : null;
             var instance = UnityEngine.Object.Instantiate(vipCustomerPrefab, position, rotation, parent);
+            
             StabilizeVipPresentation(instance);
+            
             anchor?.SnapTransform(instance.transform);
+
             ApplyVipTransformOverrides(instance.transform);
+            // Force apply again next frame to override any Start/OnEnable resets (e.g. NavMeshAgent, BossChaseController)
+            ReapplyTransformsNextFrame(instance.transform).Forget();
 
             var customer = instance.GetComponent<Customer>() ?? instance.GetComponentInChildren<Customer>();
             if (customer == null)
@@ -305,6 +310,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             {
                 if (bossChase == null) continue;
                 bossChase.enabled = false;
+                Debug.Log($"[VIP Debug] Disabled BossChaseController on {bossChase.name}");
             }
 
             foreach (var movementAudio in instance.GetComponentsInChildren<MobMovementAudio>(true))
@@ -337,6 +343,8 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
             {
                 if (animator == null) continue;
                 animator.enabled = false;
+                // Also disable root motion explicitly to prevent override
+                animator.applyRootMotion = false;
             }
         }
     }
@@ -351,12 +359,26 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset
         if (overrideVipRotation)
         {
             var desiredRotation = Quaternion.Euler(vipRotationEuler);
-            vipTransform.SetPositionAndRotation(vipTransform.position, desiredRotation);
+            vipTransform.localRotation = desiredRotation;
+            Debug.Log($"[VIP Override] Applied Local Rotation: {vipRotationEuler} -> {vipTransform.localRotation.eulerAngles}");
         }
 
         if (overrideVipScale)
         {
             vipTransform.localScale = vipLocalScale;
+        }
+    }
+
+    private async UniTaskVoid ReapplyTransformsNextFrame(Transform vipTransform)
+    {
+        if (vipTransform == null) return;
+        
+        // Force apply for 5 frames to fight any initialization logic (animators, navmesh, mob state machines)
+        for (int i = 0; i < 5; i++)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            if (vipTransform == null) return;
+            ApplyVipTransformOverrides(vipTransform);
         }
     }
 
