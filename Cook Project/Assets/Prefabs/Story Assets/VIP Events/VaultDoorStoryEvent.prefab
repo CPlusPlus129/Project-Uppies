@@ -121,11 +121,64 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bld_Vault_Door_01
       objectReference: {fileID: 0}
+    - target: {fileID: 3704191874091821444, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3704191874091821444, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2822040451238020842}
   m_SourcePrefab: {fileID: 100100000, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+--- !u!1 &1861372174069671241 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3704191874091821444, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+  m_PrefabInstance: {fileID: 3076806007454272717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2822040451238020842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1861372174069671241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c0ddaa1c3fa99f469107ae16a4cb8e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnityInteractable
+  useOutline: 1
+  targetRenderers: []
+  onInteract:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2836832889526834046}
+        m_TargetAssemblyTypeName: VaultDoorController, Assembly-CSharp
+        m_MethodName: DebugOpen
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onFirstInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  interactOnce: 1
+  disableOnUse: []
+  colliderToDisable: {fileID: 7743660783447417054}
+  fitColliderToBillboard: 1
+  billboardColliderDepth: 0.2
+  customPrompts:
+  - actionName: Interact
+    controlScheme: keyboard&mouse
+    customText: Interact
 --- !u!4 &4307824262104573044 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
@@ -134,6 +187,11 @@ Transform:
 --- !u!4 &5940351411045767098 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8701901028817509239, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+  m_PrefabInstance: {fileID: 3076806007454272717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &7743660783447417054 stripped
+MeshCollider:
+  m_CorrespondingSourceObject: {fileID: 4738913495751863315, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
   m_PrefabInstance: {fileID: 3076806007454272717}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8336251222267238657 stripped
