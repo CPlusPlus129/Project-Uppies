@@ -18,11 +18,18 @@ namespace NvJ.Rendering.Editor
 
             EditorGUILayout.Space();
 
+            // Help box to guide users
+            EditorGUILayout.HelpBox(
+                "After changing settings above, click 'Refresh Billboard' to preview changes in the editor.",
+                MessageType.Info
+            );
+
             // Refresh button
             if (GUILayout.Button("Refresh Billboard", GUILayout.Height(30)))
             {
                 billboard.Refresh();
                 EditorUtility.SetDirty(billboard);
+                SceneView.RepaintAll();
             }
             
             // Force Recreate button (for troubleshooting lighting issues)

@@ -7,7 +7,6 @@ namespace NvJ.Rendering
     /// Automatically creates and configures the sprite renderer with billboard materials.
     /// Properly handles sliced sprite sheets by using sprite UV coordinates.
     /// </summary>
-    [ExecuteAlways]
     public class BillboardSprite : MonoBehaviour
     {
         [Header("Sprite Settings")]
@@ -51,23 +50,11 @@ namespace NvJ.Rendering
 
         private void OnValidate()
         {
-            // Update in both edit mode and play mode
+            // Only auto-update during play mode to avoid creating runtime assets in edit mode
+            // In edit mode, use the "Refresh Billboard" button in the Inspector instead
             if (Application.isPlaying)
             {
                 UpdateBillboard();
-            }
-            else
-            {
-                // In edit mode, use delayed call to avoid issues
-                #if UNITY_EDITOR
-                UnityEditor.EditorApplication.delayCall += () =>
-                {
-                    if (this != null)
-                    {
-                        UpdateBillboard();
-                    }
-                };
-                #endif
             }
         }
 
