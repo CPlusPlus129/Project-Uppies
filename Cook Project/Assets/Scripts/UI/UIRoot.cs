@@ -5,10 +5,15 @@ using UnityEngine;
 
 public class UIRoot : MonoSingleton<UIRoot>
 {
+    public bool IsInitialized { get; private set; } = false;
+
     protected override void Awake()
     {
         base.Awake();
         if (Instance != this)
+            return;
+
+        if (IsInitialized)
             return;
         InitChildren().Forget();
     }
@@ -33,6 +38,11 @@ public class UIRoot : MonoSingleton<UIRoot>
         }
     }
 
+    public async UniTask WaitUntilInitialized()
+    {
+        await UniTask.WaitUntil(() => IsInitialized);
+    }
+
     public void SetVisible(bool isVisible)
     {
         var canvasGroup = GetComponent<CanvasGroup>();
@@ -52,5 +62,6 @@ public class UIRoot : MonoSingleton<UIRoot>
             taskList.Add(item.Init());
         }
         await UniTask.WhenAll(taskList);
+        IsInitialized = true;
     }
 }
