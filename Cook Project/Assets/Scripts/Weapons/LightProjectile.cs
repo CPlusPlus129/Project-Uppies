@@ -41,7 +41,24 @@ public class LightProjectile : MonoBehaviour
 
     public void Initialize(Vector3 velocity, float damage, float intensity, float sizeScale, Collider sourceCollider = null, float overrideLifetime = -1f)
     {
-        rb.linearVelocity = velocity;
+        // Ensure components are assigned
+        if (rb == null) rb = GetComponent<Rigidbody>();
+        if (pointLight == null) pointLight = GetComponentInChildren<Light>();
+        if (projCollider == null) projCollider = GetComponentInChildren<Collider>(); // Changed to GetComponentInChildren
+
+        Debug.Log($"[LightProjectile] Initialized. Velocity: {velocity}, Damage: {damage}, Lifetime: {overrideLifetime}");
+
+        if (rb != null)
+        {
+            rb.isKinematic = false; // Ensure physics is enabled
+            rb.useGravity = true;   // Ensure gravity is normal (unless we want 0g)
+            rb.linearVelocity = velocity;
+        }
+        else
+        {
+            Debug.LogError($"[LightProjectile] Missing Rigidbody on {gameObject.name}", gameObject);
+        }
+
         currentDamage = damage;
         
         // Scale transform
@@ -51,19 +68,31 @@ public class LightProjectile : MonoBehaviour
         if (pointLight != null)
         {
             pointLight.intensity = intensity;
-            pointLight.range = sizeScale * 8f; // Increased range multiplier for better coverage
+            pointLight.range = sizeScale * 8f; 
             initialIntensity = intensity;
             initialRange = pointLight.range;
         }
 
         // Ignore collision with source (player)
-        if (sourceCollider != null && projCollider != null)
+        if (sourceCollider != null)
         {
-            Physics.IgnoreCollision(projCollider, sourceCollider);
+            Collider[] myColliders = GetComponentsInChildren<Collider>();
+            foreach (var c in myColliders)
+            {
+                Physics.IgnoreCollision(c, sourceCollider);
+            }
         }
         
         // Use override lifetime if provided
-        currentLifetime = overrideLifetime > 0 ? overrideLifetime : lifetime;
+        if (overrideLifetime > 0)
+        {
+            currentLifetime = overrideLifetime;
+            lifetime = overrideLifetime; // Update base lifetime so fade curve works correctly
+        }
+        else
+        {
+            currentLifetime = lifetime;
+        }
     }
 
     private void Update()
@@ -85,6 +114,7 @@ public class LightProjectile : MonoBehaviour
             
             if (currentLifetime <= 0)
             {
+                Debug.Log("[LightProjectile] Lifetime expired. Fizzling out.");
                 FizzleOut();
             }
         }
@@ -104,12 +134,20 @@ public class LightProjectile : MonoBehaviour
         // Ignore player collision
         if (collision.gameObject.CompareTag("Player")) return;
 
+        Debug.Log($"[LightProjectile] Collided with {collision.gameObject.name} at {collision.contacts[0].point}");
+
         // Stick to surface
         hasLanded = true;
         
         // Stop physics movement FIRST
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true; // Lock it
+        }
+        
+        // ... rest of collision logic ...
         // Then make kinematic to lock it in place
         // Check if we hit something static or the ground
         if (collision.gameObject.isStatic || collision.gameObject.layer == LayerMask.NameToLayer("Default") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))

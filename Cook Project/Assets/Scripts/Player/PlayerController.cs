@@ -105,7 +105,10 @@ public class PlayerController : MonoBehaviour
             .Where(_ => isActiveAndEnabled)
             .Subscribe(can =>
             {
-                lightGun.gameObject.SetActive(can);
+                if (lightGun != null)
+                {
+                    lightGun.gameObject.SetActive(can);
+                }
             })
             .AddTo(disposables);
         

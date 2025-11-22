@@ -23,6 +23,11 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private LineRenderer trajectoryLine;
     [SerializeField] private GameObject targetingReticle;
     [SerializeField] private GameObject chargingOrbVisual;
+    [SerializeField] private Vector3 chargingVisualOffset = new Vector3(0, 0.1f, 0);
+    [SerializeField] private Vector3 chargeRotationSpeed = new Vector3(0, 360f, 0);
+    [SerializeField] private float minChargeScale = 1f;
+    [SerializeField] private float maxChargeScale = 1.5f;
+    [SerializeField] private float projectileSpawnScale = 0.5f;
     [SerializeField] private int trajectoryResolution = 30;
     [SerializeField] private float trajectoryTimeStep = 0.1f;
     [SerializeField] private LayerMask groundLayer;
@@ -32,7 +37,9 @@ public class CandleWeapon : MonoBehaviour
     private InputAction fireAction;
     
     private Vector3 reticleOriginalScale;
+    private Vector3 visualInitialScale;
     private Collider playerCollider;
+    private GameObject spawnedProjectileVisual;
 
     private void Awake()
     {
@@ -41,14 +48,101 @@ public class CandleWeapon : MonoBehaviour
             groundLayer = 1; // Default layer
         }
 
-        if (chargingOrbVisual != null) chargingOrbVisual.SetActive(false);
+        if (chargingOrbVisual != null) 
+        {
+            // If the user assigned a Prefab Asset (scene.name is null), instantiate it.
+            if (chargingOrbVisual.scene.name == null)
+            {
+                GameObject instance = Instantiate(chargingOrbVisual, firePoint);
+                instance.transform.localPosition = chargingVisualOffset;
+                instance.transform.localRotation = Quaternion.identity;
+                
+                // Strip physics and logic from the visual only
+                Destroy(instance.GetComponent<LightProjectile>());
+                Destroy(instance.GetComponent<Rigidbody>());
+                foreach (var c in instance.GetComponentsInChildren<Collider>()) Destroy(c);
+                
+                chargingOrbVisual = instance;
+                // Capture scale after instantiation
+                visualInitialScale = chargingOrbVisual.transform.localScale;
+            }
+            else
+            {
+                // It's a scene object, capture its scale
+                visualInitialScale = chargingOrbVisual.transform.localScale;
+            }
+            chargingOrbVisual.SetActive(false);
+        }
+        
+        if (projectilePrefab != null)
+        {
+            // Create a visual representation if none exists
+            if (chargingOrbVisual == null)
+            {
+                spawnedProjectileVisual = Instantiate(projectilePrefab.gameObject, firePoint);
+                spawnedProjectileVisual.transform.localPosition = chargingVisualOffset;
+                spawnedProjectileVisual.transform.localRotation = Quaternion.identity;
+                
+                // Strip physics and logic
+                Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
+                Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
+                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
+                
+                chargingOrbVisual = spawnedProjectileVisual;
+                chargingOrbVisual.SetActive(false);
+            }
+        }
+
+        if (chargingOrbVisual != null)
+        {
+            // We handled capture in the blocks above to ensure we get it regardless of creation method
+            // But just in case we missed a path (e.g. assigned scene object but didn't enter the prefab instantiation block)
+            // Actually I added the else block for scene object above.
+            // So this block is redundant or potentially dangerous if it runs after SetActive(false) on a newly created object?
+            // SetActive(false) shouldn't affect localScale reading.
+            // Let's remove this redundant block to avoid confusion and potential overwrites if logic changes.
+        }
+        else if (projectilePrefab != null)
+        {
+            // If we are going to create one later, we can't get scale yet.
+            // But wait, if chargingOrbVisual is NULL, we enter the next block.
+        }
+        
+        if (projectilePrefab != null)
+        {
+            // Create a visual representation if none exists
+            if (chargingOrbVisual == null)
+            {
+                spawnedProjectileVisual = Instantiate(projectilePrefab.gameObject, firePoint);
+                spawnedProjectileVisual.transform.localPosition = chargingVisualOffset;
+                spawnedProjectileVisual.transform.localRotation = Quaternion.identity;
+                
+                // Strip physics and logic
+                Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
+                Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
+                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
+                
+                chargingOrbVisual = spawnedProjectileVisual;
+                chargingOrbVisual.SetActive(false);
+                
+                // Capture scale NOW that it exists
+                visualInitialScale = chargingOrbVisual.transform.localScale;
+            }
+        }
+
         if (targetingReticle != null) 
         {
             targetingReticle.SetActive(false);
             reticleOriginalScale = targetingReticle.transform.localScale;
             if (reticleOriginalScale == Vector3.zero) reticleOriginalScale = Vector3.one; 
         }
-        if (trajectoryLine != null) trajectoryLine.enabled = false;
+        if (trajectoryLine != null) 
+        {
+            trajectoryLine.enabled = false;
+            // Ensure reasonable width so it doesn't look like a giant plane if unassigned
+            if (trajectoryLine.startWidth > 0.2f) trajectoryLine.startWidth = 0.05f;
+            if (trajectoryLine.endWidth > 0.2f) trajectoryLine.endWidth = 0.05f;
+        }
 
         // Find player collider
         playerCollider = GetComponentInParent<CharacterController>();
@@ -100,8 +194,9 @@ public class CandleWeapon : MonoBehaviour
 
         if (chargingOrbVisual != null)
         {
-            float scale = Mathf.Lerp(0.1f, 0.5f, chargeRatio);
-            chargingOrbVisual.transform.localScale = Vector3.one * scale;
+            float scaleMult = Mathf.Lerp(minChargeScale, maxChargeScale, chargeRatio);
+            chargingOrbVisual.transform.localScale = visualInitialScale * scaleMult;
+            chargingOrbVisual.transform.Rotate(chargeRotationSpeed * Time.deltaTime, Space.Self);
         }
 
         UpdateTrajectory(chargeRatio);
@@ -185,23 +280,31 @@ public class CandleWeapon : MonoBehaviour
         float finalDamage = 10f * (1f + chargeRatio);
         float finalIntensity = Mathf.Lerp(baseIntensity, baseIntensity * maxChargeIntensityMult, chargeRatio);
         float finalLifetime = Mathf.Lerp(baseLifetime, baseLifetime * maxChargeLifetimeMult, chargeRatio);
-        float sizeScale = Mathf.Lerp(0.2f, 0.5f, chargeRatio);
+        // Use fixed spawn scale for the projectile itself
+        float sizeScale = projectileSpawnScale;
 
         Vector3 velocity = GetLaunchVelocity(finalForce);
 
         if (projectilePrefab != null)
         {
             LightProjectile proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            // Manually set the lifetime before Initialize since Initialize uses the serialized value
-            // Or better, just set it directly if we make it public, but since it's private serialized field,
-            // we'll rely on the updated Initialize method (if I had updated it signature, which I didn't).
-            // Correction: I should update Initialize to accept lifetime to be clean.
-            // But to save a write, I'll assume the serialized default is OK for now or update it in a bit.
-            // Wait, I'll update Initialize signature in LightProjectile to take lifetime.
             
-            // Actually, I missed updating the Initialize signature in LightProjectile.cs in previous step.
-            // I only added sourceCollider.
-            // I will re-write LightProjectile.cs one more time to add lifetime parameter.
+            // Ignore all weapon colliders to prevent immediate collision
+            Collider[] weaponColliders = GetComponentsInChildren<Collider>();
+            Collider[] projColliders = proj.GetComponentsInChildren<Collider>();
+            
+            if (projColliders != null && weaponColliders != null)
+            {
+                foreach (var pc in projColliders)
+                {
+                    foreach (var wc in weaponColliders)
+                    {
+                        Physics.IgnoreCollision(pc, wc);
+                    }
+                }
+            }
+
+            proj.gameObject.SetActive(true); // Ensure it's active
             proj.Initialize(velocity, finalDamage, finalIntensity, sizeScale, playerCollider, finalLifetime);
         }
     }
