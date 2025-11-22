@@ -1,7 +1,10 @@
+using R3;
+using R3.Triggers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.UI;
 
 /// <summary>
 /// UI component for displaying a single ability in the ability list.
@@ -13,10 +16,21 @@ public class AbilityListItemUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI keyText;
     [SerializeField] private TextMeshProUGUI costText;
     [SerializeField] private TextMeshProUGUI abilityNameText;
+    [SerializeField] private Image borderGlowImage;
 
     [Header("Display Settings")]
     [SerializeField] private string unboundKeyText = "?";
     [SerializeField] private string defaultAbilityName = "Unknown Ability";
+
+    private PlayerSoulAbilityManager.AbilityDisplayInfo info;
+
+    private void Awake()
+    {
+        var playerStat = PlayerStatSystem.Instance;
+        playerStat.CurrentSouls
+            .Subscribe(currSoul => borderGlowImage.gameObject.SetActive(currSoul >= info.SoulCost))
+            .AddTo(this);
+    }
 
     /// <summary>
     /// Updates the item display with ability information.
@@ -24,6 +38,8 @@ public class AbilityListItemUI : MonoBehaviour
     /// <param name="info">The ability display information from PlayerSoulAbilityManager</param>
     public void UpdateDisplay(PlayerSoulAbilityManager.AbilityDisplayInfo info)
     {
+        this.info = info;
+
         // Update key text
         if (keyText != null)
         {
@@ -83,19 +99,4 @@ public class AbilityListItemUI : MonoBehaviour
         return key.ToString();
     }
 
-    /// <summary>
-    /// Allows manual setting of display values for testing or custom scenarios.
-    /// </summary>
-    public void SetDisplay(string keyString, string abilityName)
-    {
-        if (keyText != null)
-        {
-            keyText.text = keyString;
-        }
-
-        if (abilityNameText != null)
-        {
-            abilityNameText.text = abilityName;
-        }
-    }
 }
