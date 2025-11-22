@@ -45,8 +45,11 @@ public class GameFlow : MonoSingleton<GameFlow>
         base.Awake();
         if (Instance != this)
         {
+            Debug.Log($"[GameFlow] Awake on duplicate {this.GetInstanceID()}. Destroying.");
             return;
         }
+
+        Debug.Log($"[GameFlow] Awake on instance {this.GetInstanceID()}. Initialized: {IsInitialized}");
 
         if (!IsInitialized)
         {
@@ -56,10 +59,12 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     private async UniTask StartGame()
     {
+        Debug.Log($"[GameFlow] StartGame called on {this.GetInstanceID()}. Stack: {Environment.StackTrace}");
         IsInitialized = false;
         CancelGameLoop();
 
         gameLoopCts = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
+        Debug.Log($"[GameFlow] Created gameLoopCts {gameLoopCts.GetHashCode()} on {this.GetInstanceID()}");
 
         await InitServices();
         await LoadTables();
@@ -93,6 +98,7 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     private async UniTask RunStoryLoopAsync(CancellationToken cancellationToken)
     {
+        Debug.Log($"[GameFlow] RunStoryLoopAsync started on {this.GetInstanceID()}. Token: {cancellationToken.GetHashCode()}");
         while (!cancellationToken.IsCancellationRequested)
         {
             if (isStoryPaused)
@@ -144,6 +150,7 @@ public class GameFlow : MonoSingleton<GameFlow>
 
             await ProcessStoryEventAsync(runtime, cancellationToken, false);
         }
+        Debug.LogError($"[GameFlow] RunStoryLoopAsync exited on {this.GetInstanceID()}. Token cancelled: {cancellationToken.IsCancellationRequested}");
     }
 
     private async UniTask ProcessStoryEventAsync(StoryEventRuntime runtime, CancellationToken cancellationToken, bool isBackground)
@@ -175,6 +182,8 @@ public class GameFlow : MonoSingleton<GameFlow>
         }
         catch (OperationCanceledException)
         {
+            var tokenStatus = cancellationToken.IsCancellationRequested ? "cancelled" : "active";
+            Debug.LogWarning($"[GameFlow] OperationCanceledException in '{runtime.Asset.EventId}' on {this.GetInstanceID()}. Token status: {tokenStatus}. Stack: {Environment.StackTrace}");
             result = StoryEventResult.Cancelled($"Story event cancelled: {runtime.Asset.EventId}");
         }
         catch (Exception ex)
@@ -383,6 +392,8 @@ public class GameFlow : MonoSingleton<GameFlow>
             return null;
         }
 
+        Debug.Log($"[GameFlow] EnqueueEvent called on {this.GetInstanceID()} for '{asset.EventId}'. InsertAtFront: {insertAtFront}");
+
         var runtime = new StoryEventRuntime(asset, sourceSequence, 0, sourceSequence != null ? 1 : 0);
 
         if (insertAtFront)
@@ -525,6 +536,7 @@ public class GameFlow : MonoSingleton<GameFlow>
             base.OnDestroy();
             return;
         }
+        Debug.Log($"[GameFlow] OnDestroy called on {this.GetInstanceID()}. Stack: {Environment.StackTrace}");
         CancelGameLoop();
 
         // Dispose all services before destruction
@@ -543,6 +555,7 @@ public class GameFlow : MonoSingleton<GameFlow>
     {
         if (gameLoopCts != null)
         {
+            Debug.Log($"[GameFlow] CancelGameLoop called on {this.GetInstanceID()}. CTS: {gameLoopCts.GetHashCode()}. Stack: {Environment.StackTrace}");
             gameLoopCts.Cancel();
             gameLoopCts.Dispose();
             gameLoopCts = null;

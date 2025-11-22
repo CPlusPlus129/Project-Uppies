@@ -31,6 +31,7 @@ namespace BlackjackGame
 
         public override async void Interact()
         {
+            Debug.Log($"[BlackjackNPC] Interact called on {this.GetInstanceID()}. PreGameEvent: {preGameEvent?.name}");
             if (requireTaskToStart && !string.IsNullOrEmpty(taskIdToComplete))
             {
                 if (TaskManager.Instance == null) return;

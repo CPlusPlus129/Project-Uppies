@@ -7,8 +7,20 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 [CreateAssetMenu(fileName = "GlowObjectStoryEvent", menuName = "Game Flow/Environment Events/Glow Object Until Interact (New)")]
-public class GlowObjectStoryEvent : StoryEventAsset
+public class GlowObjectStoryEvent : StoryEventAsset, IBackgroundStoryEvent
 {
+    [Header("Execution Flow")]
+    [SerializeField]
+    [Tooltip("If true, this event runs concurrently with the queue.")]
+    private bool runInBackground = false;
+
+    [SerializeField]
+    [Tooltip("If running in background, blocks subsequent events from the SAME sequence until completion.")]
+    private bool blockSourceSequence = false;
+
+    public bool RunInBackground => runInBackground;
+    public bool BlockSourceSequence => blockSourceSequence;
+
     [Header("Targeting")]
     [SerializeField]
     [Tooltip("Name of the GameObject to find in the scene. Can be a simple name (e.g., 'DoorButton1') or a path (e.g., 'Parent/Child/DoorButton1').")]

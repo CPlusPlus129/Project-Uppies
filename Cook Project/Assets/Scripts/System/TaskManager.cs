@@ -18,6 +18,7 @@ public class TaskManager : MonoSingleton<TaskManager>
 
     // Changed to expose TaskData instead of just strings
     public readonly ReactiveProperty<List<TaskData>> Tasks = new(new List<TaskData>());
+    public readonly Subject<string> OnTaskCompleted = new();
 
     public void AddTask(string id, string description)
     {
@@ -70,6 +71,7 @@ public class TaskManager : MonoSingleton<TaskManager>
         if (_completedTaskHistory.Add(id))
         {
             Debug.Log($"[TaskManager] Recorded completion for task ID: {id}");
+            OnTaskCompleted.OnNext(id);
         }
 
         var index = _activeTasks.FindIndex(x => x.Id == id);

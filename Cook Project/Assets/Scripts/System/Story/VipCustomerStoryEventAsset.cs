@@ -162,6 +162,8 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
+        Debug.Log($"[VipCustomerStoryEventAsset] ExecuteAsync started for '{name}' (EventId: {EventId})");
+
         if (vipCustomerPrefab == null)
         {
             return StoryEventResult.Failed("VIP customer prefab is not set.");
@@ -174,16 +176,18 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
         var isShiftValid = await EnsureTargetShiftAsync(shiftSystem, cancellationToken);
         if (!isShiftValid)
         {
-            Debug.LogWarning($"[{nameof(VipCustomerStoryEventAsset)}] Skipping VIP spawn because shift {targetShiftIndex} is not active.");
+            Debug.LogWarning($"[{nameof(VipCustomerStoryEventAsset)}] Skipping VIP spawn because shift {targetShiftIndex} is not active. Current Shift: {shiftSystem.shiftNumber.Value}");
             return StoryEventResult.Skipped("Shift mismatch for VIP spawn.");
         }
 
         await WaitForShiftActiveAsync(shiftSystem, cancellationToken);
 
         var spawnHour = ResolveSpawnHour();
+        Debug.Log($"[VipCustomerStoryEventAsset] Waiting for spawn hour {spawnHour}...");
         var spawnWindowHit = await WaitForSpawnWindowAsync(shiftSystem, spawnHour, cancellationToken);
         if (!spawnWindowHit)
         {
+            Debug.LogWarning($"[{nameof(VipCustomerStoryEventAsset)}] Shift ended before VIP spawn window elapsed.");
             return StoryEventResult.Skipped("Shift ended before VIP spawn window elapsed.");
         }
 
@@ -202,6 +206,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
 
         ConfigureVipOrder(vipInstance);
         var vipName = vipInstance.customerName;
+        Debug.Log($"[VipCustomerStoryEventAsset] VIP '{vipName}' spawned successfully.");
 
         ListenForDestroySignal(context, vipInstance, cancellationToken);
 
@@ -228,6 +233,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
         StoryEventResult result;
         if (vipHasOrder)
         {
+            Debug.Log($"[VipCustomerStoryEventAsset] Waiting for VIP order '{vipName}'...");
             result = await WaitForVipOrderAsync(
                 context,
                 vipName,
@@ -235,6 +241,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
                 shiftSystem,
                 dialogueService,
                 cancellationToken);
+            Debug.Log($"[VipCustomerStoryEventAsset] WaitForVipOrderAsync finished with: {result.Message}");
         }
         else
         {
@@ -652,6 +659,8 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
         IDialogueService dialogueService,
         CancellationToken token)
     {
+        token.Register(() => Debug.LogError($"[VipCustomerStoryEventAsset] Token cancelled for {vipName}!"));
+        
         var vipServedTcs = new UniTaskCompletionSource<bool>();
         var shiftEndedTcs = new UniTaskCompletionSource<bool>();
         var disposables = new CompositeDisposable();
@@ -701,6 +710,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
 
             if (vipServed)
             {
+                Debug.Log($"[VipCustomerStoryEventAsset] VIP order '{vipName}' served detected.");
                 if (!string.IsNullOrWhiteSpace(signalOnOrderCompleted))
                 {
                     context.SendSignal(signalOnOrderCompleted);
@@ -724,6 +734,7 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
                 return StoryEventResult.Completed($"VIP order '{vipName}' served.");
             }
 
+            Debug.Log($"[VipCustomerStoryEventAsset] Shift ended while waiting for VIP '{vipName}'. Current State: {shiftSystem.currentState.Value}");
             return StoryEventResult.Failed($"Shift ended before VIP '{vipName}' was satisfied.");
         }
         finally
