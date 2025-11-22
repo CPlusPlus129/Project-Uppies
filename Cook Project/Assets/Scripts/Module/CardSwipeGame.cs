@@ -14,6 +14,7 @@ public class CardSwipeGame : IPuzzle
     public float MaxSpeed { get; private set; }
     public bool IsCompleted { get; private set; }
     public int AttemptCount { get; private set; }
+    private float swipeDistance;
 
     public CardSwipeGame(IPuzzleGameManager puzzleGameManager)
     {
@@ -22,10 +23,15 @@ public class CardSwipeGame : IPuzzle
         Reset();
     }
 
+    public void SetSwipeDistance(float distance)
+    {
+        swipeDistance = distance;
+    }
+
     private void GenerateSpeedRange()
     {
         float baseSpeed = UnityEngine.Random.Range(600f, 1000f);
-        float tolerance = 125;
+        float tolerance = 175;
 
         MinSpeed = baseSpeed - tolerance;
         MaxSpeed = baseSpeed + tolerance;
@@ -63,6 +69,13 @@ public class CardSwipeGame : IPuzzle
 
     public string GetSpeedRangeHint()
     {
-        return $"Target speed: {MinSpeed:F0} - {MaxSpeed:F0} units/sec";
+        if (swipeDistance <= 0)
+        {
+            return $"Target speed: {MinSpeed:F0} - {MaxSpeed:F0} units/sec";
+        }
+
+        float minTime = swipeDistance / MaxSpeed;
+        float maxTime = swipeDistance / MinSpeed;
+        return $"Swipe in {minTime:F2} - {maxTime:F2} seconds";
     }
 }

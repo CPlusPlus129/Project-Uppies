@@ -91,27 +91,5 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         cardImage.raycastTarget = enabled;
     }
 
-    /// <summary>
-    /// For animation card to use
-    /// </summary>
-    /// <param name="isOn"></param>
-    public void DoHintAnimation(bool isOn)
-    {
-        DOTween.Kill(cardRectTransform);
-        if (isOn)
-        {
-            gameObject.SetActive(true);
-            canvasGroup.alpha = 0.5f;
-            var midPoint = Vector2.Lerp(startPosition, endPosition, 0.5f);
-            cardRectTransform.anchoredPosition = startPosition;
-            var seq = DOTween.Sequence();
-            seq.Append(cardRectTransform.DOAnchorPos(midPoint, 0.5f).SetEase(Ease.OutQuad));
-            seq.Append(canvasGroup.DOFade(0, 0.5f).SetEase(Ease.OutQuad));
-            seq.OnComplete(() => ResetPosition());
-        }
-        else
-        {
-            gameObject.SetActive(false);
-        }
-    }
+    
 }
