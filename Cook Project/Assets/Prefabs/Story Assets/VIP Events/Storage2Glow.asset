@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 733558487c7b4234983a2b0073eca76c, type: 3}
   m_Name: Storage2Glow
   m_EditorClassIdentifier: Assembly-CSharp::GlowObjectStoryEvent
-  eventId: NewStorageGlow
+  eventId: Storage2Glow
   designerNotes: 
   replayable: 1
-  targetObjectName: Storage1SecretWallTrigger
+  targetObjectName: SM_Bld_Vault_Door_01_Handle_01
   searchAllScenes: 0
-  glowColor: {r: 0, g: 1, b: 1, a: 1}
+  glowColor: {r: 0.84955823, g: 1, b: 0, a: 1}
   glowIntensity: 2.5
   pulseSpeed: 2
   glowScale: 1.15

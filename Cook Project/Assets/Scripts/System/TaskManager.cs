@@ -110,6 +110,11 @@ public class TaskManager : MonoSingleton<TaskManager>
         }
     }
 
+    public bool IsTaskCompleted(string id)
+    {
+        return _completedTaskHistory.Contains(id);
+    }
+
     private void UpdateTasksList()
     {
         // Create a copy to trigger updates

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using R3;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,6 +12,10 @@ public class VaultDoorController : MonoBehaviour
     [SerializeField] private string doorId = "VaultDoor";
     [SerializeField] private Transform handleBone;
     [SerializeField] private Transform doorBone;
+
+    [Header("Task Requirement")]
+    [SerializeField] private string requiredTaskId;
+    [SerializeField] private UnityInteractable wheelInteractable;
     
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
@@ -65,6 +70,50 @@ public class VaultDoorController : MonoBehaviour
         {
             audioSource = GetComponent<AudioSource>();
         }
+    }
+
+    private void Start()
+    {
+        if (string.IsNullOrEmpty(requiredTaskId)) return;
+
+        // Try to find interactable if not assigned
+        if (wheelInteractable == null && handleBone != null)
+        {
+            wheelInteractable = handleBone.GetComponent<UnityInteractable>();
+        }
+
+        if (wheelInteractable == null)
+        {
+            Debug.LogWarning($"[VaultDoorController] Required task '{requiredTaskId}' set but no UnityInteractable found.");
+            return;
+        }
+
+        // Initial check
+        UpdateInteractableState();
+
+        // Subscribe to changes
+        if (TaskManager.Instance != null)
+        {
+            TaskManager.Instance.Tasks
+                .Subscribe(_ => UpdateInteractableState())
+                .AddTo(this);
+        }
+    }
+
+    private void UpdateInteractableState()
+    {
+        if (TaskManager.Instance == null || wheelInteractable == null) return;
+
+        bool isComplete = TaskManager.Instance.IsTaskCompleted(requiredTaskId);
+        
+        // Disable the collider to prevent interaction prompts and raycasts
+        var col = wheelInteractable.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = isComplete;
+        }
+        
+        wheelInteractable.enabled = isComplete;
     }
 
     private void OnDestroy()
