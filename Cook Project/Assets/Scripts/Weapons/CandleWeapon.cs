@@ -19,6 +19,11 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private float baseLifetime = 5f; 
     [SerializeField] private float maxChargeLifetimeMult = 2f;
 
+    [Header("Charge Drain Settings")]
+    [SerializeField] private bool drainLightWhileCharging = false;
+    [SerializeField] private float startDrainRate = 1f;
+    [SerializeField] private float endDrainRate = 5f;
+
     [Header("Visuals")]
     [SerializeField] private LineRenderer trajectoryLine;
     [SerializeField] private GameObject targetingReticle;
@@ -40,6 +45,7 @@ public class CandleWeapon : MonoBehaviour
     private Vector3 visualInitialScale;
     private Collider playerCollider;
     private GameObject spawnedProjectileVisual;
+    private LightRecoverySystem lightRecoverySystem;
 
     private void Awake()
     {
@@ -150,6 +156,21 @@ public class CandleWeapon : MonoBehaviour
         {
             playerCollider = GetComponentInParent<Collider>();
         }
+
+        if (playerCollider != null)
+        {
+            lightRecoverySystem = playerCollider.GetComponent<LightRecoverySystem>();
+            if (lightRecoverySystem == null)
+            {
+                // Fallback: check parent directly if collider was on a child
+                lightRecoverySystem = playerCollider.GetComponentInParent<LightRecoverySystem>();
+            }
+        }
+        else
+        {
+            // Fallback search
+            lightRecoverySystem = GetComponentInParent<LightRecoverySystem>();
+        }
     }
 
     private void Start()
@@ -191,6 +212,26 @@ public class CandleWeapon : MonoBehaviour
         currentChargeTime = Mathf.Min(currentChargeTime, maxChargeTime);
         
         float chargeRatio = currentChargeTime / maxChargeTime;
+
+        if (drainLightWhileCharging)
+        {
+            float currentDrain = Mathf.Lerp(startDrainRate, endDrainRate, chargeRatio);
+            float drainAmount = currentDrain * Time.deltaTime;
+
+            if (LightRecoverySystem.HasEnoughLight(drainAmount))
+            {
+                if (lightRecoverySystem != null)
+                {
+                    lightRecoverySystem.PreventRecovery(Time.deltaTime * 2f);
+                }
+                LightRecoverySystem.DrainLight(drainAmount);
+            }
+            else
+            {
+                Fire();
+                return;
+            }
+        }
 
         if (chargingOrbVisual != null)
         {

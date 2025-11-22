@@ -23,6 +23,7 @@ public class LightRecoverySystem : MonoBehaviour
     private PlayerStatSystem playerStatSystem;
     private float timeSinceLastDrain = 0f;
     private bool canRecover = true;
+    private float recoveryBlockTimer = 0f;
     
     private void Start()
     {
@@ -74,6 +75,15 @@ public class LightRecoverySystem : MonoBehaviour
         if (currentLight >= maxLight)
         {
             canRecover = true;
+            return;
+        }
+
+        // Handle explicit recovery block (e.g. from weapon drain)
+        if (recoveryBlockTimer > 0f)
+        {
+            recoveryBlockTimer -= Time.deltaTime;
+            canRecover = false;
+            timeSinceLastDrain = 0f; // Reset drain timer while blocked
             return;
         }
         
@@ -146,5 +156,14 @@ public class LightRecoverySystem : MonoBehaviour
     public void SetRecoveryDelay(float delay)
     {
         recoveryDelay = Mathf.Max(0f, delay);
+    }
+
+    /// <summary>
+    /// Prevent recovery for a specified duration (resets recovery timer)
+    /// </summary>
+    public void PreventRecovery(float duration)
+    {
+        recoveryBlockTimer = Mathf.Max(recoveryBlockTimer, duration);
+        canRecover = false;
     }
 }
