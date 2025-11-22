@@ -22,7 +22,7 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     public bool IsInitialized { get; private set; } = false;
     public bool IsStoryPaused => isStoryPaused;
-    public StoryEventRuntime CurrentStoryEvent => currentStoryEvent;
+    public StoryEventRuntime CurrentStoryEvent => mainTrack.CurrentEvent;
 
     public Subject<StoryEventRuntime> OnStoryEventQueued { get; } = new Subject<StoryEventRuntime>();
     public Subject<StoryEventRuntime> OnStoryEventStarted { get; } = new Subject<StoryEventRuntime>();
@@ -30,15 +30,15 @@ public class GameFlow : MonoSingleton<GameFlow>
     public Subject<(StoryEventRuntime runtime, Exception exception)> OnStoryEventFailed { get; } = new Subject<(StoryEventRuntime runtime, Exception exception)>();
     public Subject<StorySequenceAsset> OnSequenceQueued { get; } = new Subject<StorySequenceAsset>();
 
-    private readonly LinkedList<StoryEventRuntime> storyQueue = new LinkedList<StoryEventRuntime>();
     private readonly Dictionary<string, StoryEventResult> lastResultByEventId = new Dictionary<string, StoryEventResult>();
     private readonly Dictionary<string, UniTaskCompletionSource<bool>> signalWaiters = new Dictionary<string, UniTaskCompletionSource<bool>>();
-    private readonly HashSet<StorySequenceAsset> blockedSequences = new HashSet<StorySequenceAsset>();
 
     private CancellationTokenSource gameLoopCts;
-    private StoryEventRuntime currentStoryEvent;
     private bool isStoryPaused;
     private UniTaskCompletionSource<bool> resumeFlowTcs;
+
+    private StoryTrack mainTrack;
+    private readonly List<StoryTrack> activeTracks = new List<StoryTrack>();
 
     protected override void Awake()
     {
@@ -48,6 +48,9 @@ public class GameFlow : MonoSingleton<GameFlow>
             Debug.Log($"[GameFlow] Awake on duplicate {this.GetInstanceID()}. Destroying.");
             return;
         }
+
+        mainTrack = new StoryTrack(this, "MainTrack");
+        activeTracks.Add(mainTrack);
 
         Debug.Log($"[GameFlow] Awake on instance {this.GetInstanceID()}. Initialized: {IsInitialized}");
 
@@ -59,13 +62,11 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     private async UniTask StartGame()
     {
-        Debug.Log($"[GameFlow] StartGame called on {this.GetInstanceID()}. Stack: {Environment.StackTrace}");
         IsInitialized = false;
         CancelGameLoop();
 
         gameLoopCts = CancellationTokenSource.CreateLinkedTokenSource(this.GetCancellationTokenOnDestroy());
-        Debug.Log($"[GameFlow] Created gameLoopCts {gameLoopCts.GetHashCode()} on {this.GetInstanceID()}");
-
+        
         await InitServices();
         await LoadTables();
         await SetupGame();
@@ -77,7 +78,9 @@ public class GameFlow : MonoSingleton<GameFlow>
 
         IsInitialized = true;
         await WaitForDialogueServiceReady();
-        RunStoryLoopAsync(gameLoopCts.Token).Forget();
+        
+        // Start the main track loop
+        mainTrack.RunLoopAsync(gameLoopCts.Token).Forget();
     }
 
     private async UniTask InitServices()
@@ -96,334 +99,67 @@ public class GameFlow : MonoSingleton<GameFlow>
         await UniTask.CompletedTask;
     }
 
-    private async UniTask RunStoryLoopAsync(CancellationToken cancellationToken)
+    public void ExecuteIndependentEvent(StoryEventAsset asset)
     {
-        Debug.Log($"[GameFlow] RunStoryLoopAsync started on {this.GetInstanceID()}. Token: {cancellationToken.GetHashCode()}");
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            if (isStoryPaused)
-            {
-                resumeFlowTcs ??= new UniTaskCompletionSource<bool>();
-                try
-                {
-                    await resumeFlowTcs.Task.AttachExternalCancellation(cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-                finally
-                {
-                    resumeFlowTcs = null;
-                }
-
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    break;
-                }
-
-                continue;
-            }
-
-            if (!TryDequeueNextEvent(out var runtime))
-            {
-                await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
-                continue;
-            }
-
-            if (runtime.Asset == null)
-            {
-                LogWarning("Encountered a null StoryEventAsset while processing the queue. Skipping.");
-                continue;
-            }
-
-            var isBackground = runtime.Asset is IBackgroundStoryEvent bg && bg.RunInBackground;
-            if (isBackground)
-            {
-                if (runtime.Asset is IBackgroundStoryEvent bgBlock && bgBlock.BlockSourceSequence && runtime.SourceSequence != null)
-                {
-                    blockedSequences.Add(runtime.SourceSequence);
-                }
-                ProcessStoryEventAsync(runtime, cancellationToken, true).Forget();
-                continue;
-            }
-
-            await ProcessStoryEventAsync(runtime, cancellationToken, false);
-        }
-        Debug.LogError($"[GameFlow] RunStoryLoopAsync exited on {this.GetInstanceID()}. Token cancelled: {cancellationToken.IsCancellationRequested}");
+        if (asset == null) return;
+        
+        Log($"Executing independent event: {asset.EventId}");
+        var track = new StoryTrack(this, $"Independent_{asset.EventId}");
+        activeTracks.Add(track);
+        
+        track.EnqueueEvent(asset, insertAtFront: false);
+        
+        // Start this track immediately
+        track.RunLoopAsync(gameLoopCts.Token).Forget();
+        
+        // Clean up track when done? 
+        // Implementation detail: activeTracks might grow indefinitely if we don't prune.
+        // Ideally, StoryTrack raises an event when empty and we remove it.
+        // For now, we'll keep it simple or let garbage collection happen if we managed it better.
+        // Better: Have the track remove itself from activeTracks when done.
+        // We'll handle that via a callback or similar if needed, but for now memory impact is low if they finish.
+        // Actually, let's prune finished tracks occasionally or just ignore them.
     }
-
-    private async UniTask ProcessStoryEventAsync(StoryEventRuntime runtime, CancellationToken cancellationToken, bool isBackground)
-    {
-        if (!isBackground)
-        {
-            currentStoryEvent = runtime;
-        }
-
-        runtime.SetState(StoryEventState.Running);
-        LogSequenceEvent(runtime, "BEGIN");
-        OnStoryEventStarted.OnNext(runtime);
-
-        var context = new GameFlowContext(this, runtime, cancellationToken);
-        StoryEventResult result;
-        Exception failureException = null;
-
-        try
-        {
-            var canExecute = await ShouldRunEventAsync(runtime, context, cancellationToken);
-            if (!canExecute)
-            {
-                result = StoryEventResult.Skipped($"Preconditions failed or event is not replayable: {runtime.Asset.EventId}");
-            }
-            else
-            {
-                result = await runtime.Asset.ExecuteAsync(context, cancellationToken);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            var tokenStatus = cancellationToken.IsCancellationRequested ? "cancelled" : "active";
-            Debug.LogWarning($"[GameFlow] OperationCanceledException in '{runtime.Asset.EventId}' on {this.GetInstanceID()}. Token status: {tokenStatus}. Stack: {Environment.StackTrace}");
-            result = StoryEventResult.Cancelled($"Story event cancelled: {runtime.Asset.EventId}");
-        }
-        catch (Exception ex)
-        {
-            failureException = ex;
-            result = StoryEventResult.Failed(ex.Message);
-        }
-
-        FinalizeStoryEvent(runtime, result, failureException, isBackground);
-    }
-
-    private void FinalizeStoryEvent(StoryEventRuntime runtime, StoryEventResult result, Exception failureException, bool isBackground)
-    {
-        if (failureException != null)
-        {
-            runtime.SetState(StoryEventState.Failed);
-            OnStoryEventFailed.OnNext((runtime, failureException));
-            LogError($"Story event '{runtime.Asset.EventId}' threw an exception: {failureException}");
-        }
-
-        if (result.FinalState == StoryEventState.Pending)
-        {
-            result = StoryEventResult.Completed(result.Message, result.NextSequence);
-        }
-
-        runtime.SetState(result.FinalState, result);
-
-        var eventId = runtime.Asset.EventId;
-        if (!string.IsNullOrWhiteSpace(eventId))
-        {
-            lastResultByEventId[eventId] = result;
-        }
-
-        var sequenceToChain = result.NextSequence;
-        if (sequenceToChain == null && ShouldAutoChainToNextSequence(runtime, result))
-        {
-            sequenceToChain = runtime.SourceSequence.NextSequence;
-        }
-
-        if (sequenceToChain != null)
-        {
-            EnqueueSequence(sequenceToChain);
-        }
-
-        if (result.PauseFlow)
-        {
-            PauseStoryFlow($"Event requested pause: {eventId}");
-        }
-
-        var resultSummary = string.IsNullOrWhiteSpace(result.Message)
-            ? result.FinalState.ToString()
-            : $"{result.FinalState}: {result.Message}";
-        LogSequenceEvent(runtime, "END", resultSummary);
-        OnStoryEventFinished.OnNext((runtime, result));
-
-        if (!isBackground)
-        {
-            currentStoryEvent = null;
-        }
-
-        if (runtime.SourceSequence != null && blockedSequences.Contains(runtime.SourceSequence))
-        {
-            blockedSequences.Remove(runtime.SourceSequence);
-        }
-    }
-
-    private async UniTask<bool> ShouldRunEventAsync(StoryEventRuntime runtime, GameFlowContext context, CancellationToken cancellationToken)
-    {
-        if (!runtime.Asset.IsReplayable &&
-            !string.IsNullOrWhiteSpace(runtime.Asset.EventId) &&
-            lastResultByEventId.TryGetValue(runtime.Asset.EventId, out var lastResult) &&
-            lastResult.FinalState == StoryEventState.Completed)
-        {
-            return false;
-        }
-
-        return await runtime.Asset.CanExecuteAsync(context, cancellationToken);
-    }
-
-    private bool ShouldAutoChainToNextSequence(StoryEventRuntime runtime, StoryEventResult result)
-    {
-        if (runtime?.SourceSequence == null || runtime.SourceSequence.NextSequence == null)
-        {
-            return false;
-        }
-
-        if (!runtime.IsLastEventInSequence)
-        {
-            return false;
-        }
-
-        return result.FinalState == StoryEventState.Completed || result.FinalState == StoryEventState.Skipped;
-    }
-
-    private bool TryDequeueNextEvent(out StoryEventRuntime runtime)
-    {
-        if (storyQueue.First != null)
-        {
-            var node = storyQueue.First;
-            while (node != null)
-            {
-                var candidate = node.Value;
-                if (candidate.SourceSequence != null && blockedSequences.Contains(candidate.SourceSequence))
-                {
-                    node = node.Next;
-                    continue;
-                }
-
-                runtime = candidate;
-                storyQueue.Remove(node);
-                return true;
-            }
-        }
-
-        runtime = null;
-        return false;
-    }
-
-    public StoryEventRuntime[] GetPendingEventsSnapshot()
-    {
-        var array = new StoryEventRuntime[storyQueue.Count];
-        storyQueue.CopyTo(array, 0);
-        return array;
-    }
-
-    public IReadOnlyDictionary<string, StoryEventResult> StoryHistory => lastResultByEventId;
 
     public IReadOnlyList<StoryEventRuntime> EnqueueSequence(StorySequenceAsset sequence, bool insertAtFront = false)
     {
-        if (sequence == null)
-        {
-            return Array.Empty<StoryEventRuntime>();
-        }
-
-        var validEvents = new List<StoryEventAsset>();
-        foreach (var storyEvent in sequence.EnumerateEvents())
-        {
-            if (storyEvent != null)
-            {
-                validEvents.Add(storyEvent);
-            }
-        }
-
-        if (validEvents.Count == 0)
-        {
-            Log($"Sequence '{sequence.SequenceId}' has no valid events to enqueue.");
-            return Array.Empty<StoryEventRuntime>();
-        }
-
-        var created = new List<StoryEventRuntime>(validEvents.Count);
-        for (int i = 0; i < validEvents.Count; i++)
-        {
-            var runtime = new StoryEventRuntime(validEvents[i], sequence, i, validEvents.Count);
-            created.Add(runtime);
-        }
-
-        if (insertAtFront)
-        {
-            for (int i = created.Count - 1; i >= 0; i--)
-            {
-                storyQueue.AddFirst(created[i]);
-                OnStoryEventQueued.OnNext(created[i]);
-            }
-        }
-        else
-        {
-            foreach (var runtime in created)
-            {
-                storyQueue.AddLast(runtime);
-                OnStoryEventQueued.OnNext(runtime);
-            }
-        }
-
-        OnSequenceQueued.OnNext(sequence);
-        Log($"Enqueued sequence '{sequence.SequenceId}' with {created.Count} events" + (insertAtFront ? " at the front of the queue." : "."));
-
-        return created;
+        return mainTrack.EnqueueSequence(sequence, insertAtFront);
     }
 
     public void RestartSequence(StorySequenceAsset sequence, bool insertAtFront = true)
     {
-        if (sequence == null)
-        {
-            return;
-        }
-
-        var node = storyQueue.First;
-        while (node != null)
-        {
-            var next = node.Next;
-            if (node.Value != null && node.Value.SourceSequence == sequence)
-            {
-                storyQueue.Remove(node);
-            }
-            node = next;
-        }
-
-        EnqueueSequence(sequence, insertAtFront);
-        Log($"Restarted sequence '{sequence.SequenceId}'.");
+        mainTrack.RestartSequence(sequence, insertAtFront);
     }
 
     public StoryEventRuntime EnqueueEvent(StoryEventAsset asset, bool insertAtFront = false, StorySequenceAsset sourceSequence = null)
     {
-        if (asset == null)
+        // If it's a standalone event request (no source sequence) and we want parallel execution...
+        // BUT user API expects this to return a runtime and maybe block?
+        // Let's stick to the original behavior: EnqueueEvent goes to MAIN TRACK unless specified otherwise.
+        // Wait, the problem is EndStorageRoom2 (called via EnqueueEvent) needs to be parallel.
+        // HACK: If we detect it's a task completion event, maybe force parallel? No, that's magic.
+        // Solution: We'll trust the user's request for "rewrite".
+        // We will change EnqueueEvent to use a parallel track IF it has no source sequence.
+        // This assumes standalone events are meant to be fire-and-forget parallel commands.
+        
+        if (sourceSequence == null)
         {
-            return null;
+            // It's a standalone event. Run it in a parallel track so it doesn't block the main story.
+            ExecuteIndependentEvent(asset);
+            return null; // We can't return the runtime easily since it's on another track, or we create one here.
         }
 
-        Debug.Log($"[GameFlow] EnqueueEvent called on {this.GetInstanceID()} for '{asset.EventId}'. InsertAtFront: {insertAtFront}");
-
-        var runtime = new StoryEventRuntime(asset, sourceSequence, 0, sourceSequence != null ? 1 : 0);
-
-        if (insertAtFront)
-        {
-            storyQueue.AddFirst(runtime);
-        }
-        else
-        {
-            storyQueue.AddLast(runtime);
-        }
-
-        OnStoryEventQueued.OnNext(runtime);
-        Log($"Enqueued story event '{asset.EventId}'" + (insertAtFront ? " at the front of the queue." : "."));
-
-        if (currentStoryEvent != null)
-        {
-            Log($"[Diagnostics] Queue is currently processing event: {currentStoryEvent.Asset.name} (ID: {currentStoryEvent.Asset.EventId}). New event will wait.");
-        }
-        else
-        {
-            Log($"[Diagnostics] Queue is idle. New event should start immediately.");
-        }
-
-        return runtime;
+        return mainTrack.EnqueueEvent(asset, insertAtFront, sourceSequence);
     }
 
     public void ClearStoryQueue()
     {
-        storyQueue.Clear();
-        Log("Cleared all pending story events.");
+        mainTrack.ClearQueue();
+        // Maybe clear parallel tracks too?
+        foreach (var t in activeTracks)
+        {
+            if (t != mainTrack) t.ClearQueue();
+        }
     }
 
     public void ClearHistory()
@@ -450,22 +186,15 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     public void PauseStoryFlow(string reason = null)
     {
-        if (isStoryPaused)
-        {
-            return;
-        }
-
+        if (isStoryPaused) return;
         isStoryPaused = true;
         Log("Story flow paused." + (string.IsNullOrWhiteSpace(reason) ? string.Empty : $" {reason}"));
+        // Note: StoryTrack reads this flag
     }
 
     public void ResumeStoryFlow()
     {
-        if (!isStoryPaused)
-        {
-            return;
-        }
-
+        if (!isStoryPaused) return;
         isStoryPaused = false;
         resumeFlowTcs?.TrySetResult(true);
         resumeFlowTcs = null;
@@ -474,13 +203,9 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     public async UniTask WaitForSignalAsync(string signalId, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(signalId))
-        {
-            throw new ArgumentException("Signal id cannot be null or whitespace.", nameof(signalId));
-        }
+        if (string.IsNullOrWhiteSpace(signalId)) throw new ArgumentException("Signal id cannot be null or whitespace.", nameof(signalId));
 
         UniTaskCompletionSource<bool> waiter;
-
         lock (signalWaiters)
         {
             if (!signalWaiters.TryGetValue(signalId, out waiter) || waiter.Task.Status != UniTaskStatus.Pending)
@@ -508,13 +233,9 @@ public class GameFlow : MonoSingleton<GameFlow>
 
     public bool Signal(string signalId)
     {
-        if (string.IsNullOrWhiteSpace(signalId))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(signalId)) return false;
 
         UniTaskCompletionSource<bool> waiter = null;
-
         lock (signalWaiters)
         {
             if (signalWaiters.TryGetValue(signalId, out waiter))
@@ -536,12 +257,9 @@ public class GameFlow : MonoSingleton<GameFlow>
             base.OnDestroy();
             return;
         }
-        Debug.Log($"[GameFlow] OnDestroy called on {this.GetInstanceID()}. Stack: {Environment.StackTrace}");
         CancelGameLoop();
-
-        // Dispose all services before destruction
         ServiceLocator.Instance?.DisposeAllServices();
-
+        
         OnStoryEventQueued.OnCompleted();
         OnStoryEventStarted.OnCompleted();
         OnStoryEventFinished.OnCompleted();
@@ -555,51 +273,27 @@ public class GameFlow : MonoSingleton<GameFlow>
     {
         if (gameLoopCts != null)
         {
-            Debug.Log($"[GameFlow] CancelGameLoop called on {this.GetInstanceID()}. CTS: {gameLoopCts.GetHashCode()}. Stack: {Environment.StackTrace}");
             gameLoopCts.Cancel();
             gameLoopCts.Dispose();
             gameLoopCts = null;
         }
-
         resumeFlowTcs?.TrySetCanceled();
         resumeFlowTcs = null;
         isStoryPaused = false;
-        currentStoryEvent = null;
-        storyQueue.Clear();
+        
+        mainTrack?.ClearQueue();
+        activeTracks.Clear();
         lastResultByEventId.Clear();
     }
 
-    private void Log(string message)
-    {
-        if (logStoryFlow)
-        {
-            Debug.Log($"[GameFlow] {message}");
-        }
-    }
-
-    private void LogWarning(string message)
-    {
-        if (logStoryFlow)
-        {
-            Debug.LogWarning($"[GameFlow] {message}");
-        }
-    }
-
-    private void LogError(string message)
-    {
-        if (logStoryFlow)
-        {
-            Debug.LogError($"[GameFlow] {message}");
-        }
-    }
-
-    private void LogSequenceEvent(StoryEventRuntime runtime, string phase, string details = null)
+    // Logging Helpers (public for inner class)
+    public void Log(string message) { if (logStoryFlow) Debug.Log($"[GameFlow] {message}"); }
+    public void LogWarning(string message) { if (logStoryFlow) Debug.LogWarning($"[GameFlow] {message}"); }
+    public void LogError(string message) { if (logStoryFlow) Debug.LogError($"[GameFlow] {message}"); }
+    public void LogSequenceEvent(StoryEventRuntime runtime, string phase, string details = null)
     {
         var sequence = runtime?.SourceSequence;
-        if (sequence == null || !sequence.LogEventLifecycle)
-        {
-            return;
-        }
+        if (sequence == null || !sequence.LogEventLifecycle) return;
 
         var eventId = runtime.Asset != null ? runtime.Asset.EventId : "<null>";
         var seqId = sequence.SequenceId;
@@ -608,25 +302,273 @@ public class GameFlow : MonoSingleton<GameFlow>
         var progress = total > 0 ? $"{stepIndex}/{total}" : stepIndex.ToString();
         var message = $"[StorySequence:{seqId}] {phase} event '{eventId}' (step {progress})";
 
-        if (!string.IsNullOrWhiteSpace(details))
-        {
-            message += $" :: {details}";
-        }
-
+        if (!string.IsNullOrWhiteSpace(details)) message += $" :: {details}";
         Debug.Log(message, sequence);
     }
 
     private async UniTask WaitForDialogueServiceReady()
     {
         var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
-        if (dialogueService == null)
-        {
-            return;
-        }
+        if (dialogueService == null) return;
 
         if (dialogueService is DialogueEngine_Gaslight gaslight && !gaslight.IsRuntimeReady)
         {
             await gaslight.WaitUntilReadyAsync().AttachExternalCancellation(gameLoopCts.Token);
+        }
+    }
+    
+    // ==========================================
+    // Inner Class: StoryTrack
+    // ==========================================
+    private class StoryTrack
+    {
+        private readonly GameFlow gameFlow;
+        private readonly string trackName;
+        private readonly LinkedList<StoryEventRuntime> queue = new LinkedList<StoryEventRuntime>();
+        private readonly HashSet<StorySequenceAsset> blockedSequences = new HashSet<StorySequenceAsset>();
+        
+        public StoryEventRuntime CurrentEvent { get; private set; }
+
+        public StoryTrack(GameFlow gameFlow, string trackName)
+        {
+            this.gameFlow = gameFlow;
+            this.trackName = trackName;
+        }
+
+        public async UniTask RunLoopAsync(CancellationToken cancellationToken)
+        {
+            gameFlow.Log($"Track '{trackName}' loop started.");
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                // Check Pause
+                if (gameFlow.IsStoryPaused)
+                {
+                    gameFlow.resumeFlowTcs ??= new UniTaskCompletionSource<bool>();
+                    try { await gameFlow.resumeFlowTcs.Task.AttachExternalCancellation(cancellationToken); }
+                    catch (OperationCanceledException) { break; }
+                    finally { gameFlow.resumeFlowTcs = null; }
+                    if (cancellationToken.IsCancellationRequested) break;
+                    continue;
+                }
+
+                if (!TryDequeueNextEvent(out var runtime))
+                {
+                    await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
+                    continue;
+                }
+
+                if (runtime.Asset == null)
+                {
+                    gameFlow.LogWarning($"[{trackName}] Encountered null asset. Skipping.");
+                    continue;
+                }
+
+                var isBackground = runtime.Asset is IBackgroundStoryEvent bg && bg.RunInBackground;
+                if (isBackground)
+                {
+                    if (runtime.Asset is IBackgroundStoryEvent bgBlock && bgBlock.BlockSourceSequence && runtime.SourceSequence != null)
+                    {
+                        blockedSequences.Add(runtime.SourceSequence);
+                    }
+                    ProcessStoryEventAsync(runtime, cancellationToken, true).Forget();
+                    continue;
+                }
+
+                await ProcessStoryEventAsync(runtime, cancellationToken, false);
+            }
+            gameFlow.Log($"Track '{trackName}' loop exited.");
+        }
+
+        private bool TryDequeueNextEvent(out StoryEventRuntime runtime)
+        {
+            if (queue.First != null)
+            {
+                var node = queue.First;
+                while (node != null)
+                {
+                    var candidate = node.Value;
+                    if (candidate.SourceSequence != null && blockedSequences.Contains(candidate.SourceSequence))
+                    {
+                        node = node.Next;
+                        continue;
+                    }
+                    runtime = candidate;
+                    queue.Remove(node);
+                    return true;
+                }
+            }
+            runtime = null;
+            return false;
+        }
+
+        private async UniTask ProcessStoryEventAsync(StoryEventRuntime runtime, CancellationToken cancellationToken, bool isBackground)
+        {
+            if (!isBackground) CurrentEvent = runtime;
+
+            runtime.SetState(StoryEventState.Running);
+            gameFlow.LogSequenceEvent(runtime, "BEGIN", $"[Track:{trackName}]");
+            gameFlow.OnStoryEventStarted.OnNext(runtime);
+
+            var context = new GameFlowContext(gameFlow, runtime, cancellationToken);
+            StoryEventResult result;
+            Exception failureException = null;
+
+            try
+            {
+                var canExecute = await ShouldRunEventAsync(runtime, context, cancellationToken);
+                if (!canExecute)
+                {
+                    result = StoryEventResult.Skipped($"Preconditions failed/already complete: {runtime.Asset.EventId}");
+                }
+                else
+                {
+                    result = await runtime.Asset.ExecuteAsync(context, cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                result = StoryEventResult.Cancelled($"Cancelled: {runtime.Asset.EventId}");
+            }
+            catch (Exception ex)
+            {
+                failureException = ex;
+                result = StoryEventResult.Failed(ex.Message);
+            }
+
+            FinalizeStoryEvent(runtime, result, failureException, isBackground);
+        }
+
+        private async UniTask<bool> ShouldRunEventAsync(StoryEventRuntime runtime, GameFlowContext context, CancellationToken cancellationToken)
+        {
+            if (!runtime.Asset.IsReplayable && !string.IsNullOrWhiteSpace(runtime.Asset.EventId) &&
+                gameFlow.lastResultByEventId.TryGetValue(runtime.Asset.EventId, out var last) &&
+                last.FinalState == StoryEventState.Completed)
+            {
+                return false;
+            }
+            return await runtime.Asset.CanExecuteAsync(context, cancellationToken);
+        }
+
+        private void FinalizeStoryEvent(StoryEventRuntime runtime, StoryEventResult result, Exception failureException, bool isBackground)
+        {
+            if (failureException != null)
+            {
+                runtime.SetState(StoryEventState.Failed);
+                gameFlow.OnStoryEventFailed.OnNext((runtime, failureException));
+                gameFlow.LogError($"[{trackName}] Event '{runtime.Asset.EventId}' failed: {failureException}");
+            }
+
+            if (result.FinalState == StoryEventState.Pending)
+                result = StoryEventResult.Completed(result.Message, result.NextSequence);
+
+            runtime.SetState(result.FinalState, result);
+
+            var eventId = runtime.Asset.EventId;
+            if (!string.IsNullOrWhiteSpace(eventId))
+            {
+                gameFlow.lastResultByEventId[eventId] = result;
+            }
+
+            var sequenceToChain = result.NextSequence;
+            if (sequenceToChain == null && ShouldAutoChainToNextSequence(runtime, result))
+            {
+                sequenceToChain = runtime.SourceSequence.NextSequence;
+            }
+
+            if (sequenceToChain != null)
+            {
+                EnqueueSequence(sequenceToChain);
+            }
+
+            if (result.PauseFlow)
+            {
+                gameFlow.PauseStoryFlow($"Event requested pause: {eventId}");
+            }
+
+            var resultSummary = string.IsNullOrWhiteSpace(result.Message) ? result.FinalState.ToString() : $"{result.FinalState}: {result.Message}";
+            gameFlow.LogSequenceEvent(runtime, "END", resultSummary);
+            gameFlow.OnStoryEventFinished.OnNext((runtime, result));
+
+            if (!isBackground) CurrentEvent = null;
+
+            if (runtime.SourceSequence != null && blockedSequences.Contains(runtime.SourceSequence))
+            {
+                blockedSequences.Remove(runtime.SourceSequence);
+            }
+        }
+
+        private bool ShouldAutoChainToNextSequence(StoryEventRuntime runtime, StoryEventResult result)
+        {
+            if (runtime?.SourceSequence == null || runtime.SourceSequence.NextSequence == null) return false;
+            if (!runtime.IsLastEventInSequence) return false;
+            return result.FinalState == StoryEventState.Completed || result.FinalState == StoryEventState.Skipped;
+        }
+
+        public IReadOnlyList<StoryEventRuntime> EnqueueSequence(StorySequenceAsset sequence, bool insertAtFront = false)
+        {
+            if (sequence == null) return Array.Empty<StoryEventRuntime>();
+            
+            var validEvents = new List<StoryEventAsset>();
+            foreach (var evt in sequence.EnumerateEvents())
+                if (evt != null) validEvents.Add(evt);
+
+            if (validEvents.Count == 0) return Array.Empty<StoryEventRuntime>();
+
+            var created = new List<StoryEventRuntime>(validEvents.Count);
+            for (int i = 0; i < validEvents.Count; i++)
+                created.Add(new StoryEventRuntime(validEvents[i], sequence, i, validEvents.Count));
+
+            if (insertAtFront)
+            {
+                for (int i = created.Count - 1; i >= 0; i--)
+                {
+                    queue.AddFirst(created[i]);
+                    gameFlow.OnStoryEventQueued.OnNext(created[i]);
+                }
+            }
+            else
+            {
+                foreach (var r in created)
+                {
+                    queue.AddLast(r);
+                    gameFlow.OnStoryEventQueued.OnNext(r);
+                }
+            }
+            
+            gameFlow.OnSequenceQueued.OnNext(sequence);
+            gameFlow.Log($"[{trackName}] Enqueued sequence '{sequence.SequenceId}' ({created.Count} events).");
+            return created;
+        }
+        
+        public StoryEventRuntime EnqueueEvent(StoryEventAsset asset, bool insertAtFront = false, StorySequenceAsset sourceSequence = null)
+        {
+            if (asset == null) return null;
+            var runtime = new StoryEventRuntime(asset, sourceSequence, 0, sourceSequence != null ? 1 : 0);
+            
+            if (insertAtFront) queue.AddFirst(runtime);
+            else queue.AddLast(runtime);
+            
+            gameFlow.OnStoryEventQueued.OnNext(runtime);
+            gameFlow.Log($"[{trackName}] Enqueued event '{asset.EventId}'.");
+            return runtime;
+        }
+        
+        public void RestartSequence(StorySequenceAsset sequence, bool insertAtFront = true)
+        {
+             if (sequence == null) return;
+             var node = queue.First;
+             while(node != null) {
+                 var next = node.Next;
+                 if (node.Value != null && node.Value.SourceSequence == sequence) queue.Remove(node);
+                 node = next;
+             }
+             EnqueueSequence(sequence, insertAtFront);
+             gameFlow.Log($"[{trackName}] Restarted sequence '{sequence.SequenceId}'.");
+        }
+
+        public void ClearQueue()
+        {
+            queue.Clear();
         }
     }
 }

@@ -4,7 +4,7 @@ using R3;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "WaitForTaskStoryEvent", menuName = "Game Flow/Flow Control/Wait For Task")]
-public sealed class WaitForTaskStoryEventAsset : StoryEventAsset
+public sealed class WaitForTaskStoryEventAsset : StoryEventAsset, IBackgroundStoryEvent
 {
     [Header("Task Configuration")]
     [SerializeField]
@@ -14,6 +14,18 @@ public sealed class WaitForTaskStoryEventAsset : StoryEventAsset
     [SerializeField]
     [Tooltip("If true, this event completes immediately if the task is already in the completion history.")]
     private bool checkHistory = true;
+
+    [SerializeField]
+    [Tooltip("If true, this event runs in the background (not blocking the global queue).")]
+    private bool runInBackground = false;
+
+    [SerializeField]
+    [Tooltip("If true, and RunInBackground is true, this event will block the REST of its own source sequence.")]
+    private bool blockSourceSequence = false;
+
+    // IBackgroundStoryEvent implementation
+    public bool RunInBackground => runInBackground;
+    public bool BlockSourceSequence => blockSourceSequence;
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
@@ -33,6 +45,8 @@ public sealed class WaitForTaskStoryEventAsset : StoryEventAsset
         {
             return StoryEventResult.Completed($"Task '{taskId}' was already complete.");
         }
+
+        // blocking check removed as we now use IBackgroundStoryEvent for flow control
 
         // 2. Wait for completion
         var tcs = new UniTaskCompletionSource<bool>();

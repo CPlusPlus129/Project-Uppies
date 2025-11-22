@@ -78,31 +78,17 @@ namespace BlackjackGame
             ui.Open();
         }
 
-        private bool _isInterruptedByEvent;
-
         private void HandleRoundCompleted(RoundResult result, int chipsWon)
         {
-            _isInterruptedByEvent = false;
             if (result == RoundResult.PlayerWin || result == RoundResult.PlayerBlackjack)
             {
                 if (onWinRoundEvent != null)
-                {
                     GameFlow.Instance.EnqueueEvent(onWinRoundEvent, insertAtFront: true);
-                    _isInterruptedByEvent = true;
-                }
             }
             else if (result == RoundResult.DealerWin)
             {
                 if (onLoseRoundEvent != null)
-                {
                     GameFlow.Instance.EnqueueEvent(onLoseRoundEvent, insertAtFront: true);
-                    _isInterruptedByEvent = true;
-                }
-            }
-
-            if (_isInterruptedByEvent && _currentUI != null)
-            {
-                _currentUI.Close();
             }
         }
 
@@ -121,11 +107,10 @@ namespace BlackjackGame
                 TaskManager.Instance.CompleteTask(taskIdToComplete);
             }
 
-            if (!_isInterruptedByEvent && postGameEvent != null)
+            if (postGameEvent != null)
             {
                 GameFlow.Instance.EnqueueEvent(postGameEvent, insertAtFront: true);
             }
-            _isInterruptedByEvent = false;
         }
 
         private void OnDestroy()
