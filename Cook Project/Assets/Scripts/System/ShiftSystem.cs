@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using R3;
@@ -286,6 +287,16 @@ public class ShiftSystem : IShiftSystem
         return depositedAmount.Value >= quotaAmount.Value;
     }
 
+    public bool HasTasksRequiredBeforeShiftEnds()
+    {
+        return TaskManager.Instance.Tasks.Value.Any(x => !x.IsCompleted && x.dueBeforeShiftEnds);
+    }
+
+    public bool HasTasksRequiredBeforeShiftStarts()
+    {
+        return TaskManager.Instance.Tasks.Value.Any(x => !x.IsCompleted && x.dueBeforeShiftStarts);
+    }
+
     private int DepositInternal(int requestedAmount)
     {
         if (!CanInteractWithDepositBox())
@@ -396,7 +407,12 @@ public class ShiftSystem : IShiftSystem
         }
 
         // Always update the description first so it shows the correct amount
-        TaskManager.Instance.AddTask("QuotaTask", $"Quota: ${depositedAmount.Value}/{quotaAmount.Value}");
+        var task = new TaskManager.TaskData()
+        {
+            Id = "QuotaTask",
+            Description = $"Quota: ${depositedAmount.Value}/{quotaAmount.Value}"
+        };
+        TaskManager.Instance.AddTask(task);
 
         if (HasMetQuota())
         {
@@ -421,7 +437,7 @@ public class ShiftSystem : IShiftSystem
 
             if (remain <= 0f)
             {
-                if (HasMetQuota())
+                if (HasMetQuota() && !HasTasksRequiredBeforeShiftEnds())
                 {
                     CompleteShift();
                 }
@@ -435,7 +451,7 @@ public class ShiftSystem : IShiftSystem
         else
         {
             overtimeElapsedSeconds += deltaTime;
-            if (HasMetQuota())
+            if (HasMetQuota() && !HasTasksRequiredBeforeShiftEnds())
             {
                 CompleteShift();
                 return;
@@ -467,7 +483,7 @@ public class ShiftSystem : IShiftSystem
     {
         shiftTimer.Value = 0f;
         currentState.Value = ShiftState.Overtime;
-        WorldBroadcastSystem.Instance.Broadcast("5pm hit! Satan starts collecting if you miss quota.", 6f);
+        WorldBroadcastSystem.Instance.Broadcast("5pm hit! Satan starts collecting if you miss quota or fail to complete your tasks.", 6f);
         BeginDebtCollectionLoop();
     }
 

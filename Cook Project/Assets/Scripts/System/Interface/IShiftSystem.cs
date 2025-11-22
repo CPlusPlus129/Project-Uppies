@@ -19,6 +19,8 @@ public interface IShiftSystem : IGameService
     bool TryDeposit(int amount);
     int DepositAllAvailableFunds();
     bool HasMetQuota();
+    bool HasTasksRequiredBeforeShiftStarts();
+    bool HasTasksRequiredBeforeShiftEnds();
     void RestartCurrentShift();
     void RestartShift(int shiftIndex);
     void EnterAfterShiftState(bool markShiftCompleted = false);

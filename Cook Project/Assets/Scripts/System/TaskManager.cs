@@ -11,6 +11,9 @@ public class TaskManager : MonoSingleton<TaskManager>
         public string Id;
         public string Description;
         public bool IsCompleted;
+
+        public bool dueBeforeShiftStarts;
+        public bool dueBeforeShiftEnds;
     }
 
     private readonly List<TaskData> _activeTasks = new();
@@ -20,17 +23,17 @@ public class TaskManager : MonoSingleton<TaskManager>
     public readonly ReactiveProperty<List<TaskData>> Tasks = new(new List<TaskData>());
     public readonly Subject<string> OnTaskCompleted = new();
 
-    public void AddTask(string id, string description)
+    public void AddTask(TaskData task)
     {
-        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(description)) return;
+        if (string.IsNullOrWhiteSpace(task.Id) || string.IsNullOrWhiteSpace(task.Description)) return;
 
-        var index = _activeTasks.FindIndex(x => x.Id == id);
+        var index = _activeTasks.FindIndex(x => x.Id == task.Id);
         if (index != -1)
         {
             var data = _activeTasks[index];
-            data.Description = description;
+            data.Description = task.Description;
             // Preserve completion status if already completed
-            if (_completedTaskHistory.Contains(id))
+            if (_completedTaskHistory.Contains(task.Id))
             {
                 data.IsCompleted = true;
             }
@@ -39,13 +42,14 @@ public class TaskManager : MonoSingleton<TaskManager>
                 data.IsCompleted = false;
             }
             _activeTasks[index] = data;
-            Debug.Log($"[TaskManager] Updated existing task: {id}");
+            Debug.Log($"[TaskManager] Updated existing task: {task.Id}");
         }
         else
         {
-            bool isAlreadyCompleted = _completedTaskHistory.Contains(id);
-            _activeTasks.Add(new TaskData { Id = id, Description = description, IsCompleted = isAlreadyCompleted });
-            Debug.Log($"[TaskManager] Added new task: {id} (Completed: {isAlreadyCompleted})");
+            bool isAlreadyCompleted = _completedTaskHistory.Contains(task.Id);
+            task.IsCompleted = isAlreadyCompleted;
+            _activeTasks.Add(task);
+            Debug.Log($"[TaskManager] Added new task: {task.Id} (Completed: {isAlreadyCompleted})");
         }
 
         UpdateTasksList();

@@ -212,7 +212,13 @@ public sealed class VipCustomerStoryEventAsset : StoryEventAsset, IBackgroundSto
 
         if (vipHasOrder && autoAddTaskOnSpawn && !string.IsNullOrWhiteSpace(taskIdToComplete))
         {
-            TaskManager.Instance.AddTask(taskIdToComplete, taskDescription);
+            var task = new TaskManager.TaskData()
+            {
+                Id = taskIdToComplete,
+                Description = taskDescription,
+                dueBeforeShiftEnds = true,
+            };
+            TaskManager.Instance.AddTask(task);
         }
 
         if (!string.IsNullOrWhiteSpace(signalOnSpawn))

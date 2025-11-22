@@ -35,6 +35,12 @@ public class RestaurantDoor : InteractableBase
             return;
         }
 
+        if (shiftSystem.HasTasksRequiredBeforeShiftStarts())
+        {
+            WorldBroadcastSystem.Instance.Broadcast("You must complete all required tasks before starting the next shift!", 4f);
+            return;
+        }
+
         EmitAfterShiftExitSignal();
         if (shiftSystem.IsAfterShiftReadyForNextShift)
         {

@@ -22,6 +22,7 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
     private static bool effectsApplied;
     private static readonly SemaphoreSlim effectSemaphore = new SemaphoreSlim(1, 1);
     private static Vector3? cachedOriginalScale;
+    private static Vector3? cachedOriginalSpawnPosition;
     private static float? cachedOriginalSpeed;
     private static float? cachedOriginalSprintSpeed;
     private static float? cachedOriginalJumpHeight;
@@ -113,10 +114,10 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
             switch (effectMode)
             {
                 case EffectMode.Apply:
-                    return await ApplyEffectsAsync(playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
+                    return await ApplyEffectsAsync(playerController, playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
 
                 case EffectMode.Revert:
-                    return await RevertEffectsAsync(playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
+                    return await RevertEffectsAsync(playerController, playerMotor, characterController, playerInteract, playerTransform, cancellationToken);
 
                 default:
                     var message = $"{LogPrefix} Unsupported effect mode '{effectMode}'.";
@@ -131,6 +132,7 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
     }
 
     private async UniTask<StoryEventResult> ApplyEffectsAsync(
+        PlayerController playerController,
         PlayerMotor playerMotor,
         CharacterController characterController,
         PlayerInteract playerInteract,
@@ -143,10 +145,11 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
             return StoryEventResult.Completed("Storage room puzzle shrink already applied.");
         }
 
-        CaptureOriginalState(playerMotor, characterController, playerInteract, playerTransform);
+        CaptureOriginalState(playerController, playerMotor, characterController, playerInteract, playerTransform);
 
         var targetScale = Vector3.Scale(playerTransform.localScale, Vector3.one * Mathf.Clamp(shrinkScaleMultiplier, 0.01f, 1f));
 
+        playerController.SpawnPosition = playerTransform.position;
         await ResizePlayerAsync(playerTransform, targetScale, cancellationToken);
 
         ApplyMovementScaling(playerMotor, characterController, playerTransform, playerInteract);
@@ -157,6 +160,7 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
     }
 
     private async UniTask<StoryEventResult> RevertEffectsAsync(
+        PlayerController playerController,
         PlayerMotor playerMotor,
         CharacterController characterController,
         PlayerInteract playerInteract,
@@ -176,13 +180,14 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
             return StoryEventResult.Failed(message);
         }
 
+        playerController.SpawnPosition = cachedOriginalSpawnPosition.Value;
         await ResizePlayerAsync(playerTransform, cachedOriginalScale.Value, cancellationToken);
 
         RestoreMovementSettings(playerMotor, characterController, playerInteract);
         RestorePlayerWeaponState();
 
         effectsApplied = false;
-        CaptureOriginalState(playerMotor, characterController, playerInteract, playerTransform);
+        CaptureOriginalState(playerController, playerMotor, characterController, playerInteract, playerTransform);
 
         return StoryEventResult.Completed("Player restored to original size for storage room puzzle.");
     }
@@ -265,9 +270,10 @@ public sealed class StorageRoomPuzzle1StoryEventAsset : StoryEventAsset
         }
     }
 
-    private void CaptureOriginalState(PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract, Transform playerTransform)
+    private void CaptureOriginalState(PlayerController playerController, PlayerMotor playerMotor, CharacterController characterController, PlayerInteract playerInteract, Transform playerTransform)
     {
         cachedOriginalScale = playerTransform.localScale;
+        cachedOriginalSpawnPosition = playerController.SpawnPosition;
         cachedOriginalSpeed = playerMotor.speed;
         cachedOriginalSprintSpeed = playerMotor.sprintSpeed;
         cachedOriginalJumpHeight = playerMotor.jumpHeight;
