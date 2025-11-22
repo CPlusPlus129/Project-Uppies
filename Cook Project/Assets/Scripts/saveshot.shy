@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Standard Ubuntu Screenshot Directory (Adjust if yours is different, e.g., just "$HOME/Pictures")
+SOURCE_DIR="$HOME/Pictures/Screenshots"
+
+# target directory is the first argument
+TARGET_DIR="$1"
+
+# Check if source exists
+if [ ! -d "$SOURCE_DIR" ]; then
+    echo "Error: Screenshot directory $SOURCE_DIR not found."
+    exit 1
+fi
+
+# Check if target argument is provided
+if [ -z "$TARGET_DIR" ]; then
+    echo "Usage: save_shot <target_directory_path>"
+    exit 1
+fi
+
+# Create target directory if it doesn't exist
+if [ ! -d "$TARGET_DIR" ]; then
+    mkdir -p "$TARGET_DIR"
+fi
+
+# Find the newest PNG file in the source directory
+# Uses ls -t (sort by time) and head -n 1 (take top)
+LATEST_FILE=$(ls -t "$SOURCE_DIR"/*.png 2>/dev/null | head -n 1)
+
+if [ -z "$LATEST_FILE" ]; then
+    echo "No screenshots found in $SOURCE_DIR"
+    exit 1
+else
+    cp "$LATEST_FILE" "$TARGET_DIR/"
+    FILENAME=$(basename "$LATEST_FILE")
+    echo "Saved '$FILENAME' to '$TARGET_DIR'"
+    
+    # Optional: Send a desktop notification
+    notify-send "Screenshot Saved" "Moved $FILENAME to $TARGET_DIR"
+fi

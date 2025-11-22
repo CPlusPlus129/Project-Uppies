@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using R3;
+using Cysharp.Threading.Tasks;
 
 namespace BlackjackGame
 {
@@ -16,19 +18,53 @@ namespace BlackjackGame
         }
 
         [Header("Story Integration")]
-        [SerializeField] private StorySequenceAsset preGameSequence;
-        [SerializeField] private StorySequenceAsset postGameSequence;
-        [SerializeField] private StorySequenceAsset onWinRoundSequence;
-        [SerializeField] private StorySequenceAsset onLoseRoundSequence;
+        [SerializeField] private StoryEventAsset preGameEvent;
+        [SerializeField] private StoryEventAsset postGameEvent;
+        [SerializeField] private StoryEventAsset onWinRoundEvent;
+        [SerializeField] private StoryEventAsset onLoseRoundEvent;
+
+        [Header("Task Integration")]
+        [SerializeField] private string taskIdToComplete;
+        [SerializeField] private bool requireTaskToStart;
 
         private BlackjackUI _currentUI;
 
         public override async void Interact()
         {
-            if (preGameSequence != null)
+            if (requireTaskToStart && !string.IsNullOrEmpty(taskIdToComplete))
             {
-                GameFlow.Instance.EnqueueSequence(preGameSequence, insertAtFront: true);
-                await WaitForSequenceCompletion(preGameSequence);
+                if (TaskManager.Instance == null) return;
+                
+                bool hasTask = false;
+                // Check if task exists in active list
+                var tasks = TaskManager.Instance.Tasks.Value;
+                foreach (var task in tasks)
+                {
+                    if (task.Id == taskIdToComplete)
+                    {
+                        hasTask = true;
+                        break;
+                    }
+                }
+
+                if (!hasTask) return;
+            }
+
+            if (preGameEvent != null)
+            {
+                var runtime = GameFlow.Instance.EnqueueEvent(preGameEvent, insertAtFront: true);
+                
+                // Wait for completion
+                try 
+                {
+                    await GameFlow.Instance.OnStoryEventFinished
+                        .Where(x => x.runtime == runtime)
+                        .FirstAsync(cancellationToken: this.GetCancellationTokenOnDestroy());
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Error waiting for pre-game event: {e}");
+                }
             }
 
             var ui = UIRoot.Instance.GetUIComponent<BlackjackUI>();
@@ -45,13 +81,13 @@ namespace BlackjackGame
         {
             if (result == RoundResult.PlayerWin || result == RoundResult.PlayerBlackjack)
             {
-                if (onWinRoundSequence != null)
-                    GameFlow.Instance.EnqueueSequence(onWinRoundSequence, insertAtFront: true);
+                if (onWinRoundEvent != null)
+                    GameFlow.Instance.EnqueueEvent(onWinRoundEvent, insertAtFront: true);
             }
             else if (result == RoundResult.DealerWin)
             {
-                if (onLoseRoundSequence != null)
-                    GameFlow.Instance.EnqueueSequence(onLoseRoundSequence, insertAtFront: true);
+                if (onLoseRoundEvent != null)
+                    GameFlow.Instance.EnqueueEvent(onLoseRoundEvent, insertAtFront: true);
             }
         }
 
@@ -65,31 +101,15 @@ namespace BlackjackGame
             }
             _currentUI = null;
 
-            if (postGameSequence != null)
+            if (!string.IsNullOrEmpty(taskIdToComplete) && TaskManager.Instance != null)
             {
-                GameFlow.Instance.EnqueueSequence(postGameSequence, insertAtFront: true);
+                TaskManager.Instance.CompleteTask(taskIdToComplete);
             }
-        }
 
-        private async Cysharp.Threading.Tasks.UniTask WaitForSequenceCompletion(StorySequenceAsset sequence)
-        {
-            // Wait until the sequence is no longer in the pending events or active
-            await Cysharp.Threading.Tasks.UniTask.WaitUntil(() => 
+            if (postGameEvent != null)
             {
-                // Check if current event belongs to sequence
-                if (GameFlow.Instance.CurrentStoryEvent?.SourceSequence == sequence)
-                    return false;
-                
-                // Check if any queued event belongs to sequence
-                var snapshot = GameFlow.Instance.GetPendingEventsSnapshot();
-                foreach (var evt in snapshot)
-                {
-                    if (evt.SourceSequence == sequence)
-                        return false;
-                }
-                
-                return true;
-            });
+                GameFlow.Instance.EnqueueEvent(postGameEvent, insertAtFront: true);
+            }
         }
 
         private void OnDestroy()

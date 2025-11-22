@@ -120,5 +120,11 @@ namespace BlackjackGame
         /// </summary>
         /// <param name="playerMustWin">True = player will win, False = player will lose</param>
         void ActivateCheatMode(bool? playerMustWin);
+
+        /// <summary>
+        /// Add chips to the player's balance
+        /// </summary>
+        /// <param name="amount">Amount to add (can be negative)</param>
+        void AddChips(int amount);
     }
 }

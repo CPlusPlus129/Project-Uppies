@@ -90,6 +90,13 @@ namespace BlackjackGame
             _CheatMode = playerMustWin;
         }
 
+        public void AddChips(int amount)
+        {
+            _playerChips += amount;
+            if (_playerChips < 0) _playerChips = 0;
+            _playerChipsProperty.Value = _playerChips;
+        }
+
         public bool CanPlaceBet(int amount)
         {
             return amount >= MINIMUM_BET && amount <= _playerChips && amount <= MAXIMUM_BET && _gameState == GameState.WaitingForBet;

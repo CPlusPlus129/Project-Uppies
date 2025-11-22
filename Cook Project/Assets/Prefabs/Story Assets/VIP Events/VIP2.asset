@@ -15,12 +15,14 @@ MonoBehaviour:
   eventId: VIP2
   designerNotes: 
   replayable: 1
-  vipCustomerPrefab: {fileID: 919132149155446097, guid: 0898d66b2b47bc842abc625dfa5e2d87, type: 3}
+  runInBackground: 1
+  blockSourceSequence: 1
+  vipCustomerPrefab: {fileID: 6299498899753320731, guid: 4208aba560ee878ea830b83f34d878b0, type: 3}
   vipDisplayName: MoneyMan
   freezeVipOnSpawn: 1
   disableVipAnimatorOnSpawn: 1
   overrideVipRotation: 1
-  vipRotationEuler: {x: 0, y: -90, z: -90}
+  vipRotationEuler: {x: 0, y: 0, z: 0}
   overrideVipScale: 1
   vipLocalScale: {x: 1, y: 1, z: 1}
   forcedMealName: 
@@ -45,5 +47,6 @@ MonoBehaviour:
   spawnBroadcastMessage: VIP arrival detected.
   completionBroadcastMessage: VIP satisfied. Nice work.
   broadcastDurationSeconds: 5
-  questIdToComplete: VIP1Complete
-  autoStartQuestOnSpawn: 1
+  taskIdToComplete: ServeVIP2Task
+  taskDescription: Serve the VIP customer
+  autoAddTaskOnSpawn: 1
