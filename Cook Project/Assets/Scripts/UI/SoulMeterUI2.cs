@@ -129,7 +129,7 @@ public class SoulMeterUI2 : MonoBehaviour
         }
 
         abilityManager.PopulateAbilityDisplayInfo(abilityInfos);
-        Debug.Log($"refreshabilitylist, populateabilitydisplayinfo {abilityInfos.Count}");
+
         // Adjust item count
         while (abilityItems.Count < abilityInfos.Count)
         {

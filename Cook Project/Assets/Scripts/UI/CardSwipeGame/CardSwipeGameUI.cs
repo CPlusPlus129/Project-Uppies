@@ -9,6 +9,7 @@ public class CardSwipeGameUI : MonoBehaviour, IUIInitializable
 {
     [Header("Game Components")]
     [SerializeField] private DraggableCard draggableCard;
+    [SerializeField] private GameObject animationCard;
     [SerializeField] private CardReader cardReader;
 
     [Header("UI Elements")]
@@ -23,7 +24,6 @@ public class CardSwipeGameUI : MonoBehaviour, IUIInitializable
     IPuzzleGameManager puzzleGameManager;
     private CardSwipeGame currentGame;
     private float swipeDistance;
-    private DraggableCard animationCard;
 
     public async UniTask Init()
     {
@@ -54,13 +54,10 @@ public class CardSwipeGameUI : MonoBehaviour, IUIInitializable
 
     private void SetupCardEvents()
     {
+        animationCard.SetActive(false);
         draggableCard.OnSwipeStart.Subscribe(_ => OnSwipeStart()).AddTo(this);
         draggableCard.OnSwipeComplete.Subscribe(tuple => OnSwipeComplete(tuple.Item1, tuple.Item2)).AddTo(this);
-
-        animationCard = Instantiate(draggableCard, draggableCard.transform.parent);
-        animationCard.transform.SetAsLastSibling();
-        animationCard.gameObject.SetActive(false);
-        animationCard.ShouldShowHintAnimation.Subscribe(animationCard.DoHintAnimation).AddTo(this);
+        draggableCard.ShouldShowHintAnimation.Subscribe(animationCard.SetActive).AddTo(this);
     }
 
     private void OnEnable()
@@ -90,6 +87,8 @@ public class CardSwipeGameUI : MonoBehaviour, IUIInitializable
             endPosition.anchoredPosition,
             swipeDistance
         );
+
+        currentGame.SetSwipeDistance(swipeDistance);
 
         instructionText.text = "Swipe the card at the right speed";
         feedbackText.text = currentGame.GetSpeedRangeHint();
