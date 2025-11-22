@@ -331,8 +331,13 @@ namespace BlackjackGame
 
         public void Open() { gameObject.SetActive(true); }
 
-        public void Close() { gameObject.SetActive(false); }
+        public event Action OnClosed;
 
+        public void Close() 
+        { 
+            gameObject.SetActive(false);
+            OnClosed?.Invoke();
+        }
         private void OnDestroy()
         {
             _disposables?.Dispose();

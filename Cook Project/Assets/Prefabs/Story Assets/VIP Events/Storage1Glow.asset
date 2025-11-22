@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 733558487c7b4234983a2b0073eca76c, type: 3}
+  m_Name: Storage1Glow
+  m_EditorClassIdentifier: Assembly-CSharp::GlowObjectStoryEvent
+  eventId: NewStorageGlow
+  designerNotes: 
+  replayable: 1
+  targetObjectName: Storage1SecretWallTrigger
+  searchAllScenes: 0
+  glowColor: {r: 0, g: 1, b: 1, a: 1}
+  glowIntensity: 2.5
+  pulseSpeed: 2
+  glowScale: 1.15
+  fresnelPower: 3
+  pulseVariation: 0.35
+  waitForInteraction: 1
+  disableInteractableAfterUse: 1

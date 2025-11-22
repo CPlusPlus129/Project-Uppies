@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5800745807035201246
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2875754329279326868}
+  - component: {fileID: 2836832889526834046}
+  m_Layer: 0
+  m_Name: VaultDoorStoryEvent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2875754329279326868
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5800745807035201246}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.6304037, z: -0, w: 0.77626747}
+  m_LocalPosition: {x: -70.091995, y: -0.9989998, z: 15.121996}
+  m_LocalScale: {x: 1.2484366, y: 1.2484368, z: 1.2484366}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4307824262104573044}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2836832889526834046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5800745807035201246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a19c87dc4fee4ad69ab52fdcf5ba6041, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VaultDoorController
+  doorId: SecretRoomVaultDoor
+  handleBone: {fileID: 5940351411045767098}
+  doorBone: {fileID: 8336251222267238657}
+  audioSource: {fileID: 0}
+  openSound: {fileID: 8300000, guid: 0b431d3d6e396274d9b2aa54db071a55, type: 3}
+  closeSound: {fileID: 8300000, guid: 0b431d3d6e396274d9b2aa54db071a55, type: 3}
+  handleSpinDuration: 1.5
+  handleSpinRotation: {x: 0, y: 0, z: 360}
+  handleSpinLoops: 2
+  doorOpenDuration: 2
+  doorOpenRotation: {x: 0, y: 110, z: 0}
+  animationEase: 7
+  OnOpenStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnOpenComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCloseStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCloseComplete:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!1001 &3076806007454272717
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2875754329279326868}
+    m_Modifications:
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6.542098
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.6738796
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.0901113
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1887189904713363971, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+      propertyPath: m_Name
+      value: SM_Bld_Vault_Door_01
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+--- !u!4 &4307824262104573044 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1259729802191235257, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+  m_PrefabInstance: {fileID: 3076806007454272717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5940351411045767098 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8701901028817509239, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+  m_PrefabInstance: {fileID: 3076806007454272717}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8336251222267238657 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6414061084021233100, guid: 0c29e2f1ebbb4fa4c98e4925d60daf32, type: 3}
+  m_PrefabInstance: {fileID: 3076806007454272717}
+  m_PrefabAsset: {fileID: 0}
