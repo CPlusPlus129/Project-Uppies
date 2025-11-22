@@ -40,6 +40,7 @@ namespace BlackjackGame
         private List<GameObject> _playerCardObjects = new List<GameObject>();
         private List<GameObject> _dealerCardObjects = new List<GameObject>();
         private CompositeDisposable _disposables = new CompositeDisposable();
+        private int _roundsPlayedSinceDeal = 0;
 
         // Event triggered when round ends (for dialogue integration)
         public event Action<RoundResult, int> OnRoundCompleted;
@@ -255,11 +256,30 @@ namespace BlackjackGame
             // Trigger event for external systems (dialogue, etc.)
             OnRoundCompleted?.Invoke(result, chipsWon);
 
+            // Check if we need to end the game after the deal
+            if (HasAcceptedDeal())
+            {
+                _roundsPlayedSinceDeal++;
+                if (_roundsPlayedSinceDeal >= 3)
+                {
+                    EndGameAfterDelay().Forget();
+                    return;
+                }
+            }
+
             // Check if should offer devil's deal (only if player hasn't accepted yet)
             if (!_blackjackSystem.IsCheatingForPlayer && ShouldOfferDevilsDeal())
             {
                 ShowDevilsDealAsync().Forget();
             }
+        }
+
+        private async UniTaskVoid EndGameAfterDelay()
+        {
+            await UniTask.Delay(1000); // Wait for result to be read
+            ShowMessage("The contract is fulfilled.");
+            await UniTask.Delay(2000);
+            Close();
         }
 
         private void DisplayRoundResult(RoundResult result, int chipsWon)
@@ -297,6 +317,7 @@ namespace BlackjackGame
 
         private void OnAcceptDeal()
         {
+            _roundsPlayedSinceDeal = 0;
             _blackjackSystem.ActivateCheatMode(true); // Player will now win
 
             if (_devilsDealPanel != null)
