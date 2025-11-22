@@ -99,15 +99,15 @@ public class GameFlow : MonoSingleton<GameFlow>
         await UniTask.CompletedTask;
     }
 
-    public void ExecuteIndependentEvent(StoryEventAsset asset)
+    public StoryEventRuntime ExecuteIndependentEvent(StoryEventAsset asset)
     {
-        if (asset == null) return;
+        if (asset == null) return null;
         
         Log($"Executing independent event: {asset.EventId}");
         var track = new StoryTrack(this, $"Independent_{asset.EventId}");
         activeTracks.Add(track);
         
-        track.EnqueueEvent(asset, insertAtFront: false);
+        var runtime = track.EnqueueEvent(asset, insertAtFront: false);
         
         // Start this track immediately
         track.RunLoopAsync(gameLoopCts.Token).Forget();
@@ -119,6 +119,8 @@ public class GameFlow : MonoSingleton<GameFlow>
         // Better: Have the track remove itself from activeTracks when done.
         // We'll handle that via a callback or similar if needed, but for now memory impact is low if they finish.
         // Actually, let's prune finished tracks occasionally or just ignore them.
+        
+        return runtime;
     }
 
     public IReadOnlyList<StoryEventRuntime> EnqueueSequence(StorySequenceAsset sequence, bool insertAtFront = false)
@@ -145,8 +147,7 @@ public class GameFlow : MonoSingleton<GameFlow>
         if (sourceSequence == null)
         {
             // It's a standalone event. Run it in a parallel track so it doesn't block the main story.
-            ExecuteIndependentEvent(asset);
-            return null; // We can't return the runtime easily since it's on another track, or we create one here.
+            return ExecuteIndependentEvent(asset);
         }
 
         return mainTrack.EnqueueEvent(asset, insertAtFront, sourceSequence);
