@@ -60,7 +60,7 @@ public class TaskManager : MonoSingleton<TaskManager>
         }
         else
         {
-            Debug.LogWarning($"[TaskManager] Failed to remove task: {id} (not found)");
+            Debug.Log($"[TaskManager] Failed to remove task: {id} (not found)");
         }
     }
 

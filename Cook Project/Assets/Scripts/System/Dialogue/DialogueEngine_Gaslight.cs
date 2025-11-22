@@ -5,6 +5,7 @@ using UnityEngine;
 
 class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
 {
+    public Subject<Unit> onBeginScenario { get; } = new Subject<Unit>();
     public Subject<Unit> onEndScenario { get; } = new Subject<Unit>();
     private readonly UniTaskCompletionSource readyTcs = new UniTaskCompletionSource();
     private bool isRuntimeReady;
@@ -12,7 +13,11 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
     protected override void OnDestroy()
     {
         base.OnDestroy();
-        scenarioManager.onEndScenario -= OnEndScenario;
+        if (scenarioManager != null)
+        {
+            scenarioManager.onBeginScenario -= OnBeginScenario;
+            scenarioManager.onEndScenario -= OnEndScenario;
+        }
         if (!isRuntimeReady)
         {
             readyTcs.TrySetCanceled();
@@ -54,9 +59,15 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
         var assetLoader = await ServiceLocator.Instance.GetAsync<IAssetLoader>();
         assetManager = new DialogueAssetManager(assetLoader);
         
+        scenarioManager.onBeginScenario += OnBeginScenario;
         scenarioManager.onEndScenario += OnEndScenario;
         isRuntimeReady = true;
         readyTcs.TrySetResult();
+    }
+
+    private void OnBeginScenario()
+    {
+        onBeginScenario.OnNext(Unit.Default);
     }
 
     private void OnEndScenario()
@@ -66,10 +77,12 @@ class DialogueEngine_Gaslight : DialogueEngine, IDialogueService
 
     void System.IDisposable.Dispose()
     {
+        onBeginScenario?.Dispose();
         onEndScenario?.Dispose();
 
         if (scenarioManager != null)
         {
+            scenarioManager.onBeginScenario -= OnBeginScenario;
             scenarioManager.onEndScenario -= OnEndScenario;
         }
 

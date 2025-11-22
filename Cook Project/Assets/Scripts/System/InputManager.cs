@@ -57,7 +57,7 @@ public class InputManager : MonoSingleton<InputManager>
     {
         if (!activeMapStack.Contains(mapName))
         {
-            Debug.LogWarning($"[InputManager] Cannot pop '{mapName}': it is not in the stack.");
+            Debug.Log($"[InputManager] Cannot pop '{mapName}': it is not in the stack.");
             return;
         }
 

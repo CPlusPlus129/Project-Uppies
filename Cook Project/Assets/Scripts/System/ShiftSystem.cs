@@ -29,12 +29,14 @@ public class ShiftSystem : IShiftSystem
     private readonly IInventorySystem inventorySystem;
     private readonly CompositeDisposable updateDisposible = new CompositeDisposable();
     private readonly CompositeDisposable disposables = new CompositeDisposable();
+    private readonly CompositeDisposable systemDisposables = new CompositeDisposable();
     private ShiftData.Shift activeShift;
     private float shiftElapsedSeconds;
     private float overtimeElapsedSeconds;
     private CancellationTokenSource debtCollectionCts;
     private IDisposable playerDeathSubscription;
     private bool afterShiftReadyForNextShift;
+    private bool isDialoguePaused;
 
     public ShiftSystem(IQuestService questService, IOrderManager orderManager, IInventorySystem inventorySystem)
     {
@@ -45,8 +47,18 @@ public class ShiftSystem : IShiftSystem
 
     public async UniTask Init()
     {
-        await UniTask.CompletedTask;
+        await SubscribeToDialogueEvents();
         SubscribeToPlayerDeathAsync().Forget();
+    }
+
+    private async UniTask SubscribeToDialogueEvents()
+    {
+        var dialogueService = await ServiceLocator.Instance.GetAsync<IDialogueService>();
+        if (dialogueService != null)
+        {
+            dialogueService.onBeginScenario.Subscribe(_ => isDialoguePaused = true).AddTo(systemDisposables);
+            dialogueService.onEndScenario.Subscribe(_ => isDialoguePaused = false).AddTo(systemDisposables);
+        }
     }
 
     public void StartGame()
@@ -397,6 +409,9 @@ public class ShiftSystem : IShiftSystem
         if (currentState.Value != ShiftState.InShift && currentState.Value != ShiftState.Overtime)
             return;
 
+        if (isDialoguePaused)
+            return;
+
         shiftElapsedSeconds += deltaTime;
 
         if (currentState.Value == ShiftState.InShift)
@@ -613,5 +628,6 @@ public class ShiftSystem : IShiftSystem
         playerDeathSubscription?.Dispose();
         updateDisposible.Dispose();
         disposables.Dispose();
+        systemDisposables.Dispose();
     }
 }

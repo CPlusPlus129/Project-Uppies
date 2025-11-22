@@ -55,6 +55,9 @@ namespace DialogueModule
 
         private void OnCharacterLayerEvent(CharacterLayerEvent e)
         {
+            if (string.IsNullOrEmpty(e.Data.LayerName) || e.Data.LayerName == "None")
+                return;
+
             if (!layerItemDict.TryGetValue(e.Data.LayerName, out var layer))
             {
                 Debug.LogWarning($"Trying to execute character event on unknown layer {e.Data.LayerName}!");
