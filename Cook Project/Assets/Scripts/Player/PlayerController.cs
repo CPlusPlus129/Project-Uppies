@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerLook camlook;
     [SerializeField] private PlayerInteract interact;
     [SerializeField] private Weapon lightGun;
+    [SerializeField] private CandleWeapon candleWeapon;
     private PlayerActionController actionController = new PlayerActionController();
     private InputAction lookAction;
     private InputAction moveAction;
@@ -109,9 +110,13 @@ public class PlayerController : MonoBehaviour
                 {
                     lightGun.gameObject.SetActive(can);
                 }
+                if (candleWeapon != null)
+                {
+                    candleWeapon.gameObject.SetActive(can);
+                }
             })
             .AddTo(disposables);
-        
+
         playerStat.OnPlayerDeath
             .TakeUntil(terminationSignal)
             .Where(_ => isActiveAndEnabled)
@@ -146,8 +151,10 @@ public class PlayerController : MonoBehaviour
     private async void HandleOnDeath()
     {
         var playerStat = PlayerStatSystem.Instance;
+        var fireAction = InputSystem.actions.FindAction("Attack");
         UIRoot.Instance.GetUIComponent<DeathUI>()?.Open();
         playerStat.CanMove.Value = false;
+        fireAction?.Disable();
         //if you don't wait on this, resurrect will set currentHP and the newest event from that will not fire, it's recommended to wait at least a frame.
         await UniTask.Delay(2000);
         if (playerStat == null)
@@ -155,8 +162,9 @@ public class PlayerController : MonoBehaviour
         UIRoot.Instance.GetUIComponent<DeathUI>()?.Close();
         playerStat.Resurrect();
         playerStat.CanMove.Value = true;
+        fireAction?.Enable();
         //Respawn at position
-        if(playerStat.RespawnPosition.Value != Vector3.zero)
+        if (playerStat.RespawnPosition.Value != Vector3.zero)
             Teleport(playerStat.RespawnPosition.Value);
         else
             Teleport(SpawnPosition);

@@ -120,7 +120,7 @@ public class TutorialFlow : MonoBehaviour
         tutorialHints.Enqueue($"Press {interactKey} to talk to {customer.customerName}.");
         tutorialHints.Enqueue($"Press {interactKey} to gather ingredients. Press {discardKey} to discard items. Please gather ingredients from the fridge.");
         tutorialHints.Enqueue("Find a light source to stay safe from the darkness. And gather more ingredients.");
-        tutorialHints.Enqueue("Use the shotgun to create light and defeat enemies.");
+        tutorialHints.Enqueue("Use the lantern to create light, enemies get damaged from lights.");
         tutorialHints.Enqueue("Go back to the first room and cook.");
         tutorialHints.Enqueue($"Use mouse scroll or {hotbarKey} to select the meal. Serve the meal to {customer.customerName}");
         

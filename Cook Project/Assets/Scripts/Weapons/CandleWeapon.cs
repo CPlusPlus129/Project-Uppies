@@ -63,7 +63,7 @@ public class CandleWeapon : MonoBehaviour
     {
         if (groundLayer.value == 0) 
         {
-            groundLayer = 1; // Default layer
+            groundLayer = (1 << 0) | (1 << 6) | (1 << 12); //LayerMask.NameToLayer("Default") | LayerMask.NameToLayer("Interactable") | LayerMask.NameToLayer("NavmeshSurface");
         }
 
         // Sync base intensity from prefab if available, so the fired projectile matches the prefab settings
