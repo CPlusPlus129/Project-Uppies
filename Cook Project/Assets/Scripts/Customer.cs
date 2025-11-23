@@ -48,7 +48,22 @@ public class Customer : InteractableBase
                 PlaceOrder();
                 break;
             case CustomerState.WaitingForMeal:
-                Debug.Log($"{customerName} is waiting for meal delivery");
+                // Handle meal delivery
+                if (inventorySystem == null)
+                {
+                    Debug.LogWarning($"{customerName}: Inventory system not initialized yet");
+                    return;
+                }
+
+                var heldItem = inventorySystem.GetSelectedItem();
+                if (heldItem != null && CanReceiveMeal(heldItem))
+                {
+                    ReceiveMeal(heldItem);
+                }
+                else
+                {
+                    Debug.Log($"{customerName} is waiting for the correct meal");
+                }
                 break;
         }
     }

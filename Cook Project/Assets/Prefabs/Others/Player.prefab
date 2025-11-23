@@ -729,7 +729,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 887
+    m_Bits: 7031
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1115,6 +1115,7 @@ MonoBehaviour:
   camlook: {fileID: 8858371310009257608}
   interact: {fileID: 615881212244471086}
   lightGun: {fileID: 9050977604782803514}
+  candleWeapon: {fileID: 6247320803160831829}
 --- !u!114 &642524756056240156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1159,7 +1160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 334f7314f8610d8468322ceab75c449f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteract
-  interactDistance: 3
+  interactDistance: 4
   interactLayer:
     serializedVersion: 2
     m_Bits: 64

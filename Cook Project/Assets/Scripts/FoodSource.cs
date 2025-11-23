@@ -57,9 +57,36 @@ public class FoodSource : InteractableBase
         }
     }
 
-    public override void Interact()
+    public override async void Interact()
     {
-        // Interaction logic here
+        // Get inventory system
+        await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
+        var inventorySystem = await ServiceLocator.Instance.GetAsync<IInventorySystem>();
+
+        // Check if inventory is full
+        if (inventorySystem.IsInventoryFull())
+        {
+            Debug.Log("Inventory is full!");
+            return;
+        }
+
+        // Get item prefab from database
+        var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(ItemName);
+        var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
+
+        if (foodObj != null)
+        {
+            // Try to add to inventory
+            var wasAdded = inventorySystem.AddItem(foodObj);
+            if (wasAdded)
+            {
+                foodObj.gameObject.SetActive(false);
+            }
+            else
+            {
+                Destroy(foodObj.gameObject);
+            }
+        }
     }
     
     public void StartGlowing()

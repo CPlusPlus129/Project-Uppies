@@ -54,39 +54,6 @@ public class PlayerInteract : MonoBehaviour
         foreach (var interactable in interactablesToTrigger)
         {
             interactable.Interact();
-
-            if (interactable is ItemBase item)
-            {
-                if (inventorySystem.AddItem(item))
-                    item.gameObject.SetActive(false);
-            }
-
-            if (interactable is Customer customer)
-            {
-                var heldItem = inventorySystem.GetSelectedItem();
-                if (heldItem != null && customer.CanReceiveMeal(heldItem))
-                {
-                    customer.ReceiveMeal(heldItem);
-                }
-            }
-
-            if (interactable is FoodSource foodSource && !inventorySystem.IsInventoryFull())
-            {
-                var itemPrefab = Database.Instance.itemPrefabData.GetItemByName(foodSource.ItemName);
-                var foodObj = itemPrefab != null ? Instantiate(itemPrefab) : null;
-                if (foodObj != null)
-                {
-                    var wasAdded = inventorySystem.AddItem(foodObj);
-                    if (wasAdded)
-                    {
-                        foodObj.gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        Destroy(foodObj.gameObject);
-                    }
-                }
-            }
         }
     }
 }
