@@ -202,8 +202,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9345450240ac7024583f789bb05bc4fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleDoor
-  questTargetId: door_temp
+  useOutline: 1
+  targetRenderers: []
+  requiredTaskId: StorageRoom1Task
+  puzzleType: 1
   anim: {fileID: 0}
+  hintObject: {fileID: 8185971105124752917}
 --- !u!65 &6254481408573807213
 BoxCollider:
   m_ObjectHideFlags: 0

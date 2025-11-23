@@ -8,20 +8,22 @@ public class PuzzleDoor : InteractableBase
     [SerializeField] private string requiredTaskId;
     [SerializeField] private PuzzleGameType puzzleType = PuzzleGameType.CardSwipe;
     [SerializeField] private Animator anim;
+    [SerializeField] private GameObject hintObject;
     private IPuzzleGameManager puzzleGameManager;
     private IPuzzle gameInstance;
     private bool doorOpen;
 
     protected async override void Awake()
     {
-        // Auto-assign task ID for the specific door mentioned
-        if (string.IsNullOrEmpty(requiredTaskId) && gameObject.name == "StorageRoom1_DoorButton")
-        {
-            requiredTaskId = "StorageRoom1Task";
-        }
-
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         puzzleGameManager = await ServiceLocator.Instance.GetAsync<IPuzzleGameManager>();
+        if (!string.IsNullOrEmpty(requiredTaskId))
+        {
+            TaskManager.Instance.Tasks.Subscribe(list =>
+            {
+                hintObject.SetActive(list.Any(t => t.Id == requiredTaskId));
+            }).AddTo(this);
+        }
     }
 
     public override void Interact()
@@ -34,9 +36,10 @@ public class PuzzleDoor : InteractableBase
 
         // Check if task exists in the active tasks list
         var taskExists = TaskManager.Instance.Tasks.Value.Any(t => t.Id == requiredTaskId);
-        
+
         if (!taskExists)
         {
+            WorldBroadcastSystem.Instance.Broadcast("Seems like the door is locked.");
             Debug.Log($"PuzzleDoor: Task '{requiredTaskId}' not found/active. Door remains locked.");
             return;
         }
@@ -57,7 +60,7 @@ public class PuzzleDoor : InteractableBase
         UIRoot.Instance.GetUIComponent<CardSwipeGameUI>()?.Open();
         // Pass null for quest as we are using task-based unlocking
         gameInstance ??= puzzleGameManager.StartPuzzleGame(PuzzleGameType.CardSwipe, null);
-        
+
         puzzleGameManager.OnGameCompleted
             .Where(x => x == gameInstance)
             .Take(1)
@@ -72,6 +75,6 @@ public class PuzzleDoor : InteractableBase
     private void PlayDoorAnimation()
     {
         doorOpen = !doorOpen;
-        anim.SetBool("IsOpen", doorOpen);
+        anim?.SetBool("IsOpen", doorOpen);
     }
 }
