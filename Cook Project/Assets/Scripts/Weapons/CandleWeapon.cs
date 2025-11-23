@@ -318,7 +318,7 @@ public class CandleWeapon : MonoBehaviour
         
         if (weaponRigidbody != null)
         {
-            velocity += weaponRigidbody.linearVelocity * inheritedVelocityScale;
+            velocity += weaponRigidbody.GetPointVelocity(firePoint.position) * inheritedVelocityScale;
         }
 
         List<Vector3> points = new List<Vector3>();
@@ -401,7 +401,7 @@ public class CandleWeapon : MonoBehaviour
 
         if (weaponRigidbody != null)
         {
-            velocity += weaponRigidbody.linearVelocity * inheritedVelocityScale;
+            velocity += weaponRigidbody.GetPointVelocity(firePoint.position) * inheritedVelocityScale;
         }
 
         if (projectilePrefab != null)
