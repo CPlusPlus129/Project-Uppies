@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private PlayerLook camlook;
     [SerializeField] private PlayerInteract interact;
     [SerializeField] private Weapon lightGun;
+    [SerializeField] private CandleWeapon candleWeapon;
     private PlayerActionController actionController = new PlayerActionController();
     private InputAction lookAction;
     private InputAction moveAction;
@@ -109,9 +110,13 @@ public class PlayerController : MonoBehaviour
                 {
                     lightGun.gameObject.SetActive(can);
                 }
+                if (candleWeapon != null)
+                {
+                    candleWeapon.gameObject.SetActive(can);
+                }
             })
             .AddTo(disposables);
-        
+
         playerStat.OnPlayerDeath
             .TakeUntil(terminationSignal)
             .Where(_ => isActiveAndEnabled)
@@ -156,7 +161,7 @@ public class PlayerController : MonoBehaviour
         playerStat.Resurrect();
         playerStat.CanMove.Value = true;
         //Respawn at position
-        if(playerStat.RespawnPosition.Value != Vector3.zero)
+        if (playerStat.RespawnPosition.Value != Vector3.zero)
             Teleport(playerStat.RespawnPosition.Value);
         else
             Teleport(SpawnPosition);
