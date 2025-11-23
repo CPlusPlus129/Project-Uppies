@@ -15,7 +15,6 @@ public interface IShiftSystem : IGameService
     ReplaySubject<Unit> OnGameStart { get; }
     void StartGame();
     void StartNextShift();
-    bool IsCurrentShiftQuestCompleted();
     bool TryDeposit(int amount);
     int DepositAllAvailableFunds();
     bool HasMetQuota();

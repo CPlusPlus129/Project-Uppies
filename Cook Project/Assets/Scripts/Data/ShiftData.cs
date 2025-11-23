@@ -51,10 +51,6 @@ public class ShiftData : ScriptableObject
         public int requiredOrdersCount;
         [Tooltip("Money quota that must be deposited to clear this shift.")]
         public int quotaAmount = 500;
-        [Tooltip("Does this shift include a VIP whose request must be satisfied to pass the day?")]
-        public bool requiresVipCustomer = false;
-        [Tooltip("Quest started automatically when the shift begins (empty for none).")]
-        public string questId;
         [Tooltip("Multiplier applied to debt tick amounts for this specific shift.")]
         public float debtPressureMultiplier = 1f;
     }

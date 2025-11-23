@@ -94,8 +94,6 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset, IBackgroun
         var shiftData = Database.Instance?.shiftData;
         var capturedShiftNumber = shiftSystem.shiftNumber.Value;
         var shiftDefinition = GetShiftDefinition(shiftData, capturedShiftNumber);
-        var questId = shiftDefinition?.questId;
-        var vipRequired = shiftDefinition?.requiresVipCustomer ?? false;
 
         var disposables = new CompositeDisposable();
         var overtimeDetected = shiftSystem.currentState.Value == ShiftSystem.ShiftState.Overtime;
@@ -104,6 +102,26 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset, IBackgroun
 
         var terminalStateTcs = new UniTaskCompletionSource<ShiftSystem.ShiftState>();
         var initialState = shiftSystem.currentState.Value;
+
+        if (IsTerminalState(initialState))
+        {
+            if (initialState == ShiftSystem.ShiftState.AfterShift)
+            {
+                // already in afterShift = success
+                var outcome = ResolveOutcome(initialState, false, false);
+                if (autoEnqueueOutcome)
+                {
+                    TryQueueOutcome(outcome, context.Flow, context.Runtime?.SourceSequence);
+                }
+                return StoryEventResult.Completed($"Shift already ended: {outcome}");
+            }
+            else
+            {
+                // GaveOver 
+                return StoryEventResult.Failed("Shift already ended in failure state.");
+            }
+        }
+
         var sawStateChange = false;
         var sawActiveShift = initialState == ShiftSystem.ShiftState.InShift || initialState == ShiftSystem.ShiftState.Overtime;
         var sawNonTerminal = !IsTerminalState(initialState);
@@ -165,21 +183,7 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset, IBackgroun
         {
             var finalState = await terminalStateTcs.Task.AttachExternalCancellation(cancellationToken);
 
-            var vipCompleted = true;
-            if (vipRequired)
-            {
-                if (!string.IsNullOrWhiteSpace(questId) && questService != null)
-                {
-                    vipCompleted = questService.GetQuestStatus(questId) == QuestStatus.Completed;
-                }
-                else if (vipRequired)
-                {
-                    Debug.LogWarning($"[{nameof(ShiftCompletionStoryEventAsset)}] Shift {capturedShiftNumber} requires a VIP but no questId is configured. Assuming VIP completed.");
-                    vipCompleted = true;
-                }
-            }
-
-            var outcome = ResolveOutcome(finalState, vipRequired, vipCompleted, overtimeDetected, moneyFailureDetected);
+            var outcome = ResolveOutcome(finalState, overtimeDetected, moneyFailureDetected);
 
             if (autoEnqueueOutcome)
             {
@@ -232,29 +236,17 @@ public sealed class ShiftCompletionStoryEventAsset : StoryEventAsset, IBackgroun
 
     private static ShiftOutcome ResolveOutcome(
         ShiftSystem.ShiftState terminalState,
-        bool vipRequired,
-        bool vipCompleted,
         bool overtimeDetected,
         bool moneyFailureDetected)
     {
         if (terminalState == ShiftSystem.ShiftState.AfterShift)
         {
-            if (vipRequired && !vipCompleted)
-            {
-                return ShiftOutcome.FailureVip;
-            }
-
             return ShiftOutcome.Success;
         }
 
         if (moneyFailureDetected)
         {
             return ShiftOutcome.FailureMoney;
-        }
-
-        if (vipRequired && !vipCompleted)
-        {
-            return ShiftOutcome.FailureVip;
         }
 
         return overtimeDetected ? ShiftOutcome.FailureTime : ShiftOutcome.FailureTime;

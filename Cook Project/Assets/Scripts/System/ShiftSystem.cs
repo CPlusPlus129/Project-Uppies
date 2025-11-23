@@ -206,11 +206,6 @@ public class ShiftSystem : IShiftSystem
             depositedAmount.Value = Mathf.Max(depositedAmount.Value, quotaAmount.Value);
         }
 
-        if (autoCompleteActiveQuest && activeShift != null && !string.IsNullOrWhiteSpace(activeShift.questId))
-        {
-            questService?.CompleteQuest(activeShift.questId);
-        }
-
         CompleteShift();
         return true;
     }
@@ -234,19 +229,6 @@ public class ShiftSystem : IShiftSystem
         shiftTimer.Value = Mathf.Min(targetRemainTime, shiftData.shiftDuration);
 
         return true;
-    }
-
-    public bool IsCurrentShiftQuestCompleted()
-    {
-        var s = GetCurrentShift();
-        if (s == null)
-            return false;
-
-        var questId = s.questId;
-        if (string.IsNullOrEmpty(questId))
-            return true;
-
-        return questService.GetQuestStatus(questId) == QuestStatus.Completed;
     }
 
     public bool TryDeposit(int amount)
@@ -376,11 +358,6 @@ public class ShiftSystem : IShiftSystem
         depositedAmount.Value = 0;
         quotaAmount.Value = Mathf.Max(0, activeShift.quotaAmount);
         afterShiftReadyForNextShift = false;
-
-        if (!string.IsNullOrEmpty(activeShift.questId))
-        {
-            questService.StartQuest(activeShift.questId);
-        }
 
         ShopSystem.Instance.RefreshShopItems();
         ShopSystem.Instance?.SetStoreAvailability(false);
