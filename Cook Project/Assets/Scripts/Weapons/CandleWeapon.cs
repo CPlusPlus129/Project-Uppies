@@ -10,6 +10,7 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private float minForce = 10f;
     [SerializeField] private float maxForce = 25f;
     [SerializeField] private float maxChargeTime = 2f;
+    [SerializeField] private float inheritedVelocityScale = 0.5f;
 
     [Header("Light Settings")]
     [SerializeField] private float baseLightCost = 5f;
@@ -53,6 +54,7 @@ public class CandleWeapon : MonoBehaviour
     private Renderer chargingOrbRenderer;
     private Color baseEmissionColor;
     private bool hasEmission;
+    private Rigidbody weaponRigidbody;
 
     private void Awake()
     {
@@ -223,6 +225,8 @@ public class CandleWeapon : MonoBehaviour
             // Fallback search
             lightRecoverySystem = GetComponentInParent<LightRecoverySystem>();
         }
+
+        weaponRigidbody = GetComponentInParent<Rigidbody>();
     }
 
     private void Start()
@@ -312,6 +316,11 @@ public class CandleWeapon : MonoBehaviour
         float currentForce = Mathf.Lerp(minForce, maxForce, chargeRatio);
         Vector3 velocity = GetLaunchVelocity(currentForce);
         
+        if (weaponRigidbody != null)
+        {
+            velocity += weaponRigidbody.linearVelocity * inheritedVelocityScale;
+        }
+
         List<Vector3> points = new List<Vector3>();
         Vector3 currentPos = firePoint.position;
         Vector3 currentVel = velocity;
@@ -389,6 +398,11 @@ public class CandleWeapon : MonoBehaviour
         float sizeScale = projectileSpawnScale;
 
         Vector3 velocity = GetLaunchVelocity(finalForce);
+
+        if (weaponRigidbody != null)
+        {
+            velocity += weaponRigidbody.linearVelocity * inheritedVelocityScale;
+        }
 
         if (projectilePrefab != null)
         {
