@@ -64,7 +64,7 @@ public class LightMeterUI : MonoBehaviour
             borderColor.a = Mathf.Lerp(borderAlphaMin, borderAlphaMax, lightPercentage);
             lightBorderImage.color = borderColor;
             lightBorderImage.fillAmount = Mathf.Lerp(fillAmountMin, fillAmountMax, lightPercentage);
-            lightBorderImage.gameObject.SetActive(currentLight >= lightCostPerShot);
+            //lightBorderImage.gameObject.SetActive(currentLight >= lightCostPerShot);
         }
     }
 

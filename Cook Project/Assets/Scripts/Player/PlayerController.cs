@@ -151,8 +151,10 @@ public class PlayerController : MonoBehaviour
     private async void HandleOnDeath()
     {
         var playerStat = PlayerStatSystem.Instance;
+        var fireAction = InputSystem.actions.FindAction("Attack");
         UIRoot.Instance.GetUIComponent<DeathUI>()?.Open();
         playerStat.CanMove.Value = false;
+        fireAction?.Disable();
         //if you don't wait on this, resurrect will set currentHP and the newest event from that will not fire, it's recommended to wait at least a frame.
         await UniTask.Delay(2000);
         if (playerStat == null)
@@ -160,6 +162,7 @@ public class PlayerController : MonoBehaviour
         UIRoot.Instance.GetUIComponent<DeathUI>()?.Close();
         playerStat.Resurrect();
         playerStat.CanMove.Value = true;
+        fireAction?.Enable();
         //Respawn at position
         if (playerStat.RespawnPosition.Value != Vector3.zero)
             Teleport(playerStat.RespawnPosition.Value);
