@@ -16,8 +16,8 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private float maxChargeLightCostMult = 3f;
     [SerializeField] private float baseIntensity = 2f;
     [SerializeField] private float maxChargeIntensityMult = 3f;
-    [SerializeField] private float baseLifetime = 5f; 
     [SerializeField] private float maxChargeLifetimeMult = 2f;
+    private float baseLifetime = 5f; 
 
     [Header("Charge Drain Settings")]
     [SerializeField] private bool drainLightWhileCharging = false;
@@ -25,6 +25,8 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private float endDrainRate = 5f;
 
     [Header("Visuals")]
+    [SerializeField] private float chargingLightStartMult = 0.5f;
+    [SerializeField] private float chargingLightEndMult = 2.0f;
     [SerializeField] private LineRenderer trajectoryLine;
     [SerializeField] private GameObject targetingReticle;
     [SerializeField] private GameObject chargingOrbVisual;
@@ -46,12 +48,35 @@ public class CandleWeapon : MonoBehaviour
     private Collider playerCollider;
     private GameObject spawnedProjectileVisual;
     private LightRecoverySystem lightRecoverySystem;
+    private Light chargingOrbLight;
+    private float visualInitialLightIntensity;
+    private Renderer chargingOrbRenderer;
+    private Color baseEmissionColor;
+    private bool hasEmission;
 
     private void Awake()
     {
         if (groundLayer.value == 0) 
         {
             groundLayer = 1; // Default layer
+        }
+
+        // Sync base intensity from prefab if available, so the fired projectile matches the prefab settings
+        if (projectilePrefab != null)
+        {
+            Light prefabLight = projectilePrefab.GetComponentInChildren<Light>();
+            if (prefabLight != null)
+            {
+                baseIntensity = prefabLight.intensity;
+            }
+
+            baseLifetime = projectilePrefab.GetBaseLifetime();
+        }
+        else
+        {
+            Debug.LogError("CandleWeapon: No LightProjectile prefab assigned! Please assign one in the inspector.");
+            enabled = false;
+            return;
         }
 
         if (chargingOrbVisual != null) 
@@ -66,7 +91,9 @@ public class CandleWeapon : MonoBehaviour
                 // Strip physics and logic from the visual only
                 Destroy(instance.GetComponent<LightProjectile>());
                 Destroy(instance.GetComponent<Rigidbody>());
+                Destroy(instance.GetComponent<ExplosionLifetimeBarController>());
                 foreach (var c in instance.GetComponentsInChildren<Collider>()) Destroy(c);
+                foreach (var c in instance.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
                 
                 chargingOrbVisual = instance;
                 // Capture scale after instantiation
@@ -92,7 +119,9 @@ public class CandleWeapon : MonoBehaviour
                 // Strip physics and logic
                 Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
                 Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
+                Destroy(spawnedProjectileVisual.GetComponent<ExplosionLifetimeBarController>());
                 foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
+                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
                 
                 chargingOrbVisual = spawnedProjectileVisual;
                 chargingOrbVisual.SetActive(false);
@@ -126,13 +155,36 @@ public class CandleWeapon : MonoBehaviour
                 // Strip physics and logic
                 Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
                 Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
+                Destroy(spawnedProjectileVisual.GetComponent<ExplosionLifetimeBarController>());
                 foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
+                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
                 
                 chargingOrbVisual = spawnedProjectileVisual;
                 chargingOrbVisual.SetActive(false);
                 
                 // Capture scale NOW that it exists
                 visualInitialScale = chargingOrbVisual.transform.localScale;
+            }
+        }
+
+        if (chargingOrbVisual != null)
+        {
+            chargingOrbLight = chargingOrbVisual.GetComponentInChildren<Light>(true);
+            if (chargingOrbLight != null)
+            {
+                visualInitialLightIntensity = chargingOrbLight.intensity;
+            }
+
+            chargingOrbRenderer = chargingOrbVisual.GetComponentInChildren<Renderer>();
+            if (chargingOrbRenderer != null)
+            {
+                // Accessing .material creates an instance, ensuring we don't modify the asset
+                Material mat = chargingOrbRenderer.material;
+                if (mat.HasProperty("_EmissionColor"))
+                {
+                    baseEmissionColor = mat.GetColor("_EmissionColor");
+                    hasEmission = true;
+                }
             }
         }
 
@@ -238,6 +290,18 @@ public class CandleWeapon : MonoBehaviour
             float scaleMult = Mathf.Lerp(minChargeScale, maxChargeScale, chargeRatio);
             chargingOrbVisual.transform.localScale = visualInitialScale * scaleMult;
             chargingOrbVisual.transform.Rotate(chargeRotationSpeed * Time.deltaTime, Space.Self);
+
+            if (chargingOrbLight != null)
+            {
+                float intensityMult = Mathf.Lerp(chargingLightStartMult, chargingLightEndMult, chargeRatio);
+                chargingOrbLight.intensity = visualInitialLightIntensity * intensityMult;
+            }
+
+            if (hasEmission && chargingOrbRenderer != null)
+            {
+                float intensityMult = Mathf.Lerp(chargingLightStartMult, chargingLightEndMult, chargeRatio);
+                chargingOrbRenderer.material.SetColor("_EmissionColor", baseEmissionColor * intensityMult);
+            }
         }
 
         UpdateTrajectory(chargeRatio);

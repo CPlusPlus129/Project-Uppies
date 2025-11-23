@@ -20,18 +20,28 @@ public class ExplosionLifetimeBarController : MonoBehaviour
         // Store the world position where the bar should stay
         worldPosition = transform.position + offset;
         
-        // Get the TimedObjectDestroyer component
-        TimedObjectDestroyer destroyer = GetComponent<TimedObjectDestroyer>();
-        if (destroyer != null)
+        // Try getting LightProjectile first (new system)
+        LightProjectile lightProjectile = GetComponent<LightProjectile>();
+        if (lightProjectile != null)
         {
-            maxLifetime = destroyer.lifeTime;
+            maxLifetime = lightProjectile.GetBaseLifetime();
             currentLifetime = maxLifetime;
         }
+        // Fallback to TimedObjectDestroyer (old system)
         else
         {
-            Debug.LogWarning("No TimedObjectDestroyer found, using default lifetime");
-            maxLifetime = 6f;
-            currentLifetime = maxLifetime;
+            TimedObjectDestroyer destroyer = GetComponent<TimedObjectDestroyer>();
+            if (destroyer != null)
+            {
+                maxLifetime = destroyer.lifeTime;
+                currentLifetime = maxLifetime;
+            }
+            else
+            {
+                Debug.LogWarning("No LightProjectile or TimedObjectDestroyer found, using default lifetime");
+                maxLifetime = 6f;
+                currentLifetime = maxLifetime;
+            }
         }
         
         // Create the canvas if we're instantiating this at runtime
@@ -48,23 +58,52 @@ public class ExplosionLifetimeBarController : MonoBehaviour
                 SetupWorldSpaceCanvas();
             }
         }
+        
+        // Hide initially if attached to a LightProjectile that hasn't landed
+        if (canvas != null && lightProjectile != null && !lightProjectile.HasLanded())
+        {
+            canvas.enabled = false;
+        }
     }
 
     void Update()
     {
-        // Get the TimedObjectDestroyer to use its actual elapsed time
-        TimedObjectDestroyer destroyer = GetComponent<TimedObjectDestroyer>();
+        // Update world position to follow the object (since it might be a moving projectile)
+        worldPosition = transform.position + offset;
+
+        // Try LightProjectile first
+        LightProjectile lightProjectile = GetComponent<LightProjectile>();
         
-        if (destroyer != null)
+        if (lightProjectile != null)
         {
-            // Use the actual remaining lifetime from the destroyer
-            currentLifetime = destroyer.GetRemainingLifetime();
-            // DON'T update maxLifetime - it should stay as the original value for correct percentage
+            currentLifetime = lightProjectile.GetRemainingLifetime();
+            
+            // Show canvas only when landed
+            if (canvas != null)
+            {
+                bool shouldShow = lightProjectile.HasLanded();
+                if (canvas.enabled != shouldShow)
+                {
+                    canvas.enabled = shouldShow;
+                }
+            }
         }
         else
         {
-            // Fallback to manual countdown if no destroyer found
-            currentLifetime -= Time.deltaTime;
+            // Fallback to TimedObjectDestroyer
+            TimedObjectDestroyer destroyer = GetComponent<TimedObjectDestroyer>();
+            
+            if (destroyer != null)
+            {
+                // Use the actual remaining lifetime from the destroyer
+                currentLifetime = destroyer.GetRemainingLifetime();
+                // DON'T update maxLifetime - it should stay as the original value for correct percentage
+            }
+            else
+            {
+                // Fallback to manual countdown if no destroyer found
+                currentLifetime -= Time.deltaTime;
+            }
         }
         
         if (lifetimeBar != null)

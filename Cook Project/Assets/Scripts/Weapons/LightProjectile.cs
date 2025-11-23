@@ -11,6 +11,15 @@ public class LightProjectile : MonoBehaviour
     [SerializeField] private LayerMask collisionLayers;
     [SerializeField] private GameObject impactEffectPrefab;
     [SerializeField] private float impactRadius = 3f;
+
+    public float GetBaseLifetime() => lifetime;
+
+    public float GetRemainingLifetime()
+    {
+        return currentLifetime;
+    }
+
+    public bool HasLanded() => hasLanded;
     
     [Header("Light Settings")]
     [SerializeField] private float lightDecayRate = 1f; // Intensity loss per second
