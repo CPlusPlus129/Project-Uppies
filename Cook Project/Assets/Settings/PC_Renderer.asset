@@ -64,7 +64,8 @@ MonoBehaviour:
   - {fileID: 7833122117494664109}
   - {fileID: -8306525201853219985}
   - {fileID: -1037998859212874123}
-  m_RendererFeatureMap: ad6b866f10d7b46c6f7bb5b9564bb98c751e5b7f894998f1
+  - {fileID: 7577905354356986710}
+  m_RendererFeatureMap: ad6b866f10d7b46c6f7bb5b9564bb98c751e5b7f894998f15693fa33c5202a69
   m_UseNativeRenderPass: 1
   xrSystemData: {fileID: 0}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -93,6 +94,22 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &7577905354356986710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bba59f2ad1f33573ea01596fe2af83e6, type: 3}
+  m_Name: CASRendererFeature
+  m_EditorClassIdentifier: Assembly-CSharp::RenderFeatures.CAS.CASRendererFeature
+  m_Active: 0
+  settings:
+    Sharpness: 1
+  shader: {fileID: 4800000, guid: e793d09a7b6fa82c7b692b553595ff26, type: 3}
 --- !u!114 &7833122117494664109
 MonoBehaviour:
   m_ObjectHideFlags: 0
