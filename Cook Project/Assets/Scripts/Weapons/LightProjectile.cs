@@ -40,6 +40,7 @@ public class LightProjectile : MonoBehaviour
     private float currentDamage; // Scaled by charge
     
     private bool hasLanded = false;
+    private Collider[] hitCollidersBuffer = new Collider[32]; // Pre-allocated buffer
 
     private void Awake()
     {
@@ -182,18 +183,30 @@ public class LightProjectile : MonoBehaviour
 
     private void DealAreaDamage(bool isImpact = false)
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, impactRadius, collisionLayers);
-        foreach (var hitCollider in hitColliders)
+        int hitCount = Physics.OverlapSphereNonAlloc(transform.position, impactRadius, hitCollidersBuffer, collisionLayers);
+        
+        for (int i = 0; i < hitCount; i++)
         {
+            Collider hitCollider = hitCollidersBuffer[i];
+            
             if (hitCollider.gameObject == gameObject) continue;
             if (hitCollider.CompareTag("Player")) continue;
 
             // Calculate damage based on whether it's initial impact or tick damage
             float damageToDeal = isImpact ? currentDamage : (damagePerSecond * damageInterval);
 
-            // Apply damage using SendMessage for compatibility
-            hitCollider.SendMessageUpwards("TakeDamage", (int)damageToDeal, SendMessageOptions.DontRequireReceiver);
-            hitCollider.SendMessageUpwards("ChangeHealth", -damageToDeal, SendMessageOptions.DontRequireReceiver);
+            // Try to find Mob component first (Fast Path)
+            Mob mob = hitCollider.GetComponentInParent<Mob>();
+            if (mob != null)
+            {
+                mob.TakeDamage((int)damageToDeal);
+            }
+            else
+            {
+                // Fallback for non-Mob damageables (e.g. breakables)
+                hitCollider.SendMessageUpwards("TakeDamage", (int)damageToDeal, SendMessageOptions.DontRequireReceiver);
+                hitCollider.SendMessageUpwards("ChangeHealth", -damageToDeal, SendMessageOptions.DontRequireReceiver);
+            }
             
             if (isImpact && hitCollider.attachedRigidbody != null)
             {

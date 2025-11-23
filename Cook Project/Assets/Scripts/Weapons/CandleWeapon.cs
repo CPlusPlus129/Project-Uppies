@@ -55,6 +55,9 @@ public class CandleWeapon : MonoBehaviour
     private Color baseEmissionColor;
     private bool hasEmission;
     private Rigidbody weaponRigidbody;
+    private Collider[] cachedWeaponColliders;
+    private MaterialPropertyBlock propBlock;
+    private int emissionColorId;
 
     private void Awake()
     {
@@ -226,6 +229,13 @@ public class CandleWeapon : MonoBehaviour
             lightRecoverySystem = GetComponentInParent<LightRecoverySystem>();
         }
 
+        // Cache weapon colliders
+        cachedWeaponColliders = GetComponentsInChildren<Collider>();
+        
+        // Setup MaterialPropertyBlock
+        propBlock = new MaterialPropertyBlock();
+        emissionColorId = Shader.PropertyToID("_EmissionColor");
+
         weaponRigidbody = GetComponentInParent<Rigidbody>();
     }
 
@@ -304,7 +314,9 @@ public class CandleWeapon : MonoBehaviour
             if (hasEmission && chargingOrbRenderer != null)
             {
                 float intensityMult = Mathf.Lerp(chargingLightStartMult, chargingLightEndMult, chargeRatio);
-                chargingOrbRenderer.material.SetColor("_EmissionColor", baseEmissionColor * intensityMult);
+                chargingOrbRenderer.GetPropertyBlock(propBlock);
+                propBlock.SetColor(emissionColorId, baseEmissionColor * intensityMult);
+                chargingOrbRenderer.SetPropertyBlock(propBlock);
             }
         }
 
@@ -385,6 +397,12 @@ public class CandleWeapon : MonoBehaviour
         {
              if (!LightRecoverySystem.HasEnoughLight(finalCost))
              {
+                 // Feedback for not enough light
+                 if (targetingReticle != null && !targetingReticle.activeSelf)
+                 {
+                      // Flash reticle logic could go here, for now just ensure it's off
+                 }
+                 Debug.Log("Not enough light to fire!");
                  return;
              }
              LightRecoverySystem.DrainLight(finalCost);
@@ -409,16 +427,16 @@ public class CandleWeapon : MonoBehaviour
             LightProjectile proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
             
             // Ignore all weapon colliders to prevent immediate collision
-            Collider[] weaponColliders = GetComponentsInChildren<Collider>();
             Collider[] projColliders = proj.GetComponentsInChildren<Collider>();
             
-            if (projColliders != null && weaponColliders != null)
+            if (projColliders != null && cachedWeaponColliders != null)
             {
                 foreach (var pc in projColliders)
                 {
-                    foreach (var wc in weaponColliders)
+                    foreach (var wc in cachedWeaponColliders)
                     {
-                        Physics.IgnoreCollision(pc, wc);
+                        if (wc != null) // Check null in case something was destroyed
+                            Physics.IgnoreCollision(pc, wc);
                     }
                 }
             }
