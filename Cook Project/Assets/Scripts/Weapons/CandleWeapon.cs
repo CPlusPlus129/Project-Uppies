@@ -43,6 +43,7 @@ public class CandleWeapon : MonoBehaviour
     private float currentChargeTime;
     private bool isCharging;
     private InputAction fireAction;
+    private InputAction reloadAction;
     
     private Vector3 reticleOriginalScale;
     private Vector3 visualInitialScale;
@@ -242,10 +243,16 @@ public class CandleWeapon : MonoBehaviour
     private void Start()
     {
         fireAction = InputSystem.actions.FindAction("Attack");
+        reloadAction = InputSystem.actions.FindAction("Reload");
     }
 
     private void Update()
     {
+        if (reloadAction != null && reloadAction.WasPressedThisFrame())
+        {
+            ResetRotation();
+        }
+
         if (fireAction == null) return;
 
         if (fireAction.IsPressed())
@@ -449,5 +456,10 @@ public class CandleWeapon : MonoBehaviour
     private Vector3 GetLaunchVelocity(float force)
     {
         return firePoint.forward * force;
+    }
+
+    private void ResetRotation()
+    {
+        transform.localRotation = Quaternion.identity;
     }
 }
