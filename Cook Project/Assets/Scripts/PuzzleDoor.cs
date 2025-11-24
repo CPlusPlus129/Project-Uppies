@@ -39,7 +39,7 @@ public class PuzzleDoor : InteractableBase
 
         if (!taskExists)
         {
-            WorldBroadcastSystem.Instance.Broadcast("Seems like the door is locked.");
+            WorldBroadcastSystem.Instance.Broadcast("Pressed the button and nothing happened.");
             Debug.Log($"PuzzleDoor: Task '{requiredTaskId}' not found/active. Door remains locked.");
             return;
         }
