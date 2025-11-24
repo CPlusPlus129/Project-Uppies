@@ -27,6 +27,10 @@ public class GlowObjectStoryEvent : StoryEventAsset, IBackgroundStoryEvent
     private string targetObjectName;
 
     [SerializeField]
+    [Tooltip("If this task is complete, the glowing process will be skipped.")]
+    private string skipIfTaskIsCompleteTaskID = "";
+
+    [SerializeField]
     private bool searchAllScenes = false;
 
     [Header("Glow Configuration")]
@@ -48,6 +52,15 @@ public class GlowObjectStoryEvent : StoryEventAsset, IBackgroundStoryEvent
 
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrEmpty(skipIfTaskIsCompleteTaskID))
+        {
+            var isCompleted = TaskManager.Instance.IsTaskCompleted(skipIfTaskIsCompleteTaskID);
+            if(isCompleted)
+            {
+                return StoryEventResult.Completed($"GlowObjectStoryEvent: Task '{skipIfTaskIsCompleteTaskID}' is already completed. Skipping glow.");
+            }
+        }
+
         // 1. Find Target
         GameObject target = FindTarget(targetObjectName, searchAllScenes);
         if (target == null)
@@ -80,54 +93,65 @@ public class GlowObjectStoryEvent : StoryEventAsset, IBackgroundStoryEvent
 
         fridgeGlow.StartGlowing();
 
-        // 3. Setup Interaction (if waiting)
-        UnityInteractable interactable = null;
-        UnityAction onInteract = null;
-
-        try
+        // 3. Setup Interaction - always setup to stop glow when player interacts
+        UnityInteractable interactable = target.GetComponent<UnityInteractable>();
+        if (interactable == null)
         {
-            if (waitForInteraction)
+            interactable = target.AddComponent<UnityInteractable>();
+        }
+
+        // Define listener that stops glow and optionally disables the interactable
+        UnityAction onStopGlow = null;
+        onStopGlow = () =>
+        {
+            fridgeGlow.StopGlowing();
+
+            if (disableInteractableAfterUse)
             {
-                interactable = target.GetComponent<UnityInteractable>();
-                if (interactable == null)
-                {
-                    interactable = target.AddComponent<UnityInteractable>();
-                }
+                interactable.enabled = false;
+            }
 
-                var tcs = new UniTaskCompletionSource();
-                
-                // Define the listener
-                onInteract = () => 
-                {
-                    tcs.TrySetResult();
-                };
+            // Remove self after execution to prevent duplicate calls
+            interactable.RemoveOnInteractListener(onStopGlow);
+        };
 
-                interactable.AddOnInteractListener(onInteract);
-                
-                // Wait for interaction
+        // Always subscribe to stop glow on interaction
+        interactable.AddOnInteractListener(onStopGlow);
+
+        // 4. Conditionally wait for interaction
+        if (waitForInteraction)
+        {
+            var tcs = new UniTaskCompletionSource();
+            UnityAction onComplete = () => tcs.TrySetResult();
+
+            interactable.AddOnInteractListener(onComplete);
+
+            try
+            {
+                // Wait for player to interact
                 await tcs.Task.AttachExternalCancellation(cancellationToken);
             }
-            
-            if (waitForInteraction)
+            catch (OperationCanceledException)
             {
-                fridgeGlow.StopGlowing();
-                
-                if (interactable != null && disableInteractableAfterUse)
-                {
-                    interactable.enabled = false;
-                }
+                // Clean up completion listener on cancellation
+                interactable.RemoveOnInteractListener(onComplete);
+                throw;
             }
-        }
-        finally
-        {
-            // Cleanup listener
-            if (interactable != null && onInteract != null)
+            finally
             {
-                interactable.RemoveOnInteractListener(onInteract);
+                // Always clean up completion listener after await
+                interactable.RemoveOnInteractListener(onComplete);
             }
-        }
 
-        return StoryEventResult.Completed(waitForInteraction ? "Glow object interacted." : "Glow started (no wait).");
+            return StoryEventResult.Completed("Glow object interacted.");
+        }
+        else
+        {
+            // Don't wait - return immediately while the glow persists
+            // The onStopGlow listener will handle stopping when player interacts later
+            // Unity will auto-cleanup the listener when GameObject is destroyed (UnityEvent behavior)
+            return StoryEventResult.Completed("Glow started (no wait).");
+        }
     }
 
     private GameObject FindTarget(string nameOrPath, bool allScenes)
