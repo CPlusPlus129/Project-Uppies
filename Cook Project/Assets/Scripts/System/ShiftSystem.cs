@@ -69,8 +69,8 @@ public class ShiftSystem : IShiftSystem
         {
             completedOrderCount.Value++;
         }).AddTo(disposables);
-        OnGameStart.OnNext(Unit.Default);
         StartShift(0);
+        OnGameStart.OnNext(Unit.Default);
     }
 
     public void ResetGame()
