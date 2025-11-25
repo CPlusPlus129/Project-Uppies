@@ -3,7 +3,17 @@ guid: 33c9381a6fa44514db8c874b3ea80de9
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CashRegister_01
+    second: {fileID: 2100000, guid: 48539275a1ac19146ba9b99f7c027023, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CashRegister_01_glass
+    second: {fileID: 2100000, guid: d56cf508d7e5e024192d34bba9db38b6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
