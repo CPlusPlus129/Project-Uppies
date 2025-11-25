@@ -32,6 +32,24 @@ public class LanternSwingController : MonoBehaviour
     private Vector3 smoothedAccel;
     private Vector3 lastStickVelocity;
 
+    // Snapshot of the valid starting pose relative to the stick
+    private Vector3 _initRelativePos;
+    private Quaternion _initRelativeRot;
+    private bool _initialized;
+
+    void Awake()
+    {
+        // Capture the initial relative position/rotation so we can reset to it on Enable.
+        // This fixes the issue where disabling the lantern mid-swing causes it to be 
+        // permanently offset when re-enabled.
+        if (stickParentRb != null)
+        {
+            _initRelativePos = stickParentRb.transform.InverseTransformPoint(transform.position);
+            _initRelativeRot = Quaternion.Inverse(stickParentRb.transform.rotation) * transform.rotation;
+            _initialized = true;
+        }
+    }
+
     void Start()
     {
         if (stickParentRb == null) Debug.LogError("StickParent RB missing!");
@@ -46,6 +64,30 @@ public class LanternSwingController : MonoBehaviour
                 lastStickPos = stickParentRb.position;
                 lastStickEuler = stickParentRb.rotation.eulerAngles;
             }
+        }
+    }
+
+    void OnEnable()
+    {
+        // Restore the initial relative pose to prevent "stuck" swing offsets
+        if (_initialized && stickParentRb != null)
+        {
+            transform.position = stickParentRb.transform.TransformPoint(_initRelativePos);
+            transform.rotation = stickParentRb.transform.rotation * _initRelativeRot;
+        }
+
+        if (stickParentRb != null)
+        {
+            lastStickPos = stickParentRb.position;
+            lastStickEuler = stickParentRb.rotation.eulerAngles;
+            lastStickVelocity = Vector3.zero;
+            smoothedAccel = Vector3.zero;
+        }
+
+        if (lanternRb != null)
+        {
+            lanternRb.linearVelocity = Vector3.zero;
+            lanternRb.angularVelocity = Vector3.zero;
         }
     }
 
