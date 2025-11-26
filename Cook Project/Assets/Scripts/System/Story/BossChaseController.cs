@@ -15,6 +15,11 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Optional explicit player target. If left empty the mob's assigned target or a tagged Player will be used.")]
     private Transform playerOverride;
 
+    [Header("Audio")]
+    [SerializeField]
+    [Tooltip("Optional AudioSource to play during the chase (e.g. music or ambiance).")]
+    private AudioSource chaseAudioSource;
+
     [Header("Visual Effects")]
     [SerializeField]
     [Tooltip("Optional pulse effect to enable only during the chase.")]
@@ -169,6 +174,11 @@ public class BossChaseController : MonoBehaviour
             pulseEffect.enabled = true;
         }
 
+        if (chaseAudioSource != null && !chaseAudioSource.isPlaying)
+        {
+            chaseAudioSource.Play();
+        }
+
         bossMob.ForceChase(playerOverride);
         if(!string.IsNullOrEmpty(onChaseStart_toCompleteTaskId))
         {
@@ -229,6 +239,11 @@ public class BossChaseController : MonoBehaviour
         if (pulseEffect != null)
         {
             pulseEffect.enabled = false;
+        }
+        
+        if (chaseAudioSource != null)
+        {
+            chaseAudioSource.Stop();
         }
 
         if (fallingAbility != null)
