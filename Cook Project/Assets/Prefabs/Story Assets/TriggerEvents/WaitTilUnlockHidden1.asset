@@ -9,16 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 861c3e263d25ae34db1d19e05be52fe2, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e0631aaed463ae4e9a73d87f6bb7e60, type: 3}
   m_Name: WaitTilUnlockHidden1
-  m_EditorClassIdentifier: Assembly-CSharp::SignalDrivenStoryEvent
+  m_EditorClassIdentifier: Assembly-CSharp::WaitUntilTaskCompleteEvent
   eventId: WaitTilUnlockHidden1
   designerNotes: 
   replayable: 1
-  signalIdOverride: OnHidden1Unlocked
-  onSignalReceived:
-    m_PersistentCalls:
-      m_Calls: []
-  timeoutSeconds: 0
-  storyEventOnSignal: {fileID: 0}
-  logEventWarnings: 1
+  targetTaskId: HiddenRoom1Task
