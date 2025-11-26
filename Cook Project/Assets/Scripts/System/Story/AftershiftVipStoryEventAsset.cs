@@ -257,6 +257,7 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
             StabilizeVipPresentation(instance);
             anchor?.SnapTransform(instance.transform);
             ApplyVipTransformOverrides(instance.transform);
+            ReapplyTransformsNextFrame(instance.transform).Forget();
 
             var customer = instance.GetComponent<Customer>() ?? instance.GetComponentInChildren<Customer>();
             if (customer == null)
@@ -361,12 +362,25 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
         if (overrideVipRotation)
         {
             var desiredRotation = Quaternion.Euler(vipRotationEuler);
-            vipTransform.SetPositionAndRotation(vipTransform.position, desiredRotation);
+            vipTransform.localRotation = desiredRotation;
         }
 
         if (overrideVipScale)
         {
             vipTransform.localScale = vipLocalScale;
+        }
+    }
+
+    private async UniTaskVoid ReapplyTransformsNextFrame(Transform vipTransform)
+    {
+        if (vipTransform == null) return;
+
+        // Force apply for 5 frames to fight any initialization logic (animators, navmesh, mob state machines)
+        for (int i = 0; i < 5; i++)
+        {
+            await UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate);
+            if (vipTransform == null) return;
+            ApplyVipTransformOverrides(vipTransform);
         }
     }
 
