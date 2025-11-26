@@ -213,6 +213,24 @@ public class LightProjectile : MonoBehaviour
                 hitCollider.attachedRigidbody.AddExplosionForce(5f * initialIntensity, transform.position, impactRadius);
             }
         }
+
+        if (isImpact)
+        {
+            // Spawn a temporary Force Field to scatter mist/particles
+            GameObject forceObj = new GameObject("MistRepeller");
+            forceObj.transform.position = transform.position;
+            
+            // Add ParticleSystemForceField component
+            var forceField = forceObj.AddComponent<ParticleSystemForceField>();
+            forceField.shape = ParticleSystemForceFieldShape.Sphere;
+            forceField.startRange = 0f;
+            forceField.endRange = impactRadius * 1.5f; // Slightly larger than damage radius
+            forceField.gravity = -50f; // Negative gravity repels particles strongly
+            forceField.rotationSpeed = 10f; // Add some swirl
+            
+            // Destroy after short time (explosion is instant)
+            Destroy(forceObj, 0.5f);
+        }
     }
 
     private void FizzleOut()

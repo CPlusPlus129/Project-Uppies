@@ -144,6 +144,11 @@ public class RollingMist : MonoBehaviour
         rotationOverLifetime.enabled = true;
         rotationOverLifetime.z = new ParticleSystem.MinMaxCurve(-45f * Mathf.Deg2Rad, 45f * Mathf.Deg2Rad);
 
+        // External Forces (Wind, Explosions, Force Fields)
+        var externalForces = ps.externalForces;
+        externalForces.enabled = true;
+        externalForces.multiplier = 1.0f; // Allow forces to affect particles fully
+
         // Renderer Material
 #if UNITY_EDITOR
         Material mat = AssetDatabase.LoadAssetAtPath<Material>(DefaultMaterialPath);
