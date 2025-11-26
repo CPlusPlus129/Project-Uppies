@@ -30,15 +30,56 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Complete the task Id on chase starts.")]
     private string onChaseStart_toCompleteTaskId;
 
+    [Header("Escape Logic")]
+    [SerializeField]
+    [Tooltip("Distance the player must be from the boss to start the escape timer.")]
+    private float escapeDistance = 20f;
+
+    [SerializeField]
+    [Tooltip("Time in seconds the player must maintain distance to escape.")]
+    private float escapeTime = 5f;
+
+    [SerializeField]
+    [Tooltip("If true, the boss GameObject will be disabled upon escape.")]
+    private bool disableBossOnEscape = true;
+    
+    [SerializeField]
+    [Tooltip("If true, passive healing (e.g. from Safe Zones) is disabled during the chase.")]
+    private bool disablePassiveHealing = true;
+
+    [Header("Abilities")]
+    [SerializeField]
+    [Tooltip("Optional ability to drop obstacles during the chase.")]
+    private FallingObstacleAbility fallingAbility;
+
     private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
     private Vector3 initialPosition;
     private Quaternion initialRotation;
     private bool initialIsKinematic;
     private bool hasCachedRigidbodyState;
+    
+    private bool isChasing = false;
+    private float currentEscapeTimer = 0f;
+
+    private Transform CurrentTarget
+    {
+        get
+        {
+            if (playerOverride != null) return playerOverride;
+            if (bossMob != null && bossMob.PlayerTransform != null) return bossMob.PlayerTransform;
+            var p = GameObject.FindGameObjectWithTag("Player");
+            return p != null ? p.transform : null;
+        }
+    }
 
     private void Awake()
     {
+        if (fallingAbility == null)
+        {
+            fallingAbility = GetComponent<FallingObstacleAbility>();
+        }
+
         if (bossMob == null)
         {
             bossMob = GetComponent<Mob>();
@@ -71,6 +112,29 @@ public class BossChaseController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (!isChasing) return;
+
+        Transform target = CurrentTarget;
+        if (target == null) return;
+
+        float distance = Vector3.Distance(transform.position, target.position);
+
+        if (distance > escapeDistance)
+        {
+            currentEscapeTimer += Time.deltaTime;
+            if (currentEscapeTimer >= escapeTime)
+            {
+                CompleteChase();
+            }
+        }
+        else
+        {
+            currentEscapeTimer = 0f;
+        }
+    }
+
     private void CacheStartingTransform()
     {
         initialPosition = transform.position;
@@ -86,6 +150,10 @@ public class BossChaseController : MonoBehaviour
         {
             return;
         }
+
+        // Reset escape logic
+        isChasing = true;
+        currentEscapeTimer = 0f;
 
         if (holdPositionUntilChase)
         {
@@ -105,7 +173,37 @@ public class BossChaseController : MonoBehaviour
         if(!string.IsNullOrEmpty(onChaseStart_toCompleteTaskId))
         {
             TaskManager.Instance.CompleteTask(onChaseStart_toCompleteTaskId);
-        }   
+        }
+        
+        if (disablePassiveHealing)
+        {
+            SafeZone.IsGlobalHealingDisabled = true;
+        }
+
+        if (fallingAbility != null)
+        {
+            Debug.Log($"{name}: Triggering FallingObstacleAbility.", this);
+            fallingAbility.Play();
+        }
+        else
+        {
+            Debug.LogWarning($"{name}: FallingObstacleAbility is missing.", this);
+        }
+    }
+
+    /// <summary>
+    /// Successfully escaped the boss.
+    /// </summary>
+    private void CompleteChase()
+    {
+        Debug.Log($"[BossChaseController] Player escaped! Distance > {escapeDistance} for {escapeTime}s.");
+        StopChase();
+
+        if (disableBossOnEscape)
+        {
+            Debug.Log($"[BossChaseController] Disabling boss GameObject as per configuration.");
+            gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -113,16 +211,29 @@ public class BossChaseController : MonoBehaviour
     /// </summary>
     public void StopChase()
     {
+        isChasing = false;
+        currentEscapeTimer = 0f;
+
         if (bossMob == null)
         {
             return;
         }
 
         bossMob.StopChase();
+        
+        if (disablePassiveHealing)
+        {
+            SafeZone.IsGlobalHealingDisabled = false;
+        }
 
         if (pulseEffect != null)
         {
             pulseEffect.enabled = false;
+        }
+
+        if (fallingAbility != null)
+        {
+            fallingAbility.Stop();
         }
 
         if (holdPositionUntilChase)

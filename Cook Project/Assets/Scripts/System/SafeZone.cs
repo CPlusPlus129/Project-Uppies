@@ -55,6 +55,12 @@ public class SafeZone : MonoBehaviour
     private static SafeZone currentActiveSafeZone = null;
     
     /// <summary>
+    /// Global override to disable healing from ALL safe zones.
+    /// Used by boss chases or other intense sequences.
+    /// </summary>
+    public static bool IsGlobalHealingDisabled { get; set; } = false;
+    
+    /// <summary>
     /// Returns true if the player is currently in ANY safe zone.
     /// Can be checked by other systems like LightRecoverySystem.
     /// </summary>
@@ -113,8 +119,8 @@ public class SafeZone : MonoBehaviour
     
     private void OnUpdate()
     {
-        // Apply healing if player is in zone
-        if (playerInZone && enableHealing)
+        // Apply healing if player is in zone (and global healing is NOT disabled)
+        if (playerInZone && enableHealing && !IsGlobalHealingDisabled)
         {
             timeInZone += Time.deltaTime;
             

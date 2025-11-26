@@ -39,7 +39,10 @@ public class UIAnimationController : MonoBehaviour
         int operationId = ++currentOperationId;
         gameObject.SetActive(true);
 
-        animatorInstance.SetTrigger("enter");
+        if (IsAnimatorPlayable(animatorInstance))
+        {
+            animatorInstance.SetTrigger("enter");
+        }
 
         try
         {
@@ -63,7 +66,11 @@ public class UIAnimationController : MonoBehaviour
 
         var token = ResetCancellationToken();
         int operationId = ++currentOperationId;
-        animatorInstance.SetTrigger("exit");
+        
+        if (IsAnimatorPlayable(animatorInstance))
+        {
+            animatorInstance.SetTrigger("exit");
+        }
 
         try
         {

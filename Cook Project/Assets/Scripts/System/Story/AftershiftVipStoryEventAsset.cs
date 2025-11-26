@@ -327,8 +327,11 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
             foreach (var rigidbody in instance.GetComponentsInChildren<Rigidbody>(true))
             {
                 if (rigidbody == null) continue;
-                rigidbody.linearVelocity = Vector3.zero;
-                rigidbody.angularVelocity = Vector3.zero;
+                if (!rigidbody.isKinematic)
+                {
+                    rigidbody.linearVelocity = Vector3.zero;
+                    rigidbody.angularVelocity = Vector3.zero;
+                }
                 rigidbody.isKinematic = true;
                 rigidbody.useGravity = false;
             }
