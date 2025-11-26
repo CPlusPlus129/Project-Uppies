@@ -25,6 +25,11 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Freeze the boss in place until BeginChase is invoked.")]
     private bool holdPositionUntilChase = true;
 
+    [Header("Task")]
+    [SerializeField]
+    [Tooltip("Complete the task Id on chase starts.")]
+    private string onChaseStart_toCompleteTaskId;
+
     private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
     private Vector3 initialPosition;
@@ -97,6 +102,10 @@ public class BossChaseController : MonoBehaviour
         }
 
         bossMob.ForceChase(playerOverride);
+        if(!string.IsNullOrEmpty(onChaseStart_toCompleteTaskId))
+        {
+            TaskManager.Instance.CompleteTask(onChaseStart_toCompleteTaskId);
+        }   
     }
 
     /// <summary>

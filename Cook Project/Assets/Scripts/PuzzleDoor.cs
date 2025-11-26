@@ -6,6 +6,7 @@ using UnityEngine;
 public class PuzzleDoor : InteractableBase
 {
     [SerializeField] private string requiredTaskId;
+    [SerializeField] private string onOpenSignalId;
     [SerializeField] private PuzzleGameType puzzleType = PuzzleGameType.CardSwipe;
     [SerializeField] private Animator anim;
     [SerializeField] private GameObject hintObject;
@@ -67,6 +68,8 @@ public class PuzzleDoor : InteractableBase
             .Subscribe(_ =>
             {
                 PlayDoorAnimation();
+                if (!string.IsNullOrEmpty(onOpenSignalId))
+                    GameFlow.Instance?.Signal(onOpenSignalId);
                 gameInstance = null;
             })
             .AddTo(this);

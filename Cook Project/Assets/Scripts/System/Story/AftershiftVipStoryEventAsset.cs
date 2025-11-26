@@ -53,7 +53,7 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
     [Tooltip("Parent the spawned VIP under the anchor to inherit baked animations / movement.")]
     private bool parentVipToAnchor = true;
 
-    [Header("Signals & Dialogue")]
+    [Header("Signals & Dialogue & Task")]
     [SerializeField]
     private string signalOnSpawn;
 
@@ -65,6 +65,9 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
 
     [SerializeField]
     private DialogueEventAsset interactDialogue;
+
+    [SerializeField]
+    private string interactCompleteTaskId;
 
     [Header("HUD Broadcasts")]
     [SerializeField]
@@ -195,6 +198,11 @@ public sealed class AftershiftVipStoryEventAsset : StoryEventAsset
             if (!string.IsNullOrWhiteSpace(signalOnInteract))
             {
                 context.SendSignal(signalOnInteract);
+            }
+
+            if (!string.IsNullOrEmpty(interactCompleteTaskId))
+            {
+                TaskManager.Instance?.CompleteTask(interactCompleteTaskId);
             }
 
             if (!string.IsNullOrWhiteSpace(interactBroadcastMessage))

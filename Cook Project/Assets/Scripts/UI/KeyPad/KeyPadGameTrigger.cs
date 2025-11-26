@@ -4,6 +4,7 @@ using UnityEngine;
 public class KeyPadGameTrigger : InteractableBase
 {
     [SerializeField] private string requiredTaskId;
+    [SerializeField] private string onSuccessSignalId;
     [SerializeField] private SecretWall wall;
 
     private bool isActive;
@@ -31,6 +32,10 @@ public class KeyPadGameTrigger : InteractableBase
         if (!string.IsNullOrEmpty(requiredTaskId))
         {
             TaskManager.Instance.CompleteTask(requiredTaskId);
+        }
+        if(!string.IsNullOrEmpty(onSuccessSignalId))
+        {
+            GameFlow.Instance.Signal(onSuccessSignalId);
         }
     }
 

@@ -13,7 +13,7 @@ public class RemoveTaskEvent : StoryEventAsset
     {
         if (!string.IsNullOrWhiteSpace(targetEventId))
         {
-            TaskManager.Instance.CompleteTask(targetEventId);
+            TaskManager.Instance.RemoveTask(targetEventId);
         }
 
         return UniTask.FromResult(StoryEventResult.Completed());
