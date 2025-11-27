@@ -1,3 +1,6 @@
+using System;
+using Cysharp.Threading.Tasks;
+using R3;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -57,6 +60,11 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Optional ability to drop obstacles during the chase.")]
     private FallingObstacleAbility fallingAbility;
 
+    [Header("Chase Reset")]
+    [SerializeField]
+    [Tooltip("Offset from boss's original position where the player will respawn.")]
+    private Vector3 playerRespawnOffset = new Vector3(0f, 0f, 3f);
+
     private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
     private Vector3 initialPosition;
@@ -66,6 +74,7 @@ public class BossChaseController : MonoBehaviour
     
     private bool isChasing = false;
     private float currentEscapeTimer = 0f;
+    private IDisposable playerDeathSubscription;
 
     private Transform CurrentTarget
     {
@@ -115,6 +124,34 @@ public class BossChaseController : MonoBehaviour
         {
             pulseEffect.enabled = false;
         }
+
+        // Subscribe to player death events
+        SubscribeToPlayerDeath();
+    }
+
+    private void SubscribeToPlayerDeath()
+    {
+        if (PlayerStatSystem.Instance != null)
+        {
+            playerDeathSubscription = PlayerStatSystem.Instance.OnPlayerDeath
+                .Subscribe(_ => OnPlayerDeath())
+                .AddTo(this);
+        }
+    }
+
+    private void OnPlayerDeath()
+    {
+        // Only reset chase if currently chasing
+        if (isChasing)
+        {
+            Debug.Log("[BossChaseController] Player died during chase, resetting chase.");
+            ResetChase();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        playerDeathSubscription?.Dispose();
     }
 
     private void Update()
@@ -179,7 +216,24 @@ public class BossChaseController : MonoBehaviour
             chaseAudioSource.Play();
         }
 
-        bossMob.ForceChase(playerOverride);
+        // Force immediate chase with player lock-on
+        Transform target = CurrentTarget;
+        if (target != null)
+        {
+            bossMob.ForceChase(target);
+            
+            // Immediately update boss to face the player
+            Vector3 directionToPlayer = (target.position - transform.position).normalized;
+            if (directionToPlayer != Vector3.zero)
+            {
+                transform.rotation = Quaternion.LookRotation(directionToPlayer);
+            }
+        }
+        else
+        {
+            bossMob.ForceChase(playerOverride);
+        }
+        
         if(!string.IsNullOrEmpty(onChaseStart_toCompleteTaskId))
         {
             TaskManager.Instance.CompleteTask(onChaseStart_toCompleteTaskId);
@@ -214,6 +268,38 @@ public class BossChaseController : MonoBehaviour
             Debug.Log($"[BossChaseController] Disabling boss GameObject as per configuration.");
             gameObject.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// Resets the chase by respawning both player and boss at the boss's original position.
+    /// </summary>
+    public void ResetChase()
+    {
+        Transform player = CurrentTarget;
+        if (player != null)
+        {
+            // Calculate player respawn position using offset from boss's original position
+            Vector3 playerRespawnPosition = initialPosition + playerRespawnOffset;
+            
+            // Get player controller and teleport player
+            var playerController = player.GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                playerController.Teleport(playerRespawnPosition);
+            }
+            
+            // Set respawn position for future respawns using singleton
+            if (PlayerStatSystem.Instance != null)
+            {
+                PlayerStatSystem.Instance.SetRespawnPosition(playerRespawnPosition);
+            }
+        }
+        
+        // Reset boss to original position
+        transform.SetPositionAndRotation(initialPosition, initialRotation);
+        
+        // Stop the chase
+        StopChase();
     }
 
     /// <summary>
