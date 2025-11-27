@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
@@ -9,6 +10,29 @@ using UnityEngine.AI;
 /// </summary>
 public class BossChaseController : MonoBehaviour
 {
+    /// <summary>
+    /// Defines how lights should behave during the chase.
+    /// </summary>
+    public enum ChaseLightBehavior
+    {
+        TurnOff,
+        ChangeColor,
+        Strobe,
+        Dim
+    }
+
+    /// <summary>
+    /// Stores original state of a light for restoration.
+    /// </summary>
+    [System.Serializable]
+    private struct LightState
+    {
+        public bool enabled;
+        public Color color;
+        public float intensity;
+        public LightType type;
+    }
+
     [Header("References")]
     [SerializeField]
     [Tooltip("Mob component that drives the boss AI.")]
@@ -65,6 +89,23 @@ public class BossChaseController : MonoBehaviour
     [Tooltip("Offset from boss's original position where the player will respawn.")]
     private Vector3 playerRespawnOffset = new Vector3(0f, 0f, 3f);
 
+    [Header("Chase Lighting")]
+    [SerializeField]
+    [Tooltip("List of lights to modify during the chase.")]
+    private Light[] chaseLights;
+
+    [SerializeField]
+    [Tooltip("How lights should behave during the chase.")]
+    private ChaseLightBehavior lightBehavior = ChaseLightBehavior.TurnOff;
+
+    [SerializeField]
+    [Tooltip("Color to apply to lights during chase (used with ChangeColor behavior).")]
+    private Color chaseColor = Color.red;
+
+    [SerializeField]
+    [Tooltip("Strobe speed in Hz (flashes per second, used with Strobe behavior).")]
+    private float strobeSpeed = 2f;
+
     private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
     private Vector3 initialPosition;
@@ -75,6 +116,10 @@ public class BossChaseController : MonoBehaviour
     private bool isChasing = false;
     private float currentEscapeTimer = 0f;
     private IDisposable playerDeathSubscription;
+    
+    // Light state storage for restoration
+    private LightState[] originalLightStates;
+    private Coroutine strobeCoroutine;
 
     private Transform CurrentTarget
     {
@@ -127,6 +172,104 @@ public class BossChaseController : MonoBehaviour
 
         // Subscribe to player death events
         SubscribeToPlayerDeath();
+        
+        // Cache original light states
+        CacheLightStates();
+    }
+
+    private void CacheLightStates()
+    {
+        if (chaseLights == null || chaseLights.Length == 0)
+            return;
+
+        originalLightStates = new LightState[chaseLights.Length];
+        for (int i = 0; i < chaseLights.Length; i++)
+        {
+            if (chaseLights[i] != null)
+            {
+                originalLightStates[i] = new LightState
+                {
+                    enabled = chaseLights[i].enabled,
+                    color = chaseLights[i].color,
+                    intensity = chaseLights[i].intensity,
+                    type = chaseLights[i].type
+                };
+            }
+        }
+    }
+
+    private void ApplyChaseLighting()
+    {
+        if (chaseLights == null || chaseLights.Length == 0)
+            return;
+
+        for (int i = 0; i < chaseLights.Length; i++)
+        {
+            if (chaseLights[i] == null) continue;
+
+            switch (lightBehavior)
+            {
+                case ChaseLightBehavior.TurnOff:
+                    chaseLights[i].enabled = false;
+                    break;
+                    
+                case ChaseLightBehavior.ChangeColor:
+                    chaseLights[i].color = chaseColor;
+                    break;
+                    
+                case ChaseLightBehavior.Strobe:
+                    // Strobe is handled by coroutine
+                    break;
+                    
+                case ChaseLightBehavior.Dim:
+                    chaseLights[i].intensity = originalLightStates[i].intensity * 0.2f;
+                    break;
+            }
+        }
+
+        // Start strobe coroutine if needed
+        if (lightBehavior == ChaseLightBehavior.Strobe)
+        {
+            strobeCoroutine = StartCoroutine(StrobeLightsCoroutine());
+        }
+    }
+
+    private void RestoreLighting()
+    {
+        if (chaseLights == null || chaseLights.Length == 0 || originalLightStates == null)
+            return;
+
+        // Stop strobe coroutine if running
+        if (strobeCoroutine != null)
+        {
+            StopCoroutine(strobeCoroutine);
+            strobeCoroutine = null;
+        }
+
+        for (int i = 0; i < chaseLights.Length; i++)
+        {
+            if (chaseLights[i] == null || i >= originalLightStates.Length) continue;
+
+            chaseLights[i].enabled = originalLightStates[i].enabled;
+            chaseLights[i].color = originalLightStates[i].color;
+            chaseLights[i].intensity = originalLightStates[i].intensity;
+        }
+    }
+
+    private IEnumerator StrobeLightsCoroutine()
+    {
+        while (true)
+        {
+            for (int i = 0; i < chaseLights.Length; i++)
+            {
+                if (chaseLights[i] != null)
+                {
+                    chaseLights[i].enabled = !chaseLights[i].enabled;
+                }
+            }
+            
+            yield return new WaitForSeconds(1f / strobeSpeed);
+        }
     }
 
     private void SubscribeToPlayerDeath()
@@ -152,6 +295,12 @@ public class BossChaseController : MonoBehaviour
     private void OnDestroy()
     {
         playerDeathSubscription?.Dispose();
+        
+        // Clean up strobe coroutine
+        if (strobeCoroutine != null)
+        {
+            StopCoroutine(strobeCoroutine);
+        }
     }
 
     private void Update()
@@ -215,6 +364,9 @@ public class BossChaseController : MonoBehaviour
         {
             chaseAudioSource.Play();
         }
+
+        // Apply chase lighting effects
+        ApplyChaseLighting();
 
         // Force immediate chase with player lock-on
         Transform target = CurrentTarget;
@@ -336,6 +488,9 @@ public class BossChaseController : MonoBehaviour
         {
             fallingAbility.Stop();
         }
+
+        // Restore original lighting
+        RestoreLighting();
 
         if (holdPositionUntilChase)
         {

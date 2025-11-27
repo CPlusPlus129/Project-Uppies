@@ -52,7 +52,10 @@ public class PlayerMotor : MonoBehaviour
         // Apply speed modifier from SafeZone if player is in one
         currentSpeed *= SafeZone.GetCurrentSpeedModifier();
         Vector3 move = moveDirection * currentSpeed + playerVelocity;
-        controller.Move(move * Time.deltaTime);
+        if (controller.enabled)
+        {
+            controller.Move(move * Time.deltaTime);
+        }
     }
 
     public void Jump(InputAction.CallbackContext ctx)

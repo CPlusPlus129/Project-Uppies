@@ -161,12 +161,13 @@ public class PlayerController : MonoBehaviour
             return;
         UIRoot.Instance.GetUIComponent<DeathUI>()?.Close();
         playerStat.Resurrect();
-        playerStat.CanMove.Value = true;
         fireAction?.Enable();
         //Respawn at position
         if (playerStat.RespawnPosition.Value != Vector3.zero)
             Teleport(playerStat.RespawnPosition.Value);
         else
             Teleport(SpawnPosition);
+
+        playerStat.CanMove.Value = true;
     }
 }

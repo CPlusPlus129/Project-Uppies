@@ -154,7 +154,7 @@ Shader "Uppies/ClipInsideBox/Lit"
                 float alpha = albedoSample.a * _BaseColor.a;
 
                 Light mainLight = GetMainLight(input.shadowCoord);
-                float3 lighting = albedo * mainLight.color * saturate(dot(normalWS, mainLight.direction));
+                float3 lighting = albedo * mainLight.color * saturate(dot(normalWS, mainLight.direction)) * mainLight.distanceAttenuation * mainLight.shadowAttenuation;
 
 #ifdef _ADDITIONAL_LIGHTS
                 uint additionalLightsCount = GetAdditionalLightsCount();
@@ -162,7 +162,7 @@ Shader "Uppies/ClipInsideBox/Lit"
                 {
                     Light light = GetAdditionalLight(i, input.positionWS);
                     float ndotl = saturate(dot(normalWS, light.direction));
-                    lighting += albedo * light.color * ndotl;
+                    lighting += albedo * light.color * ndotl * light.distanceAttenuation * light.shadowAttenuation;
                 }
 #endif
 
