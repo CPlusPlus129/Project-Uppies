@@ -4,6 +4,7 @@ using UnityEngine;
 public partial class Mob
 {
     private static readonly Dictionary<int, TimedObjectDestroyer> s_destroyerCache = new Dictionary<int, TimedObjectDestroyer>();
+    private static readonly Dictionary<int, LightProjectile> s_projectileCache = new Dictionary<int, LightProjectile>();
 
     #region Combat & Damage
 
@@ -206,7 +207,8 @@ public partial class Mob
             return;
         }
 
-        TimedObjectDestroyer closest = null;
+        TimedObjectDestroyer closestDestroyer = null;
+        LightProjectile closestProjectile = null;
         Light closestLight = null;
         float closestSqrDistance = float.MaxValue;
         float maxDistance = Mathf.Max(0.1f, lightDamage.searchRadius);
@@ -227,26 +229,71 @@ public partial class Mob
                 continue;
             }
 
-            if (!TryGetTimedDestroyer(light, out TimedObjectDestroyer destroyer))
+            // Try to find LightProjectile first (new system)
+            if (TryGetLightProjectile(light, out LightProjectile projectile))
             {
-                continue;
+                closestProjectile = projectile;
+                closestLight = light;
+                closestSqrDistance = sqrDistance;
             }
-            closest = destroyer;
-            closestLight = light;
-            closestSqrDistance = sqrDistance;
+            // Fallback to TimedObjectDestroyer (old system)
+            else if (TryGetTimedDestroyer(light, out TimedObjectDestroyer destroyer))
+            {
+                closestDestroyer = destroyer;
+                closestLight = light;
+                closestSqrDistance = sqrDistance;
+            }
         }
 
-        if (closest == null)
+        // Handle LightProjectile (new system)
+        if (closestProjectile != null)
         {
-            return;
+            closestProjectile.ReduceLifetime(lightDamage.attackLifetimeReduction);
+
+            if (closestProjectile.GetRemainingLifetime() < 1f && closestLight != null)
+            {
+                StartCoroutine(FlickerLight(closestLight));
+            }
         }
-
-        closest.lifeTime = Mathf.Max(0.1f, closest.lifeTime - lightDamage.attackLifetimeReduction);
-
-        if (closest.lifeTime < 1f && closestLight != null)
+        // Handle TimedObjectDestroyer (old system)
+        else if (closestDestroyer != null)
         {
-            StartCoroutine(FlickerLight(closestLight));
+            closestDestroyer.lifeTime = Mathf.Max(0.1f, closestDestroyer.lifeTime - lightDamage.attackLifetimeReduction);
+
+            if (closestDestroyer.lifeTime < 1f && closestLight != null)
+            {
+                StartCoroutine(FlickerLight(closestLight));
+            }
         }
+    }
+
+    private static bool TryGetLightProjectile(Light light, out LightProjectile projectile)
+    {
+        projectile = null;
+        if (light == null)
+        {
+            return false;
+        }
+
+        int instanceId = light.GetInstanceID();
+        if (s_projectileCache.TryGetValue(instanceId, out projectile) && projectile != null)
+        {
+            return true;
+        }
+
+        // Search for LightProjectile component (expensive part)
+        if (!light.TryGetComponent(out projectile))
+        {
+            projectile = light.GetComponentInParent<LightProjectile>();
+        }
+
+        if (projectile != null)
+        {
+            s_projectileCache[instanceId] = projectile;
+            return true;
+        }
+
+        return false;
     }
 
     private static bool TryGetTimedDestroyer(Light light, out TimedObjectDestroyer destroyer)
@@ -263,7 +310,7 @@ public partial class Mob
             return true;
         }
 
-        // Search for the component (expensive part)
+        // Search for component (expensive part)
         if (!light.TryGetComponent(out destroyer))
         {
             destroyer = light.GetComponentInParent<TimedObjectDestroyer>();

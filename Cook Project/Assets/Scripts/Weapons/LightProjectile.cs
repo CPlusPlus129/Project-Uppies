@@ -21,6 +21,21 @@ public class LightProjectile : MonoBehaviour
 
     public bool HasLanded() => hasLanded;
     
+    /// <summary>
+    /// Reduces the remaining lifetime of the projectile by the specified amount.
+    /// Used by mobs to attack light sources.
+    /// </summary>
+    /// <param name="reductionAmount">Amount to reduce lifetime by</param>
+    public void ReduceLifetime(float reductionAmount)
+    {
+        currentLifetime = Mathf.Max(0.1f, currentLifetime - reductionAmount);
+        
+        // Update the base lifetime so fade curve works correctly
+        lifetime = currentLifetime;
+        
+        Debug.Log($"[LightProjectile] Lifetime reduced by {reductionAmount}. Remaining: {currentLifetime}");
+    }
+    
     [Header("Light Settings")]
     [SerializeField] private float lightDecayRate = 1f; // Intensity loss per second
     [SerializeField] private AnimationCurve lightFadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
