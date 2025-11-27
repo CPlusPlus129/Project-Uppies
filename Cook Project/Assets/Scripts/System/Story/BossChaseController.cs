@@ -108,6 +108,7 @@ public class BossChaseController : MonoBehaviour
 
     private NavMeshAgent cachedAgent;
     private Rigidbody cachedRigidbody;
+    private Animator bossAnimator;
     private Vector3 initialPosition;
     private Quaternion initialRotation;
     private bool initialIsKinematic;
@@ -157,6 +158,7 @@ public class BossChaseController : MonoBehaviour
                 initialIsKinematic = cachedRigidbody.isKinematic;
                 hasCachedRigidbodyState = true;
             }
+            bossAnimator = bossMob.GetComponentInChildren<Animator>();
         }
 
         if (holdPositionUntilChase)
@@ -342,6 +344,14 @@ public class BossChaseController : MonoBehaviour
             return;
         }
 
+        StartCoroutine(BeginChaseRoutine());
+    }
+
+    private IEnumerator BeginChaseRoutine()
+    {
+        // Give one frame for Mob.OnEnable / Animator initialization
+        yield return null;
+
         // Reset escape logic
         isChasing = true;
         currentEscapeTimer = 0f;
@@ -449,6 +459,18 @@ public class BossChaseController : MonoBehaviour
         
         // Reset boss to original position
         transform.SetPositionAndRotation(initialPosition, initialRotation);
+        if (cachedAgent != null)
+        {
+            if (!cachedAgent.enabled) cachedAgent.enabled = true;
+            if (cachedAgent.isOnNavMesh) cachedAgent.Warp(initialPosition);
+        }
+
+        // Reset Animator
+        if (bossAnimator != null)
+        {
+            bossAnimator.Rebind();
+            bossAnimator.Update(0f);
+        }
         
         // Stop the chase
         StopChase();
@@ -518,6 +540,10 @@ public class BossChaseController : MonoBehaviour
                 cachedRigidbody.isKinematic = true;
             }
             bossMob.enabled = false;
+            if (bossAnimator != null)
+            {
+                bossAnimator.speed = 0f;
+            }
         }
         else
         {
@@ -533,6 +559,10 @@ public class BossChaseController : MonoBehaviour
                 {
                     cachedRigidbody.isKinematic = false;
                 }
+            }
+            if (bossAnimator != null)
+            {
+                bossAnimator.speed = 1f;
             }
         }
     }
