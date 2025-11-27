@@ -156,6 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00d20c59d0fc0f34a8eaf5cdce93666b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mob
+  agent: {fileID: 6529107006954055856}
   player: {fileID: 0}
   healthBarController: {fileID: 0}
   locomotion:
@@ -167,7 +168,7 @@ MonoBehaviour:
     turnRate: 540
     velocitySmoothing: 12
     gravityCompensation: 2
-    destinationSampleRadius: 1.25
+    destinationSampleRadius: 3
     maxDestinationDrift: 0.75
     basePathRefreshInterval: 0.45
     chasePathRefreshInterval: 0.18
@@ -186,7 +187,7 @@ MonoBehaviour:
     cooldown: 1.3
   perception:
     detectionRange: 8
-    fieldOfView: 160
+    fieldOfView: 176
     lostSightGrace: 1.6
     obstacleLayer:
       serializedVersion: 2

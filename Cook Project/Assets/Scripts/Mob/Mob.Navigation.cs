@@ -124,6 +124,14 @@ public partial class Mob
             result = Vector3.Lerp(result, attackVelocity, attack.pursuitBlend);
         }
 
+        // Corner Avoidance / Wall Pushing
+        // If we are moving, check if we are grazing a wall and push out slightly to avoid friction/snagging
+        if (result.sqrMagnitude > 0.1f)
+        {
+             Vector3 wallPush = ComputeWallPush(result.normalized);
+             result += wallPush;
+        }
+
         if (flocking.enabled)
         {
             float flockWeight = GetFlockingWeightForState();
@@ -140,6 +148,30 @@ public partial class Mob
         }
 
         return result;
+    }
+
+    private Vector3 ComputeWallPush(Vector3 moveDir)
+    {
+        // Cast a short ray slightly forward and to the side to see if we are close to a wall
+        float lookAhead = 0.75f;
+        Vector3 origin = transform.position + Vector3.up * 0.5f;
+        
+        Vector3 right = Vector3.Cross(Vector3.up, moveDir);
+        int mask = Physics.DefaultRaycastLayers;
+        
+        // Check right side
+        if (Physics.Raycast(origin, (moveDir + right).normalized, out RaycastHit hitRight, lookAhead, mask, QueryTriggerInteraction.Ignore))
+        {
+             return hitRight.normal * 2.0f;
+        }
+        
+        // Check left side
+        if (Physics.Raycast(origin, (moveDir - right).normalized, out RaycastHit hitLeft, lookAhead, mask, QueryTriggerInteraction.Ignore))
+        {
+             return hitLeft.normal * 2.0f;
+        }
+
+        return Vector3.zero;
     }
 
     private Vector3 ComputeAttackVelocity()

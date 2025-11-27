@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// High level mob brain that handles perception, navigation, combat, and health.
@@ -69,7 +71,7 @@ public partial class Mob : MonoBehaviour
     private bool hasPresentationBaseline;
     private RendererState[] presentationRenderers = Array.Empty<RendererState>();
     private MaterialPropertyBlock deathPresentationBlock;
-    private Coroutine deathPresentationRoutine;
+    private CancellationTokenSource deathPresentationCTS;
 
     private static Collider[] s_flockingColliderBuffer = new Collider[32];
     private static Mob[] s_flockingMobBuffer = new Mob[32];
@@ -426,10 +428,11 @@ public partial class Mob : MonoBehaviour
 
     private void StopDeathPresentationRoutine()
     {
-        if (deathPresentationRoutine != null)
+        if (deathPresentationCTS != null)
         {
-            StopCoroutine(deathPresentationRoutine);
-            deathPresentationRoutine = null;
+            deathPresentationCTS.Cancel();
+            deathPresentationCTS.Dispose();
+            deathPresentationCTS = null;
         }
     }
 
@@ -443,15 +446,16 @@ public partial class Mob : MonoBehaviour
 
         RefreshPresentationCache(true);
         StopDeathPresentationRoutine();
-        deathPresentationRoutine = StartCoroutine(DeathPresentationRoutine());
+        deathPresentationCTS = new CancellationTokenSource();
+        DeathPresentationRoutine(deathPresentationCTS.Token).Forget();
     }
 
-    private IEnumerator DeathPresentationRoutine()
+    private async UniTaskVoid DeathPresentationRoutine(CancellationToken cancellationToken)
     {
         if (cachedPresentationRoot == null)
         {
             enabled = false;
-            yield break;
+            return;
         }
 
         if (deathPresentation.disableAnimator && cachedAnimator != null)
@@ -487,6 +491,11 @@ public partial class Mob : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < duration)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
 
@@ -499,11 +508,12 @@ public partial class Mob : MonoBehaviour
                 : Mathf.Clamp01(1f - (elapsed / deathPresentation.flashDuration));
             ApplyRendererPresentation(fade, emission, flash);
 
-            yield return null;
+            await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
         }
 
         ApplyRendererPresentation(0f, 0f, 0f);
-        deathPresentationRoutine = null;
+        
+        StopDeathPresentationRoutine();
         enabled = false;
     }
 

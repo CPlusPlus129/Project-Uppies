@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class CandleWeapon : MonoBehaviour
 {
@@ -28,7 +29,6 @@ public class CandleWeapon : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private float chargingLightStartMult = 0.5f;
     [SerializeField] private float chargingLightEndMult = 2.0f;
-    [SerializeField] private LineRenderer trajectoryLine;
     [SerializeField] private GameObject targetingReticle;
     [SerializeField] private GameObject chargingOrbVisual;
     [SerializeField] private Vector3 chargingVisualOffset = new Vector3(0, 0.1f, 0);
@@ -36,6 +36,11 @@ public class CandleWeapon : MonoBehaviour
     [SerializeField] private float minChargeScale = 1f;
     [SerializeField] private float maxChargeScale = 1.5f;
     [SerializeField] private float projectileSpawnScale = 0.5f;
+
+    [Header("Trajectory")]
+    [SerializeField] private LineRenderer trajectoryLine;
+    [SerializeField] private Gradient trajectoryColor;
+    [SerializeField] private float trajectoryWidth = 0.05f;
     [SerializeField] private int trajectoryResolution = 30;
     [SerializeField] private float trajectoryTimeStep = 0.1f;
     [SerializeField] private LayerMask groundLayer;
@@ -60,131 +65,124 @@ public class CandleWeapon : MonoBehaviour
     private MaterialPropertyBlock propBlock;
     private int emissionColorId;
 
+    // Optimization: Reusable list
+    private List<Vector3> trajectoryPoints = new List<Vector3>();
+
     private void Awake()
     {
         if (groundLayer.value == 0) 
         {
-            groundLayer = (1 << 0) | (1 << 6) | (1 << 12); //LayerMask.NameToLayer("Default") | LayerMask.NameToLayer("Interactable") | LayerMask.NameToLayer("NavmeshSurface");
+            groundLayer = (1 << 0) | (1 << 6) | (1 << 12); 
         }
 
-        // Sync base intensity from prefab if available, so the fired projectile matches the prefab settings
+        // Sync base intensity from prefab
         if (projectilePrefab != null)
         {
             Light prefabLight = projectilePrefab.GetComponentInChildren<Light>();
-            if (prefabLight != null)
-            {
-                baseIntensity = prefabLight.intensity;
-            }
-
+            if (prefabLight != null) baseIntensity = prefabLight.intensity;
             baseLifetime = projectilePrefab.GetBaseLifetime();
         }
         else
         {
-            Debug.LogError("CandleWeapon: No LightProjectile prefab assigned! Please assign one in the inspector.");
+            Debug.LogError("CandleWeapon: No LightProjectile prefab assigned!");
             enabled = false;
             return;
         }
 
-        if (chargingOrbVisual != null) 
+        SetupChargingOrb();
+        SetupTrajectoryLine();
+
+        if (targetingReticle != null) 
         {
-            // If the user assigned a Prefab Asset (scene.name is null), instantiate it.
-            if (chargingOrbVisual.scene.name == null)
+            targetingReticle.SetActive(false);
+            reticleOriginalScale = targetingReticle.transform.localScale;
+            if (reticleOriginalScale == Vector3.zero) reticleOriginalScale = Vector3.one; 
+        }
+
+        // Find player collider and systems
+        playerCollider = GetComponentInParent<CharacterController>();
+        if (playerCollider == null) playerCollider = GetComponentInParent<Collider>();
+
+        if (playerCollider != null)
+            lightRecoverySystem = playerCollider.GetComponent<LightRecoverySystem>() ?? playerCollider.GetComponentInParent<LightRecoverySystem>();
+        else
+            lightRecoverySystem = GetComponentInParent<LightRecoverySystem>();
+
+        cachedWeaponColliders = GetComponentsInChildren<Collider>();
+        propBlock = new MaterialPropertyBlock();
+        emissionColorId = Shader.PropertyToID("_EmissionColor");
+        weaponRigidbody = GetComponentInParent<Rigidbody>();
+    }
+
+    private void SetupTrajectoryLine()
+    {
+        if (trajectoryLine != null)
+        {
+            trajectoryLine.enabled = false;
+            trajectoryLine.startWidth = trajectoryWidth;
+            trajectoryLine.endWidth = trajectoryWidth;
+            trajectoryLine.useWorldSpace = true;
+
+            // Ensure material exists
+            if (trajectoryLine.sharedMaterial == null)
             {
-                GameObject instance = Instantiate(chargingOrbVisual, firePoint);
-                instance.transform.localPosition = chargingVisualOffset;
-                instance.transform.localRotation = Quaternion.identity;
+                Shader spriteShader = Shader.Find("Sprites/Default");
+                if (spriteShader != null)
+                    trajectoryLine.material = new Material(spriteShader);
+            }
+
+            // Apply default gradient if null
+            if (trajectoryColor == null)
+            {
+                trajectoryColor = new Gradient();
+                trajectoryColor.SetKeys(
+                    new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(Color.white, 1.0f) },
+                    new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
+                );
+            }
+            
+            trajectoryLine.colorGradient = trajectoryColor;
+        }
+    }
+
+    private void SetupChargingOrb()
+    {
+        // 1. If assigned scene object
+        if (chargingOrbVisual != null && chargingOrbVisual.scene.IsValid())
+        {
+             visualInitialScale = chargingOrbVisual.transform.localScale;
+        }
+        // 2. If assigned prefab or needs creation
+        else 
+        {
+            GameObject prefabToUse = chargingOrbVisual != null ? chargingOrbVisual : (projectilePrefab != null ? projectilePrefab.gameObject : null);
+            
+            if (prefabToUse != null)
+            {
+                chargingOrbVisual = Instantiate(prefabToUse, firePoint);
+                chargingOrbVisual.transform.localPosition = chargingVisualOffset;
+                chargingOrbVisual.transform.localRotation = Quaternion.identity;
+
+                // Strip components
+                Destroy(chargingOrbVisual.GetComponent<LightProjectile>());
+                Destroy(chargingOrbVisual.GetComponent<Rigidbody>());
+                Destroy(chargingOrbVisual.GetComponent<ExplosionLifetimeBarController>());
+                foreach (var c in chargingOrbVisual.GetComponentsInChildren<Collider>()) Destroy(c);
+                foreach (var c in chargingOrbVisual.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
                 
-                // Strip physics and logic from the visual only
-                Destroy(instance.GetComponent<LightProjectile>());
-                Destroy(instance.GetComponent<Rigidbody>());
-                Destroy(instance.GetComponent<ExplosionLifetimeBarController>());
-                foreach (var c in instance.GetComponentsInChildren<Collider>()) Destroy(c);
-                foreach (var c in instance.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
-                
-                chargingOrbVisual = instance;
-                // Capture scale after instantiation
                 visualInitialScale = chargingOrbVisual.transform.localScale;
             }
-            else
-            {
-                // It's a scene object, capture its scale
-                visualInitialScale = chargingOrbVisual.transform.localScale;
-            }
+        }
+
+        if (chargingOrbVisual != null)
+        {
             chargingOrbVisual.SetActive(false);
-        }
-        
-        if (projectilePrefab != null)
-        {
-            // Create a visual representation if none exists
-            if (chargingOrbVisual == null)
-            {
-                spawnedProjectileVisual = Instantiate(projectilePrefab.gameObject, firePoint);
-                spawnedProjectileVisual.transform.localPosition = chargingVisualOffset;
-                spawnedProjectileVisual.transform.localRotation = Quaternion.identity;
-                
-                // Strip physics and logic
-                Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
-                Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
-                Destroy(spawnedProjectileVisual.GetComponent<ExplosionLifetimeBarController>());
-                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
-                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
-                
-                chargingOrbVisual = spawnedProjectileVisual;
-                chargingOrbVisual.SetActive(false);
-            }
-        }
-
-        if (chargingOrbVisual != null)
-        {
-            // We handled capture in the blocks above to ensure we get it regardless of creation method
-            // But just in case we missed a path (e.g. assigned scene object but didn't enter the prefab instantiation block)
-            // Actually I added the else block for scene object above.
-            // So this block is redundant or potentially dangerous if it runs after SetActive(false) on a newly created object?
-            // SetActive(false) shouldn't affect localScale reading.
-            // Let's remove this redundant block to avoid confusion and potential overwrites if logic changes.
-        }
-        else if (projectilePrefab != null)
-        {
-            // If we are going to create one later, we can't get scale yet.
-            // But wait, if chargingOrbVisual is NULL, we enter the next block.
-        }
-        
-        if (projectilePrefab != null)
-        {
-            // Create a visual representation if none exists
-            if (chargingOrbVisual == null)
-            {
-                spawnedProjectileVisual = Instantiate(projectilePrefab.gameObject, firePoint);
-                spawnedProjectileVisual.transform.localPosition = chargingVisualOffset;
-                spawnedProjectileVisual.transform.localRotation = Quaternion.identity;
-                
-                // Strip physics and logic
-                Destroy(spawnedProjectileVisual.GetComponent<LightProjectile>());
-                Destroy(spawnedProjectileVisual.GetComponent<Rigidbody>());
-                Destroy(spawnedProjectileVisual.GetComponent<ExplosionLifetimeBarController>());
-                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Collider>()) Destroy(c);
-                foreach (var c in spawnedProjectileVisual.GetComponentsInChildren<Canvas>()) Destroy(c.gameObject);
-                
-                chargingOrbVisual = spawnedProjectileVisual;
-                chargingOrbVisual.SetActive(false);
-                
-                // Capture scale NOW that it exists
-                visualInitialScale = chargingOrbVisual.transform.localScale;
-            }
-        }
-
-        if (chargingOrbVisual != null)
-        {
             chargingOrbLight = chargingOrbVisual.GetComponentInChildren<Light>(true);
-            if (chargingOrbLight != null)
-            {
-                visualInitialLightIntensity = chargingOrbLight.intensity;
-            }
+            if (chargingOrbLight != null) visualInitialLightIntensity = chargingOrbLight.intensity;
 
             chargingOrbRenderer = chargingOrbVisual.GetComponentInChildren<Renderer>();
             if (chargingOrbRenderer != null)
             {
-                // Accessing .material creates an instance, ensuring we don't modify the asset
                 Material mat = chargingOrbRenderer.material;
                 if (mat.HasProperty("_EmissionColor"))
                 {
@@ -193,51 +191,6 @@ public class CandleWeapon : MonoBehaviour
                 }
             }
         }
-
-        if (targetingReticle != null) 
-        {
-            targetingReticle.SetActive(false);
-            reticleOriginalScale = targetingReticle.transform.localScale;
-            if (reticleOriginalScale == Vector3.zero) reticleOriginalScale = Vector3.one; 
-        }
-        if (trajectoryLine != null) 
-        {
-            trajectoryLine.enabled = false;
-            // Ensure reasonable width so it doesn't look like a giant plane if unassigned
-            if (trajectoryLine.startWidth > 0.2f) trajectoryLine.startWidth = 0.05f;
-            if (trajectoryLine.endWidth > 0.2f) trajectoryLine.endWidth = 0.05f;
-        }
-
-        // Find player collider
-        playerCollider = GetComponentInParent<CharacterController>();
-        if (playerCollider == null)
-        {
-            playerCollider = GetComponentInParent<Collider>();
-        }
-
-        if (playerCollider != null)
-        {
-            lightRecoverySystem = playerCollider.GetComponent<LightRecoverySystem>();
-            if (lightRecoverySystem == null)
-            {
-                // Fallback: check parent directly if collider was on a child
-                lightRecoverySystem = playerCollider.GetComponentInParent<LightRecoverySystem>();
-            }
-        }
-        else
-        {
-            // Fallback search
-            lightRecoverySystem = GetComponentInParent<LightRecoverySystem>();
-        }
-
-        // Cache weapon colliders
-        cachedWeaponColliders = GetComponentsInChildren<Collider>();
-        
-        // Setup MaterialPropertyBlock
-        propBlock = new MaterialPropertyBlock();
-        emissionColorId = Shader.PropertyToID("_EmissionColor");
-
-        weaponRigidbody = GetComponentInParent<Rigidbody>();
     }
 
     private void Start()
@@ -340,11 +293,12 @@ public class CandleWeapon : MonoBehaviour
             velocity += weaponRigidbody.GetPointVelocity(firePoint.position) * inheritedVelocityScale;
         }
 
-        List<Vector3> points = new List<Vector3>();
-        Vector3 currentPos = firePoint.position;
+        trajectoryPoints.Clear();
+        // Start from the orb if available
+        Vector3 currentPos = chargingOrbVisual != null ? chargingOrbVisual.transform.position : firePoint.position;
         Vector3 currentVel = velocity;
         
-        points.Add(currentPos);
+        trajectoryPoints.Add(currentPos);
 
         Vector3 lastPos = currentPos;
         bool hitGround = false;
@@ -357,7 +311,7 @@ public class CandleWeapon : MonoBehaviour
             // Raycast - Ignore triggers
             if (Physics.Linecast(lastPos, currentPos, out RaycastHit hit, groundLayer, QueryTriggerInteraction.Ignore))
             {
-                points.Add(hit.point);
+                trajectoryPoints.Add(hit.point);
                 hitGround = true;
                 
                 if (targetingReticle != null)
@@ -373,14 +327,14 @@ public class CandleWeapon : MonoBehaviour
                 break;
             }
             
-            points.Add(currentPos);
+            trajectoryPoints.Add(currentPos);
             lastPos = currentPos;
         }
 
         if (trajectoryLine != null)
         {
-            trajectoryLine.positionCount = points.Count;
-            trajectoryLine.SetPositions(points.ToArray());
+            trajectoryLine.positionCount = trajectoryPoints.Count;
+            trajectoryLine.SetPositions(trajectoryPoints.ToArray());
         }
         
         if (!hitGround && targetingReticle != null && targetingReticle.activeSelf)
@@ -422,16 +376,17 @@ public class CandleWeapon : MonoBehaviour
         // Use fixed spawn scale for the projectile itself
         float sizeScale = projectileSpawnScale;
 
+        Vector3 spawnPos = chargingOrbVisual != null ? chargingOrbVisual.transform.position : firePoint.position;
         Vector3 velocity = GetLaunchVelocity(finalForce);
 
         if (weaponRigidbody != null)
         {
-            velocity += weaponRigidbody.GetPointVelocity(firePoint.position) * inheritedVelocityScale;
+            velocity += weaponRigidbody.GetPointVelocity(spawnPos) * inheritedVelocityScale;
         }
 
         if (projectilePrefab != null)
         {
-            LightProjectile proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            LightProjectile proj = Instantiate(projectilePrefab, spawnPos, Quaternion.identity);
             
             // Ignore all weapon colliders to prevent immediate collision
             Collider[] projColliders = proj.GetComponentsInChildren<Collider>();
