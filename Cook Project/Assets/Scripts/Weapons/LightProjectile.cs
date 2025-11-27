@@ -40,6 +40,12 @@ public class LightProjectile : MonoBehaviour
     [SerializeField] private float lightDecayRate = 1f; // Intensity loss per second
     [SerializeField] private AnimationCurve lightFadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
     
+    [Header("Fadeaway Effects")]
+    [SerializeField] private float fadeawayDuration = 1f;
+    [SerializeField] private AnimationCurve scaleFadeCurve = AnimationCurve.EaseInOut(0, 1, 1, 0);
+    [SerializeField] private AnimationCurve alphaFadeCurve = AnimationCurve.EaseInOut(0, 1, 1, 0);
+    [SerializeField] private GameObject fadeawayEffectPrefab;
+    
     [Header("Damage Settings")]
     [SerializeField] private float damagePerSecond = 10f;
     [SerializeField] private float damageInterval = 0.5f;
@@ -56,6 +62,14 @@ public class LightProjectile : MonoBehaviour
     
     private bool hasLanded = false;
     private Collider[] hitCollidersBuffer = new Collider[32]; // Pre-allocated buffer
+    
+    // Fadeaway effect state
+    private bool isFadingAway = false;
+    private float fadeawayStartTime;
+    private Vector3 initialScale;
+    private Renderer[] projectileRenderers;
+    private MaterialPropertyBlock fadePropertyBlock;
+    private static readonly int FadeColorId = Shader.PropertyToID("_Color");
 
     private void Awake()
     {
@@ -108,6 +122,15 @@ public class LightProjectile : MonoBehaviour
             }
         }
         
+        // Cache renderers for fadeaway effect
+        projectileRenderers = GetComponentsInChildren<Renderer>();
+        if (projectileRenderers.Length > 0)
+        {
+            fadePropertyBlock = new MaterialPropertyBlock();
+        }
+        
+        initialScale = transform.localScale;
+        
         // Use override lifetime if provided
         if (overrideLifetime > 0)
         {
@@ -122,6 +145,13 @@ public class LightProjectile : MonoBehaviour
 
     private void Update()
     {
+        // Handle fadeaway effect
+        if (isFadingAway)
+        {
+            UpdateFadeawayEffect();
+            return;
+        }
+        
         // Handle lifetime/health decay
         if (currentLifetime > 0)
         {
@@ -139,8 +169,8 @@ public class LightProjectile : MonoBehaviour
             
             if (currentLifetime <= 0)
             {
-                Debug.Log("[LightProjectile] Lifetime expired. Fizzling out.");
-                FizzleOut();
+                Debug.Log("[LightProjectile] Lifetime expired. Starting fadeaway.");
+                StartFadeaway();
             }
         }
 
@@ -230,9 +260,79 @@ public class LightProjectile : MonoBehaviour
         }
     }
 
+    private void StartFadeaway()
+    {
+        isFadingAway = true;
+        fadeawayStartTime = Time.time;
+        
+        // Spawn fadeaway effect if available
+        if (fadeawayEffectPrefab != null)
+        {
+            Instantiate(fadeawayEffectPrefab, transform.position, Quaternion.identity);
+        }
+        
+        // Stop dealing damage during fadeaway
+        hasLanded = false;
+    }
+    
+    private void UpdateFadeawayEffect()
+    {
+        float elapsed = Time.time - fadeawayStartTime;
+        float t = Mathf.Clamp01(elapsed / fadeawayDuration);
+        
+        // Scale fade
+        float scaleMult = scaleFadeCurve.Evaluate(t);
+        transform.localScale = initialScale * scaleMult;
+        
+        // Alpha fade for renderers
+        float alphaMult = alphaFadeCurve.Evaluate(t);
+        if (projectileRenderers != null && fadePropertyBlock != null)
+        {
+            foreach (Renderer renderer in projectileRenderers)
+            {
+                if (renderer == null) continue;
+                
+                fadePropertyBlock.Clear();
+                
+                // Try to fade the main color
+                Material material = renderer.material;
+                if (material.HasProperty(FadeColorId))
+                {
+                    Color color = material.color;
+                    color.a *= alphaMult;
+                    fadePropertyBlock.SetColor(FadeColorId, color);
+                }
+                
+                // Try to fade emission color
+                int emissionId = Shader.PropertyToID("_EmissionColor");
+                if (material.HasProperty(emissionId))
+                {
+                    Color emission = material.GetColor(emissionId);
+                    emission.a *= alphaMult;
+                    fadePropertyBlock.SetColor(emissionId, emission);
+                }
+                
+                renderer.SetPropertyBlock(fadePropertyBlock);
+            }
+        }
+        
+        // Fade light completely
+        if (pointLight != null)
+        {
+            pointLight.intensity = initialIntensity * alphaMult * 0.1f; // Keep minimal light during fade
+        }
+        
+        // Destroy when fade is complete
+        if (t >= 1f)
+        {
+            Debug.Log("[LightProjectile] Fadeaway complete. Destroying.");
+            Destroy(gameObject);
+        }
+    }
+
     private void FizzleOut()
     {
-        // Maybe spawn a poof effect here if desired
-        Destroy(gameObject);
+        // Legacy method - now just starts immediate fadeaway
+        StartFadeaway();
     }
 }
