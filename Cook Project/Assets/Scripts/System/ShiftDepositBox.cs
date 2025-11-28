@@ -8,15 +8,20 @@ using R3;
 [AddComponentMenu("Gameplay/Shift Deposit Box")]
 public class ShiftDepositBox : InteractableBase, IInteractionPromptProvider
 {
-    [SerializeField][Tooltip("Seconds required to deposit the full quota amount.")]
+    [SerializeField]
+    [Tooltip("Seconds required to deposit the full quota amount.")]
     private float holdDurationForDepositAll = 0.75f;
-    [SerializeField][Tooltip("Input Action name to monitor for hold detection.")]
+    [SerializeField]
+    [Tooltip("Input Action name to monitor for hold detection.")]
     private string interactActionName = "Interact";
-    [SerializeField][Tooltip("Label shown for the deposit prompt.")]
+    [SerializeField]
+    [Tooltip("Label shown for the deposit prompt.")]
     private string holdPromptText = "Hold to Deposit Money";
-    [SerializeField][Tooltip("Control scheme used when looking up binding display strings.")]
+    [SerializeField]
+    [Tooltip("Control scheme used when looking up binding display strings.")]
     private string promptControlScheme = "keyboard&mouse";
-    [SerializeField][Tooltip("Optional collider reference that will be forced into the Interactable layer.")]
+    [SerializeField]
+    [Tooltip("Optional collider reference that will be forced into the Interactable layer.")]
     private Collider interactCollider;
 
     private IShiftSystem shiftSystem;
@@ -53,12 +58,13 @@ public class ShiftDepositBox : InteractableBase, IInteractionPromptProvider
     {
         await UniTask.WaitUntil(() => GameFlow.Instance.IsInitialized);
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
-
-        // Calculate deposit rate based on quota and hold duration
-        if (shiftSystem.quotaAmount.CurrentValue > 0 && holdDurationForDepositAll > 0f)
+        shiftSystem.quotaAmount.Subscribe(value =>
         {
-            depositRatePerSecond = shiftSystem.quotaAmount.CurrentValue / holdDurationForDepositAll;
-        }
+            if (holdDurationForDepositAll == 0)
+                depositRatePerSecond = value;
+            else
+                depositRatePerSecond = value / holdDurationForDepositAll;
+        }).AddTo(this);
 
         // Get the interact action reference
         interactAction = InputSystem.actions?.FindAction(interactActionName);
@@ -102,6 +108,7 @@ public class ShiftDepositBox : InteractableBase, IInteractionPromptProvider
             return;
 
         // Calculate amount to deposit this frame
+        // This might not be accurate, but is sufficient for our needs
         int amountThisFrame = Mathf.CeilToInt(depositRatePerSecond * Time.deltaTime);
 
         if (amountThisFrame > 0)
