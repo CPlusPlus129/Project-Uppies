@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3932722281165203901}
-  - component: {fileID: 8278611734123307652}
   - component: {fileID: 5140845723078123453}
+  - component: {fileID: 3519128475176990101}
   m_Layer: 0
   m_Name: FireSnakeTrap
   m_TagString: Untagged
@@ -35,25 +35,6 @@ Transform:
   - {fileID: 4305844608907508333}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8278611734123307652
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3760331813910949411}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d000fe0756eec0a4085c64dd94fb7853, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FireSnakeTrapController
-  flameEffect: {fileID: 4305844608907310589}
-  trapCollider: {fileID: 5140845723078123453}
-  fireDuration: 3
-  cooldownDuration: 2
-  damage: 10
-  damageInterval: 0.5
-  autoStart: 1
 --- !u!65 &5140845723078123453
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -75,6 +56,25 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 9.602894, y: 1.1956854, z: 1.0095482}
   m_Center: {x: 4.8957767, y: 0.5317526, z: 0.1890564}
+--- !u!114 &3519128475176990101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3760331813910949411}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d000fe0756eec0a4085c64dd94fb7853, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireSnakeTrapController
+  flameEffect: {fileID: 4305844608907310589}
+  trapCollider: {fileID: 5140845723078123453}
+  fireDuration: 3
+  cooldownDuration: 2
+  damage: 30
+  damageInterval: 0.5
+  autoStart: 1
 --- !u!1001 &4305844608907209999
 PrefabInstance:
   m_ObjectHideFlags: 0

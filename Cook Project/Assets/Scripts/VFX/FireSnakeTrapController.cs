@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FirePillarTrapController : MonoBehaviour
+public class FireSnakeTrapController : MonoBehaviour
 {
     [Header("Trap References")]
     public GameObject flameEffect;       
