@@ -9,13 +9,15 @@ using Cysharp.Threading.Tasks;
 public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 {
     [Header("Primary Elements")]
-    public TextMeshProUGUI shiftNumberText;
-    public TextMeshProUGUI shiftOnOffText;
+    //public TextMeshProUGUI shiftNumberText;
+    //public TextMeshProUGUI shiftOnOffText;
     public TextMeshProUGUI clockText;
     [Header("Supporting Elements")]
     [SerializeField] private TextMeshProUGUI shiftSubtitleText;
     [SerializeField] private Image statusBadgeImage;
     [SerializeField] private Image panelBackgroundImage;
+    [SerializeField] private Image onShiftImage;
+    [SerializeField] private Image offShiftImage;
 
     private IShiftSystem shiftSystem;
     private readonly Color32 offDutyBadge = new(48, 47, 66, 255);
@@ -28,7 +30,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
     {
         shiftSystem = await ServiceLocator.Instance.GetAsync<IShiftSystem>();
         shiftSystem.OnGameStart.Subscribe(_ => UpdateActiveState());
-        shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
+        //shiftSystem.shiftNumber.Subscribe(UpdateShiftNumber).AddTo(this);
         shiftSystem.currentState.Subscribe(UpdateShiftState).AddTo(this);
         shiftSystem.currentClockHour.Subscribe(UpdateClock).AddTo(this);
 
@@ -44,7 +46,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
     private void UpdateAll()
     {
         UpdateActiveState();
-        UpdateShiftNumber(shiftSystem.shiftNumber.Value);
+        //UpdateShiftNumber(shiftSystem.shiftNumber.Value);
         UpdateShiftState(shiftSystem.currentState.Value);
         UpdateClock(shiftSystem.currentClockHour.Value);
     }
@@ -54,11 +56,13 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         gameObject.SetActive(shiftSystem.currentState.Value != ShiftSystem.ShiftState.None);
     }
 
+    /*
     private void UpdateShiftNumber(int number)
     {
         var displayIndex = Mathf.Max(0, number) + 1;
         shiftNumberText.text = $"Shift {displayIndex:D2}";
     }
+    */
 
     private void UpdateClock(float hours)
     {
@@ -83,7 +87,8 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateShiftState(ShiftSystem.ShiftState state)
     {
-        string label;
+        //string label;
+        bool onShiftState = false;
         string subtitle;
         Color badgeColor;
         Color backgroundColor;
@@ -94,7 +99,8 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
         if (treatAsIdle)
         {
-            label = "OFF DUTY";
+            onShiftState = false;
+            //label = "OFF DUTY";
             subtitle = "Clock in when you are ready.";
             badgeColor = offDutyBadge;
             backgroundColor = backgroundBase;
@@ -104,31 +110,36 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
             switch (state)
             {
                 case ShiftSystem.ShiftState.InShift:
-                    label = "ON DUTY";
+                    onShiftState = true;
+                    //label = "ON DUTY";
                     subtitle = "Keep orders moving and watch the clock.";
                     badgeColor = onDutyBadge;
                     backgroundColor = backgroundBase;
                     break;
                 case ShiftSystem.ShiftState.Overtime:
-                    label = "OVERTIME";
+                    onShiftState = true;
+                    //label = "OVERTIME";
                     subtitle = "Push through the rush for bonus payouts.";
                     badgeColor = overtimeBadge;
                     backgroundColor = backgroundOvertime;
                     break;
                 case ShiftSystem.ShiftState.AfterShift:
-                    label = "SHIFT COMPLETE";
+                    onShiftState = false;
+                    //label = "SHIFT COMPLETE";
                     subtitle = "Catch your breath before the next gig.";
                     badgeColor = offDutyBadge;
                     backgroundColor = backgroundBase;
                     break;
                 case ShiftSystem.ShiftState.GaveOver:
-                    label = "BANKRUPT";
+                    onShiftState = false;
+                    //label = "BANKRUPT";
                     subtitle = "You lost everything. Restarting...";
                     badgeColor = new Color32(200, 50, 50, 255); // Red for failure
                     backgroundColor = new Color32(255, 200, 200, 236); // Light red background
                     break;
                 default:
-                    label = "OFF DUTY";
+                    onShiftState = true;
+                    //label = "OFF DUTY";
                     subtitle = "Clock in when you are ready.";
                     badgeColor = offDutyBadge;
                     backgroundColor = backgroundBase;
@@ -136,6 +147,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
             }
         }
 
+        /*
         // Override subtitle with tasks if any exist
         if (TaskManager.Instance != null && TaskManager.Instance.Tasks.Value.Count > 0)
         {
@@ -149,9 +161,17 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
             }
             subtitle = taskListString;
         }
+        */
 
-        shiftOnOffText.text = label;
+        if(onShiftImage != null && offShiftImage != null)
+        {
+            onShiftImage.gameObject.SetActive(onShiftState);
+            offShiftImage.gameObject.SetActive(!onShiftState);
+        }
 
+        //shiftOnOffText.text = label;
+
+        /*
         if (shiftSubtitleText != null)
         {
             shiftSubtitleText.text = subtitle;
@@ -163,5 +183,6 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
         if (panelBackgroundImage != null)
             panelBackgroundImage.color = backgroundColor;
+        */
     }
 }
