@@ -316,7 +316,7 @@ public class ShiftSystem : IShiftSystem
         stats.Money.Value -= depositAmount;
         depositedAmount.Value += depositAmount;
 
-        WorldBroadcastSystem.Instance.Broadcast($"Deposited ${depositAmount}. ({depositedAmount.Value}/{quotaAmount.Value})", 4f);
+        WorldBroadcastSystem.Instance.Broadcast($"Deposited money. ({depositedAmount.Value}/{quotaAmount.Value})", 4f);
 
         return depositAmount;
     }
