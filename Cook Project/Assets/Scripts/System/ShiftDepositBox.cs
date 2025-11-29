@@ -78,6 +78,22 @@ public class ShiftDepositBox : InteractableBase, IInteractionPromptProvider
             .Where(_ => isDepositing && shiftSystem != null && !shiftSystem.HasMetQuota())
             .Subscribe(_ => DepositIncrementally())
             .AddTo(disposables);
+
+        // Subscribe to shift state changes to disable interactable in AfterShift
+        shiftSystem.currentState.Subscribe(OnShiftStateChanged).AddTo(disposables);
+    }
+
+    private void OnShiftStateChanged(ShiftSystem.ShiftState state)
+    {
+        // Disable this interactable when in AfterShift state
+        bool shouldBeEnabled = state != ShiftSystem.ShiftState.AfterShift;
+        enabled = shouldBeEnabled;
+        
+        // Also disable the collider when in AfterShift state
+        if (interactCollider != null)
+        {
+            interactCollider.enabled = shouldBeEnabled;
+        }
     }
 
     private void OnDestroy()
