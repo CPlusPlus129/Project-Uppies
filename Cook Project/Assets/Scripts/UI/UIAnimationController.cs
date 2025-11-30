@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class UIAnimationController : MonoBehaviour
 {
+    [SerializeField] private bool dontDeactivateOnClose = false;
     public Subject<Unit> OnOpenComplete { get; } = new Subject<Unit>();
     public Subject<Unit> OnCloseComplete { get; } = new Subject<Unit>();
     private Animator animator;
@@ -66,7 +67,7 @@ public class UIAnimationController : MonoBehaviour
 
         var token = ResetCancellationToken();
         int operationId = ++currentOperationId;
-        
+
         if (IsAnimatorPlayable(animatorInstance))
         {
             animatorInstance.SetTrigger("exit");
@@ -80,7 +81,8 @@ public class UIAnimationController : MonoBehaviour
             // check if there is a new open call
             if (operationId == currentOperationId)
             {
-                gameObject.SetActive(false);
+                if (!dontDeactivateOnClose)
+                    gameObject.SetActive(false);
 
                 OnCloseComplete.OnNext(Unit.Default);
             }

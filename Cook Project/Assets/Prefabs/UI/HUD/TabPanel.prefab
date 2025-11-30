@@ -9,6 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2391760026586483354}
+  - component: {fileID: 8281603113651837044}
+  - component: {fileID: 8828981494845983176}
+  - component: {fileID: 7827850470891921953}
   m_Layer: 5
   m_Name: TabPanel
   m_TagString: Untagged
@@ -33,9 +36,57 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -960, y: 467.8}
+  m_AnchoredPosition: {x: -1330, y: 467.8}
   m_SizeDelta: {x: 425, y: 576}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &8281603113651837044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5650411322170662257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 358a433b0b064494d85a1666a4dd0e9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TabPanelUI
+  uiAnim: {fileID: 8828981494845983176}
+--- !u!114 &8828981494845983176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5650411322170662257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 491e195cb26fd4d4e9ac1597933bb7a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIAnimationController
+  dontDeactivateOnClose: 1
+--- !u!95 &7827850470891921953
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5650411322170662257}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 516534096e9e3484e880de064295c3c9, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6892316201974282117
 GameObject:
   m_ObjectHideFlags: 0
