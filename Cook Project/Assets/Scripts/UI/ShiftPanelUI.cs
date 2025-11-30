@@ -45,7 +45,7 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
 
     private void UpdateAll()
     {
-        UpdateActiveState();
+        //UpdateActiveState();
         //UpdateShiftNumber(shiftSystem.shiftNumber.Value);
         UpdateShiftState(shiftSystem.currentState.Value);
         UpdateClock(shiftSystem.currentClockHour.Value);
