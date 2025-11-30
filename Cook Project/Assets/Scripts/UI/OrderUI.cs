@@ -36,7 +36,7 @@ public class OrderUI : MonoBehaviour, IUIInitializable
         {
             itemList.Remove(item);
             item.Exit();
-            Destroy(item.gameObject, 1f);
+            Destroy(item.gameObject, 0.25f);
         }
     }
 

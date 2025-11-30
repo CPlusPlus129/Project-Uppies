@@ -273,6 +273,7 @@ GameObject:
   - component: {fileID: 4957211310600139419}
   - component: {fileID: 2530299570678500534}
   - component: {fileID: 6686378518218139578}
+  - component: {fileID: 6984192145206789118}
   m_Layer: 5
   m_Name: Money
   m_TagString: Untagged
@@ -342,6 +343,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 2
   m_VerticalFit: 0
+--- !u!114 &6984192145206789118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6601843059082031721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a64dee67e5140b46afb69a54698c0d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoneyUI
+  moneyValueText: {fileID: 470129460374676755}
+  moneyCountCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  minMoneyCountDuration: 0.35
+  maxMoneyCountDuration: 1.2
+  moneyAudioSource: {fileID: 0}
+  moneyTickClip: {fileID: 0}
 --- !u!1 &8196525212769645927
 GameObject:
   m_ObjectHideFlags: 0
