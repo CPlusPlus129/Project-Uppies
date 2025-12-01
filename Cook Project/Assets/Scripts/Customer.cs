@@ -96,6 +96,7 @@ public class Customer : InteractableBase
         orderManager.PlaceOrder(order);
         state = CustomerState.WaitingForMeal;
         Debug.Log($"{customerName} placed order: {order.MealName}");
+        WorldBroadcastSystem.Instance.Broadcast($"{customerName} has placed an order for {order.MealName}!");
     }
 
     public bool CanReceiveMeal(ItemBase item)
