@@ -104,8 +104,38 @@ namespace UI
 
         private void OnReturnToTitleClicked()
         {
-            // Load the Title scene.
-            SceneManager.LoadScene("Title");
+            // 1. Reset Input to UI for Title Screen
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.SetActionMap("UI");
+            }
+
+            // 2. Clean up GameFlow state
+            if (GameFlow.Instance != null)
+            {
+                GameFlow.Instance.ClearStoryQueue();
+                GameFlow.Instance.ClearHistory();
+            }
+
+            // 3. Resolve the wait task so the StoryEvent finishes cleanly
+            _continueCompletionSource?.TrySetResult();
+
+            // 4. Load the Title scene via Service to ensure UI updates correctly
+            ReturnToTitleAsync().Forget();
+        }
+
+        private async UniTaskVoid ReturnToTitleAsync()
+        {
+            var sceneService = await ServiceLocator.Instance.GetAsync<ISceneManagementService>();
+            if (sceneService != null)
+            {
+                await sceneService.LoadSceneAsync("Title");
+            }
+            else
+            {
+                Debug.LogWarning("SceneManagementService not found, falling back to SceneManager");
+                SceneManager.LoadScene("Title");
+            }
         }
     }
 }
