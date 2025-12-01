@@ -300,11 +300,12 @@ public class PlayerSoulAbilityManager : MonoBehaviour
             return false;
         }
 
-        if (!playerStats.TrySpendSouls(ability.soulCost))
+        if (playerStats.CurrentLight.CurrentValue < ability.soulCost)
         {
             ability.onInsufficientSouls?.Invoke();
             return false;
         }
+        playerStats.ConsumeLight(ability.soulCost);
 
         ability.onActivated?.Invoke();
         return true;
