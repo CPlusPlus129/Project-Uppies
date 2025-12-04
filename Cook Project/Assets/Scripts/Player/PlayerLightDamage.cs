@@ -114,9 +114,9 @@ public class PlayerLightDamage : MonoBehaviour
                 if (!isTakingDamage)
                 {
                     isTakingDamage = true;
-                    if (showWarningMessages)
+                    if (showDebugInfo)
                     {
-                        Debug.LogWarning($"Player is taking darkness damage! Light Level: {currentLightLevel:F3} (threshold: {damageThreshold})");
+                        Debug.Log($"Player is taking darkness damage! Light Level: {currentLightLevel:F3} (threshold: {damageThreshold})");
                     }
                 }
                 

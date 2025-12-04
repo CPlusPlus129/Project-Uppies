@@ -100,8 +100,6 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
         if (treatAsIdle)
         {
             onShiftState = false;
-            //label = "OFF DUTY";
-            subtitle = "Clock in when you are ready.";
             badgeColor = offDutyBadge;
             backgroundColor = backgroundBase;
         }
@@ -111,36 +109,26 @@ public class ShiftPanelUI : MonoBehaviour, IUIInitializable
             {
                 case ShiftSystem.ShiftState.InShift:
                     onShiftState = true;
-                    //label = "ON DUTY";
-                    subtitle = "Keep orders moving and watch the clock.";
                     badgeColor = onDutyBadge;
                     backgroundColor = backgroundBase;
                     break;
                 case ShiftSystem.ShiftState.Overtime:
                     onShiftState = true;
-                    //label = "OVERTIME";
-                    subtitle = "Push through the rush for bonus payouts.";
                     badgeColor = overtimeBadge;
                     backgroundColor = backgroundOvertime;
                     break;
                 case ShiftSystem.ShiftState.AfterShift:
                     onShiftState = false;
-                    //label = "SHIFT COMPLETE";
-                    subtitle = "Catch your breath before the next gig.";
                     badgeColor = offDutyBadge;
                     backgroundColor = backgroundBase;
                     break;
                 case ShiftSystem.ShiftState.GaveOver:
                     onShiftState = false;
-                    //label = "BANKRUPT";
-                    subtitle = "You lost everything. Restarting...";
                     badgeColor = new Color32(200, 50, 50, 255); // Red for failure
                     backgroundColor = new Color32(255, 200, 200, 236); // Light red background
                     break;
                 default:
                     onShiftState = true;
-                    //label = "OFF DUTY";
-                    subtitle = "Clock in when you are ready.";
                     badgeColor = offDutyBadge;
                     backgroundColor = backgroundBase;
                     break;

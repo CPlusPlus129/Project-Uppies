@@ -11,7 +11,7 @@ public class ShowEndingScreenStoryEventAsset : StoryEventAsset
 {
     public override async UniTask<StoryEventResult> ExecuteAsync(GameFlowContext context, CancellationToken cancellationToken)
     {
-        var endingController = FindObjectOfType<EndingScreenController>(true);
+        var endingController = FindFirstObjectByType<EndingScreenController>(FindObjectsInactive.Include);
 
         if (endingController == null)
         {
@@ -24,7 +24,7 @@ public class ShowEndingScreenStoryEventAsset : StoryEventAsset
         if (InputManager.Instance != null)
         {
             InputManager.Instance.PushActionMap("UI");
-            
+
             // Fix: Ensure InputSystemUIInputModule is using the correct actions from InputManager
             // This handles cases where the scene EventSystem is using DefaultInputActions
             var eventSystem = UnityEngine.EventSystems.EventSystem.current;

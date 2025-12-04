@@ -33,7 +33,7 @@ public class LightProjectile : MonoBehaviour
         // Update the base lifetime so fade curve works correctly
         lifetime = currentLifetime;
         
-        Debug.Log($"[LightProjectile] Lifetime reduced by {reductionAmount}. Remaining: {currentLifetime}");
+        //Debug.Log($"[LightProjectile] Lifetime reduced by {reductionAmount}. Remaining: {currentLifetime}");
     }
     
     [Header("Light Settings")]
